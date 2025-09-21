@@ -123,7 +123,6 @@ try
     app.UseAuthentication();
     app.UseAuthorization();
     app.UseDetection();
-    Console.WriteLine("abc");
 
     app.MapEndpoints(apiVersion: EndpointVersion.One);
     Log.Logger.Information("Application is hosted on {os}", RuntimeInformation.OSDescription);
