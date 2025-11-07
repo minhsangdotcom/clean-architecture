@@ -497,11 +497,11 @@
       },
       "Microsoft.AspNetCore.WebUtilities": {
         "type": "Transitive",
-        "resolved": "2.3.0",
-        "contentHash": "trbXdWzoAEUVd0PE2yTopkz4kjZaAIA7xUWekd5uBw+7xE8Do/YOVTeb9d9koPTlbtZT539aESJjSLSqD8eYrQ==",
+        "resolved": "8.0.21",
+        "contentHash": "xHj1DeRkyIQ0DEY3+M4OHbEI2F7wE6JG6d2Bl0ER+WprfXHIbWCQKR052fSgGAjmhq/AeNiohcnjVVuGFAADAQ==",
         "dependencies": {
-          "Microsoft.Net.Http.Headers": "2.3.0",
-          "System.Text.Encodings.Web": "8.0.0"
+          "Microsoft.Net.Http.Headers": "8.0.21",
+          "System.IO.Pipelines": "8.0.0"
         }
       },
       "Microsoft.Bcl.AsyncInterfaces": {
@@ -1008,11 +1008,10 @@
       },
       "Microsoft.Net.Http.Headers": {
         "type": "Transitive",
-        "resolved": "2.3.0",
-        "contentHash": "/M0wVg6tJUOHutWD3BMOUVZAioJVXe0tCpFiovzv0T9T12TBf4MnaHP0efO8TCr1a6O9RZgQeZ9Gdark8L9XdA==",
+        "resolved": "8.0.21",
+        "contentHash": "G+HPxwKBpmvfSfmpeL8uV6OdFRrLelTS0nNkK3ND6j51Y1+Z1eK0wmhaCnwb4cuYXyijsAWIrOn1mOviObTBNg==",
         "dependencies": {
-          "Microsoft.Extensions.Primitives": "8.0.0",
-          "System.Buffers": "4.6.0"
+          "Microsoft.Extensions.Primitives": "8.0.0"
         }
       },
       "Microsoft.NETCore.Platforms": {
@@ -1095,11 +1094,12 @@
       },
       "minhsangdotcom.TheTemplate.SharedKernel": {
         "type": "Transitive",
-        "resolved": "1.0.12",
-        "contentHash": "rNZNITeOvtSMquDNFYQJ5Gl0haDsR4RAm0qflKTDSJ8Em5wue0OJQQzAOPrW+cS/Fj7+L+1Fh+bFdqHYiRxf0A==",
+        "resolved": "1.0.13",
+        "contentHash": "HhKopEvFneeoZ7tJvHhedr+O0RXp2WAa3ZZGXWWLmUh4jqg3tCWnmmVJTj+o7xoy65kUdQTEULa8KNvEbKaMaQ==",
         "dependencies": {
           "BouncyCastle.Cryptography": "2.5.1",
           "CaseConverter": "2.0.1",
+          "Microsoft.AspNetCore.WebUtilities": "8.0.21",
           "Ulid": "1.4.1",
           "deniszykov.TypeConversion": "3.2.3"
         }
@@ -1166,8 +1166,8 @@
       },
       "Newtonsoft.Json": {
         "type": "Transitive",
-        "resolved": "13.0.4-beta1",
-        "contentHash": "6V0WDUzcU5p3R2/RN6UC+1wJtWfCB9YahSUe37mSGbPoH+Q84HTOjmsLIgynkZwJb/NYv0vFARSvDdUse3ZODA=="
+        "resolved": "13.0.4",
+        "contentHash": "pdgNNMai3zv51W5aq268sujXUyx7SNdE2bj1wZcWjAQrKMFZV260lbqYop1d2GM67JI1huLRwxo9ZqnfF/lC6A=="
       },
       "Npgsql": {
         "type": "Transitive",
@@ -2440,12 +2440,12 @@
       },
       "TranMinhSang.DynamicQueryExtension.EntityFrameworkCore": {
         "type": "Transitive",
-        "resolved": "0.1.1",
-        "contentHash": "WuAuBhWQFv5lqoZxnJg+0DxslViksz6J5n5o70uppQXFzJ597Z+0cUlIn+lwtXrnv3sqMF1sq5UUi0M+KVH9NQ==",
+        "resolved": "0.1.2",
+        "contentHash": "xM4G9nmQA/xrsebJyCG8Qiq4Yid+ZJHttmpV1Hz68lrsB9jWg9zLEkBrCxyeNmapdWIMDwofXplm9d5h07EE8g==",
         "dependencies": {
-          "Newtonsoft.Json": "13.0.4-beta1",
+          "Newtonsoft.Json": "13.0.4",
           "Npgsql.EntityFrameworkCore.PostgreSQL": "8.0.11",
-          "minhsangdotcom.TheTemplate.SharedKernel": "1.0.12"
+          "minhsangdotcom.TheTemplate.SharedKernel": "1.0.13"
         }
       },
       "Ulid": {
@@ -2564,7 +2564,7 @@
         "dependencies": {
           "Microsoft.AspNetCore.Http": "[2.3.0, )",
           "Microsoft.AspNetCore.Mvc.Core": "[2.3.0, )",
-          "minhsangdotcom.TheTemplate.SharedKernel": "[1.0.12, )"
+          "minhsangdotcom.TheTemplate.SharedKernel": "[1.0.13, )"
         }
       },
       "domain": {
@@ -2572,7 +2572,7 @@
         "dependencies": {
           "Ardalis.GuardClauses": "[5.0.0, )",
           "Mediator.Abstractions": "[3.0.1, )",
-          "minhsangdotcom.TheTemplate.SharedKernel": "[1.0.12, )",
+          "minhsangdotcom.TheTemplate.SharedKernel": "[1.0.13, )",
           "minhsangdotcom.TheTemplate.SpecificationPattern": "[1.0.4, )"
         }
       },
@@ -2587,7 +2587,7 @@
           "Microsoft.AspNetCore.Authentication.JwtBearer": "[8.0.19, )",
           "NRedisStack": "[1.1.0, )",
           "RazorLight": "[2.3.1, )",
-          "TranMinhSang.DynamicQueryExtension.EntityFrameworkCore": "[0.1.1, )"
+          "TranMinhSang.DynamicQueryExtension.EntityFrameworkCore": "[0.1.2, )"
         }
       }
     }

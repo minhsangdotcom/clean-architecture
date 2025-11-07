@@ -17,7 +17,7 @@
     </PackageReference>
     <PackageReference Include="NRedisStack" Version="1.1.0" />
     <PackageReference Include="RazorLight" Version="2.3.1" />
-    <PackageReference Include="TranMinhSang.DynamicQueryExtension.EntityFrameworkCore" Version="0.1.1" />
+    <PackageReference Include="TranMinhSang.DynamicQueryExtension.EntityFrameworkCore" Version="0.1.2" />
   </ItemGroup>
 
   <PropertyGroup>

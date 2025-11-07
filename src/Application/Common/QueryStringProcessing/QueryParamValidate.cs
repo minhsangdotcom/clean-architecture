@@ -1,12 +1,11 @@
 using System.Reflection;
 using Application.Common.Errors;
-using Application.Common.Extensions;
 using Contracts.Dtos.Requests;
 using Microsoft.Extensions.Logging;
 using SharedKernel.Common.Messages;
 using SharedKernel.Extensions;
 using SharedKernel.Extensions.Reflections;
-using StringExtension = Application.Common.Extensions.StringExtension;
+using SharedKernel.Results;
 
 namespace Application.Common.QueryStringProcessing;
 
@@ -48,7 +47,10 @@ public static partial class QueryParamValidate
 
         List<QueryResult> queries =
         [
-            .. StringExtension.TransformStringQuery(request.OriginFilters!),
+            .. StringExtension.TransformStringQuery(
+                request.OriginFilters!,
+                nameof(QueryParamRequest.Filter)
+            ),
         ];
 
         int length = queries.Count;

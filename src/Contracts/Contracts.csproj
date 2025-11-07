@@ -10,7 +10,7 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Http" Version="2.3.0" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Core" Version="2.3.0" />
-    <PackageReference Include="minhsangdotcom.TheTemplate.SharedKernel" Version="1.0.12" />
+    <PackageReference Include="minhsangdotcom.TheTemplate.SharedKernel" Version="1.0.13" />
   </ItemGroup>
 
 </Project>

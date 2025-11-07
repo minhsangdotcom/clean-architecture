@@ -19,12 +19,13 @@
       },
       "minhsangdotcom.TheTemplate.SharedKernel": {
         "type": "Direct",
-        "requested": "[1.0.12, )",
-        "resolved": "1.0.12",
-        "contentHash": "rNZNITeOvtSMquDNFYQJ5Gl0haDsR4RAm0qflKTDSJ8Em5wue0OJQQzAOPrW+cS/Fj7+L+1Fh+bFdqHYiRxf0A==",
+        "requested": "[1.0.13, )",
+        "resolved": "1.0.13",
+        "contentHash": "HhKopEvFneeoZ7tJvHhedr+O0RXp2WAa3ZZGXWWLmUh4jqg3tCWnmmVJTj+o7xoy65kUdQTEULa8KNvEbKaMaQ==",
         "dependencies": {
           "BouncyCastle.Cryptography": "2.5.1",
           "CaseConverter": "2.0.1",
+          "Microsoft.AspNetCore.WebUtilities": "8.0.21",
           "Ulid": "1.4.1",
           "deniszykov.TypeConversion": "3.2.3"
         }
@@ -55,6 +56,15 @@
         "contentHash": "RzdZjTJJc5funWyVpArmzI6B1UEkKRBhcQzJIOGuzuup+ImDVwjprWQnNSzfL7wc5sPp3NkGklJQ7yMkhK90NA==",
         "dependencies": {
           "Microsoft.Extensions.Options": "3.1.10"
+        }
+      },
+      "Microsoft.AspNetCore.WebUtilities": {
+        "type": "Transitive",
+        "resolved": "8.0.21",
+        "contentHash": "xHj1DeRkyIQ0DEY3+M4OHbEI2F7wE6JG6d2Bl0ER+WprfXHIbWCQKR052fSgGAjmhq/AeNiohcnjVVuGFAADAQ==",
+        "dependencies": {
+          "Microsoft.Net.Http.Headers": "8.0.21",
+          "System.IO.Pipelines": "8.0.0"
         }
       },
       "Microsoft.EntityFrameworkCore": {
@@ -159,6 +169,19 @@
         "type": "Transitive",
         "resolved": "8.0.0",
         "contentHash": "bXJEZrW9ny8vjMF1JV253WeLhpEVzFo1lyaZu1vQ4ZxWUlVvknZ/+ftFgVheLubb4eZPSwwxBeqS1JkCOjxd8g=="
+      },
+      "Microsoft.Net.Http.Headers": {
+        "type": "Transitive",
+        "resolved": "8.0.21",
+        "contentHash": "G+HPxwKBpmvfSfmpeL8uV6OdFRrLelTS0nNkK3ND6j51Y1+Z1eK0wmhaCnwb4cuYXyijsAWIrOn1mOviObTBNg==",
+        "dependencies": {
+          "Microsoft.Extensions.Primitives": "8.0.0"
+        }
+      },
+      "System.IO.Pipelines": {
+        "type": "Transitive",
+        "resolved": "8.0.0",
+        "contentHash": "FHNOatmUq0sqJOkTx+UF/9YK1f180cnW5FVqnQMvYUN0elp6wFzbtPSiqbo1/ru8ICp43JM1i7kKkk6GsNGHlA=="
       },
       "Ulid": {
         "type": "Transitive",
