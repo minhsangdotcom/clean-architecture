@@ -1,3 +1,4 @@
+using Contracts.Dtos.Requests;
 using Contracts.Dtos.Responses;
 
 namespace Application.Common.Interfaces.Services.Queue;
@@ -7,7 +8,7 @@ public interface IQueueHandler<TRequest, TResponse>
     where TResponse : class
 {
     Task<QueueResponse<TResponse>> HandleAsync(
-        TRequest payload,
+        QueueRequest<TRequest> queueRequest,
         CancellationToken cancellationToken
     );
 }
