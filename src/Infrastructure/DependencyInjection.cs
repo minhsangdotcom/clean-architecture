@@ -1,5 +1,6 @@
 using Application.Common.Interfaces.Services;
 using Application.Common.Interfaces.UnitOfWorks;
+using Application.Features.Users.Commands.Create;
 using Infrastructure.Data;
 using Infrastructure.Data.Interceptors;
 using Infrastructure.Services;
@@ -62,13 +63,15 @@ public static class DependencyInjection
             }
         );
 
+        // queue register
+        services.AddQueue(configuration);
+
         services
             .AddAmazonS3(configuration)
             .AddHttpContextAccessor()
             .AddSingleton<ICurrentUser, CurrentUserService>()
             .AddScoped<IHttpContextAccessorService, HttpContextAccessorService>()
             .AddJwt(configuration)
-            .AddQueue(configuration)
             .AddElasticSearch(configuration)
             .AddIdentity()
             .AddMail(configuration)

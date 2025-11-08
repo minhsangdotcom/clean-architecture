@@ -1,5 +1,6 @@
 using Application.Common.Interfaces.Services.Queue;
 using Application.Features.QueueLogs;
+using Contracts.Dtos.Requests;
 using Contracts.Dtos.Responses;
 using Mediator;
 using Microsoft.Extensions.DependencyInjection;
@@ -9,11 +10,13 @@ using Microsoft.Extensions.Options;
 
 namespace Infrastructure.Services.Queue;
 
-public class QueueBackgroundService(
+public class QueueWorker<TRequest, TResponse>(
     IQueueService queueService,
     IServiceProvider serviceProvider,
     IOptions<QueueSettings> options
 ) : BackgroundService
+    where TRequest : class
+    where TResponse : class
 {
     private readonly QueueSettings queueSettings = options.Value;
 
@@ -21,53 +24,54 @@ public class QueueBackgroundService(
     {
         using IServiceScope scope = serviceProvider.CreateScope();
         ISender sender = scope.ServiceProvider.GetRequiredService<ISender>();
-        var logger = scope.ServiceProvider.GetRequiredService<ILogger<QueueBackgroundService>>();
+        var handler = scope.ServiceProvider.GetService<IQueueHandler<TRequest, TResponse>>();
+        var logger = scope.ServiceProvider.GetRequiredService<
+            ILogger<QueueWorker<TRequest, TResponse>>
+        >();
 
         while (!stoppingToken.IsCancellationRequested)
         {
-            // PayCartPayload? request = await queueService.DequeueAsync<
-            //     PayCartPayload,
-            //     PayCartRequest
-            // >();
-
             if (!await queueService.PingAsync())
             {
                 logger.LogWarning("Redis server is unavailable!");
                 continue;
             }
 
-            // if (request != null)
-            // {
-            //     await ProcessWithRetryAsync<PayCartPayload, PayCartResponse>(
-            //         request,
-            //         sender,
-            //         logger,
-            //         stoppingToken
-            //     );
-            // }
+            QueueRequest<TRequest> request = await queueService.DequeueAsync<TRequest>();
+            if (request.Payload == null)
+            {
+                await Task.Delay(1000, stoppingToken);
+                continue;
+            }
+
+            if (handler == null)
+            {
+                logger.LogWarning("No handler registered for {JobType}", typeof(TRequest).FullName);
+                continue;
+            }
+
+            await ProcessWithRetryAsync(request.Payload, sender, handler, logger, stoppingToken);
 
             await Task.Delay(TimeSpan.FromSeconds(10), stoppingToken);
         }
     }
 
-    private async Task ProcessWithRetryAsync<TRequest, TResponse>(
+    private async Task ProcessWithRetryAsync(
         TRequest request,
         ISender sender,
-        ILogger<QueueBackgroundService> logger,
+        IQueueHandler<TRequest, TResponse> handler,
+        ILogger<QueueWorker<TRequest, TResponse>> logger,
         CancellationToken cancellationToken
     )
-        where TRequest : class
-        where TResponse : class
     {
         QueueResponse<TResponse>? queueResponse = new();
         int attempt = 0;
         int maximumRetryAttempt = queueSettings.MaxRetryAttempts;
         double maximumDelay = queueSettings.MaximumDelayInSec;
 
-        while (attempt <= maximumRetryAttempt)
+        while (attempt <= maximumRetryAttempt && !cancellationToken.IsCancellationRequested)
         {
-            queueResponse =
-                await sender.Send(request, cancellationToken) as QueueResponse<TResponse>;
+            queueResponse = await handler.HandleAsync(request, cancellationToken);
 
             // success case
             if (queueResponse!.IsSuccess)

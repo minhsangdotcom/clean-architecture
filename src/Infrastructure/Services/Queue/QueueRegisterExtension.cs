@@ -1,3 +1,4 @@
+using System.Reflection;
 using Application.Common.Interfaces.Services.Queue;
 using Infrastructure.Services.Cache.DistributedCache;
 using Microsoft.Extensions.Configuration;
@@ -28,9 +29,20 @@ public static class QueueRegisterExtension
                     options.ServicesStartConcurrently = true;
                     options.ServicesStopConcurrently = true;
                 })
-                .AddHostedService<QueueBackgroundService>()
                 .AddSingleton<IQueueService, QueueService>();
         }
+
+        return services;
+    }
+
+    public static IServiceCollection AddQueueWorkers<TRequest, TResponse>(
+        this IServiceCollection services
+    )
+        where TRequest : class
+        where TResponse : class
+    {
+        services.AddScoped<IQueueHandler<TRequest, TResponse>>();
+        services.AddHostedService<QueueWorker<TRequest, TResponse>>();
 
         return services;
     }
