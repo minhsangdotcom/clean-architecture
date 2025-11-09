@@ -19,12 +19,12 @@ public class ListQueueLogEndpoint : IEndpoint
 
     public void MapEndpoint(IEndpointRouteBuilder app)
     {
-        app.MapGet(Router.UserRoute.Users, HandleAsync)
+        app.MapGet(Router.QueueLogRoute.QueueLog, HandleAsync)
             .WithOpenApi(operation => new OpenApiOperation(operation)
             {
                 Summary = "Get list of Queue logging 📄",
                 Description = "Retrieves a list of all logs of queue.",
-                Tags = [new OpenApiTag() { Name = Router.UserRoute.Tags }],
+                Tags = [new OpenApiTag() { Name = Router.QueueLogRoute.Tags }],
                 Parameters = operation.AddDocs(),
             })
             .RequireAuth(
