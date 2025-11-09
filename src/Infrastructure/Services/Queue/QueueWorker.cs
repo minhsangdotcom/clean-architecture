@@ -132,7 +132,6 @@ public class QueueWorker<TRequest, TResponse>(
                 queueResponse.PayloadId,
                 attempt
             );
-            // if it still fails after many attempts then logging into db
             await handler.FailedAsync(request, queueResponse, cancellationToken);
         }
     }
