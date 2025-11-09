@@ -1195,6 +1195,7 @@
           "MailKit": "[4.12.1, )",
           "Microsoft.AspNetCore.Authentication.JwtBearer": "[8.0.19, )",
           "RazorLight": "[2.3.1, )",
+          "Scrutor": "[6.1.0, )",
           "StackExchange.Redis": "[2.9.32, )",
           "TranMinhSang.DynamicQueryExtension.EntityFrameworkCore": "[0.1.2, )"
         }
