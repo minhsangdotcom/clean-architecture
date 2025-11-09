@@ -46,7 +46,7 @@ public class QueueWorker<TRequest, TResponse>(
                 continue;
             }
 
-            await ProcessWithRetryAsync(request, handler, logger, stoppingToken);
+            await ProcessWithRetryAsync(request, handler, stoppingToken);
 
             await Task.Delay(TimeSpan.FromSeconds(10), stoppingToken);
         }
@@ -55,7 +55,6 @@ public class QueueWorker<TRequest, TResponse>(
     private async Task ProcessWithRetryAsync(
         QueueRequest<TRequest> request,
         IQueueHandler<TRequest, TResponse> handler,
-        ILogger<QueueWorker<TRequest, TResponse>> logger,
         CancellationToken cancellationToken
     )
     {
