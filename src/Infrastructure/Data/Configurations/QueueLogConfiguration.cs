@@ -9,7 +9,5 @@ public class DeadLetterQueueConfiguration : IEntityTypeConfiguration<QueueLog>
     public void Configure(EntityTypeBuilder<QueueLog> builder)
     {
         builder.HasKey(x => x.Id);
-        builder.Property(x => x.ErrorDetail).HasColumnType("jsonb");
-        builder.Property(x => x.Request).HasColumnType("jsonb");
     }
 }

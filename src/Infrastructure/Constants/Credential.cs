@@ -16,6 +16,7 @@ public static class Credential
     [
         Permission.CreateBasicPermissions(PermissionResource.User),
         Permission.CreateBasicPermissions(PermissionResource.Role),
+        Permission.CreateBasicPermissions(PermissionResource.QueueLog),
     ];
 
     public static readonly List<string> ADMIN_CLAIMS =
@@ -85,4 +86,5 @@ public class PermissionResource
 {
     public const string User = nameof(User);
     public const string Role = nameof(Role);
+    public const string QueueLog = nameof(QueueLog);
 }

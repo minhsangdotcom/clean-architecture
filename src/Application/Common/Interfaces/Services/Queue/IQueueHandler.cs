@@ -9,6 +9,16 @@ public interface IQueueHandler<TRequest, TResponse>
 {
     Task<QueueResponse<TResponse>> HandleAsync(
         QueueRequest<TRequest> queueRequest,
-        CancellationToken cancellationToken
+        CancellationToken cancellationToken = default
+    );
+
+    Task CompleteAsync(
+        QueueResponse<TResponse> queueResponse,
+        CancellationToken cancellationToken = default
+    );
+
+    Task FailedAsync(
+        QueueResponse<TResponse> queueResponse,
+        CancellationToken cancellationToken = default
     );
 }

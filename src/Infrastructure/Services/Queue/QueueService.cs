@@ -38,7 +38,7 @@ public class QueueService(IDatabase database, IOptions<QueueSettings> options) :
     /// <returns></returns>
     public async Task<QueueRequest<T>> DequeueAsync<T>()
     {
-        string queueName = $"{queueSettings.OriginQueueName}:{typeof(T).Name}";
+        string queueName = $"{queueSettings.OriginQueueName}:{typeof(T).FullName}";
         RedisValue value = await database.ListRightPopAsync(queueName);
 
         if (value.IsNullOrEmpty)

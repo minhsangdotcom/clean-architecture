@@ -1,18 +1,18 @@
 using Application.Common.Interfaces.Services.Queue;
-using Application.Features.QueueLogs;
 using Contracts.Dtos.Requests;
 using Contracts.Dtos.Responses;
-using Mediator;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using SharedKernel.Extensions;
 
 namespace Infrastructure.Services.Queue;
 
 public class QueueWorker<TRequest, TResponse>(
     IQueueService queueService,
     IServiceProvider serviceProvider,
+    ILogger<QueueWorker<TRequest, TResponse>> logger,
     IOptions<QueueSettings> options
 ) : BackgroundService
     where TRequest : class
@@ -23,11 +23,7 @@ public class QueueWorker<TRequest, TResponse>(
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         using IServiceScope scope = serviceProvider.CreateScope();
-        ISender sender = scope.ServiceProvider.GetRequiredService<ISender>();
         var handler = scope.ServiceProvider.GetService<IQueueHandler<TRequest, TResponse>>();
-        var logger = scope.ServiceProvider.GetRequiredService<
-            ILogger<QueueWorker<TRequest, TResponse>>
-        >();
 
         while (!stoppingToken.IsCancellationRequested)
         {
@@ -50,7 +46,7 @@ public class QueueWorker<TRequest, TResponse>(
                 continue;
             }
 
-            await ProcessWithRetryAsync(request, sender, handler, logger, stoppingToken);
+            await ProcessWithRetryAsync(request, handler, logger, stoppingToken);
 
             await Task.Delay(TimeSpan.FromSeconds(10), stoppingToken);
         }
@@ -58,7 +54,6 @@ public class QueueWorker<TRequest, TResponse>(
 
     private async Task ProcessWithRetryAsync(
         QueueRequest<TRequest> request,
-        ISender sender,
         IQueueHandler<TRequest, TResponse> handler,
         ILogger<QueueWorker<TRequest, TResponse>> logger,
         CancellationToken cancellationToken
@@ -77,24 +72,22 @@ public class QueueWorker<TRequest, TResponse>(
             if (queueResponse!.IsSuccess)
             {
                 logger.LogInformation(
-                    "Executing request {payloadId} has been success!",
-                    queueResponse.PayloadId
+                    "Request {PayloadId} processed successfully on attempt {Attempt}.",
+                    queueResponse.PayloadId,
+                    attempt + 1
                 );
+                await handler.CompleteAsync(queueResponse, cancellationToken);
                 break;
             }
 
             // 500 or 400 error
             if (queueResponse.ErrorType == QueueErrorType.Persistent)
             {
-                CreateQueueLogCommand createQueueLogCommand =
-                    new()
-                    {
-                        RequestId = queueResponse.PayloadId!.Value,
-                        ErrorDetail = queueResponse.Error,
-                        Request = request,
-                        RetryCount = attempt,
-                    };
-                await sender.Send(createQueueLogCommand, cancellationToken);
+                logger.LogError(
+                    "Request {PayloadId} failed due to a persistent error. Details: {ErrorJson}. No further retries.",
+                    queueResponse.PayloadId,
+                    SerializerExtension.Serialize(queueResponse.Error!)
+                );
                 break;
             }
 
@@ -102,6 +95,11 @@ public class QueueWorker<TRequest, TResponse>(
             attempt++;
             if (attempt > maximumRetryAttempt)
             {
+                logger.LogError(
+                    "Request {PayloadId} failed after {MaxAttempts} attempts due to transient errors.",
+                    queueResponse.PayloadId,
+                    maximumRetryAttempt
+                );
                 break;
             }
 
@@ -115,26 +113,27 @@ public class QueueWorker<TRequest, TResponse>(
 
             TimeSpan delayTime = TimeSpan.FromSeconds(delay);
             logger.LogWarning(
-                "Retry {Attempt} in {DelayTimeTotalSeconds:F2} seconds...",
+                "Transient failure for request {PayloadId}. Retrying (attempt {Attempt}/{MaxAttempts}) in {DelaySeconds:F2} seconds...",
+                queueResponse.PayloadId,
                 attempt,
+                maximumRetryAttempt,
                 delayTime.TotalSeconds
             );
             await Task.Delay(delayTime, cancellationToken);
         }
 
-        if (queueResponse is { IsSuccess: false, ErrorType: QueueErrorType.Transient })
+        if (
+            queueResponse is { IsSuccess: false, ErrorType: QueueErrorType.Transient }
+            || queueResponse is { IsSuccess: false, ErrorType: QueueErrorType.Persistent }
+        )
         {
-            // if it still fails after many attempts then logging into db
-            await sender.Send(
-                new CreateQueueLogCommand()
-                {
-                    RequestId = queueResponse.PayloadId!.Value,
-                    ErrorDetail = queueResponse.Error,
-                    Request = request,
-                    RetryCount = queueResponse.RetryCount,
-                },
-                cancellationToken
+            logger.LogError(
+                "Request {PayloadId} permanently failed after {TotalAttempts} attempts",
+                queueResponse.PayloadId,
+                attempt
             );
+            // if it still fails after many attempts then logging into db
+            await handler.FailedAsync(queueResponse, cancellationToken);
         }
     }
 }
