@@ -13,11 +13,13 @@ public interface IQueueHandler<TRequest, TResponse>
     );
 
     Task CompleteAsync(
+        QueueRequest<TRequest> queueRequest,
         QueueResponse<TResponse> queueResponse,
         CancellationToken cancellationToken = default
     );
 
     Task FailedAsync(
+        QueueRequest<TRequest> queueRequest,
         QueueResponse<TResponse> queueResponse,
         CancellationToken cancellationToken = default
     );

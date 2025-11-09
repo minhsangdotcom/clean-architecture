@@ -76,7 +76,7 @@ public class QueueWorker<TRequest, TResponse>(
                     queueResponse.PayloadId,
                     attempt + 1
                 );
-                await handler.CompleteAsync(queueResponse, cancellationToken);
+                await handler.CompleteAsync(request, queueResponse, cancellationToken);
                 break;
             }
 
@@ -133,7 +133,7 @@ public class QueueWorker<TRequest, TResponse>(
                 attempt
             );
             // if it still fails after many attempts then logging into db
-            await handler.FailedAsync(queueResponse, cancellationToken);
+            await handler.FailedAsync(request, queueResponse, cancellationToken);
         }
     }
 }
