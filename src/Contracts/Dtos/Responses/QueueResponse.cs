@@ -4,7 +4,7 @@ public class QueueResponse<T>
 {
     public bool IsSuccess { get; set; } = true;
 
-    public Guid? PayloadId { get; set; }
+    public Guid PayloadId { get; set; }
 
     public T? ResponseData { get; set; }
 

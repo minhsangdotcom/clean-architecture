@@ -1,4 +1,3 @@
-using System.Reflection;
 using Application.Common.Interfaces.Services.Queue;
 using Infrastructure.Services.Cache.DistributedCache;
 using Microsoft.Extensions.Configuration;
