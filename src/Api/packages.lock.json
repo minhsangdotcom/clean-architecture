@@ -898,14 +898,6 @@
           "Npgsql": "8.0.6"
         }
       },
-      "NRedisStack": {
-        "type": "Transitive",
-        "resolved": "1.1.0",
-        "contentHash": "yXAaqhKT2hkapUBdpMEz7evNRwSGPP0KDd6E1GEIWPyLfnlTEHgEE8bsOD0I21ZHLvoMvKwbE4ibuOuVkOEE2Q==",
-        "dependencies": {
-          "StackExchange.Redis": "2.8.58"
-        }
-      },
       "OpenTelemetry.Api": {
         "type": "Transitive",
         "resolved": "1.12.0",
@@ -1017,8 +1009,8 @@
       },
       "StackExchange.Redis": {
         "type": "Transitive",
-        "resolved": "2.8.58",
-        "contentHash": "0XGRE2UoF/n2/qhCpcyBBZovpGhHu4hRtkdsx4fZFu1H5Q/Z8Q+U/z/nWwnosWDRJnEasntNatd9Mf+Isc8plg==",
+        "resolved": "2.9.32",
+        "contentHash": "j5Rjbf7gWz5izrn0UWQy9RlQY4cQDPkwJfVqATnVsOa/+zzJrps12LOgacMsDl/Vit2f01cDiDkG/Rst8v2iGw==",
         "dependencies": {
           "Microsoft.Extensions.Logging.Abstractions": "8.0.0",
           "Pipelines.Sockets.Unofficial": "2.2.8"
@@ -1202,8 +1194,9 @@
           "JWT": "[11.0.0, )",
           "MailKit": "[4.12.1, )",
           "Microsoft.AspNetCore.Authentication.JwtBearer": "[8.0.19, )",
-          "NRedisStack": "[1.1.0, )",
           "RazorLight": "[2.3.1, )",
+          "Scrutor": "[6.1.0, )",
+          "StackExchange.Redis": "[2.9.32, )",
           "TranMinhSang.DynamicQueryExtension.EntityFrameworkCore": "[0.1.2, )"
         }
       }

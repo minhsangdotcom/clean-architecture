@@ -47,6 +47,12 @@ public static class Router
         public const string Tags = $"{nameof(AuditLog)} endpoint";
     }
 
+    public static class QueueLogRoute
+    {
+        public const string QueueLog = nameof(QueueLog);
+        public const string Tags = $"{nameof(QueueLog)} endpoint";
+    }
+
     public static class RegionRoute
     {
         public const string Provinces = nameof(Provinces);

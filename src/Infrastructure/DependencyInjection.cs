@@ -62,13 +62,15 @@ public static class DependencyInjection
             }
         );
 
+        // queue register
+        services.AddQueue(configuration);
+
         services
             .AddAmazonS3(configuration)
             .AddHttpContextAccessor()
             .AddSingleton<ICurrentUser, CurrentUserService>()
             .AddScoped<IHttpContextAccessorService, HttpContextAccessorService>()
             .AddJwt(configuration)
-            .AddQueue(configuration)
             .AddElasticSearch(configuration)
             .AddIdentity()
             .AddMail(configuration)

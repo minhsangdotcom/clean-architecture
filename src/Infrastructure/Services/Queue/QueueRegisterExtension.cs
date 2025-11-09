@@ -28,8 +28,36 @@ public static class QueueRegisterExtension
                     options.ServicesStartConcurrently = true;
                     options.ServicesStopConcurrently = true;
                 })
-                .AddHostedService<QueueBackgroundService>()
                 .AddSingleton<IQueueService, QueueService>();
+        }
+
+        return services;
+    }
+
+    public static IServiceCollection AddQueueWorkers<TRequest, TResponse>(
+        this IServiceCollection services,
+        IConfiguration configuration
+    )
+        where TRequest : class
+        where TResponse : class
+    {
+        RedisDatabaseSettings databaseSettings =
+            configuration.GetSection(nameof(RedisDatabaseSettings)).Get<RedisDatabaseSettings>()
+            ?? new();
+
+        if (databaseSettings.IsEnabled)
+        {
+            services.Scan(scan =>
+                scan.FromApplicationDependencies(a =>
+                        !a.FullName!.StartsWith("Microsoft") && !a.FullName.StartsWith("System")
+                    )
+                    .AddClasses(classes =>
+                        classes.AssignableTo(typeof(IQueueHandler<TRequest, TResponse>))
+                    )
+                    .AsImplementedInterfaces()
+                    .WithScopedLifetime()
+            );
+            services.AddHostedService<QueueWorker<TRequest, TResponse>>();
         }
 
         return services;

@@ -4,5 +4,5 @@ public class QueueRequest<T>
 {
     public Guid PayloadId { get; set; }
 
-    public T? Payload { get; set; }
+    public T Payload { get; set; } = default!;
 }
