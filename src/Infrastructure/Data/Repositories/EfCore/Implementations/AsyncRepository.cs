@@ -1,11 +1,12 @@
 using System.Linq.Expressions;
+using Application.Common.Interfaces.Contexts;
 using Application.Common.Interfaces.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 
 namespace Infrastructure.Data.Repositories.EfCore.Implementations;
 
-public class AsyncRepository<T>(IDbContext dbContext) : IAsyncRepository<T>
+public class AsyncRepository<T>(IEfDbContext dbContext) : IAsyncRepository<T>
     where T : class
 {
     #region Read

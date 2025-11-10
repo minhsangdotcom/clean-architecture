@@ -1,5 +1,5 @@
 using System.Text.Json;
-using Application.Common.Interfaces.Repositories;
+using Application.Common.Interfaces.UnitOfWorks;
 using Domain.Aggregates.Regions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;

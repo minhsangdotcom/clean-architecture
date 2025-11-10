@@ -1,4 +1,5 @@
 using System.Linq.Expressions;
+using Application.Common.Interfaces.Contexts;
 using Application.Common.Interfaces.Repositories;
 using Contracts.Dtos.Requests;
 using Domain.Common;
@@ -11,12 +12,7 @@ using Specification.Interfaces;
 
 namespace Infrastructure.Data.Repositories.EfCore.Implementations;
 
-/// <summary>
-/// do query in Specification
-/// </summary>
-/// <typeparam name="T"> must be BaseEntity or AggregateRoot</typeparam>
-/// <param name="dbContext">IDbContext</param>
-public class SpecificationRepository<T>(IDbContext dbContext) : ISpecificationRepository<T>
+public class SpecificationRepository<T>(IEfDbContext dbContext) : ISpecificationRepository<T>
     where T : class
 {
     public Task<TResult?> FindByConditionAsync<TResult>(

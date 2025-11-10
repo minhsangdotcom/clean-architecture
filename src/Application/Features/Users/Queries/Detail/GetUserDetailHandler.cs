@@ -1,6 +1,6 @@
 using Application.Common.Constants;
 using Application.Common.Errors;
-using Application.Common.Interfaces.Repositories;
+using Application.Common.Interfaces.UnitOfWorks;
 using Contracts.ApiWrapper;
 using Domain.Aggregates.Users;
 using Domain.Aggregates.Users.Specifications;

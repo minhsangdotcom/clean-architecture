@@ -1,4 +1,5 @@
 using System.Linq.Expressions;
+using Application.Common.Interfaces.Contexts;
 using Application.Common.Interfaces.Repositories;
 using Contracts.Dtos.Requests;
 using Domain.Common;
@@ -11,12 +12,7 @@ using Specification.Interfaces;
 
 namespace Infrastructure.Data.Repositories.EfCore.Implementations;
 
-/// <summary>
-/// combine specification pattern and dynamic queries
-/// </summary>
-/// <typeparam name="T">must be BaseEntity or AggregateRoot</typeparam>
-/// <param name="dbContext">must be IDbContext</param>
-public class DynamicSpecificationRepository<T>(IDbContext dbContext)
+public class DynamicSpecificationRepository<T>(IEfDbContext dbContext)
     : IDynamicSpecificationRepository<T>
     where T : class
 {

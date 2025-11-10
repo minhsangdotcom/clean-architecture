@@ -1,7 +1,7 @@
 using Application.Common.Constants;
 using Application.Common.Errors;
-using Application.Common.Interfaces.Repositories;
 using Application.Common.Interfaces.Services.Mail;
+using Application.Common.Interfaces.UnitOfWorks;
 using Contracts.ApiWrapper;
 using Contracts.Dtos.Models;
 using Contracts.Dtos.Requests;

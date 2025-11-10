@@ -1,5 +1,5 @@
 using System.Reflection;
-using Application.Common.Interfaces.Repositories;
+using Application.Common.Interfaces.Contexts;
 using Domain.Common;
 using DynamicQuery.Extensions;
 using Microsoft.EntityFrameworkCore;
@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 
 namespace Infrastructure.Data;
 
-public class TheDbContext(DbContextOptions<TheDbContext> options) : DbContext(options), IDbContext
+public class TheDbContext(DbContextOptions<TheDbContext> options) : DbContext(options), IEfDbContext
 {
     public DatabaseFacade DatabaseFacade => Database;
 

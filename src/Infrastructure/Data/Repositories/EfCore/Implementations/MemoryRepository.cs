@@ -1,11 +1,12 @@
 using System.Linq.Expressions;
+using Application.Common.Interfaces.Contexts;
 using Application.Common.Interfaces.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 
 namespace Infrastructure.Data.Repositories.EfCore.Implementations;
 
-public class MemoryRepository<T>(IDbContext dbContext) : IMemoryRepository<T>
+public class MemoryRepository<T>(IEfDbContext dbContext) : IMemoryRepository<T>
     where T : class
 {
     #region Read

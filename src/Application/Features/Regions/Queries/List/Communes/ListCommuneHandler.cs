@@ -1,4 +1,4 @@
-using Application.Common.Interfaces.Repositories;
+using Application.Common.Interfaces.UnitOfWorks;
 using Application.Common.QueryStringProcessing;
 using Application.Features.Common.Mapping.Regions;
 using Application.Features.Common.Projections.Regions;

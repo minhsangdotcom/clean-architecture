@@ -1,6 +1,8 @@
 using System.Data.Common;
+using Application.Common.Interfaces.Contexts;
 using Application.Common.Interfaces.Repositories;
 using Application.Common.Interfaces.Services.Cache;
+using Application.Common.Interfaces.UnitOfWorks;
 using Infrastructure.Data.Repositories.EfCore.Cached;
 using Infrastructure.Data.Repositories.EfCore.Implementations;
 using Microsoft.EntityFrameworkCore;
@@ -10,7 +12,7 @@ using Microsoft.Extensions.Logging;
 namespace Infrastructure.Data;
 
 public class UnitOfWork(
-    IDbContext dbContext,
+    IEfDbContext dbContext,
     ILogger<UnitOfWork> logger,
     IMemoryCacheService memoryCacheService
 ) : IEfUnitOfWork

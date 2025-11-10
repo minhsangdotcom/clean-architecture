@@ -1,5 +1,6 @@
-using Application.Common.Interfaces.Repositories;
+using Application.Common.Interfaces.Contexts;
 using Application.Common.Interfaces.Services;
+using Application.Common.Interfaces.UnitOfWorks;
 using Infrastructure.Data;
 using Infrastructure.Data.Interceptors;
 using Infrastructure.Data.Settings;
@@ -44,7 +45,7 @@ public static class DependencyInjection
         });
 
         services
-            .AddScoped<IDbContext, TheDbContext>()
+            .AddScoped<IEfDbContext, TheDbContext>()
             .AddScoped<IEfUnitOfWork, UnitOfWork>()
             .AddSingleton<UpdateAuditableEntityInterceptor>()
             .AddSingleton<DispatchDomainEventInterceptor>();

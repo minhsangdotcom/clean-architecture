@@ -1,6 +1,6 @@
 using System.Text.Json;
-using Application.Common.Interfaces.Repositories;
 using Application.Common.Interfaces.Services.Identity;
+using Application.Common.Interfaces.UnitOfWorks;
 using Application.Features.Common.Payloads.Users;
 using Application.Features.Common.Projections.Users;
 using Application.Features.Users.Commands.Create;

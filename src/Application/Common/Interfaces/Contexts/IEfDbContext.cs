@@ -2,9 +2,9 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 
-namespace Application.Common.Interfaces.Repositories;
+namespace Application.Common.Interfaces.Contexts;
 
-public interface IDbContext : IDisposable
+public interface IEfDbContext : IDisposable
 {
     EntityEntry Entry(object entity);
 

@@ -1,6 +1,7 @@
 using System.Data.Common;
+using Application.Common.Interfaces.Repositories;
 
-namespace Application.Common.Interfaces.Repositories;
+namespace Application.Common.Interfaces.UnitOfWorks;
 
 public interface IEfUnitOfWork : IUnitOfWork
 {

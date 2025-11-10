@@ -1,6 +1,6 @@
 using System.Runtime.InteropServices;
 using Application.Common.Extensions;
-using Application.Common.Interfaces.Repositories;
+using Application.Common.Interfaces.Contexts;
 using Application.Common.Interfaces.Services.Identity;
 using Ardalis.GuardClauses;
 using Domain.Aggregates.Roles;
@@ -12,7 +12,7 @@ using SharedKernel.Constants;
 
 namespace Infrastructure.Services.Identity;
 
-public class RoleManagerService(IDbContext context) : IRoleManagerService
+public class RoleManagerService(IEfDbContext context) : IRoleManagerService
 {
     private readonly DbSet<Role> roleDbSet = context.Set<Role>();
     public DbSet<Role> Roles => roleDbSet;

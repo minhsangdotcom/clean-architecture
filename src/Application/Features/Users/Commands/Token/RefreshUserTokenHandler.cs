@@ -1,7 +1,7 @@
 using Application.Common.Errors;
-using Application.Common.Interfaces.Repositories;
 using Application.Common.Interfaces.Services;
 using Application.Common.Interfaces.Services.Token;
+using Application.Common.Interfaces.UnitOfWorks;
 using Contracts.ApiWrapper;
 using Contracts.Dtos.Responses;
 using Domain.Aggregates.Users;
