@@ -1,4 +1,4 @@
-using Application.Common.Interfaces.UnitOfWorks;
+using Application.Common.Interfaces.Repositories;
 using Application.Common.QueryStringProcessing;
 using Application.Features.Common.Projections.Regions;
 using Contracts.ApiWrapper;
@@ -10,7 +10,7 @@ using SharedKernel.Models;
 
 namespace Application.Features.Regions.Queries.List.Districts;
 
-public class ListDistrictHandler(IUnitOfWork unitOfWork, ILogger<ListDistrictHandler> logger)
+public class ListDistrictHandler(IEfUnitOfWork unitOfWork, ILogger<ListDistrictHandler> logger)
     : IRequestHandler<ListDistrictQuery, Result<PaginationResponse<DistrictProjection>>>
 {
     public async ValueTask<Result<PaginationResponse<DistrictProjection>>> Handle(

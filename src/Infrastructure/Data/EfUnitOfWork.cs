@@ -1,19 +1,19 @@
 using System.Data.Common;
+using Application.Common.Interfaces.Repositories;
 using Application.Common.Interfaces.Services.Cache;
-using Application.Common.Interfaces.UnitOfWorks;
-using Infrastructure.UnitOfWorks.CachedRepositories;
-using Infrastructure.UnitOfWorks.Repositories;
+using Infrastructure.Data.Repositories.EfCore.Cached;
+using Infrastructure.Data.Repositories.EfCore.Implementations;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.Logging;
 
-namespace Infrastructure.UnitOfWorks;
+namespace Infrastructure.Data;
 
 public class UnitOfWork(
     IDbContext dbContext,
     ILogger<UnitOfWork> logger,
     IMemoryCacheService memoryCacheService
-) : IUnitOfWork
+) : IEfUnitOfWork
 {
     public DbTransaction? CurrentTransaction { get; set; }
 
@@ -92,9 +92,7 @@ public class UnitOfWork(
         return (ISpecificationRepository<TEntity>)value!;
     }
 
-    public async Task<DbTransaction> BeginTransactionAsync(
-        CancellationToken cancellationToken = default
-    )
+    public async Task BeginTransactionAsync(CancellationToken cancellationToken = default)
     {
         if (CurrentTransaction != null)
         {
@@ -105,7 +103,6 @@ public class UnitOfWork(
             await dbContext.DatabaseFacade.BeginTransactionAsync(cancellationToken);
 
         CurrentTransaction = currentTransaction.GetDbTransaction();
-        return CurrentTransaction;
     }
 
     public async Task CommitAsync(CancellationToken cancellationToken = default)

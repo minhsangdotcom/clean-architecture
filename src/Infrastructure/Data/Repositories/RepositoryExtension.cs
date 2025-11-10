@@ -4,13 +4,13 @@ using Domain.Common;
 using Newtonsoft.Json;
 using SharedKernel.Models;
 
-namespace Infrastructure.UnitOfWorks;
+namespace Infrastructure.Data.Repositories;
 
 public static class RepositoryExtension
 {
     public static string GetSort(this string? sort)
     {
-        string defaultSort = GetDefaultSort(sort);
+        string defaultSort = sort.GetDefaultSort();
         return $"{defaultSort},{nameof(BaseEntity.Id)}";
     }
 

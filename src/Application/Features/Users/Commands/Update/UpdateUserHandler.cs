@@ -1,7 +1,7 @@
 using Application.Common.Constants;
 using Application.Common.Errors;
+using Application.Common.Interfaces.Repositories;
 using Application.Common.Interfaces.Services.Identity;
-using Application.Common.Interfaces.UnitOfWorks;
 using Contracts.ApiWrapper;
 using Domain.Aggregates.Regions;
 using Domain.Aggregates.Users;
@@ -14,7 +14,7 @@ using SharedKernel.Common.Messages;
 namespace Application.Features.Users.Commands.Update;
 
 public class UpdateUserHandler(
-    IUnitOfWork unitOfWork,
+    IEfUnitOfWork unitOfWork,
     IMediaUpdateService<User> mediaUpdateService,
     IUserManagerService userManagerService
 ) : IRequestHandler<UpdateUserCommand, Result<UpdateUserResponse>>
@@ -127,7 +127,7 @@ public class UpdateUserHandler(
 
         try
         {
-            _ = await unitOfWork.BeginTransactionAsync(cancellationToken);
+            await unitOfWork.BeginTransactionAsync(cancellationToken);
 
             await unitOfWork.Repository<User>().UpdateAsync(user);
             await unitOfWork.SaveAsync(cancellationToken);

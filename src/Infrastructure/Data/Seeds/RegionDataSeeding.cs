@@ -1,5 +1,5 @@
 using System.Text.Json;
-using Application.Common.Interfaces.UnitOfWorks;
+using Application.Common.Interfaces.Repositories;
 using Domain.Aggregates.Regions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -10,7 +10,7 @@ public class RegionDataSeeding
 {
     public static async Task SeedingAsync(IServiceProvider provider)
     {
-        IUnitOfWork unitOfWork = provider.GetRequiredService<IUnitOfWork>();
+        IEfUnitOfWork unitOfWork = provider.GetRequiredService<IEfUnitOfWork>();
         ILogger logger = provider.GetRequiredService<ILogger<RegionDataSeeding>>();
 
         if (

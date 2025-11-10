@@ -1,5 +1,5 @@
 using System.Reflection;
-using Application.Common.Interfaces.UnitOfWorks;
+using Application.Common.Interfaces.Repositories;
 using Domain.Common;
 using DynamicQuery.Extensions;
 using Microsoft.EntityFrameworkCore;

@@ -1,6 +1,6 @@
 using System.Linq.Expressions;
 
-namespace Application.Common.Interfaces.UnitOfWorks;
+namespace Application.Common.Interfaces.Repositories;
 
 public interface IMemoryRepository<T> : IRepository<T>
     where T : class

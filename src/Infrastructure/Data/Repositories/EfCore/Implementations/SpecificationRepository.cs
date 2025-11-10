@@ -1,5 +1,5 @@
 using System.Linq.Expressions;
-using Application.Common.Interfaces.UnitOfWorks;
+using Application.Common.Interfaces.Repositories;
 using Contracts.Dtos.Requests;
 using Domain.Common;
 using DynamicQuery.Extensions;
@@ -9,7 +9,7 @@ using SharedKernel.Models;
 using Specification.Evaluators;
 using Specification.Interfaces;
 
-namespace Infrastructure.UnitOfWorks.Repositories;
+namespace Infrastructure.Data.Repositories.EfCore.Implementations;
 
 /// <summary>
 /// do query in Specification

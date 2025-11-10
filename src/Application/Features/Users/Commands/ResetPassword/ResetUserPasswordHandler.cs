@@ -1,6 +1,6 @@
 using Application.Common.Constants;
 using Application.Common.Errors;
-using Application.Common.Interfaces.UnitOfWorks;
+using Application.Common.Interfaces.Repositories;
 using Contracts.ApiWrapper;
 using Domain.Aggregates.Users;
 using Domain.Aggregates.Users.Enums;
@@ -10,7 +10,7 @@ using SharedKernel.Common.Messages;
 
 namespace Application.Features.Users.Commands.ResetPassword;
 
-public class ResetUserPasswordHandler(IUnitOfWork unitOfWork)
+public class ResetUserPasswordHandler(IEfUnitOfWork unitOfWork)
     : IRequestHandler<ResetUserPasswordCommand, Result<string>>
 {
     public async ValueTask<Result<string>> Handle(

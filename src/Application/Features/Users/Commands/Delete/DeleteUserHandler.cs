@@ -1,7 +1,7 @@
 using Application.Common.Constants;
 using Application.Common.Errors;
+using Application.Common.Interfaces.Repositories;
 using Application.Common.Interfaces.Services.Identity;
-using Application.Common.Interfaces.UnitOfWorks;
 using Contracts.ApiWrapper;
 using Domain.Aggregates.Users;
 using Domain.Aggregates.Users.Specifications;
@@ -10,7 +10,7 @@ using SharedKernel.Common.Messages;
 
 namespace Application.Features.Users.Commands.Delete;
 
-public class DeleteUserHandler(IUnitOfWork unitOfWork, IMediaUpdateService<User> mediaUpdateService)
+public class DeleteUserHandler(IEfUnitOfWork unitOfWork, IMediaUpdateService<User> mediaUpdateService)
     : IRequestHandler<DeleteUserCommand, Result<string>>
 {
     public async ValueTask<Result<string>> Handle(

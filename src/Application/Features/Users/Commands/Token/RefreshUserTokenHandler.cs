@@ -1,7 +1,7 @@
 using Application.Common.Errors;
+using Application.Common.Interfaces.Repositories;
 using Application.Common.Interfaces.Services;
 using Application.Common.Interfaces.Services.Token;
-using Application.Common.Interfaces.UnitOfWorks;
 using Contracts.ApiWrapper;
 using Contracts.Dtos.Responses;
 using Domain.Aggregates.Users;
@@ -17,7 +17,7 @@ using Wangkanai.Detection.Services;
 namespace Application.Features.Users.Commands.Token;
 
 public class RefreshUserTokenHandler(
-    IUnitOfWork unitOfWork,
+    IEfUnitOfWork unitOfWork,
     ITokenFactoryService tokenFactory,
     IDetectionService detectionService,
     ICurrentUser currentUser

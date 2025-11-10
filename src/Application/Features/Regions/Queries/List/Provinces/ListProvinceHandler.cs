@@ -1,4 +1,4 @@
-using Application.Common.Interfaces.UnitOfWorks;
+using Application.Common.Interfaces.Repositories;
 using Application.Common.QueryStringProcessing;
 using Application.Features.Common.Projections.Regions;
 using Contracts.ApiWrapper;
@@ -10,7 +10,7 @@ using SharedKernel.Models;
 
 namespace Application.Features.Regions.Queries.List.Provinces;
 
-public class ListProvinceHandler(IUnitOfWork unitOfWork, ILogger<ListProvinceHandler> logger)
+public class ListProvinceHandler(IEfUnitOfWork unitOfWork, ILogger<ListProvinceHandler> logger)
     : IRequestHandler<ListProvinceQuery, Result<PaginationResponse<ProvinceProjection>>>
 {
     public async ValueTask<Result<PaginationResponse<ProvinceProjection>>> Handle(

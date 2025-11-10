@@ -1,7 +1,7 @@
 using Application.Common.Constants;
 using Application.Common.Errors;
+using Application.Common.Interfaces.Repositories;
 using Application.Common.Interfaces.Services.Identity;
-using Application.Common.Interfaces.UnitOfWorks;
 using Application.Features.Users.Commands.Update;
 using Contracts.ApiWrapper;
 using Domain.Aggregates.Regions;
@@ -14,7 +14,7 @@ using SharedKernel.Common.Messages;
 namespace Application.Features.Users.Commands.Create;
 
 public class CreateUserHandler(
-    IUnitOfWork unitOfWork,
+    IEfUnitOfWork unitOfWork,
     IMediaUpdateService<User> mediaUpdateService,
     IUserManagerService userManagerService
 ) : IRequestHandler<CreateUserCommand, Result<CreateUserResponse>>
@@ -105,7 +105,7 @@ public class CreateUserHandler(
         string? userAvatar = null;
         try
         {
-            _ = await unitOfWork.BeginTransactionAsync(cancellationToken);
+            await unitOfWork.BeginTransactionAsync(cancellationToken);
 
             User user = await unitOfWork
                 .Repository<User>()

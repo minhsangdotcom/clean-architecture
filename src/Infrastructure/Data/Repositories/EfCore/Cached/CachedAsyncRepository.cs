@@ -1,7 +1,7 @@
 using System.Linq.Expressions;
-using Application.Common.Interfaces.UnitOfWorks;
+using Application.Common.Interfaces.Repositories;
 
-namespace Infrastructure.UnitOfWorks.CachedRepositories;
+namespace Infrastructure.Data.Repositories.EfCore.Cached;
 
 public partial class CachedAsyncRepository<T>(IAsyncRepository<T> repository) : IAsyncRepository<T>
     where T : class

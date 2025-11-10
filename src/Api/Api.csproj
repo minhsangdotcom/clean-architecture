@@ -4,16 +4,16 @@
     <ProjectReference Include="..\Application\Application.csproj" />
     <ProjectReference Include="..\Infrastructure\Infrastructure.csproj" />
     <ProjectReference Include="..\Contracts\Contracts.csproj" />
-    <None Include="..\Infrastructure\Data\Seeds\Provinces.json">
-      <Link>Data\Seeds\Provinces.json</Link>
+    <None Include="..\Infrastructure\Data\Seeds\Resources\Provinces.json">
+      <Link>Data\Seeds\Resources\Provinces.json</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="..\Infrastructure\Data\Seeds\Districts.json">
-      <Link>Data\Seeds\Districts.json</Link>
+    <None Include="..\Infrastructure\Data\Seeds\Resources\Districts.json">
+      <Link>Data\Seeds\Resources\Districts.json</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="..\Infrastructure\Data\Seeds\Wards.json">
-      <Link>Data\Seeds\Wards.json</Link>
+    <None Include="..\Infrastructure\Data\Seeds\Resources\Wards.json">
+      <Link>Data\Seeds\Resources\Wards.json</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>

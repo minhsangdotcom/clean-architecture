@@ -1,8 +1,8 @@
 using Application.Common.Constants;
 using Application.Common.Errors;
+using Application.Common.Interfaces.Repositories;
 using Application.Common.Interfaces.Services;
 using Application.Common.Interfaces.Services.Token;
-using Application.Common.Interfaces.UnitOfWorks;
 using Application.Features.Common.Mapping.Users;
 using Contracts.ApiWrapper;
 using Domain.Aggregates.Users;
@@ -16,7 +16,7 @@ using Wangkanai.Detection.Services;
 namespace Application.Features.Users.Commands.Login;
 
 public class LoginUserHandler(
-    IUnitOfWork unitOfWork,
+    IEfUnitOfWork unitOfWork,
     ITokenFactoryService tokenFactory,
     IDetectionService detectionService,
     ICurrentUser currentUser

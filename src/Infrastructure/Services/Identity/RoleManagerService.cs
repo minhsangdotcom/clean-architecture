@@ -1,7 +1,7 @@
 using System.Runtime.InteropServices;
 using Application.Common.Extensions;
+using Application.Common.Interfaces.Repositories;
 using Application.Common.Interfaces.Services.Identity;
-using Application.Common.Interfaces.UnitOfWorks;
 using Ardalis.GuardClauses;
 using Domain.Aggregates.Roles;
 using Domain.Aggregates.Users;

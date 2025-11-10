@@ -1,4 +1,4 @@
-using Application.Common.Interfaces.UnitOfWorks;
+using Application.Common.Interfaces.Repositories;
 using Application.Common.QueryStringProcessing;
 using Contracts.ApiWrapper;
 using Domain.Aggregates.QueueLogs;
@@ -9,7 +9,7 @@ using SharedKernel.Models;
 
 namespace Application.Features.QueueLogs.Queries;
 
-public class ListQueueLogHandler(IUnitOfWork unitOfWork, ILogger<ListQueueLogHandler> logger)
+public class ListQueueLogHandler(IEfUnitOfWork unitOfWork, ILogger<ListQueueLogHandler> logger)
     : IRequestHandler<ListQueueLogQuery, Result<PaginationResponse<ListQueueLogResponse>>>
 {
     public async ValueTask<Result<PaginationResponse<ListQueueLogResponse>>> Handle(

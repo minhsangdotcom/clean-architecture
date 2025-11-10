@@ -1,6 +1,6 @@
 using Application.Common.Constants;
 using Application.Common.Errors;
-using Application.Common.Interfaces.UnitOfWorks;
+using Application.Common.Interfaces.Repositories;
 using Contracts.ApiWrapper;
 using Domain.Aggregates.Users;
 using Domain.Aggregates.Users.Specifications;
@@ -9,7 +9,7 @@ using SharedKernel.Common.Messages;
 
 namespace Application.Features.Users.Queries.Detail;
 
-public class GetUserDetailHandler(IUnitOfWork unitOfWork)
+public class GetUserDetailHandler(IEfUnitOfWork unitOfWork)
     : IRequestHandler<GetUserDetailQuery, Result<GetUserDetailResponse>>
 {
     public async ValueTask<Result<GetUserDetailResponse>> Handle(

@@ -1,4 +1,4 @@
-using Application.Common.Interfaces.UnitOfWorks;
+using Application.Common.Interfaces.Repositories;
 using Application.Common.QueryStringProcessing;
 using Contracts.ApiWrapper;
 using Domain.Aggregates.Users;
@@ -9,7 +9,7 @@ using SharedKernel.Models;
 
 namespace Application.Features.Users.Queries.List;
 
-public class ListUserHandler(IUnitOfWork unitOfWork, ILogger<ListUserHandler> logger)
+public class ListUserHandler(IEfUnitOfWork unitOfWork, ILogger<ListUserHandler> logger)
     : IRequestHandler<ListUserQuery, Result<PaginationResponse<ListUserResponse>>>
 {
     public async ValueTask<Result<PaginationResponse<ListUserResponse>>> Handle(

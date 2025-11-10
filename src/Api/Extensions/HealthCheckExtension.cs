@@ -1,4 +1,4 @@
-using Infrastructure.Data;
+using Infrastructure.Data.Settings;
 
 namespace Api.Extensions;
 

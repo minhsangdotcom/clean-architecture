@@ -3,7 +3,7 @@ using Contracts.Dtos.Requests;
 using SharedKernel.Models;
 using Specification.Interfaces;
 
-namespace Application.Common.Interfaces.UnitOfWorks;
+namespace Application.Common.Interfaces.Repositories;
 
 /// <summary>
 /// Repository using <see cref="ISpecification{T}"/> for static, pre-defined queries.

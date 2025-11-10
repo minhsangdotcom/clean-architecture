@@ -1,6 +1,6 @@
 using Microsoft.Extensions.Options;
 
-namespace Infrastructure.Data;
+namespace Infrastructure.Data.Settings;
 
 public class ValidateDatabaseSetting : IValidateOptions<DatabaseSettings>
 {

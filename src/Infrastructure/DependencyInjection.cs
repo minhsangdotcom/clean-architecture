@@ -1,7 +1,8 @@
+using Application.Common.Interfaces.Repositories;
 using Application.Common.Interfaces.Services;
-using Application.Common.Interfaces.UnitOfWorks;
 using Infrastructure.Data;
 using Infrastructure.Data.Interceptors;
+using Infrastructure.Data.Settings;
 using Infrastructure.Services;
 using Infrastructure.Services.Aws;
 using Infrastructure.Services.Cache.DistributedCache;
@@ -11,7 +12,6 @@ using Infrastructure.Services.Identity;
 using Infrastructure.Services.Mail;
 using Infrastructure.Services.Queue;
 using Infrastructure.Services.Token;
-using Infrastructure.UnitOfWorks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -45,7 +45,7 @@ public static class DependencyInjection
 
         services
             .AddScoped<IDbContext, TheDbContext>()
-            .AddScoped<IUnitOfWork, UnitOfWork>()
+            .AddScoped<IEfUnitOfWork, UnitOfWork>()
             .AddSingleton<UpdateAuditableEntityInterceptor>()
             .AddSingleton<DispatchDomainEventInterceptor>();
 

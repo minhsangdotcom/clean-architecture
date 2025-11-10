@@ -1,9 +1,9 @@
 using System.Linq.Expressions;
-using Application.Common.Interfaces.UnitOfWorks;
+using Application.Common.Interfaces.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 
-namespace Infrastructure.UnitOfWorks.Repositories;
+namespace Infrastructure.Data.Repositories.EfCore.Implementations;
 
 public class AsyncRepository<T>(IDbContext dbContext) : IAsyncRepository<T>
     where T : class

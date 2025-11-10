@@ -1,6 +1,6 @@
 using System.Text.Json;
+using Application.Common.Interfaces.Repositories;
 using Application.Common.Interfaces.Services.Identity;
-using Application.Common.Interfaces.UnitOfWorks;
 using Application.Features.Common.Payloads.Users;
 using Application.Features.Common.Projections.Users;
 using Application.Features.Users.Commands.Create;
@@ -22,7 +22,7 @@ public partial class TestingFixture
     {
         using var scope = factory!.Services.CreateScope();
         var provider = scope.ServiceProvider;
-        IUnitOfWork unitOfWork = provider.GetRequiredService<IUnitOfWork>();
+        IEfUnitOfWork unitOfWork = provider.GetRequiredService<IEfUnitOfWork>();
 
         if (
             await unitOfWork.Repository<Province>().AnyAsync()
@@ -194,7 +194,7 @@ public partial class TestingFixture
     public async Task<User?> FindUserByIdAsync(Ulid userId)
     {
         using var scope = factory!.Services.CreateScope();
-        IUnitOfWork? unitOfWork = scope.ServiceProvider.GetService<IUnitOfWork>();
+        IEfUnitOfWork? unitOfWork = scope.ServiceProvider.GetService<IEfUnitOfWork>();
 
         return await unitOfWork!
             .DynamicReadOnlyRepository<User>()

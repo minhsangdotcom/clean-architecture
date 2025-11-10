@@ -1,4 +1,4 @@
-using Application.Common.Interfaces.UnitOfWorks;
+using Application.Common.Interfaces.Repositories;
 using Application.Common.QueryStringProcessing;
 using Application.Features.Common.Mapping.Regions;
 using Application.Features.Common.Projections.Regions;
@@ -11,7 +11,7 @@ using SharedKernel.Models;
 
 namespace Application.Features.Regions.Queries.List.Communes;
 
-public class ListCommuneHandler(IUnitOfWork unitOfWork, ILogger<ListCommuneHandler> logger)
+public class ListCommuneHandler(IEfUnitOfWork unitOfWork, ILogger<ListCommuneHandler> logger)
     : IRequestHandler<ListCommuneQuery, Result<PaginationResponse<CommuneProjection>>>
 {
     public async ValueTask<Result<PaginationResponse<CommuneProjection>>> Handle(

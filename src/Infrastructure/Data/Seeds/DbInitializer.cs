@@ -1,5 +1,5 @@
+using Application.Common.Interfaces.Repositories;
 using Application.Common.Interfaces.Services.Identity;
-using Application.Common.Interfaces.UnitOfWorks;
 using Domain.Aggregates.Regions;
 using Domain.Aggregates.Roles;
 using Domain.Aggregates.Users;
@@ -17,7 +17,7 @@ public class DbInitializer
 {
     public static async Task InitializeAsync(IServiceProvider provider)
     {
-        var unitOfWork = provider.GetRequiredService<IUnitOfWork>();
+        var unitOfWork = provider.GetRequiredService<IEfUnitOfWork>();
         var roleManagerService = provider.GetRequiredService<IRoleManagerService>();
         var userManagerService = provider.GetRequiredService<IUserManagerService>();
         var logger = provider.GetRequiredService<ILogger<DbInitializer>>();
@@ -55,7 +55,7 @@ public class DbInitializer
         Role[] roles = [adminRole, managerRole];
         try
         {
-            _ = await unitOfWork.BeginTransactionAsync();
+            await unitOfWork.BeginTransactionAsync();
 
             if (!await roleManagerService.Roles.AnyAsync())
             {
@@ -152,7 +152,7 @@ public class DbInitializer
     }
 
     private static async Task CreateAdminUserAsync(
-        IUnitOfWork unitOfWork,
+        IEfUnitOfWork unitOfWork,
         IUserManagerService userManagerService,
         Ulid adminRoleId,
         Ulid managerRoleId
@@ -221,7 +221,7 @@ public class DbInitializer
     }
 
     private static async Task<GetRegionResult> GetRegionAsync(
-        IUnitOfWork unitOfWork,
+        IEfUnitOfWork unitOfWork,
         string provinceCode,
         string districtCode,
         string communeCode
