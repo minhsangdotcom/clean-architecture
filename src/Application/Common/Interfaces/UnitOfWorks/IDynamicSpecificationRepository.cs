@@ -5,6 +5,11 @@ using Specification.Interfaces;
 
 namespace Application.Common.Interfaces.UnitOfWorks;
 
+/// <summary>
+/// Repository that supports dynamic filter, search, sort, and pagination logic
+/// built at runtime using query parameters.
+/// The <see cref="ISpecification{T}"/> here is mainly used for includes, AsNoTracking, AsSplitQuery or base filters.
+/// </summary>
 public interface IDynamicSpecificationRepository<T> : IRepository<T>
     where T : class
 {

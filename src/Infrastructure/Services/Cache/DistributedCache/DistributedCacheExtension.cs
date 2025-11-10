@@ -1,7 +1,6 @@
 using Application.Common.Interfaces.Services.Cache;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
 using StackExchange.Redis;
 
 namespace Infrastructure.Services.Cache.DistributedCache;
@@ -23,16 +22,16 @@ public static class DistributedCacheExtension
                 .Configure<RedisDatabaseSettings>(options =>
                     configuration.GetSection(nameof(RedisDatabaseSettings)).Bind(options)
                 )
+                .AddSingleton<IConnectionMultiplexer>(_ =>
+                {
+                    ConfigurationOptions options = new() { Password = databaseSettings.Password };
+                    options.EndPoints.Add(databaseSettings.Host!, databaseSettings.Port!.Value);
+
+                    return ConnectionMultiplexer.Connect(options);
+                })
                 .AddSingleton(sp =>
                 {
-                    var settings = sp.GetRequiredService<IOptions<RedisDatabaseSettings>>().Value;
-                    ConfigurationOptions options =
-                        new()
-                        {
-                            EndPoints = { { settings.Host!, settings.Port!.Value } },
-                            Password = settings.Password,
-                        };
-                    ConnectionMultiplexer multiplexer = ConnectionMultiplexer.Connect(options);
+                    var multiplexer = sp.GetRequiredService<IConnectionMultiplexer>();
                     return multiplexer.GetDatabase();
                 })
                 .AddSingleton<IDistributedCacheService, RedisCacheService>();

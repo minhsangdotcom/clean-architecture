@@ -12,6 +12,6 @@ public interface IDbContext : IDisposable
         where TEntity : class;
 
     public DatabaseFacade DatabaseFacade { get; }
-    
+
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 }

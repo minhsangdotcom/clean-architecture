@@ -19,7 +19,7 @@ public class ListQueueLogEndpoint : IEndpoint
 
     public void MapEndpoint(IEndpointRouteBuilder app)
     {
-        app.MapGet(Router.QueueLogRoute.QueueLog, HandleAsync)
+        app.MapGet(Router.QueueLogRoute.QueueLogs, HandleAsync)
             .WithOpenApi(operation => new OpenApiOperation(operation)
             {
                 Summary = "Get list of Queue logging 📄",

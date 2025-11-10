@@ -18,7 +18,7 @@ public class ListAuditLogEndpoint : IEndpoint
 
     public void MapEndpoint(IEndpointRouteBuilder app)
     {
-        app.MapGet(Router.AuditLogRoute.AuditLog, HandleAsync)
+        app.MapGet(Router.AuditLogRoute.AuditLogs, HandleAsync)
             .WithOpenApi(operation => new OpenApiOperation(operation)
             {
                 Summary = "Get list of audit logs",

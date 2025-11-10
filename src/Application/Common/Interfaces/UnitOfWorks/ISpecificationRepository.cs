@@ -6,7 +6,9 @@ using Specification.Interfaces;
 namespace Application.Common.Interfaces.UnitOfWorks;
 
 /// <summary>
-/// To Use static query with Specification for performance
+/// Repository using <see cref="ISpecification{T}"/> for static, pre-defined queries.
+/// Encapsulates filter, search, sort, and pagination logic for performance and reusability.
+/// Use when queries are fixed; for dynamic queries, use the dynamic repository.
 /// </summary>
 public interface ISpecificationRepository<T> : IRepository<T>
     where T : class
