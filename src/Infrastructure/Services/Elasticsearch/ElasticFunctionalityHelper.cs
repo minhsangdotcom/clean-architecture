@@ -1,10 +1,11 @@
 using System.Reflection;
 using CaseConverter;
+using DotNetCoreExtension.Extensions.Reflections;
 using Elastic.Clients.Elasticsearch;
 using Elastic.Clients.Elasticsearch.QueryDsl;
 using FluentConfiguration.Configurations;
 using Infrastructure.Services.Elasticsearch;
-using SharedKernel.Extensions.Reflections;
+using SharedKernel.Constants;
 using SharedKernel.Models;
 
 namespace Infrastructure.Services.Elasticsearch;

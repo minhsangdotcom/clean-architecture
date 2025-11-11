@@ -7,10 +7,10 @@ using Application.Features.Common.Mapping.Users;
 using Contracts.ApiWrapper;
 using Domain.Aggregates.Users;
 using Domain.Aggregates.Users.Specifications;
+using DotNetCoreExtension.Extensions;
 using Mediator;
 using SharedKernel.Common.Messages;
 using SharedKernel.Constants;
-using SharedKernel.Extensions;
 using Wangkanai.Detection.Services;
 
 namespace Application.Features.Users.Commands.Login;

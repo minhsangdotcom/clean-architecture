@@ -194,8 +194,8 @@
       },
       "BouncyCastle.Cryptography": {
         "type": "Transitive",
-        "resolved": "2.5.1",
-        "contentHash": "zy8TMeTP+1FH2NrLaNZtdRbBdq7u5MI+NFZQOBSM69u5RFkciinwzV2eveY6Kjf5MzgsYvvl6kTStsj3JrXqkg=="
+        "resolved": "2.6.2",
+        "contentHash": "7oWOcvnntmMKNzDLsdxAYqApt+AjpRpP2CShjMfIa3umZ42UQMvH0tl1qAliYPNYO6vTdcGMqnRrCPmsfzTI1w=="
       },
       "CaseConverter": {
         "type": "Transitive",
@@ -1094,14 +1094,11 @@
       },
       "minhsangdotcom.TheTemplate.SharedKernel": {
         "type": "Transitive",
-        "resolved": "1.0.13",
-        "contentHash": "HhKopEvFneeoZ7tJvHhedr+O0RXp2WAa3ZZGXWWLmUh4jqg3tCWnmmVJTj+o7xoy65kUdQTEULa8KNvEbKaMaQ==",
+        "resolved": "1.0.14",
+        "contentHash": "6J+H4lTev/X/btyRve1tX2PnMvr2Va7bGieHi2FMqHYAR/MXZwOnS+zYd1QU02fyDge7L3n0gzZ5TG2GxVNZiA==",
         "dependencies": {
-          "BouncyCastle.Cryptography": "2.5.1",
           "CaseConverter": "2.0.1",
-          "Microsoft.AspNetCore.WebUtilities": "8.0.21",
-          "Ulid": "1.4.1",
-          "deniszykov.TypeConversion": "3.2.3"
+          "Ulid": "1.4.1"
         }
       },
       "minhsangdotcom.TheTemplate.SpecificationPattern": {
@@ -1195,14 +1192,6 @@
           "Microsoft.EntityFrameworkCore.Abstractions": "8.0.11",
           "Microsoft.EntityFrameworkCore.Relational": "8.0.11",
           "Npgsql": "8.0.6"
-        }
-      },
-      "NRedisStack": {
-        "type": "Transitive",
-        "resolved": "1.1.0",
-        "contentHash": "yXAaqhKT2hkapUBdpMEz7evNRwSGPP0KDd6E1GEIWPyLfnlTEHgEE8bsOD0I21ZHLvoMvKwbE4ibuOuVkOEE2Q==",
-        "dependencies": {
-          "StackExchange.Redis": "2.8.58"
         }
       },
       "NuGet.Frameworks": {
@@ -1532,8 +1521,8 @@
       },
       "StackExchange.Redis": {
         "type": "Transitive",
-        "resolved": "2.8.58",
-        "contentHash": "0XGRE2UoF/n2/qhCpcyBBZovpGhHu4hRtkdsx4fZFu1H5Q/Z8Q+U/z/nWwnosWDRJnEasntNatd9Mf+Isc8plg==",
+        "resolved": "2.9.32",
+        "contentHash": "j5Rjbf7gWz5izrn0UWQy9RlQY4cQDPkwJfVqATnVsOa/+zzJrps12LOgacMsDl/Vit2f01cDiDkG/Rst8v2iGw==",
         "dependencies": {
           "Microsoft.Extensions.Logging.Abstractions": "8.0.0",
           "Pipelines.Sockets.Unofficial": "2.2.8"
@@ -2438,14 +2427,25 @@
           "System.Xml.ReaderWriter": "4.3.0"
         }
       },
+      "TranMinhSang.AspNetCore.Extensions": {
+        "type": "Transitive",
+        "resolved": "1.0.0",
+        "contentHash": "7orrqkO6j/WQO+uyqZx6uwKtmRfQSM1jDseSaEbc9scTnrdUXH4/RQroRqQlGyMiuD8BN34/Ct1D40P6RVzEkA==",
+        "dependencies": {
+          "BouncyCastle.Cryptography": "2.6.2",
+          "Microsoft.AspNetCore.WebUtilities": "8.0.21",
+          "Ulid": "1.4.1",
+          "deniszykov.TypeConversion": "3.2.3"
+        }
+      },
       "TranMinhSang.DynamicQueryExtension.EntityFrameworkCore": {
         "type": "Transitive",
-        "resolved": "0.1.2",
-        "contentHash": "xM4G9nmQA/xrsebJyCG8Qiq4Yid+ZJHttmpV1Hz68lrsB9jWg9zLEkBrCxyeNmapdWIMDwofXplm9d5h07EE8g==",
+        "resolved": "1.0.1",
+        "contentHash": "8SjB/mnY2O2Mwj/GJL3oCddPzUJltcpN8JfrXehmXr14qrBEIKqGSbMQNtuFVhmDjt0F9FiqlRragW/CdM12Iw==",
         "dependencies": {
           "Newtonsoft.Json": "13.0.4",
           "Npgsql.EntityFrameworkCore.PostgreSQL": "8.0.11",
-          "minhsangdotcom.TheTemplate.SharedKernel": "1.0.13"
+          "TranMinhSang.AspNetCore.Extensions": "1.0.0"
         }
       },
       "Ulid": {
@@ -2564,7 +2564,7 @@
         "dependencies": {
           "Microsoft.AspNetCore.Http": "[2.3.0, )",
           "Microsoft.AspNetCore.Mvc.Core": "[2.3.0, )",
-          "minhsangdotcom.TheTemplate.SharedKernel": "[1.0.13, )"
+          "minhsangdotcom.TheTemplate.SharedKernel": "[1.0.14, )"
         }
       },
       "domain": {
@@ -2572,7 +2572,8 @@
         "dependencies": {
           "Ardalis.GuardClauses": "[5.0.0, )",
           "Mediator.Abstractions": "[3.0.1, )",
-          "minhsangdotcom.TheTemplate.SharedKernel": "[1.0.13, )",
+          "TranMinhSang.AspNetCore.Extensions": "[1.0.0, )",
+          "minhsangdotcom.TheTemplate.SharedKernel": "[1.0.14, )",
           "minhsangdotcom.TheTemplate.SpecificationPattern": "[1.0.4, )"
         }
       },
@@ -2585,9 +2586,10 @@
           "JWT": "[11.0.0, )",
           "MailKit": "[4.12.1, )",
           "Microsoft.AspNetCore.Authentication.JwtBearer": "[8.0.19, )",
-          "NRedisStack": "[1.1.0, )",
           "RazorLight": "[2.3.1, )",
-          "TranMinhSang.DynamicQueryExtension.EntityFrameworkCore": "[0.1.2, )"
+          "Scrutor": "[6.1.0, )",
+          "StackExchange.Redis": "[2.9.32, )",
+          "TranMinhSang.DynamicQueryExtension.EntityFrameworkCore": "[1.0.1, )"
         }
       }
     }

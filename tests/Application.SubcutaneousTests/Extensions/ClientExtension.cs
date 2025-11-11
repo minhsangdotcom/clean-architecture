@@ -3,9 +3,9 @@ using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Net.Mime;
 using System.Text;
+using DotNetCoreExtension.Extensions;
+using DotNetCoreExtension.Extensions.Reflections;
 using Microsoft.AspNetCore.Http;
-using SharedKernel.Extensions;
-using SharedKernel.Extensions.Reflections;
 
 namespace Application.SubcutaneousTests.Extensions;
 

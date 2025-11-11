@@ -1,11 +1,11 @@
 using System.Reflection;
 using Application.Common.Errors;
 using Contracts.Dtos.Requests;
+using DotNetCoreExtension.Extensions;
+using DotNetCoreExtension.Extensions.Reflections;
+using DotNetCoreExtension.Results;
 using Microsoft.Extensions.Logging;
 using SharedKernel.Common.Messages;
-using SharedKernel.Extensions;
-using SharedKernel.Extensions.Reflections;
-using SharedKernel.Results;
 
 namespace Application.Common.QueryStringProcessing;
 

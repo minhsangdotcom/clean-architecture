@@ -1,5 +1,5 @@
 using Domain.Aggregates.Roles;
-using SharedKernel.Extensions;
+using DotNetCoreExtension.Extensions;
 
 namespace Application.Features.Roles.Commands.Update;
 

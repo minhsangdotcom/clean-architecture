@@ -19,15 +19,12 @@
       },
       "minhsangdotcom.TheTemplate.SharedKernel": {
         "type": "Direct",
-        "requested": "[1.0.13, )",
-        "resolved": "1.0.13",
-        "contentHash": "HhKopEvFneeoZ7tJvHhedr+O0RXp2WAa3ZZGXWWLmUh4jqg3tCWnmmVJTj+o7xoy65kUdQTEULa8KNvEbKaMaQ==",
+        "requested": "[1.0.14, )",
+        "resolved": "1.0.14",
+        "contentHash": "6J+H4lTev/X/btyRve1tX2PnMvr2Va7bGieHi2FMqHYAR/MXZwOnS+zYd1QU02fyDge7L3n0gzZ5TG2GxVNZiA==",
         "dependencies": {
-          "BouncyCastle.Cryptography": "2.5.1",
           "CaseConverter": "2.0.1",
-          "Microsoft.AspNetCore.WebUtilities": "8.0.21",
-          "Ulid": "1.4.1",
-          "deniszykov.TypeConversion": "3.2.3"
+          "Ulid": "1.4.1"
         }
       },
       "minhsangdotcom.TheTemplate.SpecificationPattern": {
@@ -40,10 +37,22 @@
           "Microsoft.EntityFrameworkCore.Relational": "8.0.17"
         }
       },
+      "TranMinhSang.AspNetCore.Extensions": {
+        "type": "Direct",
+        "requested": "[1.0.0, )",
+        "resolved": "1.0.0",
+        "contentHash": "7orrqkO6j/WQO+uyqZx6uwKtmRfQSM1jDseSaEbc9scTnrdUXH4/RQroRqQlGyMiuD8BN34/Ct1D40P6RVzEkA==",
+        "dependencies": {
+          "BouncyCastle.Cryptography": "2.6.2",
+          "Microsoft.AspNetCore.WebUtilities": "8.0.21",
+          "Ulid": "1.4.1",
+          "deniszykov.TypeConversion": "3.2.3"
+        }
+      },
       "BouncyCastle.Cryptography": {
         "type": "Transitive",
-        "resolved": "2.5.1",
-        "contentHash": "zy8TMeTP+1FH2NrLaNZtdRbBdq7u5MI+NFZQOBSM69u5RFkciinwzV2eveY6Kjf5MzgsYvvl6kTStsj3JrXqkg=="
+        "resolved": "2.6.2",
+        "contentHash": "7oWOcvnntmMKNzDLsdxAYqApt+AjpRpP2CShjMfIa3umZ42UQMvH0tl1qAliYPNYO6vTdcGMqnRrCPmsfzTI1w=="
       },
       "CaseConverter": {
         "type": "Transitive",

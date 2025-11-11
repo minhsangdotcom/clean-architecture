@@ -7,11 +7,10 @@ using Contracts.Dtos.Responses;
 using Domain.Aggregates.Users;
 using Domain.Aggregates.Users.Enums;
 using Domain.Aggregates.Users.Specifications;
+using DotNetCoreExtension.Extensions;
 using Mediator;
 using SharedKernel.Common.Messages;
 using SharedKernel.Constants;
-using SharedKernel.Extensions;
-using SharedKernel.Models;
 using Wangkanai.Detection.Services;
 
 namespace Application.Features.Users.Commands.Token;

@@ -1,7 +1,7 @@
 using Application.Common.Interfaces.Services.Queue;
 using Contracts.Dtos.Requests;
+using DotNetCoreExtension.Extensions;
 using Microsoft.Extensions.Options;
-using SharedKernel.Extensions;
 using StackExchange.Redis;
 
 namespace Infrastructure.Services.Queue;

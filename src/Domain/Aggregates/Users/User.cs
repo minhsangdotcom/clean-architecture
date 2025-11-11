@@ -4,9 +4,9 @@ using Domain.Aggregates.Users.Enums;
 using Domain.Aggregates.Users.Events;
 using Domain.Aggregates.Users.ValueObjects;
 using Domain.Common;
+using DotNetCoreExtension.Extensions.Reflections;
 using Mediator;
 using SharedKernel.Constants;
-using SharedKernel.Extensions.Reflections;
 
 namespace Domain.Aggregates.Users;
 

@@ -10,8 +10,9 @@
   <ItemGroup>
     <PackageReference Include="Ardalis.GuardClauses" Version="5.0.0" />
     <PackageReference Include="Mediator.Abstractions" Version="3.0.1" />
-    <PackageReference Include="minhsangdotcom.TheTemplate.SharedKernel" Version="1.0.13" />
+    <PackageReference Include="minhsangdotcom.TheTemplate.SharedKernel" Version="1.0.14" />
     <PackageReference Include="minhsangdotcom.TheTemplate.SpecificationPattern" Version="1.0.4" />
+    <PackageReference Include="TranMinhSang.AspNetCore.Extensions" Version="1.0.0" />
   </ItemGroup>
 
 </Project>

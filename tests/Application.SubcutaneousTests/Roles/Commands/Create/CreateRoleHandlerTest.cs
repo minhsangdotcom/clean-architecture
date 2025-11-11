@@ -1,9 +1,8 @@
 using Application.Features.Common.Payloads.Roles;
-using Application.Features.Common.Projections.Roles;
 using Application.Features.Roles.Commands.Create;
 using AutoFixture;
 using CaseConverter;
-using SharedKernel.Extensions;
+using DotNetCoreExtension.Extensions;
 using Shouldly;
 
 namespace Application.SubcutaneousTests.Roles.Commands.Create;
@@ -38,7 +37,11 @@ public class CreateRoleHandlerTest(TestingFixture testingFixture) : IAsyncLifeti
     public async Task CreateRole_WhenNoDescription_ShouldCreateRole()
     {
         // Arrange
-        var roleClaims = fixture.Build<RoleClaimPayload>().Without(x => x.Id).CreateMany(2).ToList();
+        var roleClaims = fixture
+            .Build<RoleClaimPayload>()
+            .Without(x => x.Id)
+            .CreateMany(2)
+            .ToList();
 
         var command = fixture
             .Build<CreateRoleCommand>()
@@ -65,7 +68,11 @@ public class CreateRoleHandlerTest(TestingFixture testingFixture) : IAsyncLifeti
     public async Task CreateRole_ShouldCreateRole()
     {
         // Arrange
-        var roleClaims = fixture.Build<RoleClaimPayload>().Without(x => x.Id).CreateMany(2).ToList();
+        var roleClaims = fixture
+            .Build<RoleClaimPayload>()
+            .Without(x => x.Id)
+            .CreateMany(2)
+            .ToList();
 
         var command = fixture
             .Build<CreateRoleCommand>()

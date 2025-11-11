@@ -1,13 +1,11 @@
 using Application.Common.Constants;
 using Application.Features.Common.Payloads.Roles;
-using Application.Features.Common.Projections.Roles;
 using Application.Features.Roles.Commands.Update;
 using Application.SubcutaneousTests.Extensions;
 using AutoFixture;
-using CaseConverter;
 using Domain.Aggregates.Roles;
+using DotNetCoreExtension.Extensions;
 using SharedKernel.Common.Messages;
-using SharedKernel.Extensions;
 using Shouldly;
 
 namespace Application.SubcutaneousTests.Roles.Commands.Update;

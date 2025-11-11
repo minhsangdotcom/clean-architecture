@@ -74,12 +74,14 @@ public class DynamicSpecificationRepository<T>(IEfDbContext dbContext)
     {
         string uniqueSort = queryParam.Sort.GetSort();
 
-        return await ApplySpecification(spec)
+        PaginatedResult<TResult> result = await ApplySpecification(spec)
             .Filter(queryParam.Filter)
             .Search(queryParam.Keyword, queryParam.Targets, deep)
             .Sort(uniqueSort)
             .Select(selector)
             .ToPagedListAsync(queryParam.Page, queryParam.PageSize, cancellationToken);
+
+        return result.ToPaginationResponse();
     }
 
     public async Task<PaginationResponse<TResult>> CursorPagedListAsync<TResult>(
@@ -91,19 +93,21 @@ public class DynamicSpecificationRepository<T>(IEfDbContext dbContext)
         CancellationToken cancellationToken = default
     )
         where TResult : class =>
-        await ApplySpecification(spec)
-            .Filter(queryParam.Filter)
-            .Search(queryParam.Keyword, queryParam.Targets, deep)
-            .Select(selector)
-            .ToCursorPagedListAsync(
-                new CursorPaginationRequest(
-                    queryParam.Before,
-                    queryParam.After,
-                    queryParam.PageSize,
-                    queryParam.Sort.GetDefaultSort(),
-                    uniqueSort ?? nameof(BaseEntity.Id)
+        (
+            await ApplySpecification(spec)
+                .Filter(queryParam.Filter)
+                .Search(queryParam.Keyword, queryParam.Targets, deep)
+                .Select(selector)
+                .ToCursorPagedListAsync(
+                    new CursorPaginationRequest(
+                        queryParam.Before,
+                        queryParam.After,
+                        queryParam.PageSize,
+                        queryParam.Sort.GetDefaultSort(),
+                        uniqueSort ?? nameof(BaseEntity.Id)
+                    )
                 )
-            );
+        ).ToPaginationResponse();
 
     private IQueryable<T> ApplySpecification(ISpecification<T> spec) =>
         SpecificationEvaluator.GetQuery(dbContext.Set<T>().AsQueryable(), spec);

@@ -1,6 +1,6 @@
 using Application.Common.Security;
+using DotNetCoreExtension.Extensions;
 using Microsoft.AspNetCore.Authorization;
-using SharedKernel.Extensions;
 
 namespace Application.Common.Auth;
 

@@ -7,10 +7,10 @@ using Contracts.Dtos.Models;
 using Contracts.Dtos.Requests;
 using Domain.Aggregates.Users;
 using Domain.Aggregates.Users.Specifications;
+using DotNetCoreExtension.Extensions;
 using Mediator;
 using Microsoft.Extensions.Configuration;
 using SharedKernel.Common.Messages;
-using SharedKernel.Extensions;
 
 namespace Application.Features.Users.Commands.RequestResetPassword;
 

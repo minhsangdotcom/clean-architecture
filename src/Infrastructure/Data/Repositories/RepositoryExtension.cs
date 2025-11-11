@@ -1,7 +1,9 @@
 using System.Security.Cryptography;
 using System.Text;
 using Domain.Common;
+using DynamicQuery.Models;
 using Newtonsoft.Json;
+using SharedKernel.Constants;
 using SharedKernel.Models;
 
 namespace Infrastructure.Data.Repositories;
@@ -53,5 +55,27 @@ public static class RepositoryExtension
         text.Append(param);
 
         return text;
+    }
+
+    public static PaginationResponse<T> ToPaginationResponse<T>(this PaginatedResult<T> source)
+    {
+        ArgumentNullException.ThrowIfNull(source, nameof(source));
+
+        PageMetadata<T> metadata =
+            source.PageMetadata
+            ?? throw new ArgumentException("Paging cannot be null.", nameof(source));
+
+        return new PaginationResponse<T>(
+            source.Data ?? [],
+            new Paging<T>(
+                metadata.CurrentPage,
+                metadata.PageSize,
+                metadata.TotalPage,
+                metadata.HasNextPage,
+                metadata.HasPreviousPage,
+                metadata.Before,
+                metadata.After
+            )
+        );
     }
 }
