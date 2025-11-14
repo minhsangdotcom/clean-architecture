@@ -1,20 +1,11 @@
 using Domain.Aggregates.Permissions;
-using Domain.Common;
 
 namespace Domain.Aggregates.Users;
 
-public class UserPermission : BaseEntity
+public class UserPermission
 {
-    public Ulid UserId { get; private set; }
-    public Ulid PermissionId { get; private set; }
+    public Ulid UserId { get; set; }
+    public Ulid PermissionId { get; set; }
 
-    public Permission? Permission { get; private set; }
-
-    private UserPermission() { }
-
-    public UserPermission(Ulid userId, Ulid permissionId)
-    {
-        UserId = userId;
-        PermissionId = permissionId;
-    }
+    public Permission? Permission { get; set; }
 }

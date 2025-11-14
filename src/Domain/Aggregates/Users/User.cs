@@ -105,7 +105,7 @@ public class User : AggregateRoot
         if (Permissions.Any(p => p.PermissionId == permissionId))
             throw new PermissionAlreadyAssignedException(Id, permissionId);
 
-        Permissions.Add(new UserPermission(Id, permissionId));
+        Permissions.Add(new UserPermission { PermissionId = permissionId, UserId = Id });
     }
 
     public void DeletePermission(Ulid permissionId)
