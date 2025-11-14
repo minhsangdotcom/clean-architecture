@@ -5,7 +5,7 @@ using Mediator;
 
 namespace Application.Features.Roles.Queries.List;
 
-public class ListRoleHandler(IRoleManagerService roleManagerService)
+public class ListRoleHandler(IRoleManager roleManager)
     : IRequestHandler<ListRoleQuery, Result<IEnumerable<ListRoleResponse>>>
 {
     public async ValueTask<Result<IEnumerable<ListRoleResponse>>> Handle(
@@ -13,7 +13,7 @@ public class ListRoleHandler(IRoleManagerService roleManagerService)
         CancellationToken cancellationToken
     )
     {
-        List<Role> roles = await roleManagerService.ListAsync();
-        return Result<IEnumerable<ListRoleResponse>>.Success(roles.ToListRoleResponse());
+        //List<Role> roles = await roleManager.ListAsync();
+        return Result<IEnumerable<ListRoleResponse>>.Success([]);
     }
 }

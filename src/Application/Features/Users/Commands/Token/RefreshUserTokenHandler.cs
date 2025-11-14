@@ -37,7 +37,7 @@ public class RefreshUserTokenHandler(
                 new BadRequestError(
                     "Error has occurred with the Refresh token",
                     Messenger
-                        .Create<UserToken>(nameof(User))
+                        .Create<UserRefreshToken>(nameof(User))
                         .Property(x => x.RefreshToken!)
                         .Message(MessageType.Valid)
                         .Negative()
@@ -46,8 +46,8 @@ public class RefreshUserTokenHandler(
             );
         }
 
-        IList<UserToken> refreshTokens = await unitOfWork
-            .DynamicReadOnlyRepository<UserToken>()
+        IList<UserRefreshToken> refreshTokens = await unitOfWork
+            .DynamicReadOnlyRepository<UserRefreshToken>()
             .ListAsync(
                 new ListRefreshTokenByFamilyIdSpecification(
                     decodeToken!.FamilyId!,
@@ -55,7 +55,8 @@ public class RefreshUserTokenHandler(
                 ),
                 new()
                 {
-                    Sort = $"{nameof(UserToken.CreatedAt)}{OrderTerm.DELIMITER}{OrderTerm.DESC}",
+                    Sort =
+                        $"{nameof(UserRefreshToken.CreatedAt)}{OrderTerm.DELIMITER}{OrderTerm.DESC}",
                 },
                 deep: 0,
                 cancellationToken: cancellationToken
@@ -67,7 +68,7 @@ public class RefreshUserTokenHandler(
                 new UnauthorizedError(
                     "Error has occurred with the Refresh token",
                     Messenger
-                        .Create<UserToken>(nameof(User))
+                        .Create<UserRefreshToken>(nameof(User))
                         .Property(x => x.RefreshToken!)
                         .Negative()
                         .Message(MessageType.Identical)
@@ -76,20 +77,20 @@ public class RefreshUserTokenHandler(
                 )
             );
         }
-        UserToken validRefreshToken = refreshTokens[0];
+        UserRefreshToken validRefreshToken = refreshTokens[0];
 
         // detect cheating with token, maybe which is stolen
         if (validRefreshToken.RefreshToken != command.RefreshToken)
         {
             // remove all the token by family token
-            await unitOfWork.Repository<UserToken>().DeleteRangeAsync(refreshTokens);
+            await unitOfWork.Repository<UserRefreshToken>().DeleteRangeAsync(refreshTokens);
             await unitOfWork.SaveAsync(cancellationToken);
 
             return Result<RefreshUserTokenResponse>.Failure(
                 new UnauthorizedError(
                     "Error has occurred with the Refresh token",
                     Messenger
-                        .Create<UserToken>(nameof(User))
+                        .Create<UserRefreshToken>(nameof(User))
                         .Property(x => x.RefreshToken!)
                         .Negative()
                         .Message(MessageType.Identical)
@@ -133,7 +134,7 @@ public class RefreshUserTokenHandler(
             Engine = detectionService.Engine.Name,
         };
 
-        var userToken = new UserToken()
+        var userRefreshToken = new UserRefreshToken()
         {
             FamilyId = decodeToken.FamilyId,
             UserId = Ulid.Parse(decodeToken.Sub!),
@@ -143,7 +144,9 @@ public class RefreshUserTokenHandler(
             ClientIp = currentUser.ClientIp,
         };
 
-        await unitOfWork.Repository<UserToken>().AddAsync(userToken, cancellationToken);
+        await unitOfWork
+            .Repository<UserRefreshToken>()
+            .AddAsync(userRefreshToken, cancellationToken);
         await unitOfWork.SaveAsync(cancellationToken);
 
         return Result<RefreshUserTokenResponse>.Success(

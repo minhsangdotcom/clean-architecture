@@ -16,8 +16,7 @@ public class AuthorizeHandler(IServiceProvider serviceProvider, ICurrentUser cur
     )
     {
         using var scope = serviceProvider.CreateScope();
-        IUserManagerService userManagerService =
-            scope.ServiceProvider.GetRequiredService<IUserManagerService>();
+        IUserManager userManagerService = scope.ServiceProvider.GetRequiredService<IUserManager>();
 
         Ulid? userId = currentUser.Id;
         if (userId == null)
@@ -44,36 +43,36 @@ public class AuthorizeHandler(IServiceProvider serviceProvider, ICurrentUser cur
 
         if (authorizeModel.Roles?.Count > 0 && authorizeModel.Permissions?.Count > 0)
         {
-            bool hasRolesAndClaims = await userManagerService.HasUserClaimsAndRolesAsync(
-                userId.Value,
-                authorizeModel.Roles,
-                authorizeModel.Permissions.Select(permission => new KeyValuePair<string, string>(
-                    ClaimTypes.Permission,
-                    permission
-                ))
-            );
-            SuccessOrFailure(context, requirement, hasRolesAndClaims);
+            // bool hasRolesAndClaims = await userManagerService.HasUserClaimsAndRolesAsync(
+            //     userId.Value,
+            //     authorizeModel.Roles,
+            //     authorizeModel.Permissions.Select(permission => new KeyValuePair<string, string>(
+            //         ClaimTypes.Permission,
+            //         permission
+            //     ))
+            // );
+            // SuccessOrFailure(context, requirement, hasRolesAndClaims);
             return;
         }
 
         if (authorizeModel.Roles?.Count > 0)
         {
-            bool hasRole = await userManagerService.HasUserRolesAsync(
-                userId.Value,
-                authorizeModel.Roles
-            );
-            SuccessOrFailure(context, requirement, hasRole);
+            // bool hasRole = await userManagerService.HasUserRolesAsync(
+            //     userId.Value,
+            //     authorizeModel.Roles
+            // );
+            // SuccessOrFailure(context, requirement, hasRole);
 
             return;
         }
 
         if (authorizeModel.Permissions?.Count > 0)
         {
-            bool hasPermission = await userManagerService.HasUserPermissionAsync(
-                userId.Value,
-                authorizeModel.Permissions
-            );
-            SuccessOrFailure(context, requirement, hasPermission);
+            // bool hasPermission = await userManagerService.HasUserPermissionAsync(
+            //     userId.Value,
+            //     authorizeModel.Permissions
+            // );
+            // SuccessOrFailure(context, requirement, hasPermission);
 
             return;
         }

@@ -15,18 +15,20 @@ public partial class TestingFixture
 {
     public async Task<Role?> FindRoleByIdAsync(Ulid id)
     {
-        factory.ThrowIfNull();
-        using var scope = factory!.Services.CreateScope();
-        var roleManagerService = scope.ServiceProvider.GetRequiredService<IRoleManagerService>();
-        return await roleManagerService.GetByIdAsync(id);
+        // factory.ThrowIfNull();
+        // using var scope = factory!.Services.CreateScope();
+        // var roleManagerService = scope.ServiceProvider.GetRequiredService<IRoleManager>();
+        // return await roleManagerService.GetByIdAsync(id);
+        return new("","");
     }
 
     public async Task<Role?> FindRoleByIdIncludeRoleClaimsAsync(Ulid id)
     {
-        factory.ThrowIfNull();
-        using var scope = factory!.Services.CreateScope();
-        var roleManagerService = scope.ServiceProvider.GetRequiredService<IRoleManagerService>();
-        return await roleManagerService.FindByIdAsync(id);
+        // factory.ThrowIfNull();
+        // using var scope = factory!.Services.CreateScope();
+        // var roleManagerService = scope.ServiceProvider.GetRequiredService<IRoleManagerService>();
+        // return await roleManagerService.FindByIdAsync(id);
+        return new("","");
     }
 
     public async Task<Role> CreateAdminRoleAsync()

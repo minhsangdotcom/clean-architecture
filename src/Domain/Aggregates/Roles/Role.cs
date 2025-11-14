@@ -1,17 +1,61 @@
+using Ardalis.GuardClauses;
+using Domain.Aggregates.Permissions;
+using Domain.Aggregates.Roles.Exceptions;
 using Domain.Aggregates.Users;
 using Domain.Common;
+using DotNetCoreExtension.Extensions;
+using Mediator;
 
 namespace Domain.Aggregates.Roles;
 
-public class Role : DefaultEntity
+public class Role : AggregateRoot
 {
-    public string? Guard { get; set; }
-
+    public string Name { get; private set; } = string.Empty;
     public string? Description { get; set; }
 
-    public string Name { get; set; } = string.Empty;
+    public ICollection<UserRole>? Users { get; set; } = [];
+    public ICollection<RoleClaim>? Claims { get; set; } = [];
+    public ICollection<Permission> Permissions { get; set; } = [];
 
-    public ICollection<UserRole>? UserRoles { get; set; } = [];
+    private Role() { }
 
-    public ICollection<RoleClaim>? RoleClaims { get; set; } = [];
+    public Role(string name, string? description)
+    {
+        Name = Guard.Against.NullOrEmpty(name, nameof(name)).ToScreamingSnakeCase();
+        Description = description;
+    }
+
+    public void SetName(string name)
+    {
+        Guard.Against.NullOrEmpty(name, nameof(name));
+        Name = name.ToScreamingSnakeCase();
+    }
+
+    public void GrantPermission(Permission permission)
+    {
+        if (Permissions.Any(p => p.Id == permission.Id))
+        {
+            throw new PermissionAlreadyGrantedException(Id, permission.Id);
+        }
+
+        Permissions.Add(permission);
+    }
+
+    public void RevokePermission(Permission permission)
+    {
+        var existentPermission =
+            Permissions.FirstOrDefault(p => p.Id == permission.Id)
+            ?? throw new PermissionNotGrantedException(Id, permission.Id);
+        Permissions.Remove(existentPermission);
+    }
+
+    public void ClearAllPermissions()
+    {
+        Permissions.Clear();
+    }
+
+    protected override bool TryApplyDomainEvent(INotification domainEvent)
+    {
+        return true;
+    }
 }

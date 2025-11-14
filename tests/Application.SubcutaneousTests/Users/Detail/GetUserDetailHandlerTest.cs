@@ -51,7 +51,6 @@ public class GetUserDetailHandlerTest(TestingFixture testingFixture) : IAsyncLif
             () => user.Email.ShouldBe(user.Email),
             () => user.PhoneNumber.ShouldBe(user.PhoneNumber),
             () => user.Gender.ShouldBe(user.Gender),
-            () => user.Address?.ToString().ShouldBe(user.Address?.ToString()),
             () => user.Status.ShouldBe(user.Status)
         );
     }

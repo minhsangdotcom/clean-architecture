@@ -3,9 +3,7 @@ using Application.Common.Errors;
 using Application.Common.Interfaces.Services.Identity;
 using Application.Common.Interfaces.UnitOfWorks;
 using Contracts.ApiWrapper;
-using Domain.Aggregates.Regions;
 using Domain.Aggregates.Users;
-using Domain.Aggregates.Users.Enums;
 using Domain.Aggregates.Users.Specifications;
 using Mediator;
 using Microsoft.AspNetCore.Http;
@@ -15,8 +13,7 @@ namespace Application.Features.Users.Commands.Update;
 
 public class UpdateUserHandler(
     IEfUnitOfWork unitOfWork,
-    IMediaUpdateService<User> mediaUpdateService,
-    IUserManagerService userManagerService
+    IMediaUpdateService<User> mediaUpdateService
 ) : IRequestHandler<UpdateUserCommand, Result<UpdateUserResponse>>
 {
     public async ValueTask<Result<UpdateUserResponse>> Handle(
@@ -47,96 +44,17 @@ public class UpdateUserHandler(
 
         user.FromUpdateUser(updateData);
 
-        Province? province = await unitOfWork
-            .Repository<Province>()
-            .FindByIdAsync(updateData.ProvinceId, cancellationToken);
-        if (province == null)
-        {
-            return Result<UpdateUserResponse>.Failure<NotFoundError>(
-                new(
-                    TitleMessage.RESOURCE_NOT_FOUND,
-                    Messenger
-                        .Create<User>()
-                        .Property(nameof(UserUpdateRequest.ProvinceId))
-                        .Message(MessageType.Existence)
-                        .Negative()
-                        .Build()
-                )
-            );
-        }
-
-        District? district = await unitOfWork
-            .Repository<District>()
-            .FindByIdAsync(updateData.DistrictId, cancellationToken);
-        if (district == null)
-        {
-            return Result<UpdateUserResponse>.Failure<NotFoundError>(
-                new(
-                    TitleMessage.RESOURCE_NOT_FOUND,
-                    Messenger
-                        .Create<User>()
-                        .Property(nameof(updateData.DistrictId))
-                        .Message(MessageType.Existence)
-                        .Negative()
-                        .Build()
-                )
-            );
-        }
-
-        Commune? commune = null;
-        if (updateData.CommuneId.HasValue)
-        {
-            commune = await unitOfWork
-                .Repository<Commune>()
-                .FindByIdAsync(updateData.CommuneId.Value, cancellationToken);
-
-            if (commune == null)
-            {
-                return Result<UpdateUserResponse>.Failure<NotFoundError>(
-                    new(
-                        TitleMessage.RESOURCE_NOT_FOUND,
-                        Messenger
-                            .Create<User>()
-                            .Property(nameof(UserUpdateRequest.CommuneId))
-                            .Message(MessageType.Existence)
-                            .Negative()
-                            .Build()
-                    )
-                );
-            }
-        }
-
-        //* replace address
-        user.UpdateAddress(
-            new(
-                province!.FullName,
-                province.Id,
-                district!.FullName,
-                district.Id,
-                commune?.FullName,
-                commune?.Id,
-                command.UpdateData.Street!
-            )
-        );
-
         string? key = mediaUpdateService.GetKey(avatar);
-        user.Avatar = await mediaUpdateService.UploadAvatarAsync(avatar, key);
+        user.ChangeAvatar(await mediaUpdateService.UploadAvatarAsync(avatar, key));
 
-        //* trigger event to update default claims -  that's information of user
-        user.UpdateDefaultUserClaims();
-
+        await unitOfWork.BeginTransactionAsync(cancellationToken);
         try
         {
-            await unitOfWork.BeginTransactionAsync(cancellationToken);
-
             await unitOfWork.Repository<User>().UpdateAsync(user);
             await unitOfWork.SaveAsync(cancellationToken);
 
-            //* update custom claims of user like permissions ...
-            List<UserClaim> customUserClaims =
-                updateData.UserClaims?.ToListUserClaim(UserClaimType.Custom, user.Id) ?? [];
-            await userManagerService.UpdateAsync(user, updateData.Roles!, customUserClaims);
-
+            // update permissions and roles
+            //
             await unitOfWork.CommitAsync(cancellationToken);
 
             await mediaUpdateService.DeleteAvatarAsync(oldAvatar);

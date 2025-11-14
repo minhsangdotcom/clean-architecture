@@ -1,10 +1,10 @@
 using Application.Common.Extensions;
 using Application.Common.Interfaces.Services;
 using Application.Common.Interfaces.Services.Identity;
+using Application.Common.Interfaces.UnitOfWorks;
 using Application.Features.Common.Payloads.Users;
 using Domain.Aggregates.Users;
 using FluentValidation;
-using Microsoft.EntityFrameworkCore;
 using SharedKernel.Common.Messages;
 
 namespace Application.Features.Common.Validators.Users;
@@ -12,16 +12,16 @@ namespace Application.Features.Common.Validators.Users;
 public partial class UserValidator : AbstractValidator<UserPayload>
 {
     private readonly IHttpContextAccessorService httpContextAccessorService;
-    private readonly IUserManagerService userManagerService;
+    private readonly IEfUnitOfWork unitOfWork;
 
     public UserValidator(
-        IUserManagerService userManagerService,
+        IEfUnitOfWork unitOfWork,
         IHttpContextAccessorService httpContextAccessorService,
         ICurrentUser currentUser
     )
     {
         this.httpContextAccessorService = httpContextAccessorService;
-        this.userManagerService = userManagerService;
+        this.unitOfWork = unitOfWork;
         ApplyRules(currentUser);
     }
 
@@ -129,7 +129,7 @@ public partial class UserValidator : AbstractValidator<UserPayload>
             .WithState(x =>
                 Messenger
                     .Create<User>()
-                    .Property(x => x.PhoneNumber)
+                    .Property(x => x.PhoneNumber!)
                     .Message(MessageType.Null)
                     .Negative()
                     .Build()
@@ -138,41 +138,8 @@ public partial class UserValidator : AbstractValidator<UserPayload>
             .WithState(x =>
                 Messenger
                     .Create<User>()
-                    .Property(x => x.PhoneNumber)
+                    .Property(x => x.PhoneNumber!)
                     .Message(MessageType.Valid)
-                    .Negative()
-                    .Build()
-            );
-
-        RuleFor(x => x.ProvinceId)
-            .NotEmpty()
-            .WithState(x =>
-                Messenger
-                    .Create<User>()
-                    .Property(nameof(x.ProvinceId))
-                    .Message(MessageType.Null)
-                    .Negative()
-                    .Build()
-            );
-
-        RuleFor(x => x.DistrictId)
-            .NotEmpty()
-            .WithState(x =>
-                Messenger
-                    .Create<User>()
-                    .Property(nameof(UserPayload.DistrictId))
-                    .Message(MessageType.Null)
-                    .Negative()
-                    .Build()
-            );
-
-        RuleFor(x => x.Street)
-            .NotEmpty()
-            .WithState(x =>
-                Messenger
-                    .Create<User>()
-                    .Property(nameof(UserPayload.Street))
-                    .Message(MessageType.Null)
                     .Negative()
                     .Build()
             );
@@ -183,8 +150,10 @@ public partial class UserValidator : AbstractValidator<UserPayload>
         Ulid? id = null,
         CancellationToken cancellationToken = default
     ) =>
-        !await userManagerService.User.AnyAsync(
-            x => x.Email == email && (!id.HasValue || x.Id != id.Value),
-            cancellationToken
-        );
+        !await unitOfWork
+            .Repository<User>()
+            .AnyAsync(
+                x => x.Email == email && (!id.HasValue || x.Id != id.Value),
+                cancellationToken
+            );
 }

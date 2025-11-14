@@ -67,7 +67,7 @@ public class LoginUserHandler(
 
         var userAgent = detectionService.UserAgent.ToString();
 
-        var userToken = new UserToken()
+        var UserRefreshToken = new UserRefreshToken()
         {
             ExpiredTime = refreshExpireTime,
             UserId = user.Id,
@@ -87,9 +87,9 @@ public class LoginUserHandler(
             refreshExpireTime
         );
 
-        userToken.RefreshToken = refreshToken;
+        UserRefreshToken.RefreshToken = refreshToken;
 
-        await unitOfWork.Repository<UserToken>().AddAsync(userToken, cancellationToken);
+        await unitOfWork.Repository<UserRefreshToken>().AddAsync(UserRefreshToken, cancellationToken);
         await unitOfWork.SaveAsync(cancellationToken);
 
         return Result<LoginUserResponse>.Success(

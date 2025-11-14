@@ -62,7 +62,7 @@ public class UpdateRoleHandlerTest(TestingFixture testingFixture) : IAsyncLifeti
         var requestData = updateRoleCommand.UpdateData;
         createdRole!.Name.ShouldBe(requestData.Name!.ToScreamingSnakeCase());
         createdRole.Description.ShouldBe(requestData.Description);
-        createdRole.RoleClaims?.Count.ShouldBe(0);
+        createdRole.Claims?.Count.ShouldBe(0);
     }
 
     [Fact]
@@ -81,7 +81,7 @@ public class UpdateRoleHandlerTest(TestingFixture testingFixture) : IAsyncLifeti
 
         var requestData = updateRoleCommand.UpdateData;
         createdRole!.Name.ShouldBe(requestData.Name!.ToScreamingSnakeCase());
-        createdRole.RoleClaims?.Count.ShouldBe(requestData.RoleClaims!.Count);
+        createdRole.Claims?.Count.ShouldBe(requestData.RoleClaims!.Count);
         createdRole.Description.ShouldBeNull();
     }
 
@@ -111,7 +111,7 @@ public class UpdateRoleHandlerTest(TestingFixture testingFixture) : IAsyncLifeti
 
         var expectedClaims = roleClaims.Select(rc => new { rc.ClaimType, rc.ClaimValue }).ToList();
         var actualClaims = createdRole
-            .RoleClaims!.Select(rc => new { rc.ClaimType, rc.ClaimValue })
+            .Claims!.Select(rc => new { rc.ClaimType, rc.ClaimValue })
             .ToList();
         actualClaims.ShouldBe(expectedClaims!, ignoreOrder: true);
         createdRole.Description.ShouldBe(requestData.Description);

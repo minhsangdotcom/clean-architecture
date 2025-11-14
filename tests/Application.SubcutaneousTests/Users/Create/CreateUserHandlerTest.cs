@@ -21,71 +21,71 @@ public class CreateUserHandlerTest(TestingFixture testingFixture) : IAsyncLifeti
     private Ulid roleId;
     private CreateUserCommand command = new();
 
-    [Fact]
-    private async Task CreateUser_WhenProvinceNotFound_ShouldReturnNotFoundResult()
-    {
-        command.ProvinceId = Ulid.NewUlid();
-        //act
-        Result<CreateUserResponse> result = await testingFixture.SendAsync(command);
+    // [Fact]
+    // private async Task CreateUser_WhenProvinceNotFound_ShouldReturnNotFoundResult()
+    // {
+    //     command.ProvinceId = Ulid.NewUlid();
+    //     //act
+    //     Result<CreateUserResponse> result = await testingFixture.SendAsync(command);
 
-        //assert
-        var expectedMessage = Messenger
-            .Create<User>()
-            .Property(nameof(CreateUserCommand.ProvinceId))
-            .Message(MessageType.Existence)
-            .Negative()
-            .Build();
+    //     //assert
+    //     var expectedMessage = Messenger
+    //         .Create<User>()
+    //         .Property(nameof(CreateUserCommand.ProvinceId))
+    //         .Message(MessageType.Existence)
+    //         .Negative()
+    //         .Build();
 
-        result.Error.ShouldNotBeNull();
-        result.Error.Status.ShouldBe(404);
-        result.Error.ErrorMessage.ShouldBe(expectedMessage, new MessageResultComparer());
-    }
+    //     result.Error.ShouldNotBeNull();
+    //     result.Error.Status.ShouldBe(404);
+    //     result.Error.ErrorMessage.ShouldBe(expectedMessage, new MessageResultComparer());
+    // }
 
-    [Fact]
-    private async Task CreateUser_WhenDistrictNotFound_ShouldReturnNotFoundResult()
-    {
-        command.DistrictId = Ulid.NewUlid();
-        //act
-        Result<CreateUserResponse> result = await testingFixture.SendAsync(command);
+    // [Fact]
+    // private async Task CreateUser_WhenDistrictNotFound_ShouldReturnNotFoundResult()
+    // {
+    //     command.DistrictId = Ulid.NewUlid();
+    //     //act
+    //     Result<CreateUserResponse> result = await testingFixture.SendAsync(command);
 
-        //assert
-        var expectedMessage = Messenger
-            .Create<User>()
-            .Property(nameof(CreateUserCommand.DistrictId))
-            .Message(MessageType.Existence)
-            .Negative()
-            .Build();
+    //     //assert
+    //     var expectedMessage = Messenger
+    //         .Create<User>()
+    //         .Property(nameof(CreateUserCommand.DistrictId))
+    //         .Message(MessageType.Existence)
+    //         .Negative()
+    //         .Build();
 
-        result.Error.ShouldNotBeNull();
-        result.Error.Status.ShouldBe(404);
-        result.Error.ErrorMessage.ShouldBe(expectedMessage, new MessageResultComparer());
-    }
+    //     result.Error.ShouldNotBeNull();
+    //     result.Error.Status.ShouldBe(404);
+    //     result.Error.ErrorMessage.ShouldBe(expectedMessage, new MessageResultComparer());
+    // }
 
-    [Fact]
-    private async Task CreateUser_WhenCommuneNotFound_ShouldReturnNotFoundResult()
-    {
-        command.CommuneId = Ulid.NewUlid();
-        //act
-        Result<CreateUserResponse> result = await testingFixture.SendAsync(command);
+    // [Fact]
+    // private async Task CreateUser_WhenCommuneNotFound_ShouldReturnNotFoundResult()
+    // {
+    //     command.CommuneId = Ulid.NewUlid();
+    //     //act
+    //     Result<CreateUserResponse> result = await testingFixture.SendAsync(command);
 
-        //assert
-        var expectedMessage = Messenger
-            .Create<User>()
-            .Property(nameof(CreateUserCommand.CommuneId))
-            .Message(MessageType.Existence)
-            .Negative()
-            .Build();
+    //     //assert
+    //     var expectedMessage = Messenger
+    //         .Create<User>()
+    //         .Property(nameof(CreateUserCommand.CommuneId))
+    //         .Message(MessageType.Existence)
+    //         .Negative()
+    //         .Build();
 
-        result.Error.ShouldNotBeNull();
-        result.Error.Status.ShouldBe(404);
-        result.Error.ErrorMessage.ShouldBe(expectedMessage, new MessageResultComparer());
-    }
+    //     result.Error.ShouldNotBeNull();
+    //     result.Error.Status.ShouldBe(404);
+    //     result.Error.ErrorMessage.ShouldBe(expectedMessage, new MessageResultComparer());
+    // }
 
     [Fact]
     private async Task CreateUser_ShouldCreateSuccess()
     {
         //arrage
-        command.DayOfBirth = null;
+        command.DateOfBirth = null;
         command.Avatar = null;
         command.Gender = null;
         command.UserClaims = null;
@@ -107,16 +107,15 @@ public class CreateUserHandlerTest(TestingFixture testingFixture) : IAsyncLifeti
             () => user.Username.ShouldBe(response.Username),
             () => user.Email.ShouldBe(response.Email),
             () => user.PhoneNumber.ShouldBe(response.PhoneNumber),
-            () => user.DayOfBirth.ShouldBe(response.DayOfBirth),
+            () => user.DateOfBirth.ShouldBe(response.DayOfBirth),
             () => user.Gender.ShouldBe(response.Gender),
-            () => user.Address?.ToString().ShouldBe(response.Address?.ToString()),
             () => user.Avatar.ShouldBe(response.Avatar),
             () => user.Status.ShouldBe(response.Status),
-            () => user.UserRoles?.Select(x => x.RoleId).ShouldBe(response.Roles?.Select(x => x.Id)),
+            () => user.Roles?.Select(x => x.RoleId).ShouldBe(response.Roles?.Select(x => x.Id)),
             () =>
                 command
                     .UserClaims?.All(x =>
-                        user.UserClaims?.Any(p =>
+                        user.Claims?.Any(p =>
                             p.ClaimType == x.ClaimType && p.ClaimValue == x.ClaimType
                         ) == true
                     )
@@ -141,9 +140,6 @@ public class CreateUserHandlerTest(TestingFixture testingFixture) : IAsyncLifeti
         );
         command = fixture
             .Build<CreateUserCommand>()
-            .With(x => x.ProvinceId, address.ProvinceId)
-            .With(x => x.DistrictId, address.DistrictId)
-            .With(x => x.CommuneId, address.CommuneId)
             .With(x => x.Avatar, file)
             .With(
                 x => x.UserClaims,

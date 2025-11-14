@@ -9,7 +9,7 @@ using SharedKernel.Common.Messages;
 
 namespace Application.Features.Roles.Commands.Update;
 
-public class UpdateRoleHandler(IRoleManagerService roleManagerService)
+public class UpdateRoleHandler(IRoleManager manager)
     : IRequestHandler<UpdateRoleCommand, Result<UpdateRoleResponse>>
 {
     public async ValueTask<Result<UpdateRoleResponse>> Handle(
@@ -17,27 +17,27 @@ public class UpdateRoleHandler(IRoleManagerService roleManagerService)
         CancellationToken cancellationToken
     )
     {
-        Role? role = await roleManagerService.FindByIdAsync(Ulid.Parse(command.RoleId));
+        // Role? role = await manager.FindByIdAsync(Ulid.Parse(command.RoleId));
 
-        if (role == null)
-        {
-            return Result<UpdateRoleResponse>.Failure(
-                new NotFoundError(
-                    TitleMessage.RESOURCE_NOT_FOUND,
-                    Messenger
-                        .Create<Role>()
-                        .Message(MessageType.Found)
-                        .Negative()
-                        .VietnameseTranslation(TranslatableMessage.VI_ROLE_NOT_FOUND)
-                        .BuildMessage()
-                )
-            );
-        }
+        // if (role == null)
+        // {
+        //     return Result<UpdateRoleResponse>.Failure(
+        //         new NotFoundError(
+        //             TitleMessage.RESOURCE_NOT_FOUND,
+        //             Messenger
+        //                 .Create<Role>()
+        //                 .Message(MessageType.Found)
+        //                 .Negative()
+        //                 .VietnameseTranslation(TranslatableMessage.VI_ROLE_NOT_FOUND)
+        //                 .BuildMessage()
+        //         )
+        //     );
+        // }
 
-        role.FromUpdateRole(command.UpdateData);
+        // role.FromUpdateRole(command.UpdateData);
 
-        List<RoleClaim> roleClaims = command.UpdateData.RoleClaims.ToListRoleClaim() ?? [];
-        await roleManagerService.UpdateAsync(role, roleClaims);
-        return Result<UpdateRoleResponse>.Success(role.ToUpdateRoleResponse());
+        // List<RoleClaim> roleClaims = command.UpdateData.RoleClaims.ToListRoleClaim() ?? [];
+        // await roleManagerService.UpdateAsync(role, roleClaims);
+        return Result<UpdateRoleResponse>.Success(new());
     }
 }

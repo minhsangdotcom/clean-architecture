@@ -9,11 +9,10 @@ public class GetUserByIdSpecification : Specification<User>
     {
         Query
             .Where(x => x.Id == id)
-            .Include(x => x.UserRoles)!
+            .Include(x => x.Roles)!
             .ThenInclude(x => x.Role)
-            .ThenInclude(x => x!.RoleClaims)
-            .Include(x => x.UserClaims)
-            .Include(x => x.Address)
+            .ThenInclude(x => x!.Claims)
+            .Include(x => x.Claims)
             .AsSplitQuery();
     }
 }

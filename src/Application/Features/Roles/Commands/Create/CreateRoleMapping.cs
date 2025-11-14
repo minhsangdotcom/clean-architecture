@@ -6,13 +6,12 @@ namespace Application.Features.Roles.Commands.Create;
 
 public static class CreateRoleMapping
 {
-    public static Role ToRole(this CreateRoleCommand roleCommand) =>
-        new()
-        {
-            Name = roleCommand.Name.ToSnakeCase().ToUpper(),
-            Description = roleCommand.Description,
-            RoleClaims = roleCommand.RoleClaims?.ToListRoleClaim(),
-        };
+    public static Role ToRole(this CreateRoleCommand command) =>
+        new(command.Name, command.Description);
+
+    // {
+    //     RoleClaims = roleCommand.RoleClaims?.ToListRoleClaim(),
+    // };
 
     public static CreateRoleResponse ToCreateRoleResponse(this Role role)
     {

@@ -13,7 +13,7 @@ public class RoleClaimValidator : AbstractValidator<RoleClaimPayload>
             .NotEmpty()
             .WithState(x =>
                 Messenger
-                    .Create<RoleClaim>(nameof(Role.RoleClaims))
+                    .Create<RoleClaim>(nameof(Role.Claims))
                     .Property(x => x.ClaimType!)
                     .Message(MessageType.Null)
                     .Negative()
@@ -24,7 +24,7 @@ public class RoleClaimValidator : AbstractValidator<RoleClaimPayload>
             .NotEmpty()
             .WithState(x =>
                 Messenger
-                    .Create<RoleClaim>(nameof(Role.RoleClaims))
+                    .Create<RoleClaim>(nameof(Role.Claims))
                     .Property(x => x.ClaimValue!)
                     .Message(MessageType.Null)
                     .Negative()

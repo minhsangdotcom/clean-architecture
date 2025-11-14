@@ -18,22 +18,10 @@ public static class UserMappingExtension
                 FirstName = user.FirstName,
                 LastName = user.LastName,
                 Email = user.Email,
-                DayOfBirth = user.DayOfBirth,
+                DateOfBirth = user.DateOfBirth,
                 PhoneNumber = user.PhoneNumber,
-                ProvinceId = user.Address!.ProvinceId,
-                DistrictId = user.Address!.DistrictId,
-                CommuneId = user.Address!.CommuneId,
-                Street = user.Address.Street,
-                Roles = [.. user.UserRoles!.Select(x => x.RoleId)],
-                UserClaims =
-                [
-                    .. user.UserClaims!.Where(x => x.Type == UserClaimType.Custom)
-                        .Select(x => new UserClaimPayload()
-                        {
-                            ClaimType = x.ClaimType,
-                            ClaimValue = x.ClaimValue,
-                        }),
-                ],
+
+                Roles = [.. user.Roles!.Select(x => x.RoleId)],
             },
         };
 
@@ -43,11 +31,7 @@ public static class UserMappingExtension
             FirstName = user.FirstName,
             LastName = user.LastName,
             Email = user.Email,
-            DayOfBirth = user.DayOfBirth,
+            DateOfBirth = user.DateOfBirth,
             PhoneNumber = user.PhoneNumber,
-            ProvinceId = user.Address!.ProvinceId,
-            DistrictId = user.Address!.DistrictId,
-            CommuneId = user.Address!.CommuneId,
-            Street = user.Address.Street,
         };
 }

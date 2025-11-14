@@ -56,7 +56,7 @@ public class ChangeUserPasswordHandler(IEfUnitOfWork unitOfWork, ICurrentUser cu
             );
         }
 
-        user.SetPassword(HashPassword(request.NewPassword));
+        user.ChangePassword(HashPassword(request.NewPassword));
 
         await unitOfWork.Repository<User>().UpdateAsync(user);
         await unitOfWork.SaveAsync(cancellationToken);

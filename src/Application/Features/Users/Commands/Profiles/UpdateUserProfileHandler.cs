@@ -4,7 +4,6 @@ using Application.Common.Interfaces.Services;
 using Application.Common.Interfaces.Services.Identity;
 using Application.Common.Interfaces.UnitOfWorks;
 using Contracts.ApiWrapper;
-using Domain.Aggregates.Regions;
 using Domain.Aggregates.Users;
 using Domain.Aggregates.Users.Specifications;
 using Mediator;
@@ -51,78 +50,8 @@ public class UpdateUserProfileHandler(
 
         user.MapFromUpdateUserProfileCommand(command);
 
-        Province? province = await unitOfWork
-            .Repository<Province>()
-            .FindByIdAsync(command.ProvinceId, cancellationToken);
-        if (province == null)
-        {
-            return Result<UpdateUserProfileResponse>.Failure<NotFoundError>(
-                new(
-                    TitleMessage.RESOURCE_NOT_FOUND,
-                    Messenger
-                        .Create<User>()
-                        .Property(nameof(UpdateUserProfileCommand.ProvinceId))
-                        .Message(MessageType.Existence)
-                        .Negative()
-                        .Build()
-                )
-            );
-        }
-
-        District? district = await unitOfWork
-            .Repository<District>()
-            .FindByIdAsync(command.DistrictId, cancellationToken);
-        if (district == null)
-        {
-            return Result<UpdateUserProfileResponse>.Failure<NotFoundError>(
-                new(
-                    TitleMessage.RESOURCE_NOT_FOUND,
-                    Messenger
-                        .Create<User>()
-                        .Property(nameof(UpdateUserProfileCommand.DistrictId))
-                        .Message(MessageType.Existence)
-                        .Negative()
-                        .Build()
-                )
-            );
-        }
-
-        Commune? commune = null;
-        if (command.CommuneId.HasValue)
-        {
-            commune = await unitOfWork
-                .Repository<Commune>()
-                .FindByIdAsync(command.CommuneId.Value, cancellationToken);
-
-            if (commune == null)
-            {
-                return Result<UpdateUserProfileResponse>.Failure<NotFoundError>(
-                    new(
-                        TitleMessage.RESOURCE_NOT_FOUND,
-                        Messenger
-                            .Create<User>()
-                            .Property(nameof(UpdateUserProfileCommand.CommuneId))
-                            .Message(MessageType.Existence)
-                            .Negative()
-                            .Build()
-                    )
-                );
-            }
-        }
-        user.UpdateAddress(
-            new(
-                province!.FullName,
-                province.Id,
-                district!.FullName,
-                district.Id,
-                commune?.FullName,
-                commune?.Id,
-                command.Street!
-            )
-        );
-
         string? key = avatarUpdate.GetKey(avatar);
-        user.Avatar = await avatarUpdate.UploadAvatarAsync(avatar, key);
+        user.ChangeAvatar(await avatarUpdate.UploadAvatarAsync(avatar, key));
 
         try
         {

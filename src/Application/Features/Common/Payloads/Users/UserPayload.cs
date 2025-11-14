@@ -12,15 +12,7 @@ public class UserPayload
 
     public string? PhoneNumber { get; set; }
 
-    public DateTime? DayOfBirth { get; set; }
-
-    public Ulid ProvinceId { get; set; }
-
-    public Ulid DistrictId { get; set; }
-
-    public Ulid? CommuneId { get; set; }
-
-    public string? Street { get; set; }
+    public DateTime? DateOfBirth { get; set; }
 
     public IFormFile? Avatar { get; set; }
 }

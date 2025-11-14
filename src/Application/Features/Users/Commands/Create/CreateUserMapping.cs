@@ -12,13 +12,10 @@ public static class CreateUserMapping
             command.Username!,
             HashPassword(command.Password!),
             command.Email!,
-            command.PhoneNumber!
-        )
-        {
-            Gender = command.Gender,
-            Status = command.Status,
-            DayOfBirth = command.DayOfBirth,
-        };
+            command.PhoneNumber!,
+            command.DateOfBirth,
+            command.Gender
+        );
     }
 
     public static CreateUserResponse ToCreateUserResponse(this User user)

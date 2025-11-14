@@ -13,7 +13,7 @@ public class UpdateUserPasswordValidator : AbstractValidator<UpdateUserPassword>
             .NotEmpty()
             .WithState(x =>
                 Messenger
-                    .Create<UserResetPassword>()
+                    .Create<UserPasswordReset>()
                     .Property(x => x.Token)
                     .Message(MessageType.Null)
                     .Negative()

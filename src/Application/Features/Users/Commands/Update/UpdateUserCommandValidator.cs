@@ -1,5 +1,6 @@
 using Application.Common.Interfaces.Services;
 using Application.Common.Interfaces.Services.Identity;
+using Application.Common.Interfaces.UnitOfWorks;
 using Application.Features.Common.Validators.Users;
 using Domain.Aggregates.Users;
 using FluentValidation;
@@ -10,12 +11,12 @@ namespace Application.Features.Users.Commands.Update;
 public class UpdateUserCommandValidator : AbstractValidator<UserUpdateRequest>
 {
     public UpdateUserCommandValidator(
-        IUserManagerService userManagerService,
+        IEfUnitOfWork unitOfWork,
         IHttpContextAccessorService httpContextAccessorService,
         ICurrentUser currentUser
     )
     {
-        Include(new UserValidator(userManagerService, httpContextAccessorService,currentUser)!);
+        Include(new UserValidator(unitOfWork, httpContextAccessorService, currentUser)!);
 
         RuleFor(x => x.Roles)
             .NotEmpty()

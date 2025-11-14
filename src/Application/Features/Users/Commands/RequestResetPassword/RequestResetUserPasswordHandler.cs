@@ -51,7 +51,7 @@ public class RequestResetUserPasswordHandler(
         DateTimeOffset expiredTime = DateTimeOffset.UtcNow.AddHours(
             configuration.GetValue<int>("ForgotPasswordExpiredTimeInHour")
         );
-        UserResetPassword userResetPassword =
+        UserPasswordReset UserPasswordReset =
             new()
             {
                 Token = token,
@@ -59,10 +59,12 @@ public class RequestResetUserPasswordHandler(
                 Expiry = expiredTime,
             };
 
-        await unitOfWork.Repository<UserResetPassword>().DeleteRangeAsync(user.UserResetPasswords!);
         await unitOfWork
-            .Repository<UserResetPassword>()
-            .AddAsync(userResetPassword, cancellationToken);
+            .Repository<UserPasswordReset>()
+            .DeleteRangeAsync(user.PasswordResetRequests!);
+        await unitOfWork
+            .Repository<UserPasswordReset>()
+            .AddAsync(UserPasswordReset, cancellationToken);
         await unitOfWork.SaveAsync(cancellationToken);
 
         string domain = configuration.GetValue<string>("ForgotPasswordUrl")!;

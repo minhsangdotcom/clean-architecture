@@ -3,7 +3,7 @@ using Specification.Builders;
 
 namespace Domain.Aggregates.Users.Specifications;
 
-public class GetRefreshtokenSpecification : Specification<UserToken>
+public class GetRefreshtokenSpecification : Specification<UserRefreshToken>
 {
     public GetRefreshtokenSpecification(string token, Ulid userId)
     {

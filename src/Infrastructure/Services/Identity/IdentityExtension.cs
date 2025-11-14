@@ -7,9 +7,10 @@ public static class IdentityExtension
 {
     public static IServiceCollection AddIdentity(this IServiceCollection services)
     {
-        return services
-            .AddScoped<IRoleManagerService, RoleManagerService>()
-            .AddScoped<IUserManagerService, UserManagerService>()
-            .AddSingleton(typeof(IMediaUpdateService<>), typeof(MediaUpdateService<>));
+        // return services
+        //     .AddScoped<IRoleManagerService, RoleManagerService>()
+        //     .AddScoped<IUserManagerService, UserManagerService>()
+        //     .AddSingleton(typeof(IMediaUpdateService<>), typeof(MediaUpdateService<>));
+        return services;
     }
 }

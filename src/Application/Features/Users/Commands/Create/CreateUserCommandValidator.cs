@@ -1,11 +1,10 @@
-using System.Text.RegularExpressions;
 using Application.Common.Extensions;
 using Application.Common.Interfaces.Services;
-using Application.Common.Interfaces.Services.Identity;
+using Application.Common.Interfaces.UnitOfWorks;
 using Application.Features.Common.Validators.Users;
+using Domain.Aggregates.Roles;
 using Domain.Aggregates.Users;
 using FluentValidation;
-using Microsoft.EntityFrameworkCore;
 using SharedKernel.Common.Messages;
 
 namespace Application.Features.Users.Commands.Create;
@@ -13,26 +12,23 @@ namespace Application.Features.Users.Commands.Create;
 public class CreateUserCommandValidator : AbstractValidator<CreateUserCommand>
 {
     private readonly IHttpContextAccessorService httpContextAccessorService;
-    private readonly IUserManagerService userManagerService;
-    private readonly IRoleManagerService roleManagerService;
+    private readonly IEfUnitOfWork unitOfWork;
 
     public CreateUserCommandValidator(
-        IUserManagerService userManagerService,
+        IEfUnitOfWork unitOfWork,
         IHttpContextAccessorService httpContextAccessorService,
-        IRoleManagerService roleManagerService,
         ICurrentUser currentUser
     )
     {
-        this.userManagerService = userManagerService;
+        this.unitOfWork = unitOfWork;
         this.httpContextAccessorService = httpContextAccessorService;
-        this.roleManagerService = roleManagerService;
 
         ApplyRules(currentUser);
     }
 
     private void ApplyRules(ICurrentUser currentUser)
     {
-        Include(new UserValidator(userManagerService, httpContextAccessorService, currentUser)!);
+        Include(new UserValidator(unitOfWork, httpContextAccessorService, currentUser)!);
         RuleFor(x => x.Username)
             .NotEmpty()
             .WithState(x =>
@@ -160,7 +156,7 @@ public class CreateUserCommandValidator : AbstractValidator<CreateUserCommand>
                     .WithState(x =>
                         Messenger
                             .Create<User>()
-                            .Property(x => x.UserClaims!)
+                            .Property(x => x.Claims!)
                             .Message(MessageType.Unique)
                             .Negative()
                             .BuildMessage()
@@ -174,11 +170,15 @@ public class CreateUserCommandValidator : AbstractValidator<CreateUserCommand>
         Ulid? id = null,
         CancellationToken cancellationToken = default
     ) =>
-        !await userManagerService.User.AnyAsync(
-            x => (!id.HasValue && x.Username == username) || (x.Id != id && x.Username == username),
-            cancellationToken
-        );
+        !await unitOfWork
+            .Repository<User>()
+            .AnyAsync(
+                x =>
+                    (!id.HasValue && x.Username == username)
+                    || (x.Id != id && x.Username == username),
+                cancellationToken
+            );
 
     private async Task<bool> IsRolesAvailableAsync(IEnumerable<Ulid> roles) =>
-        await roleManagerService.Roles.CountAsync(x => roles.Contains(x.Id)) == roles.Count();
+        await unitOfWork.Repository<Role>().CountAsync(x => roles.Contains(x.Id)) == roles.Count();
 }

@@ -4,14 +4,14 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Infrastructure.Data.Configurations.Identity;
 
-public class UserResetPasswordConfiguration : IEntityTypeConfiguration<UserResetPassword>
+public class UserResetPasswordConfiguration : IEntityTypeConfiguration<UserPasswordReset>
 {
-    public void Configure(EntityTypeBuilder<UserResetPassword> builder)
+    public void Configure(EntityTypeBuilder<UserPasswordReset> builder)
     {
         builder.HasKey(x => x.Id);
         builder
             .HasOne(x => x.User)
-            .WithMany(x => x.UserResetPasswords)
+            .WithMany(x => x.PasswordResetRequests)
             .HasForeignKey(x => x.UserId);
     }
 }

@@ -5,8 +5,6 @@ namespace Application.Features.Common.Projections.Roles;
 
 public class RoleProjection : DefaultBaseResponse
 {
-    public string? Guard { get; set; }
-
     public string? Description { get; set; }
 
     public string? Name { get; set; }
@@ -17,6 +15,5 @@ public class RoleProjection : DefaultBaseResponse
         CreatedAt = role.CreatedAt;
         Name = role.Name;
         Description = role.Description;
-        Guard = role.Guard;
     }
 }

@@ -5,11 +5,11 @@ namespace Application.Features.Common.Projections.Roles;
 
 public class RoleDetailProjection : RoleProjection
 {
-    public ICollection<RoleClaimDetailProjection>? RoleClaims { get; set; }
+    public ICollection<RoleClaimDetailProjection>? Claims { get; set; }
 
     public override void MappingFrom(Role role)
     {
         base.MappingFrom(role);
-        RoleClaims = role.RoleClaims?.ToListRoleClaimDetailProjection();
+        //Claims = role.RoleClaims?.ToListRoleClaimDetailProjection();
     }
 }

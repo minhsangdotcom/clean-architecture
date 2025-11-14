@@ -1,5 +1,4 @@
 using Application.Features.Common.Payloads.Users;
-using Application.Features.Common.Projections.Users;
 using Contracts.ApiWrapper;
 using Mediator;
 

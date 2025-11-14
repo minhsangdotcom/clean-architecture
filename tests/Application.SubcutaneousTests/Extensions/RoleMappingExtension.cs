@@ -16,15 +16,6 @@ public static class RoleMappingExtension
             {
                 Name = role.Name,
                 Description = role.Description,
-                RoleClaims =
-                [
-                    .. role.RoleClaims!.Select(x => new RoleClaimPayload()
-                    {
-                        ClaimType = x.ClaimType,
-                        ClaimValue = x.ClaimValue,
-                        Id = x.Id,
-                    }),
-                ],
             },
         };
     }

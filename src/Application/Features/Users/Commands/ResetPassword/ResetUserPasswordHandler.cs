@@ -21,7 +21,7 @@ public class ResetUserPasswordHandler(IEfUnitOfWork unitOfWork)
         User? user = await unitOfWork
             .DynamicReadOnlyRepository<User>()
             .FindByConditionAsync(
-                new GetUserByIdIncludeResetPassword(Ulid.Parse(command.UserId)),
+                new GetUserByIdIncludePasswordResetRequestSpecification(Ulid.Parse(command.UserId)),
                 cancellationToken
             );
 
@@ -41,7 +41,7 @@ public class ResetUserPasswordHandler(IEfUnitOfWork unitOfWork)
         }
 
         UpdateUserPassword? updateUserPassword = command.UpdateUserPassword;
-        UserResetPassword? resetPassword = user.UserResetPasswords?.FirstOrDefault(x =>
+        UserPasswordReset? resetPassword = user.PasswordResetRequests?.FirstOrDefault(x =>
             x.Token == updateUserPassword!.Token
         );
 
@@ -51,7 +51,7 @@ public class ResetUserPasswordHandler(IEfUnitOfWork unitOfWork)
                 new BadRequestError(
                     "Error has occurred with reset password token",
                     Messenger
-                        .Create<UserResetPassword>()
+                        .Create<UserPasswordReset>()
                         .Property(x => x.Token)
                         .Message(MessageType.Correct)
                         .Negative()
@@ -66,7 +66,7 @@ public class ResetUserPasswordHandler(IEfUnitOfWork unitOfWork)
                 new BadRequestError(
                     "Error has occurred with reset password token",
                     Messenger
-                        .Create<UserResetPassword>()
+                        .Create<UserPasswordReset>()
                         .Property(x => x.Token)
                         .Message(MessageType.Expired)
                         .Build()
@@ -84,9 +84,9 @@ public class ResetUserPasswordHandler(IEfUnitOfWork unitOfWork)
             );
         }
 
-        user.SetPassword(HashPassword(updateUserPassword!.Password));
+        user.ChangePassword(HashPassword(updateUserPassword!.Password));
 
-        await unitOfWork.Repository<UserResetPassword>().DeleteAsync(resetPassword);
+        await unitOfWork.Repository<UserPasswordReset>().DeleteAsync(resetPassword);
         await unitOfWork.Repository<User>().UpdateAsync(user);
         await unitOfWork.SaveAsync(cancellationToken);
 

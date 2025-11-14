@@ -13,7 +13,7 @@ public class UserClaimValidator : AbstractValidator<UserClaimPayload>
             .NotEmpty()
             .WithState(x =>
                 Messenger
-                    .Create<UserClaim>(nameof(User.UserClaims))
+                    .Create<UserClaim>(nameof(User.Claims))
                     .Property(x => x.ClaimType!)
                     .Message(MessageType.Null)
                     .Negative()
@@ -24,7 +24,7 @@ public class UserClaimValidator : AbstractValidator<UserClaimPayload>
             .NotEmpty()
             .WithState(x =>
                 Messenger
-                    .Create<UserClaim>(nameof(User.UserClaims))
+                    .Create<UserClaim>(nameof(User.Claims))
                     .Property(x => x.ClaimValue!)
                     .Message(MessageType.Null)
                     .Negative()

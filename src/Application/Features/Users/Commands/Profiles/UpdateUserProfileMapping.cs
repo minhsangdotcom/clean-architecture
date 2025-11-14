@@ -18,15 +18,13 @@ public static class UpdateUserProfileMapping
         UpdateUserProfileCommand profileCommand
     )
     {
-        user.Update(
+        return user.FromMapping(
             profileCommand.FirstName,
             profileCommand.LastName,
             profileCommand.Email,
             profileCommand.PhoneNumber,
-            profileCommand.DayOfBirth
+            profileCommand.DateOfBirth
         );
-
-        return user;
     }
 
     public static UpdateUserProfileResponse ToUpdateUserProfileResponse(this User user)

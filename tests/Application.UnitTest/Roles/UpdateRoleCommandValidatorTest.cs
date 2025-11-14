@@ -1,5 +1,6 @@
 using Application.Common.Interfaces.Services;
 using Application.Common.Interfaces.Services.Identity;
+using Application.Common.Interfaces.UnitOfWorks;
 using Application.Features.Common.Payloads.Roles;
 using Application.Features.Common.Projections.Roles;
 using Application.Features.Roles.Commands.Update;
@@ -20,7 +21,7 @@ public sealed class UpdateRoleCommandValidatorTest
     private readonly RoleUpdateRequest command;
     private readonly List<RoleClaimPayload> roleClaims;
     private readonly Fixture fixture = new();
-    private readonly Mock<IRoleManagerService> mockRoleManager = new();
+    private readonly Mock<IEfUnitOfWork> mockRoleManager = new();
     private readonly Mock<IHttpContextAccessorService> mockHttpContextAccessorService = new();
 
     public UpdateRoleCommandValidatorTest()
@@ -141,7 +142,7 @@ public sealed class UpdateRoleCommandValidatorTest
 
         //assert
         MessageResult expectedState = Messenger
-            .Create<RoleClaim>(nameof(Role.RoleClaims))
+            .Create<RoleClaim>(nameof(Role.Claims))
             .Property(x => x.ClaimType!)
             .Message(MessageType.Null)
             .Negative()
@@ -165,7 +166,7 @@ public sealed class UpdateRoleCommandValidatorTest
 
         //assert
         MessageResult expectedState = Messenger
-            .Create<RoleClaim>(nameof(Role.RoleClaims))
+            .Create<RoleClaim>(nameof(Role.Claims))
             .Property(x => x.ClaimType!)
             .Message(MessageType.Null)
             .Negative()
@@ -185,7 +186,7 @@ public sealed class UpdateRoleCommandValidatorTest
         var result = await validator.TestValidateAsync(command);
         //assert
         MessageResult expectedState = Messenger
-            .Create<RoleClaim>(nameof(Role.RoleClaims))
+            .Create<RoleClaim>(nameof(Role.Claims))
             .Property(x => x.ClaimValue!)
             .Message(MessageType.Null)
             .Negative()
@@ -205,7 +206,7 @@ public sealed class UpdateRoleCommandValidatorTest
         var result = await validator.TestValidateAsync(command);
         //assert
         MessageResult expectedState = Messenger
-            .Create<RoleClaim>(nameof(Role.RoleClaims))
+            .Create<RoleClaim>(nameof(Role.Claims))
             .Property(x => x.ClaimValue!)
             .Message(MessageType.Null)
             .Negative()

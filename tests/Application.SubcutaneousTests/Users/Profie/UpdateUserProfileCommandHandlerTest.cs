@@ -14,72 +14,72 @@ public class UpdateUserProfileCommandHandlerTest(TestingFixture testingFixture) 
 {
     private UpdateUserProfileCommand updateUserCommand = new();
 
-    [Fact]
-    private async Task UpdateProfile_WhenProvinceNotFound_ShouldReturnNotFoundResult()
-    {
-        var a = TestingFixture.GetUserId();
-        updateUserCommand.ProvinceId = Ulid.NewUlid();
-        //act
-        Result<UpdateUserProfileResponse> result = await testingFixture.SendAsync(
-            updateUserCommand
-        );
+    // [Fact]
+    // private async Task UpdateProfile_WhenProvinceNotFound_ShouldReturnNotFoundResult()
+    // {
+    //     var a = TestingFixture.GetUserId();
+    //     updateUserCommand.ProvinceId = Ulid.NewUlid();
+    //     //act
+    //     Result<UpdateUserProfileResponse> result = await testingFixture.SendAsync(
+    //         updateUserCommand
+    //     );
 
-        //assert
-        var expectedMessage = Messenger
-            .Create<User>()
-            .Property(nameof(UpdateUserProfileCommand.ProvinceId))
-            .Message(MessageType.Existence)
-            .Negative()
-            .Build();
+    //     //assert
+    //     var expectedMessage = Messenger
+    //         .Create<User>()
+    //         .Property(nameof(UpdateUserProfileCommand.ProvinceId))
+    //         .Message(MessageType.Existence)
+    //         .Negative()
+    //         .Build();
 
-        result.Error.ShouldNotBeNull();
-        result.Error.Status.ShouldBe(404);
-        result.Error.ErrorMessage.ShouldBe(expectedMessage, new MessageResultComparer());
-    }
+    //     result.Error.ShouldNotBeNull();
+    //     result.Error.Status.ShouldBe(404);
+    //     result.Error.ErrorMessage.ShouldBe(expectedMessage, new MessageResultComparer());
+    // }
 
-    [Fact]
-    private async Task UpdateProfile_WhenDistrictNotFound_ShouldReturnNotFoundResult()
-    {
-        updateUserCommand.DistrictId = Ulid.NewUlid();
-        //act
-        Result<UpdateUserProfileResponse> result = await testingFixture.SendAsync(
-            updateUserCommand
-        );
+    // [Fact]
+    // private async Task UpdateProfile_WhenDistrictNotFound_ShouldReturnNotFoundResult()
+    // {
+    //     updateUserCommand.DistrictId = Ulid.NewUlid();
+    //     //act
+    //     Result<UpdateUserProfileResponse> result = await testingFixture.SendAsync(
+    //         updateUserCommand
+    //     );
 
-        //assert
-        var expectedMessage = Messenger
-            .Create<User>()
-            .Property(nameof(UpdateUserProfileCommand.DistrictId))
-            .Message(MessageType.Existence)
-            .Negative()
-            .Build();
+    //     //assert
+    //     var expectedMessage = Messenger
+    //         .Create<User>()
+    //         .Property(nameof(UpdateUserProfileCommand.DistrictId))
+    //         .Message(MessageType.Existence)
+    //         .Negative()
+    //         .Build();
 
-        result.Error.ShouldNotBeNull();
-        result.Error.Status.ShouldBe(404);
-        result.Error.ErrorMessage.ShouldBe(expectedMessage, new MessageResultComparer());
-    }
+    //     result.Error.ShouldNotBeNull();
+    //     result.Error.Status.ShouldBe(404);
+    //     result.Error.ErrorMessage.ShouldBe(expectedMessage, new MessageResultComparer());
+    // }
 
-    [Fact]
-    private async Task UpdateProfile_WhenCommuneNotFound_ShouldReturnNotFoundResult()
-    {
-        updateUserCommand.CommuneId = Ulid.NewUlid();
-        //act
-        Result<UpdateUserProfileResponse> result = await testingFixture.SendAsync(
-            updateUserCommand
-        );
+    // [Fact]
+    // private async Task UpdateProfile_WhenCommuneNotFound_ShouldReturnNotFoundResult()
+    // {
+    //     updateUserCommand.CommuneId = Ulid.NewUlid();
+    //     //act
+    //     Result<UpdateUserProfileResponse> result = await testingFixture.SendAsync(
+    //         updateUserCommand
+    //     );
 
-        //assert
-        var expectedMessage = Messenger
-            .Create<User>()
-            .Property(nameof(UpdateUserProfileCommand.CommuneId))
-            .Message(MessageType.Existence)
-            .Negative()
-            .Build();
+    //     //assert
+    //     var expectedMessage = Messenger
+    //         .Create<User>()
+    //         .Property(nameof(UpdateUserProfileCommand.CommuneId))
+    //         .Message(MessageType.Existence)
+    //         .Negative()
+    //         .Build();
 
-        result.Error.ShouldNotBeNull();
-        result.Error.Status.ShouldBe(404);
-        result.Error.ErrorMessage.ShouldBe(expectedMessage, new MessageResultComparer());
-    }
+    //     result.Error.ShouldNotBeNull();
+    //     result.Error.Status.ShouldBe(404);
+    //     result.Error.ErrorMessage.ShouldBe(expectedMessage, new MessageResultComparer());
+    // }
 
     [Fact]
     private async Task UpdateProfile_WhenIdNotfound_ShouldReturnNotFoundResult()
@@ -104,7 +104,7 @@ public class UpdateUserProfileCommandHandlerTest(TestingFixture testingFixture) 
     private async Task UpdateProfile_ShouldUpdateSuccess()
     {
         //arrage
-        updateUserCommand.DayOfBirth = null;
+        updateUserCommand.DateOfBirth = null;
         updateUserCommand.Avatar = null;
         //act
         Result<UpdateUserProfileResponse> result = await testingFixture.SendAsync(
@@ -126,7 +126,6 @@ public class UpdateUserProfileCommandHandlerTest(TestingFixture testingFixture) 
             () => user.Email.ShouldBe(response.Email),
             () => user.PhoneNumber.ShouldBe(response.PhoneNumber),
             () => user.Gender.ShouldBe(response.Gender),
-            () => user.Address?.ToString().ShouldBe(response.Address?.ToString()),
             () => user.Status.ShouldBe(response.Status)
         );
     }

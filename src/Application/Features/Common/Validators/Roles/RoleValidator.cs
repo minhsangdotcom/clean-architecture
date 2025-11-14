@@ -1,26 +1,24 @@
 using Application.Common.Interfaces.Services;
-using Application.Common.Interfaces.Services.Identity;
+using Application.Common.Interfaces.UnitOfWorks;
 using Application.Features.Common.Payloads.Roles;
-using Application.Features.Common.Projections.Roles;
 using CaseConverter;
 using Domain.Aggregates.Roles;
 using FluentValidation;
-using Microsoft.EntityFrameworkCore;
 using SharedKernel.Common.Messages;
 
 namespace Application.Features.Common.Validators.Roles;
 
 public class RoleValidator : AbstractValidator<RolePayload>
 {
-    private readonly IRoleManagerService roleManagerService;
+    private readonly IEfUnitOfWork unitOfWork;
     private readonly IHttpContextAccessorService httpContextAccessorService;
 
     public RoleValidator(
-        IRoleManagerService roleManagerService,
+        IEfUnitOfWork unitOfWork,
         IHttpContextAccessorService httpContextAccessorService
     )
     {
-        this.roleManagerService = roleManagerService;
+        this.unitOfWork = unitOfWork;
         this.httpContextAccessorService = httpContextAccessorService;
         ApplyRules();
     }
@@ -104,9 +102,11 @@ public class RoleValidator : AbstractValidator<RolePayload>
     )
     {
         string caseName = name.ToSnakeCase();
-        return !await roleManagerService.Roles.AnyAsync(
-            x => (!id.HasValue && x.Name == caseName) || (x.Id != id && x.Name == caseName),
-            cancellationToken
-        );
+        return !await unitOfWork
+            .Repository<Role>()
+            .AnyAsync(
+                x => (!id.HasValue && x.Name == caseName) || (x.Id != id && x.Name == caseName),
+                cancellationToken
+            );
     }
 }

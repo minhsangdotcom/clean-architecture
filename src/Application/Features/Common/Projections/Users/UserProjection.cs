@@ -1,7 +1,6 @@
 using Application.Common.Security;
 using Domain.Aggregates.Users;
 using Domain.Aggregates.Users.Enums;
-using Domain.Aggregates.Users.ValueObjects;
 using SharedKernel.Models;
 
 namespace Application.Features.Common.Projections.Users;
@@ -22,10 +21,6 @@ public class UserProjection : BaseResponse
 
     public Gender? Gender { get; set; }
 
-    public string? FullAddress { get; set; }
-
-    public Address? Address { get; set; }
-
     [File]
     public string? Avatar { get; set; }
 
@@ -44,11 +39,9 @@ public class UserProjection : BaseResponse
         Username = user.Username;
         Email = user.Email;
         PhoneNumber = user.PhoneNumber;
-        DayOfBirth = user.DayOfBirth;
+        DayOfBirth = user.DateOfBirth;
         Gender = user.Gender;
         Avatar = user.Avatar;
         Status = user.Status;
-        Address = user.Address;
-        FullAddress = user.Address!.ToString();
     }
 }

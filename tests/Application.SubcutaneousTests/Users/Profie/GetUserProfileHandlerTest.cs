@@ -49,7 +49,6 @@ public class GetUserProfileHandlerTest(TestingFixture testingFixture) : IAsyncLi
             () => user.Email.ShouldBe(user.Email),
             () => user.PhoneNumber.ShouldBe(user.PhoneNumber),
             () => user.Gender.ShouldBe(user.Gender),
-            () => user.Address?.ToString().ShouldBe(user.Address?.ToString()),
             () => user.Status.ShouldBe(user.Status)
         );
     }

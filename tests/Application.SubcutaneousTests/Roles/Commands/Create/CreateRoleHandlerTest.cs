@@ -30,7 +30,7 @@ public class CreateRoleHandlerTest(TestingFixture testingFixture) : IAsyncLifeti
         createdRole.ShouldNotBeNull();
         createdRole!.Name.ShouldBe(command.Name.ToSnakeCase().ToUpper());
         createdRole.Description.ShouldBe(command.Description);
-        createdRole.RoleClaims.ShouldBeEmpty();
+        createdRole.Claims.ShouldBeEmpty();
     }
 
     [Fact]
@@ -61,7 +61,7 @@ public class CreateRoleHandlerTest(TestingFixture testingFixture) : IAsyncLifeti
         createdRole.ShouldNotBeNull();
         createdRole!.Name.ShouldBe(command.Name.ToScreamingSnakeCase());
         createdRole.Description.ShouldBeNull();
-        createdRole.RoleClaims?.Count.ShouldBe(roleClaims.Count);
+        createdRole.Claims?.Count.ShouldBe(roleClaims.Count);
     }
 
     [Fact]
@@ -91,7 +91,7 @@ public class CreateRoleHandlerTest(TestingFixture testingFixture) : IAsyncLifeti
         createdRole.ShouldNotBeNull();
         createdRole!.Name.ShouldBe(command.Name.ToScreamingSnakeCase());
         createdRole.Description.ShouldBe(command.Description);
-        createdRole.RoleClaims?.Count.ShouldBe(roleClaims.Count);
+        createdRole.Claims?.Count.ShouldBe(roleClaims.Count);
     }
 
     public async Task InitializeAsync() => await testingFixture.ResetAsync();

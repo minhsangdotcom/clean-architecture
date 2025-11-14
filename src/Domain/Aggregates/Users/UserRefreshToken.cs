@@ -2,7 +2,7 @@ using Domain.Common;
 
 namespace Domain.Aggregates.Users;
 
-public class UserToken : BaseEntity
+public class UserRefreshToken : BaseEntity
 {
     public string? RefreshToken { get; set; }
 
@@ -15,7 +15,6 @@ public class UserToken : BaseEntity
     public bool IsBlocked { get; set; }
 
     public Ulid UserId { get; set; }
-
     public User? User { get; set; }
 
     public DateTimeOffset ExpiredTime { get; set; }

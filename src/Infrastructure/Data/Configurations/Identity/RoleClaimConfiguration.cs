@@ -10,6 +10,6 @@ public class RoleClaimConfiguration : IEntityTypeConfiguration<RoleClaim>
     {
         builder.HasKey(x => x.Id);
 
-        builder.HasOne(x => x.Role).WithMany(x => x.RoleClaims).HasForeignKey(x => x.RoleId);
+        builder.HasOne(x => x.Role).WithMany(x => x.Claims).HasForeignKey(x => x.RoleId);
     }
 }
