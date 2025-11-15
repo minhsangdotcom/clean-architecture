@@ -21,17 +21,31 @@ public class Permission : AggregateRoot
 
     public string? Group { get; private set; }
 
+    public bool IsDeleted { get; private set; }
+
+    public DateTimeOffset? EffectiveFrom { get; private set; }
+
+    public DateTimeOffset? EffectiveTo { get; private set; }
+
     public PermissionStatus Status { get; private set; } = PermissionStatus.Active;
 
     private Permission() { }
 
-    private Permission(string code, string name, string? description = null, string? group = null)
+    public Permission(
+        string code,
+        string name,
+        string? description = null,
+        string? group = null,
+        DateTimeOffset? effectiveFrom = null,
+        DateTimeOffset? effectiveTo = null
+    )
     {
-        Id = Ulid.NewUlid();
         Code = code;
         Name = name;
         Description = description;
         Group = group;
+        EffectiveFrom = effectiveFrom;
+        EffectiveTo = effectiveTo;
     }
 
     public void Deactivate()
