@@ -15,7 +15,7 @@ public class Role : AggregateRoot
 
     public ICollection<UserRole>? Users { get; set; } = [];
     public ICollection<RoleClaim>? Claims { get; set; } = [];
-    public ICollection<Permission> Permissions { get; set; } = [];
+    public ICollection<RolePermission> Permissions { get; set; } = [];
 
     private Role() { }
 
@@ -33,18 +33,18 @@ public class Role : AggregateRoot
 
     public void GrantPermission(Permission permission)
     {
-        if (Permissions.Any(p => p.Id == permission.Id))
+        if (Permissions.Any(p => p.PermissionId == permission.Id))
         {
             throw new PermissionAlreadyGrantedException(Id, permission.Id);
         }
 
-        Permissions.Add(permission);
+        Permissions.Add(new RolePermission { RoleId = Id, PermissionId = permission.Id });
     }
 
     public void RevokePermission(Permission permission)
     {
         var existentPermission =
-            Permissions.FirstOrDefault(p => p.Id == permission.Id)
+            Permissions.FirstOrDefault(p => p.PermissionId == permission.Id)
             ?? throw new PermissionNotGrantedException(Id, permission.Id);
         Permissions.Remove(existentPermission);
     }

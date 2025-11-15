@@ -1,12 +1,12 @@
-using Domain.Aggregates.Roles;
+using Domain.Aggregates.Permissions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Infrastructure.Data.Configurations.Identity;
 
-public class RoleConfiguration : IEntityTypeConfiguration<Role>
+public class PermissionConfiguration : IEntityTypeConfiguration<Permission>
 {
-    public void Configure(EntityTypeBuilder<Role> builder)
+    public void Configure(EntityTypeBuilder<Permission> builder)
     {
         builder.HasKey(x => x.Id);
     }
