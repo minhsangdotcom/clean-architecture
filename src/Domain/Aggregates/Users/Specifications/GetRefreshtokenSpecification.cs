@@ -7,6 +7,6 @@ public class GetRefreshtokenSpecification : Specification<UserRefreshToken>
 {
     public GetRefreshtokenSpecification(string token, Ulid userId)
     {
-        Query.Where(x => x.UserId == userId && x.RefreshToken == token).Include(x => x.User);
+        Query.Where(x => x.UserId == userId && x.Token == token).Include(x => x.User);
     }
 }

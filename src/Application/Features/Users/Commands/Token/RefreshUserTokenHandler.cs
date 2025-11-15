@@ -38,7 +38,7 @@ public class RefreshUserTokenHandler(
                     "Error has occurred with the Refresh token",
                     Messenger
                         .Create<UserRefreshToken>(nameof(User))
-                        .Property(x => x.RefreshToken!)
+                        .Property(x => x.Token!)
                         .Message(MessageType.Valid)
                         .Negative()
                         .BuildMessage()
@@ -69,7 +69,7 @@ public class RefreshUserTokenHandler(
                     "Error has occurred with the Refresh token",
                     Messenger
                         .Create<UserRefreshToken>(nameof(User))
-                        .Property(x => x.RefreshToken!)
+                        .Property(x => x.Token!)
                         .Negative()
                         .Message(MessageType.Identical)
                         .Object("TheCurrentOne")
@@ -80,7 +80,7 @@ public class RefreshUserTokenHandler(
         UserRefreshToken validRefreshToken = refreshTokens[0];
 
         // detect cheating with token, maybe which is stolen
-        if (validRefreshToken.RefreshToken != command.RefreshToken)
+        if (validRefreshToken.Token != command.RefreshToken)
         {
             // remove all the token by family token
             await unitOfWork.Repository<UserRefreshToken>().DeleteRangeAsync(refreshTokens);
@@ -91,7 +91,7 @@ public class RefreshUserTokenHandler(
                     "Error has occurred with the Refresh token",
                     Messenger
                         .Create<UserRefreshToken>(nameof(User))
-                        .Property(x => x.RefreshToken!)
+                        .Property(x => x.Token!)
                         .Negative()
                         .Message(MessageType.Identical)
                         .Object("TheCurrentOne")
@@ -139,7 +139,7 @@ public class RefreshUserTokenHandler(
             FamilyId = decodeToken.FamilyId,
             UserId = Ulid.Parse(decodeToken.Sub!),
             ExpiredTime = refreshTokenExpiredTime,
-            RefreshToken = refreshToken,
+            Token = refreshToken,
             UserAgent = SerializerExtension.Serialize(userAgent).StringJson,
             ClientIp = currentUser.ClientIp,
         };

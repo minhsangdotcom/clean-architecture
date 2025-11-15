@@ -87,9 +87,11 @@ public class LoginUserHandler(
             refreshExpireTime
         );
 
-        UserRefreshToken.RefreshToken = refreshToken;
+        UserRefreshToken.Token = refreshToken;
 
-        await unitOfWork.Repository<UserRefreshToken>().AddAsync(UserRefreshToken, cancellationToken);
+        await unitOfWork
+            .Repository<UserRefreshToken>()
+            .AddAsync(UserRefreshToken, cancellationToken);
         await unitOfWork.SaveAsync(cancellationToken);
 
         return Result<LoginUserResponse>.Success(

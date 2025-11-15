@@ -4,7 +4,7 @@ namespace Domain.Aggregates.Users;
 
 public class UserRefreshToken : BaseEntity
 {
-    public string? RefreshToken { get; set; }
+    public string? Token { get; set; }
 
     public string? ClientIp { get; set; }
 
