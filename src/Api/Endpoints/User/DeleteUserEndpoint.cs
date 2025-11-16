@@ -7,6 +7,7 @@ using Mediator;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.OpenApi.Models;
+using static Contracts.Permissions.PermissionNames;
 
 namespace Api.Endpoints.User;
 

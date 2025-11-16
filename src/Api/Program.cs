@@ -9,6 +9,7 @@ using Cysharp.Serialization.Json;
 using HealthChecks.UI.Client;
 using Infrastructure;
 using Infrastructure.Data;
+using Infrastructure.Data.Seeds;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Serilog;
 using Swashbuckle.AspNetCore.SwaggerUI;

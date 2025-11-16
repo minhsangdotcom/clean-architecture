@@ -3,6 +3,7 @@ using Application.Common.Interfaces.Contexts;
 using Application.Common.Interfaces.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
+using Microsoft.EntityFrameworkCore.Query;
 
 namespace Infrastructure.Data.Repositories.EfCore.Implementations;
 
@@ -31,22 +32,22 @@ public class AsyncRepository<T>(IEfDbContext dbContext) : IAsyncRepository<T>
             .Select(mappingResult)
             .FirstOrDefaultAsync(cancellationToken);
 
-    public async Task<IEnumerable<T>> ListAsync(CancellationToken cancellationToken = default) =>
+    public async Task<List<T>> ListAsync(CancellationToken cancellationToken = default) =>
         await dbContext.Set<T>().ToListAsync(cancellationToken);
 
-    public async Task<IEnumerable<T>> ListAsync(
+    public async Task<List<T>> ListAsync(
         Expression<Func<T, bool>> criteria,
         CancellationToken cancellationToken = default
     ) => await dbContext.Set<T>().Where(criteria ?? (x => true)).ToListAsync(cancellationToken);
 
-    public async Task<IEnumerable<TResult>> ListAsync<TResult>(
+    public async Task<List<TResult>> ListAsync<TResult>(
         Expression<Func<T, TResult>> mappingResult,
         CancellationToken cancellationToken = default
     )
         where TResult : class =>
         await dbContext.Set<T>().Select(mappingResult).ToListAsync(cancellationToken);
 
-    public async Task<IEnumerable<TResult>> ListAsync<TResult>(
+    public async Task<List<TResult>> ListAsync<TResult>(
         Expression<Func<T, bool>> criteria,
         Expression<Func<T, TResult>> mappingResult,
         CancellationToken cancellationToken = default
@@ -97,6 +98,21 @@ public class AsyncRepository<T>(IEfDbContext dbContext) : IAsyncRepository<T>
         await Task.CompletedTask;
     }
 
+    public async Task ExecuteUpdateAsync(
+        Expression<Func<T, bool>>? criteria,
+        Expression<Func<SetPropertyCalls<T>, SetPropertyCalls<T>>> updateExpression
+    )
+    {
+        IQueryable<T> query = dbContext.Set<T>();
+
+        if (criteria != null)
+        {
+            query = query.Where(criteria);
+        }
+
+        await query.ExecuteUpdateAsync(updateExpression);
+    }
+
     public async Task DeleteAsync(T entity)
     {
         dbContext.Set<T>().Remove(entity);
@@ -108,6 +124,12 @@ public class AsyncRepository<T>(IEfDbContext dbContext) : IAsyncRepository<T>
         dbContext.Set<T>().RemoveRange(entities);
         await Task.CompletedTask;
     }
+
+    public async Task ExecuteDeleteAsync(Expression<Func<T, bool>>? criteria = null)
+    {
+        await dbContext.Set<T>().Where(criteria ?? (x => true)).ExecuteDeleteAsync();
+    }
+
     #endregion
 
     #region Bool

@@ -19,10 +19,18 @@ public class Role : AggregateRoot
 
     private Role() { }
 
-    public Role(string name, string? description)
+    public Role(string name, string? description = null)
     {
         Name = Guard.Against.NullOrEmpty(name, nameof(name)).ToScreamingSnakeCase();
         Description = description;
+    }
+
+    public Role(Ulid id, string name, List<RolePermission> permissions, string? description)
+    {
+        Id = id;
+        Name = Guard.Against.NullOrEmpty(name, nameof(name)).ToScreamingSnakeCase();
+        Description = description;
+        Permissions = [.. Permissions.Concat(permissions)];
     }
 
     public void Update(string name, string? description)

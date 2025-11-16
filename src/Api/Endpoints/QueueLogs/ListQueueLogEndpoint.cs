@@ -4,12 +4,12 @@ using Api.common.Results;
 using Api.common.Routers;
 using Application.Features.QueueLogs.Queries;
 using Contracts.ApiWrapper;
-using Infrastructure.Constants;
 using Mediator;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.OpenApi.Models;
 using SharedKernel.Models;
+using static Contracts.Permissions.PermissionNames;
 
 namespace Api.Endpoints.QueueLogs;
 

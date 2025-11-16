@@ -7,7 +7,7 @@ public interface IEfUnitOfWork : IUnitOfWork
 {
     public DbTransaction? CurrentTransaction { get; protected set; }
 
-    IAsyncRepository<TEntity> Repository<TEntity>(bool isCached = false)
+    IAsyncRepository<TEntity> Repository<TEntity>()
         where TEntity : class;
 
     /// <summary>

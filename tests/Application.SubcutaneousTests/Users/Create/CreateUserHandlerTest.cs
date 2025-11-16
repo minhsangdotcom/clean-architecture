@@ -140,18 +140,6 @@ public class CreateUserHandlerTest(TestingFixture testingFixture) : IAsyncLifeti
         command = fixture
             .Build<CreateUserCommand>()
             .With(x => x.Avatar, file)
-            .With(
-                x => x.UserClaims,
-                [
-                    .. Credential
-                        .MANAGER_CLAIMS.Select(x => new UserClaimUpsertCommand()
-                        {
-                            ClaimType = ClaimTypes.Permission,
-                            ClaimValue = x,
-                        })
-                        .ToList(),
-                ]
-            )
             .With(x => x.Roles, [roleId])
             .With(x => x.Email, "admin@gmail.com")
             .With(x => x.PhoneNumber, "0123456789")

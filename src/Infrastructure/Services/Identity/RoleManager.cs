@@ -45,6 +45,7 @@ public class RoleManager(IEfDbContext dbContext) : IRoleManager
     {
         return await roles
             .Include(r => r.Permissions)
+            .ThenInclude(rp => rp.Permission)
             .Include(r => r.Claims)
             .FirstOrDefaultAsync(r => r.Id == roleId, cancellationToken);
     }

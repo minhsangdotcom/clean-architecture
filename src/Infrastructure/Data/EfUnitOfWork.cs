@@ -23,23 +23,16 @@ public class UnitOfWork(
 
     private bool disposed = false;
 
-    public IAsyncRepository<TEntity> Repository<TEntity>(bool isCached = false)
+    public IAsyncRepository<TEntity> Repository<TEntity>()
         where TEntity : class
     {
-        string key = GetKey(typeof(TEntity).FullName!, nameof(Repository), isCached);
+        string key = GetKey(typeof(TEntity).FullName!, nameof(Repository));
         Type repositoryType = typeof(AsyncRepository<>);
         object? repositoryInstance = CreateInstance<TEntity>(repositoryType, dbContext);
 
         if (!repositories.TryGetValue(key, out object? value))
         {
-            value = isCached
-                ? CreateInstance<TEntity>(
-                    typeof(CachedAsyncRepository<>),
-                    repositoryInstance!,
-                    logger,
-                    memoryCacheService
-                )
-                : repositoryInstance;
+            value = repositoryInstance;
             repositories.Add(key, value);
         }
 

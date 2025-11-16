@@ -1,6 +1,8 @@
 using System.Reflection;
 using Application.Common.Auth;
 using Application.Common.Behaviors;
+using Contracts.Permissions;
+using Domain.Aggregates.Permissions;
 using FluentValidation;
 using Mediator;
 using Microsoft.AspNetCore.Authorization;
@@ -24,6 +26,12 @@ public static class DependencyInjection
             .AddSingleton(typeof(IPipelineBehavior<,>), typeof(PerformanceBehavior<,>))
             .AddValidatorsFromAssembly(currentAssembly)
             .AddSingleton<IAuthorizationPolicyProvider, AuthorizePolicyProvider>()
-            .AddSingleton<IAuthorizationHandler, AuthorizeHandler>();
+            .AddSingleton<IAuthorizationHandler, AuthorizeHandler>()
+            .AddSingleton(_ =>
+            {
+                PermissionDefinitionContext context = new();
+                new SystemPermissionDefinitionProvider().Define(context);
+                return context;
+            });
     }
 }

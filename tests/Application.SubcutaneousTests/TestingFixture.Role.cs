@@ -30,34 +30,15 @@ public partial class TestingFixture
 
     public async Task<Role> CreateAdminRoleAsync()
     {
-        List<RoleClaimUpsertCommand> roleClaimModels =
-        [
-            .. Credential.ADMIN_CLAIMS.Select(permission => new RoleClaimUpsertCommand()
-            {
-                ClaimType = ClaimTypes.Permission,
-                ClaimValue = permission,
-            }),
-        ];
-
-        return await CreateRoleAsync(Credential.ADMIN_ROLE, roleClaimModels);
+        return new("", "");
     }
 
     public async Task<Role> CreateManagerRoleAsync()
     {
-        List<RoleClaimUpsertCommand> roleClaimModels =
-        [
-            .. Credential.MANAGER_CLAIMS.Select(permission => new RoleClaimUpsertCommand()
-            {
-                ClaimType = ClaimTypes.Permission,
-                ClaimValue = permission,
-            }),
-        ];
-
-        return await CreateRoleAsync(Credential.MANAGER_ROLE, roleClaimModels);
+        return new("", "");
     }
 
-    public async Task<Role> CreateNormalRoleAsync() =>
-        await CreateRoleAsync("user", DefaultUserClaims());
+    public async Task<Role> CreateNormalRoleAsync() => new("", "");
 
     public async Task<Role> CreateRoleAsync(
         string roleName,
@@ -70,28 +51,4 @@ public partial class TestingFixture
         CreateRoleResponse response = result.Value!;
         return (await FindRoleByIdIncludeRoleClaimsAsync(response.Id))!;
     }
-
-    public static List<RoleClaimUpsertCommand> DefaultUserClaims() =>
-        [
-            new RoleClaimUpsertCommand()
-            {
-                ClaimType = ClaimTypes.Permission,
-                ClaimValue = $"{PermissionAction.List}:{PermissionResource.Role}",
-            },
-            new RoleClaimUpsertCommand()
-            {
-                ClaimType = ClaimTypes.Permission,
-                ClaimValue = $"{PermissionAction.Detail}:{PermissionResource.Role}",
-            },
-            new RoleClaimUpsertCommand()
-            {
-                ClaimType = ClaimTypes.Permission,
-                ClaimValue = $"{PermissionAction.List}:{PermissionResource.User}",
-            },
-            new RoleClaimUpsertCommand()
-            {
-                ClaimType = ClaimTypes.Permission,
-                ClaimValue = $"{PermissionAction.Detail}:{PermissionResource.User}",
-            },
-        ];
 }

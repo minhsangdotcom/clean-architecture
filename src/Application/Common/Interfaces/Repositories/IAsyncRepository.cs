@@ -1,4 +1,5 @@
 using System.Linq.Expressions;
+using Microsoft.EntityFrameworkCore.Query;
 
 namespace Application.Common.Interfaces.Repositories;
 
@@ -25,20 +26,20 @@ public interface IAsyncRepository<T> : IRepository<T>
     )
         where TResult : class;
 
-    Task<IEnumerable<T>> ListAsync(CancellationToken cancellationToken = default);
+    Task<List<T>> ListAsync(CancellationToken cancellationToken = default);
 
-    Task<IEnumerable<T>> ListAsync(
+    Task<List<T>> ListAsync(
         Expression<Func<T, bool>> criteria,
         CancellationToken cancellationToken = default
     );
 
-    Task<IEnumerable<TResult>> ListAsync<TResult>(
+    Task<List<TResult>> ListAsync<TResult>(
         Expression<Func<T, TResult>> mappingResult,
         CancellationToken cancellationToken = default
     )
         where TResult : class;
 
-    Task<IEnumerable<TResult>> ListAsync<TResult>(
+    Task<List<TResult>> ListAsync<TResult>(
         Expression<Func<T, bool>> criteria,
         Expression<Func<T, TResult>> mappingResult,
         CancellationToken cancellationToken = default
@@ -62,9 +63,15 @@ public interface IAsyncRepository<T> : IRepository<T>
 
     Task UpdateRangeAsync(IEnumerable<T> entities);
 
+    Task ExecuteUpdateAsync(
+        Expression<Func<T, bool>>? criteria,
+        Expression<Func<SetPropertyCalls<T>, SetPropertyCalls<T>>> updateExpression
+    );
+
     Task DeleteAsync(T entity);
 
     Task DeleteRangeAsync(IEnumerable<T> entities);
+    Task ExecuteDeleteAsync(Expression<Func<T, bool>>? criteria = null);
     #endregion
 
     #region bool
