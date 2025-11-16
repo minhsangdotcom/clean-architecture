@@ -1,8 +1,6 @@
 using Application.Common.Interfaces.Services;
-using Application.Common.Interfaces.Services.Identity;
 using Application.Common.Interfaces.UnitOfWorks;
-using Application.Features.Common.Payloads.Roles;
-using Application.Features.Common.Projections.Roles;
+using Application.Features.Common.Requests.Roles;
 using Application.Features.Roles.Commands.Create;
 using AutoFixture;
 using Domain.Aggregates.Roles;
@@ -19,7 +17,7 @@ public class CreateRoleCommandValidatorTest
     private readonly CreateRoleCommandValidator validator;
 
     private readonly CreateRoleCommand command;
-    private readonly List<RoleClaimPayload> roleClaims;
+    private readonly List<RoleClaimUpsertCommand> roleClaims;
     private readonly Fixture fixture = new();
     private readonly Mock<IEfUnitOfWork> mockRoleManager = new();
     private readonly Mock<IHttpContextAccessorService> mockHttpContextAccessorService = new();
@@ -31,12 +29,7 @@ public class CreateRoleCommandValidatorTest
             mockRoleManager.Object,
             mockHttpContextAccessorService.Object
         );
-        roleClaims = [.. fixture.Build<RoleClaimPayload>().Without(x => x.Id).CreateMany(2)];
-        command = fixture
-            .Build<CreateRoleCommand>()
-            .With(x => x.Name, "manager")
-            .With(x => x.RoleClaims, roleClaims)
-            .Create();
+        roleClaims = [.. fixture.Build<RoleClaimUpsertCommand>().Without(x => x.Id).CreateMany(2)];
     }
 
     [Theory]
@@ -52,7 +45,7 @@ public class CreateRoleCommandValidatorTest
 
         //assert
         MessageResult expectedState = Messenger
-            .Create<RolePayload>(nameof(Role))
+            .Create<RoleUpsertCommand>(nameof(Role))
             .Property(x => x.Name!)
             .Negative()
             .Message(MessageType.Null)
@@ -75,7 +68,7 @@ public class CreateRoleCommandValidatorTest
 
         //assert
         MessageResult expectedState = Messenger
-            .Create<RolePayload>(nameof(Role))
+            .Create<RoleUpsertCommand>(nameof(Role))
             .Property(x => x.Name!)
             .Message(MessageType.MaximumLength)
             .Build();
@@ -93,7 +86,7 @@ public class CreateRoleCommandValidatorTest
         const string existedName = "ADMIN";
         command.Name = existedName;
         MessageResult expectedState = Messenger
-            .Create<RolePayload>(nameof(Role))
+            .Create<RoleUpsertCommand>(nameof(Role))
             .Property(x => x.Name!)
             .Message(MessageType.Existence)
             .Build();
@@ -124,7 +117,7 @@ public class CreateRoleCommandValidatorTest
 
         //assert
         MessageResult expectedState = Messenger
-            .Create<RolePayload>(nameof(Role))
+            .Create<RoleUpsertCommand>(nameof(Role))
             .Property(x => x.Description!)
             .Message(MessageType.MaximumLength)
             .Build();
@@ -133,92 +126,5 @@ public class CreateRoleCommandValidatorTest
             .ShouldHaveValidationErrorFor(x => x.Description)
             .WithCustomState(expectedState, new MessageResultComparer())
             .Only();
-    }
-
-    [Fact]
-    public async Task Validate_ClaimTypeIsEmpty_ShouldHaveNotEmptyFailure()
-    {
-        // arrage
-        roleClaims.ForEach(claim => claim.ClaimType = null);
-
-        //act
-        var result = await validator.TestValidateAsync(command);
-
-        //assert
-        MessageResult expectedState = Messenger
-            .Create<RoleClaim>(nameof(Role.Claims))
-            .Property(x => x.ClaimType!)
-            .Message(MessageType.Null)
-            .Negative()
-            .Build();
-
-        result
-            .ShouldHaveValidationErrorFor(
-                $"{nameof(CreateRoleCommand.RoleClaims)}[0].{nameof(RoleClaimPayload.ClaimType)}"
-            )
-            .WithCustomState(expectedState, new MessageResultComparer());
-    }
-
-    [Fact]
-    public async Task Validate_ClaimTypeIsNull_ShouldHaveNotEmptyFailure()
-    {
-        // arrage
-        roleClaims.ForEach(claim => claim.ClaimType = string.Empty);
-
-        //act
-        var result = await validator.TestValidateAsync(command);
-
-        //assert
-        MessageResult expectedState = Messenger
-            .Create<RoleClaim>(nameof(Role.Claims))
-            .Property(x => x.ClaimType!)
-            .Message(MessageType.Null)
-            .Negative()
-            .Build();
-        result
-            .ShouldHaveValidationErrorFor(
-                $"{nameof(CreateRoleCommand.RoleClaims)}[0].{nameof(RoleClaimPayload.ClaimType)}"
-            )
-            .WithCustomState(expectedState, new MessageResultComparer());
-    }
-
-    [Fact]
-    public async Task Validate_ClaimValueIsEmpty_ShouldHaveNotEmptyFailureAsync()
-    {
-        roleClaims.ForEach(claim => claim.ClaimValue = null);
-        //act
-        var result = await validator.TestValidateAsync(command);
-        //assert
-        MessageResult expectedState = Messenger
-            .Create<RoleClaim>(nameof(Role.Claims))
-            .Property(x => x.ClaimValue!)
-            .Message(MessageType.Null)
-            .Negative()
-            .Build();
-        result
-            .ShouldHaveValidationErrorFor(
-                $"{nameof(CreateRoleCommand.RoleClaims)}[0].{nameof(RoleClaimPayload.ClaimValue)}"
-            )
-            .WithCustomState(expectedState, new MessageResultComparer());
-    }
-
-    [Fact]
-    public async Task Validate_ClaimValueIsNull_ShouldHaveNotEmptyFailureAsync()
-    {
-        roleClaims.ForEach(claim => claim.ClaimValue = string.Empty);
-        //act
-        var result = await validator.TestValidateAsync(command);
-        //assert
-        MessageResult expectedState = Messenger
-            .Create<RoleClaim>(nameof(Role.Claims))
-            .Property(x => x.ClaimValue!)
-            .Message(MessageType.Null)
-            .Negative()
-            .Build();
-        result
-            .ShouldHaveValidationErrorFor(
-                $"{nameof(CreateRoleCommand.RoleClaims)}[0].{nameof(RoleClaimPayload.ClaimValue)}"
-            )
-            .WithCustomState(expectedState, new MessageResultComparer());
     }
 }

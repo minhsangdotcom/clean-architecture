@@ -8,7 +8,7 @@ using SharedKernel.Common.Messages;
 
 namespace Application.Features.Roles.Queries.Detail;
 
-public class GetRoleDetailHandler(IRoleManager roleManager)
+public class GetRoleDetailHandler(IRoleManager manager)
     : IRequestHandler<GetRoleDetailQuery, Result<RoleDetailResponse>>
 {
     public async ValueTask<Result<RoleDetailResponse>> Handle(
@@ -16,22 +16,22 @@ public class GetRoleDetailHandler(IRoleManager roleManager)
         CancellationToken cancellationToken
     )
     {
-        // Role? role = await roleManagerService.FindByIdAsync(query.Id);
+        Role? role = await manager.FindByIdAsync(query.Id, cancellationToken);
 
-        // if (role == null)
-        // {
-        //     return Result<RoleDetailResponse>.Failure(
-        //         new NotFoundError(
-        //             TitleMessage.RESOURCE_NOT_FOUND,
-        //             Messenger
-        //                 .Create<Role>()
-        //                 .Message(MessageType.Found)
-        //                 .Negative()
-        //                 .VietnameseTranslation(TranslatableMessage.VI_ROLE_NOT_FOUND)
-        //                 .Build()
-        //         )
-        //     );
-        // }
-        return Result<RoleDetailResponse>.Success(new());
+        if (role == null)
+        {
+            return Result<RoleDetailResponse>.Failure(
+                new NotFoundError(
+                    TitleMessage.RESOURCE_NOT_FOUND,
+                    Messenger
+                        .Create<Role>()
+                        .Message(MessageType.Found)
+                        .Negative()
+                        .VietnameseTranslation(TranslatableMessage.VI_ROLE_NOT_FOUND)
+                        .Build()
+                )
+            );
+        }
+        return Result<RoleDetailResponse>.Success(role.ToRoleDetailResponse());
     }
 }

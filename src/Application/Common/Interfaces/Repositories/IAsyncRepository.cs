@@ -2,6 +2,10 @@ using System.Linq.Expressions;
 
 namespace Application.Common.Interfaces.Repositories;
 
+/// <summary>
+/// Normal Repository Interface with expressions support for Async operations
+/// </summary>
+/// <typeparam name="T"></typeparam>
 public interface IAsyncRepository<T> : IRepository<T>
     where T : class
 {
@@ -23,7 +27,19 @@ public interface IAsyncRepository<T> : IRepository<T>
 
     Task<IEnumerable<T>> ListAsync(CancellationToken cancellationToken = default);
 
+    Task<IEnumerable<T>> ListAsync(
+        Expression<Func<T, bool>> criteria,
+        CancellationToken cancellationToken = default
+    );
+
     Task<IEnumerable<TResult>> ListAsync<TResult>(
+        Expression<Func<T, TResult>> mappingResult,
+        CancellationToken cancellationToken = default
+    )
+        where TResult : class;
+
+    Task<IEnumerable<TResult>> ListAsync<TResult>(
+        Expression<Func<T, bool>> criteria,
         Expression<Func<T, TResult>> mappingResult,
         CancellationToken cancellationToken = default
     )

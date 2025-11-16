@@ -1,5 +1,4 @@
-using Application.Features.Common.Payloads.Users;
-using Application.Features.Common.Projections.Users;
+using Application.Features.Common.Requests.Users;
 using Application.Features.Users.Commands.Create;
 using Application.SubcutaneousTests.Extensions;
 using AutoFixture;
@@ -145,7 +144,7 @@ public class CreateUserHandlerTest(TestingFixture testingFixture) : IAsyncLifeti
                 x => x.UserClaims,
                 [
                     .. Credential
-                        .MANAGER_CLAIMS.Select(x => new UserClaimPayload()
+                        .MANAGER_CLAIMS.Select(x => new UserClaimUpsertCommand()
                         {
                             ClaimType = ClaimTypes.Permission,
                             ClaimValue = x,

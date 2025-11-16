@@ -1,6 +1,4 @@
-using Application.Features.Common.Payloads.Users;
 using Domain.Aggregates.Users;
-using Domain.Aggregates.Users.Enums;
 
 namespace Application.Features.Users.Commands.Update;
 

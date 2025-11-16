@@ -2,14 +2,14 @@ using Application.Common.Extensions;
 using Application.Common.Interfaces.Services;
 using Application.Common.Interfaces.Services.Identity;
 using Application.Common.Interfaces.UnitOfWorks;
-using Application.Features.Common.Payloads.Users;
+using Application.Features.Common.Requests.Users;
 using Domain.Aggregates.Users;
 using FluentValidation;
 using SharedKernel.Common.Messages;
 
 namespace Application.Features.Common.Validators.Users;
 
-public partial class UserValidator : AbstractValidator<UserPayload>
+public partial class UserValidator : AbstractValidator<UserUpsertCommand>
 {
     private readonly IHttpContextAccessorService httpContextAccessorService;
     private readonly IEfUnitOfWork unitOfWork;

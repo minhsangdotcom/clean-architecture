@@ -1,5 +1,4 @@
-using Application.Features.Common.Payloads.Roles;
-using Application.Features.Common.Projections.Roles;
+using Application.Features.Common.Requests.Roles;
 using Contracts.ApiWrapper;
 using Mediator;
 
@@ -9,7 +8,7 @@ public class UpdateRoleCommand : IRequest<Result<UpdateRoleResponse>>
 {
     public string RoleId { get; set; } = string.Empty;
 
-    public RoleUpdateRequest UpdateData { get; set; } = null!;
+    public UpdateRoleRequest UpdateData { get; set; } = null!;
 }
 
-public class RoleUpdateRequest : RolePayload;
+public class UpdateRoleRequest : RoleUpsertCommand;

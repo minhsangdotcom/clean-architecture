@@ -3,7 +3,7 @@ using SharedKernel.Models;
 
 namespace Application.Features.Common.Projections.Roles;
 
-public class RoleProjection : DefaultBaseResponse
+public class RoleProjection : BaseResponse
 {
     public string? Description { get; set; }
 

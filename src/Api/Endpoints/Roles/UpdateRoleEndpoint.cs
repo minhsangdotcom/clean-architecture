@@ -25,7 +25,7 @@ public class UpdateRoleEndpoint : IEndpoint
                     "Updates an existing role's information. You can modify the name and add or remove claims/permissions. This endpoint helps ensure your authorization model stays current with your users' needs.",
                 Tags = [new OpenApiTag() { Name = Router.RoleRoute.Tags }],
             })
-            .WithRequestValidation<RoleUpdateRequest>()
+            .WithRequestValidation<UpdateRoleRequest>()
             .RequireAuth(
                 permissions: Permission.Generate(PermissionAction.Update, PermissionResource.Role)
             );
@@ -33,7 +33,7 @@ public class UpdateRoleEndpoint : IEndpoint
 
     private async Task<Results<Ok<ApiResponse<UpdateRoleResponse>>, ProblemHttpResult>> HandleAsync(
         [FromRoute] string id,
-        [FromBody] RoleUpdateRequest request,
+        [FromBody] UpdateRoleRequest request,
         [FromServices] ISender sender,
         CancellationToken cancellationToken = default
     )

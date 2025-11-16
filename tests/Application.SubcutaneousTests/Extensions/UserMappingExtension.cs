@@ -1,9 +1,6 @@
-using Application.Features.Common.Payloads.Users;
-using Application.Features.Common.Projections.Users;
 using Application.Features.Users.Commands.Profiles;
 using Application.Features.Users.Commands.Update;
 using Domain.Aggregates.Users;
-using Domain.Aggregates.Users.Enums;
 
 namespace Application.SubcutaneousTests.Extensions;
 

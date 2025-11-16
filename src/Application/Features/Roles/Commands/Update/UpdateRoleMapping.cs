@@ -4,11 +4,10 @@ namespace Application.Features.Roles.Commands.Update;
 
 public static class UpdateRoleMapping
 {
-    public static Role FromUpdateRole(this Role role, RoleUpdateRequest RoleUpdateRequest)
+    public static void FromCommand(this Role role, UpdateRoleCommand command)
     {
-        role.SetName(RoleUpdateRequest.Name!);
-        role.Description = RoleUpdateRequest.Description;
-        return role;
+        var roleRequest = command.UpdateData;
+        role.Update(roleRequest.Name!, roleRequest.Description);
     }
 
     public static UpdateRoleResponse ToUpdateRoleResponse(this Role role)

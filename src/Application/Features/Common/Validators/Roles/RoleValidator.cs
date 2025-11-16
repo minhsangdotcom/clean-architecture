@@ -1,14 +1,16 @@
 using Application.Common.Interfaces.Services;
 using Application.Common.Interfaces.UnitOfWorks;
-using Application.Features.Common.Payloads.Roles;
+using Application.Features.Common.Requests.Roles;
 using CaseConverter;
+using Domain.Aggregates.Permissions;
 using Domain.Aggregates.Roles;
+using DotNetCoreExtension.Extensions;
 using FluentValidation;
 using SharedKernel.Common.Messages;
 
 namespace Application.Features.Common.Validators.Roles;
 
-public class RoleValidator : AbstractValidator<RolePayload>
+public class RoleValidator : AbstractValidator<RoleUpsertCommand>
 {
     private readonly IEfUnitOfWork unitOfWork;
     private readonly IHttpContextAccessorService httpContextAccessorService;
@@ -31,7 +33,7 @@ public class RoleValidator : AbstractValidator<RolePayload>
             .NotEmpty()
             .WithState(x =>
                 Messenger
-                    .Create<RolePayload>(nameof(Role))
+                    .Create<RoleUpsertCommand>(nameof(Role))
                     .Property(x => x.Name!)
                     .Negative()
                     .Message(MessageType.Null)
@@ -40,7 +42,7 @@ public class RoleValidator : AbstractValidator<RolePayload>
             .MaximumLength(256)
             .WithState(x =>
                 Messenger
-                    .Create<RolePayload>(nameof(Role))
+                    .Create<RoleUpsertCommand>(nameof(Role))
                     .Property(x => x.Name!)
                     .Message(MessageType.MaximumLength)
                     .Build()
@@ -55,7 +57,7 @@ public class RoleValidator : AbstractValidator<RolePayload>
             )
             .WithState(x =>
                 Messenger
-                    .Create<RolePayload>(nameof(Role))
+                    .Create<RoleUpsertCommand>(nameof(Role))
                     .Property(x => x.Name!)
                     .Message(MessageType.Existence)
                     .Build()
@@ -69,7 +71,7 @@ public class RoleValidator : AbstractValidator<RolePayload>
             )
             .WithState(x =>
                 Messenger
-                    .Create<RolePayload>(nameof(Role))
+                    .Create<RoleUpsertCommand>(nameof(Role))
                     .Property(x => x.Name!)
                     .Message(MessageType.Existence)
                     .Build()
@@ -80,19 +82,43 @@ public class RoleValidator : AbstractValidator<RolePayload>
             .When(x => x.Description != null, ApplyConditionTo.CurrentValidator)
             .WithState(x =>
                 Messenger
-                    .Create<RolePayload>(nameof(Role))
+                    .Create<RoleUpsertCommand>(nameof(Role))
                     .Property(x => x.Description!)
                     .Message(MessageType.MaximumLength)
                     .Build()
             );
 
-        When(
-            x => x.RoleClaims != null,
-            () =>
-            {
-                RuleForEach(x => x.RoleClaims).SetValidator(new RoleClaimValidator());
-            }
-        );
+        RuleFor(x => x.PermissionIds)
+            .NotEmpty()
+            .WithState(x =>
+                Messenger
+                    .Create<Role>()
+                    .Property(x => x.Permissions)
+                    .Negative()
+                    .Message(MessageType.Null)
+                    .Build()
+            )
+            .Must(x => x!.Distinct().Count() == x!.Count)
+            .WithState(x =>
+                Messenger
+                    .Create<Role>()
+                    .Property(x => x.Permissions)
+                    .Message(MessageType.Unique)
+                    .Negative()
+                    .Build()
+            )
+            .MustAsync(
+                (permissionIds, cancellationToken) =>
+                    IsAnyPermissionExistentAsync(permissionIds!, cancellationToken)
+            )
+            .WithState(x =>
+                Messenger
+                    .Create<Role>()
+                    .Property(x => x.Permissions)
+                    .Message(MessageType.Existence)
+                    .Negative()
+                    .Build()
+            );
     }
 
     private async Task<bool> IsNameAvailableAsync(
@@ -101,12 +127,23 @@ public class RoleValidator : AbstractValidator<RolePayload>
         CancellationToken cancellationToken = default
     )
     {
-        string caseName = name.ToSnakeCase();
+        string caseName = name.ToScreamingSnakeCase();
         return !await unitOfWork
             .Repository<Role>()
             .AnyAsync(
                 x => (!id.HasValue && x.Name == caseName) || (x.Id != id && x.Name == caseName),
                 cancellationToken
             );
+    }
+
+    private async Task<bool> IsAnyPermissionExistentAsync(
+        List<Ulid> permissionIds,
+        CancellationToken cancellationToken = default
+    )
+    {
+        return await unitOfWork
+                .Repository<Permission>()
+                .CountAsync(x => permissionIds.Contains(x.Id), cancellationToken)
+            == permissionIds.Count;
     }
 }

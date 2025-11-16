@@ -25,11 +25,23 @@ public partial class CachedAsyncRepository<T>(IAsyncRepository<T> repository) : 
     public async Task<IEnumerable<T>> ListAsync(CancellationToken cancellationToken = default) =>
         await repository.ListAsync(cancellationToken);
 
+    public Task<IEnumerable<T>> ListAsync(
+        Expression<Func<T, bool>> criteria,
+        CancellationToken cancellationToken = default
+    ) => repository.ListAsync(criteria, cancellationToken);
+
     public async Task<IEnumerable<TResult>> ListAsync<TResult>(
         Expression<Func<T, TResult>> mappingResult,
         CancellationToken cancellationToken = default
     )
         where TResult : class => await repository.ListAsync(mappingResult, cancellationToken);
+
+    public Task<IEnumerable<TResult>> ListAsync<TResult>(
+        Expression<Func<T, bool>> criteria,
+        Expression<Func<T, TResult>> mappingResult,
+        CancellationToken cancellationToken = default
+    )
+        where TResult : class => repository.ListAsync(criteria, mappingResult, cancellationToken);
 
     public async Task<T> AddAsync(T entity, CancellationToken cancellationToken = default) =>
         await repository.AddAsync(entity, cancellationToken);

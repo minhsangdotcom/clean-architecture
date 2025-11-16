@@ -5,7 +5,7 @@ using FluentValidation;
 
 namespace Application.Features.Roles.Commands.Update;
 
-public class UpdateRoleCommandValidator : AbstractValidator<RoleUpdateRequest>
+public class UpdateRoleCommandValidator : AbstractValidator<UpdateRoleRequest>
 {
     public UpdateRoleCommandValidator(
         IEfUnitOfWork unitOfWork,

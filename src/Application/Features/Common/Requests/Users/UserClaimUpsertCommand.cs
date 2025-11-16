@@ -1,6 +1,6 @@
-namespace Application.Features.Common.Payloads.Roles;
+namespace Application.Features.Common.Requests.Users;
 
-public class RoleClaimPayload
+public class UserClaimUpsertCommand
 {
     public Ulid? Id { get; set; }
 

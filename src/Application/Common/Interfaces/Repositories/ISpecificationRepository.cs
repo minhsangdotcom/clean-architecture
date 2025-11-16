@@ -8,7 +8,7 @@ namespace Application.Common.Interfaces.Repositories;
 /// <summary>
 /// Repository using <see cref="ISpecification{T}"/> for static, pre-defined queries.
 /// Encapsulates filter, search, sort, and pagination logic for performance and reusability.
-/// Use when queries are fixed; for dynamic queries, use the dynamic repository.
+/// Use when queries are fixed; for dynamic queries, use the IDynamicSpecificationRepository.
 /// </summary>
 public interface ISpecificationRepository<T> : IRepository<T>
     where T : class

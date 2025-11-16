@@ -34,12 +34,29 @@ public class AsyncRepository<T>(IEfDbContext dbContext) : IAsyncRepository<T>
     public async Task<IEnumerable<T>> ListAsync(CancellationToken cancellationToken = default) =>
         await dbContext.Set<T>().ToListAsync(cancellationToken);
 
+    public async Task<IEnumerable<T>> ListAsync(
+        Expression<Func<T, bool>> criteria,
+        CancellationToken cancellationToken = default
+    ) => await dbContext.Set<T>().Where(criteria ?? (x => true)).ToListAsync(cancellationToken);
+
     public async Task<IEnumerable<TResult>> ListAsync<TResult>(
         Expression<Func<T, TResult>> mappingResult,
         CancellationToken cancellationToken = default
     )
         where TResult : class =>
         await dbContext.Set<T>().Select(mappingResult).ToListAsync(cancellationToken);
+
+    public async Task<IEnumerable<TResult>> ListAsync<TResult>(
+        Expression<Func<T, bool>> criteria,
+        Expression<Func<T, TResult>> mappingResult,
+        CancellationToken cancellationToken = default
+    )
+        where TResult : class =>
+        await dbContext
+            .Set<T>()
+            .Where(criteria ?? (x => true))
+            .Select(mappingResult)
+            .ToListAsync(cancellationToken);
 
     public IQueryable<T> QueryAsync(Expression<Func<T, bool>>? criteria = null) =>
         dbContext.Set<T>().Where(criteria ?? (x => true));

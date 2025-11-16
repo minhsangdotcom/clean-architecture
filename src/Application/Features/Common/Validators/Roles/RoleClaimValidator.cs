@@ -1,11 +1,11 @@
-using Application.Features.Common.Payloads.Roles;
+using Application.Features.Common.Requests.Roles;
 using Domain.Aggregates.Roles;
 using FluentValidation;
 using SharedKernel.Common.Messages;
 
 namespace Application.Features.Common.Validators.Roles;
 
-public class RoleClaimValidator : AbstractValidator<RoleClaimPayload>
+public class RoleClaimValidator : AbstractValidator<RoleClaimUpsertCommand>
 {
     public RoleClaimValidator()
     {

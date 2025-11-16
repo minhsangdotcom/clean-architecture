@@ -1,8 +1,8 @@
 using Microsoft.AspNetCore.Http;
 
-namespace Application.Features.Common.Payloads.Users;
+namespace Application.Features.Common.Requests.Users;
 
-public class UserPayload
+public class UserUpsertCommand
 {
     public string? FirstName { get; set; }
 

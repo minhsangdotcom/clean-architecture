@@ -13,15 +13,21 @@ public class Role : AggregateRoot
     public string Name { get; private set; } = string.Empty;
     public string? Description { get; set; }
 
-    public ICollection<UserRole>? Users { get; set; } = [];
-    public ICollection<RoleClaim>? Claims { get; set; } = [];
-    public ICollection<RolePermission> Permissions { get; set; } = [];
+    public ICollection<UserRole>? Users { get; private set; } = [];
+    public ICollection<RoleClaim>? Claims { get; private set; } = [];
+    public ICollection<RolePermission> Permissions { get; private set; } = [];
 
     private Role() { }
 
     public Role(string name, string? description)
     {
         Name = Guard.Against.NullOrEmpty(name, nameof(name)).ToScreamingSnakeCase();
+        Description = description;
+    }
+
+    public void Update(string name, string? description)
+    {
+        SetName(name);
         Description = description;
     }
 

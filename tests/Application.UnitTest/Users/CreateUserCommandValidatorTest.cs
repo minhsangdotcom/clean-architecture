@@ -1,6 +1,6 @@
 using System.Text.RegularExpressions;
-using Application.Features.Common.Payloads.Users;
 using Application.Features.Common.Projections.Users;
+using Application.Features.Common.Requests.Users;
 using Application.Features.Common.Validators.Users;
 using Application.Features.Users.Commands.Create;
 using AutoFixture;
@@ -32,7 +32,7 @@ public partial class CreateUserCommandValidatorTest
         //     .Without(x => x.Avatar)
         //     .With(
         //         x => x.UserClaims,
-        //         [new UserClaimPayload() { ClaimType = "test", ClaimValue = "test.value" }]
+        //         [new UserClaimUpsertCommand() { ClaimType = "test", ClaimValue = "test.value" }]
         //     )
         //     .With(x => x.Roles, [roleId])
         //     .With(x => x.Email, "admin@gmail.com")
@@ -618,7 +618,7 @@ public partial class CreateUserCommandValidatorTest
         var result = await mockValidator.TestValidateAsync(command);
         //assert
         result.ShouldHaveValidationErrorFor(
-            $"{nameof(User.Claims)}[0].{nameof(UserClaimPayload.ClaimType)}"
+            $"{nameof(User.Claims)}[0].{nameof(UserClaimUpsertCommand.ClaimType)}"
         );
     }
 
@@ -642,7 +642,7 @@ public partial class CreateUserCommandValidatorTest
         var result = await mockValidator.TestValidateAsync(command);
         //assert
         result.ShouldHaveValidationErrorFor(
-            $"{nameof(User.Claims)}[0].{nameof(UserClaimPayload.ClaimValue)}"
+            $"{nameof(User.Claims)}[0].{nameof(UserClaimUpsertCommand.ClaimValue)}"
         );
     }
 
@@ -650,7 +650,7 @@ public partial class CreateUserCommandValidatorTest
     public async Task Validate_WhenDuplicateClaim_ShouldReturnUniqueFailure()
     {
         command!.UserClaims!.Add(
-            new UserClaimPayload() { ClaimType = "test", ClaimValue = "test.value" }
+            new UserClaimUpsertCommand() { ClaimType = "test", ClaimValue = "test.value" }
         );
 
         var expectedState = Messenger

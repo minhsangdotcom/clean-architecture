@@ -7,14 +7,8 @@ namespace Domain.Aggregates.Permissions;
 
 public class Permission : AggregateRoot
 {
-    /// <summary>
-    /// Unique code for this permission (e.g. "Product.Create", "Order.View").
-    /// </summary>
     public string Code { get; private set; } = string.Empty;
 
-    /// <summary>
-    /// Human-readable name (e.g. "Create Product").
-    /// </summary>
     public string Name { get; private set; } = string.Empty;
 
     public string? Description { get; private set; }

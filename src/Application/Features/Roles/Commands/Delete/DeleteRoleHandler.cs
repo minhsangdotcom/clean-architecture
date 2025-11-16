@@ -8,7 +8,7 @@ using SharedKernel.Common.Messages;
 
 namespace Application.Features.Roles.Commands.Delete;
 
-public class DeleteRoleHandler(IRoleManager roleManager)
+public class DeleteRoleHandler(IRoleManager manager)
     : IRequestHandler<DeleteRoleCommand, Result<string>>
 {
     public async ValueTask<Result<string>> Handle(
@@ -16,25 +16,23 @@ public class DeleteRoleHandler(IRoleManager roleManager)
         CancellationToken cancellationToken
     )
     {
-        //Role? role = await roleManager.FindByIdAsync(command.RoleId);
+        Role? role = await manager.FindByIdAsync(command.RoleId, cancellationToken);
+        if (role == null)
+        {
+            return Result<string>.Failure(
+                new NotFoundError(
+                    TitleMessage.RESOURCE_NOT_FOUND,
+                    Messenger
+                        .Create<Role>()
+                        .Message(MessageType.Found)
+                        .Negative()
+                        .VietnameseTranslation(TranslatableMessage.VI_ROLE_NOT_FOUND)
+                        .BuildMessage()
+                )
+            );
+        }
 
-        // if (role == null)
-        // {
-        //     return Result<string>.Failure(
-        //         new NotFoundError(
-        //             TitleMessage.RESOURCE_NOT_FOUND,
-        //             Messenger
-        //                 .Create<Role>()
-        //                 .Message(MessageType.Found)
-        //                 .Negative()
-        //                 .VietnameseTranslation(TranslatableMessage.VI_ROLE_NOT_FOUND)
-        //                 .BuildMessage()
-        //         )
-        //     );
-        // }
-
-        //await roleManagerService.DeleteAsync(role);
-
+        await manager.DeleteAsync(role, cancellationToken);
         return Result<string>.Success();
     }
 }

@@ -1,8 +1,5 @@
 using System.Text.Json;
-using Application.Common.Interfaces.Services.Identity;
 using Application.Common.Interfaces.UnitOfWorks;
-using Application.Features.Common.Payloads.Users;
-using Application.Features.Common.Projections.Users;
 using Application.Features.Users.Commands.Create;
 using Contracts.ApiWrapper;
 using Domain.Aggregates.Regions;
@@ -11,7 +8,6 @@ using Domain.Aggregates.Users;
 using Domain.Aggregates.Users.Enums;
 using Domain.Aggregates.Users.Specifications;
 using Microsoft.AspNetCore.Http;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Application.SubcutaneousTests;
@@ -85,12 +81,6 @@ public partial class TestingFixture
                 Roles = roles,
                 Status = UserStatus.Active,
                 Avatar = avatar,
-                UserClaims =
-                [
-                    new UserClaimPayload() { ClaimType = "test1", ClaimValue = "test1.value" },
-                    new UserClaimPayload() { ClaimType = "test2", ClaimValue = "test2.value" },
-                    new UserClaimPayload() { ClaimType = "test3", ClaimValue = "test3.value" },
-                ],
             };
 
         var user = await CreateUserAsync(command);
@@ -122,12 +112,6 @@ public partial class TestingFixture
                 Roles = roles,
                 Status = UserStatus.Active,
                 Avatar = avatar,
-                UserClaims =
-                [
-                    new UserClaimPayload() { ClaimType = "test1", ClaimValue = "test1.value" },
-                    new UserClaimPayload() { ClaimType = "test2", ClaimValue = "test2.value" },
-                    new UserClaimPayload() { ClaimType = "test3", ClaimValue = "test3.value" },
-                ],
             };
 
         var user = await CreateUserAsync(command);
@@ -159,12 +143,6 @@ public partial class TestingFixture
                 Roles = roles,
                 Status = UserStatus.Active,
                 Avatar = avatar,
-                UserClaims =
-                [
-                    new UserClaimPayload() { ClaimType = "test1", ClaimValue = "test1.value" },
-                    new UserClaimPayload() { ClaimType = "test2", ClaimValue = "test2.value" },
-                    new UserClaimPayload() { ClaimType = "test3", ClaimValue = "test3.value" },
-                ],
             };
 
         var user = await CreateUserAsync(command);

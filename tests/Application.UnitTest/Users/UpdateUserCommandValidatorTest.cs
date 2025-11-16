@@ -1,8 +1,8 @@
 using Application.Common.Interfaces.Services;
 using Application.Common.Interfaces.Services.Identity;
 using Application.Common.Interfaces.UnitOfWorks;
-using Application.Features.Common.Payloads.Users;
 using Application.Features.Common.Projections.Users;
+using Application.Features.Common.Requests.Users;
 using Application.Features.Users.Commands.Update;
 using AutoFixture;
 using Domain.Aggregates.Users;
@@ -39,7 +39,7 @@ public class UpdateUserCommandValidatorTest
         //     .Without(x => x.Avatar)
         //     .With(
         //         x => x.UserClaims,
-        //         [new UserClaimPayload() { ClaimType = "test", ClaimValue = "test.value" }]
+        //         [new UserClaimUpsertCommand() { ClaimType = "test", ClaimValue = "test.value" }]
         //     )
         //     .With(x => x.Roles, [Ulid.Parse("01JS72XZJ6NFKFVWA9QM03RY5G")])
         //     .With(x => x.Email, "admin@gmail.com")
@@ -360,7 +360,7 @@ public class UpdateUserCommandValidatorTest
             .Negative()
             .Build();
         result.ShouldHaveValidationErrorFor(
-            $"{nameof(User.Claims)}[0].{nameof(UserClaimPayload.ClaimType)}"
+            $"{nameof(User.Claims)}[0].{nameof(UserClaimUpsertCommand.ClaimType)}"
         );
     }
 
@@ -381,7 +381,7 @@ public class UpdateUserCommandValidatorTest
             .Negative()
             .Build();
         result.ShouldHaveValidationErrorFor(
-            $"{nameof(User.Claims)}[0].{nameof(UserClaimPayload.ClaimValue)}"
+            $"{nameof(User.Claims)}[0].{nameof(UserClaimUpsertCommand.ClaimValue)}"
         );
     }
 
