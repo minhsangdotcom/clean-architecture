@@ -3,7 +3,6 @@ using Application.Common.Interfaces.Services.Identity;
 using DotNetCoreExtension.Extensions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.DependencyInjection;
-using SharedKernel.Constants;
 
 namespace Application.Common.Auth;
 

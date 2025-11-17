@@ -1,7 +1,6 @@
 using Application.Common.Interfaces.Services;
 using Application.Common.Interfaces.UnitOfWorks;
 using Application.Features.Common.Requests.Roles;
-using CaseConverter;
 using Domain.Aggregates.Permissions;
 using Domain.Aggregates.Roles;
 using DotNetCoreExtension.Extensions;
@@ -109,7 +108,7 @@ public class RoleValidator : AbstractValidator<RoleUpsertCommand>
             )
             .MustAsync(
                 (permissionIds, cancellationToken) =>
-                    IsAnyPermissionExistentAsync(permissionIds!, cancellationToken)
+                    IsAllPermissionExistentAsync(permissionIds!, cancellationToken)
             )
             .WithState(x =>
                 Messenger
@@ -131,12 +130,12 @@ public class RoleValidator : AbstractValidator<RoleUpsertCommand>
         return !await unitOfWork
             .Repository<Role>()
             .AnyAsync(
-                x => (!id.HasValue && x.Name == caseName) || (x.Id != id && x.Name == caseName),
+                x => (!id.HasValue && x.Name == caseName) || x.Name == caseName,
                 cancellationToken
             );
     }
 
-    private async Task<bool> IsAnyPermissionExistentAsync(
+    private async Task<bool> IsAllPermissionExistentAsync(
         List<Ulid> permissionIds,
         CancellationToken cancellationToken = default
     )

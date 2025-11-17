@@ -1,6 +1,5 @@
 using Application.Common.Extensions;
 using Application.Common.Interfaces.Services;
-using Application.Common.Interfaces.Services.Identity;
 using Application.Common.Interfaces.UnitOfWorks;
 using Application.Features.Common.Requests.Users;
 using Domain.Aggregates.Users;
