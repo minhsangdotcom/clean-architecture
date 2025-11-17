@@ -2,7 +2,6 @@ using Api.common.EndpointConfigurations;
 using Api.common.Results;
 using Api.common.Routers;
 using Application.Features.Users.Commands.Delete;
-using Infrastructure.Constants;
 using Mediator;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
@@ -25,7 +24,10 @@ public class DeleteUserEndpoint : IEndpoint
                 Tags = [new OpenApiTag() { Name = Router.UserRoute.Tags }],
             })
             .RequireAuth(
-                permissions: Permission.Generate(PermissionAction.Delete, PermissionResource.User)
+                permissions: PermissionGenerator.Generate(
+                    PermissionAction.Delete,
+                    PermissionResource.User
+                )
             );
     }
 

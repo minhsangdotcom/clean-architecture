@@ -29,7 +29,10 @@ public class ListUserEndpoint : IEndpoint
                 Parameters = operation.AddDocs(),
             })
             .RequireAuth(
-                permissions: Permission.Generate(PermissionAction.List, PermissionResource.User)
+                permissions: PermissionGenerator.Generate(
+                    PermissionAction.List,
+                    PermissionResource.User
+                )
             );
     }
 

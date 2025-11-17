@@ -28,7 +28,10 @@ public class ListQueueLogEndpoint : IEndpoint
                 Parameters = operation.AddDocs(),
             })
             .RequireAuth(
-                permissions: Permission.Generate(PermissionAction.List, PermissionResource.QueueLog)
+                permissions: PermissionGenerator.Generate(
+                    PermissionAction.List,
+                    PermissionResource.QueueLog
+                )
             );
     }
 

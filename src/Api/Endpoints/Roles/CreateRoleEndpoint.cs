@@ -3,7 +3,6 @@ using Api.common.Results;
 using Api.common.Routers;
 using Application.Features.Roles.Commands.Create;
 using Contracts.ApiWrapper;
-using Infrastructure.Constants;
 using Mediator;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
@@ -28,7 +27,10 @@ public class CreateRoleEndpoint : IEndpoint
             })
             .WithRequestValidation<CreateRoleCommand>()
             .RequireAuth(
-                permissions: Permission.Generate(PermissionAction.Create, PermissionResource.Role)
+                permissions: PermissionGenerator.Generate(
+                    PermissionAction.Create,
+                    PermissionResource.Role
+                )
             );
     }
 

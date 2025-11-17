@@ -26,7 +26,10 @@ public class UpdateUserEndpoint : IEndpoint
             })
             .WithRequestValidation<UserUpdateRequest>()
             .RequireAuth(
-                permissions: Permission.Generate(PermissionAction.Update, PermissionResource.User)
+                permissions: PermissionGenerator.Generate(
+                    PermissionAction.Update,
+                    PermissionResource.User
+                )
             )
             .DisableAntiforgery();
     }

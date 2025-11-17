@@ -27,7 +27,10 @@ public class GetUserDetailEndpoint : IEndpoint
                 Tags = [new OpenApiTag() { Name = Router.UserRoute.Tags }],
             })
             .RequireAuth(
-                permissions: Permission.Generate(PermissionAction.Detail, PermissionResource.User)
+                permissions: PermissionGenerator.Generate(
+                    PermissionAction.Detail,
+                    PermissionResource.User
+                )
             );
     }
 

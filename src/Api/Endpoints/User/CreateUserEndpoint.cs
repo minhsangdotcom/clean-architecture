@@ -26,7 +26,10 @@ public class CreateUserEndpoint : IEndpoint
             })
             .WithRequestValidation<CreateUserCommand>()
             .RequireAuth(
-                permissions: Permission.Generate(PermissionAction.Create, PermissionResource.User)
+                permissions: PermissionGenerator.Generate(
+                    PermissionAction.Create,
+                    PermissionResource.User
+                )
             )
             .DisableAntiforgery();
     }

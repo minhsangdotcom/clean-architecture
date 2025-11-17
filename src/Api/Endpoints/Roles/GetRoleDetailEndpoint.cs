@@ -28,7 +28,10 @@ public class GetRoleDetailEndpoint : IEndpoint
                 Tags = [new OpenApiTag() { Name = Router.RoleRoute.Tags }],
             })
             .RequireAuth(
-                permissions: Permission.Generate(PermissionAction.Detail, PermissionResource.Role)
+                permissions: PermissionGenerator.Generate(
+                    PermissionAction.Detail,
+                    PermissionResource.Role
+                )
             );
     }
 

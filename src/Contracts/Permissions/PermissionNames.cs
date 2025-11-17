@@ -4,7 +4,7 @@ namespace Contracts.Permissions;
 
 public static class PermissionNames
 {
-    public static class Permission
+    public static class PermissionGenerator
     {
         public static string Generate(string resource, string action) =>
             $"{resource.ToKebabCase()}.{action.ToKebabCase()}";

@@ -7,7 +7,7 @@ public class SystemPermissionDefinitionProvider : PermissionDefinitionProvider
         PermissionGroupDefinition roleGroup = context.AddGroup("RoleManagement", "Role Management");
 
         PermissionDefinition listRole = roleGroup.AddPermission(
-            PermissionNames.Permission.Generate(
+            PermissionNames.PermissionGenerator.Generate(
                 PermissionNames.PermissionResource.Role,
                 PermissionNames.PermissionAction.List
             ),
@@ -15,7 +15,7 @@ public class SystemPermissionDefinitionProvider : PermissionDefinitionProvider
         );
 
         PermissionDefinition detailRole = roleGroup.AddPermission(
-            PermissionNames.Permission.Generate(
+            PermissionNames.PermissionGenerator.Generate(
                 PermissionNames.PermissionResource.Role,
                 PermissionNames.PermissionAction.Detail
             ),
@@ -24,7 +24,7 @@ public class SystemPermissionDefinitionProvider : PermissionDefinitionProvider
         detailRole.AddChild(listRole);
 
         PermissionDefinition createRole = roleGroup.AddPermission(
-            PermissionNames.Permission.Generate(
+            PermissionNames.PermissionGenerator.Generate(
                 PermissionNames.PermissionResource.Role,
                 PermissionNames.PermissionAction.Create
             ),
@@ -33,7 +33,7 @@ public class SystemPermissionDefinitionProvider : PermissionDefinitionProvider
         createRole.AddChild(listRole);
 
         PermissionDefinition updateRole = roleGroup.AddPermission(
-            PermissionNames.Permission.Generate(
+            PermissionNames.PermissionGenerator.Generate(
                 PermissionNames.PermissionResource.Role,
                 PermissionNames.PermissionAction.Update
             ),
@@ -42,7 +42,7 @@ public class SystemPermissionDefinitionProvider : PermissionDefinitionProvider
         updateRole.AddChild(detailRole);
 
         PermissionDefinition deleteRole = roleGroup.AddPermission(
-            PermissionNames.Permission.Generate(
+            PermissionNames.PermissionGenerator.Generate(
                 PermissionNames.PermissionResource.Role,
                 PermissionNames.PermissionAction.Delete
             ),
@@ -51,7 +51,7 @@ public class SystemPermissionDefinitionProvider : PermissionDefinitionProvider
         deleteRole.AddChild(listRole);
 
         PermissionDefinition testTole = roleGroup.AddPermission(
-            PermissionNames.Permission.Generate(
+            PermissionNames.PermissionGenerator.Generate(
                 PermissionNames.PermissionResource.Role,
                 PermissionNames.PermissionAction.Test
             ),
