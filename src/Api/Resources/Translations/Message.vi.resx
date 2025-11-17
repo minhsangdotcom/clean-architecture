@@ -295,4 +295,7 @@
     <value>Mật khẩu mới</value>
     <comment>   </comment>
   </data>
+  <data name="Permissions" xml:space="preserve">
+    <value>Quyền</value>
+  </data>
 </root>

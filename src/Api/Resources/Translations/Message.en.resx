@@ -298,4 +298,8 @@
     <value>New password</value>
     <comment>   </comment>
   </data>
+  <data name="Permissions" xml:space="preserve">
+    <value>Permissions</value>
+    <comment>isPlural=true</comment>
+  </data>
 </root>
