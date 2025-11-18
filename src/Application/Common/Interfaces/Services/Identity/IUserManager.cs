@@ -77,12 +77,12 @@ public interface IUserManager
     Task<bool> HasAnyPermissionAsync(
         User user,
         IEnumerable<string> permissions,
-        CancellationToken cancellationToken
+        CancellationToken cancellationToken = default
     );
     Task<bool> HasAllPermissionAsync(
         User user,
         IEnumerable<string> permissions,
-        CancellationToken cancellationToken
+        CancellationToken cancellationToken = default
     );
     #endregion
 }
