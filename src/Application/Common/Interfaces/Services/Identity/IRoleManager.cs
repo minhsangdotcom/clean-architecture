@@ -24,15 +24,15 @@ public interface IRoleManager
         CancellationToken cancellationToken = default
     );
 
-    Task<bool> HasPermissionAsync(
+    Task<bool> HasAnyPermissionAsync(
         Role role,
-        string permissionCode,
+        IEnumerable<string> permissionCode,
         CancellationToken cancellationToken = default
     );
 
-    Task AddPermissionAsync(
+    Task<bool> HasAllPermissionAsync(
         Role role,
-        Permission permission,
+        IEnumerable<string> permissionCode,
         CancellationToken cancellationToken = default
     );
 
@@ -42,22 +42,9 @@ public interface IRoleManager
         CancellationToken cancellationToken = default
     );
 
-    Task RemovePermissionAsync(
-        Role role,
-        Permission permission,
-        CancellationToken cancellationToken = default
-    );
-
     Task RemovePermissionsAsync(
         Role role,
         IEnumerable<Permission> permissions,
-        CancellationToken cancellationToken = default
-    );
-
-    Task ReplacePermissionAsync(
-        Role role,
-        Permission oldPermission,
-        Permission newPermission,
         CancellationToken cancellationToken = default
     );
 
@@ -70,5 +57,11 @@ public interface IRoleManager
     Task ClearPermissionsAsync(Role role, CancellationToken cancellationToken = default);
     #endregion
 
+    #region Validations
     Task<bool> RoleExistsAsync(string roleName, CancellationToken cancellationToken = default);
+    Task<bool> AllRolesExistAsync(
+        IEnumerable<string> roleNames,
+        CancellationToken cancellationToken = default
+    );
+    #endregion
 }

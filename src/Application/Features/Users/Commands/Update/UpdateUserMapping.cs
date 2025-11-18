@@ -6,10 +6,10 @@ public static class UpdateUserMapping
 {
     public static User FromUpdateUser(this User user, UserUpdateRequest update)
     {
-        return user.FromMapping(
-            update.FirstName,
-            update.LastName,
-            update.Email,
+        return user.Update(
+            update.FirstName!,
+            update.LastName!,
+            update.Email!,
             update.PhoneNumber,
             update.DateOfBirth
         );

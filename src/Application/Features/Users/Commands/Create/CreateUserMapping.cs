@@ -10,7 +10,7 @@ public static class CreateUserMapping
             command.FirstName!,
             command.LastName!,
             command.Username!,
-            HashPassword(command.Password!),
+            command.Password!,
             command.Email!,
             command.PhoneNumber!,
             command.DateOfBirth,

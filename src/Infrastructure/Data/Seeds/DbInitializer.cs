@@ -23,14 +23,21 @@ public class DbInitializer
         IReadOnlyDictionary<string, PermissionGroupDefinition> groups = permissionContext.Groups;
         List<GroupedPermissionDefinition> groupedPermissions =
         [
-            .. groups.Select(g => new GroupedPermissionDefinition(g.Key, [.. g.Value.Permissions])),
+            .. groups.Select(g => new GroupedPermissionDefinition(
+                g.Key,
+                [.. g.Value.Permissions.DistinctBy(p => p.Code)]
+            )),
         ];
 
         List<Permission> permissions =
         [
             .. groupedPermissions.SelectMany(g =>
-                g.Permissions.DistinctBy(x => x.Code)
-                    .Select(p => new Permission(p.Code, p.Name, p.Description, g.GroupName))
+                g.Permissions.Select(p => new Permission(
+                    p.Code,
+                    p.Name,
+                    p.Description,
+                    g.GroupName
+                ))
             ),
         ];
 

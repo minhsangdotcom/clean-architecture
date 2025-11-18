@@ -37,7 +37,6 @@ public class RoleManager(IEfDbContext dbContext) : IRoleManager
     #endregion
 
     #region Queries
-
     public async Task<Role?> FindByIdAsync(
         Ulid roleId,
         CancellationToken cancellationToken = default
@@ -58,6 +57,7 @@ public class RoleManager(IEfDbContext dbContext) : IRoleManager
         var normalized = roleName.ToScreamingSnakeCase();
         return await roles
             .Include(r => r.Permissions)
+            .ThenInclude(rp => rp.Permission)
             .Include(r => r.Claims)
             .FirstOrDefaultAsync(r => r.Name == normalized, cancellationToken);
     }
@@ -72,64 +72,49 @@ public class RoleManager(IEfDbContext dbContext) : IRoleManager
     #endregion
 
     #region Permissions - Read
-
     public async Task<IReadOnlyList<Permission>> GetPermissionsAsync(
         Role role,
         CancellationToken cancellationToken = default
     )
     {
-        return await roles
-            .Where(rp => rp.Id == role.Id)
-            .SelectMany(rp => rp.Permissions!)
-            .Select(rp => rp.Permission!)
+        return await dbContext
+            .Set<RolePermission>()
+            .Where(rp => rp.RoleId == role.Id)
+            .Join(dbContext.Set<Permission>(), rp => rp.PermissionId, p => p.Id, (rp, p) => p)
+            .AsNoTracking()
             .ToListAsync(cancellationToken);
     }
 
-    public async Task<bool> HasPermissionAsync(
+    public Task<bool> HasAnyPermissionAsync(
         Role role,
-        string permissionCode,
+        IEnumerable<string> permissionCode,
         CancellationToken cancellationToken = default
     )
     {
-        return await dbContext
+        var codes = permissionCode.ToList();
+        return dbContext
             .Set<RolePermission>()
-            .AnyAsync(
-                rp => rp.RoleId == role.Id && rp.Permission!.Code == permissionCode,
-                cancellationToken
-            );
+            .Where(rp => rp.RoleId == role.Id)
+            .Join(dbContext.Set<Permission>(), rp => rp.PermissionId, p => p.Id, (rp, p) => p)
+            .AnyAsync(p => codes.Contains(p.Code), cancellationToken);
     }
 
+    public async Task<bool> HasAllPermissionAsync(
+        Role role,
+        IEnumerable<string> permissionCode,
+        CancellationToken cancellationToken = default
+    )
+    {
+        var codes = permissionCode.ToList();
+        return await dbContext
+                .Set<RolePermission>()
+                .Where(rp => rp.RoleId == role.Id)
+                .Join(dbContext.Set<Permission>(), rp => rp.PermissionId, p => p.Id, (rp, p) => p)
+                .CountAsync(p => codes.Contains(p.Code), cancellationToken) == codes.Count;
+    }
     #endregion
 
-    #region Permissions - Write
-
-    public async Task AddPermissionAsync(
-        Role role,
-        Permission permission,
-        CancellationToken cancellationToken = default
-    )
-    {
-        //check if role exists
-        if (!await roles.AnyAsync(r => r.Id == role.Id, cancellationToken))
-        {
-            throw new ArgumentException("Role does not exist.", nameof(role));
-        }
-
-        //check if permission exists
-        if (
-            !await dbContext
-                .Set<Permission>()
-                .AnyAsync(p => p.Id == permission.Id, cancellationToken)
-        )
-        {
-            throw new ArgumentException("Permission does not exist.", nameof(permission));
-        }
-
-        role.GrantPermission(permission);
-
-        roles.Update(role);
-        await dbContext.SaveChangesAsync(cancellationToken);
-    }
+    #region Batch Permissions - Write
 
     public async Task AddPermissionsAsync(
         Role role,
@@ -137,13 +122,7 @@ public class RoleManager(IEfDbContext dbContext) : IRoleManager
         CancellationToken cancellationToken = default
     )
     {
-        //check if role exists
-        if (!await roles.AnyAsync(r => r.Id == role.Id, cancellationToken))
-        {
-            throw new ArgumentException("Role does not exist.", nameof(role));
-        }
-        List<Permission> list = await ValidatePermissionListAsync(permissions, cancellationToken);
-
+        List<Permission> list = [.. permissions];
         await dbContext
             .Set<RolePermission>()
             .AddRangeAsync(
@@ -153,37 +132,14 @@ public class RoleManager(IEfDbContext dbContext) : IRoleManager
         await dbContext.SaveChangesAsync(cancellationToken);
     }
 
-    public async Task RemovePermissionAsync(
-        Role role,
-        Permission permission,
-        CancellationToken cancellationToken = default
-    )
-    {
-        //check if role exists
-        if (!await roles.AnyAsync(r => r.Id == role.Id, cancellationToken))
-        {
-            throw new ArgumentException("Role does not exist.", nameof(role));
-        }
-        role.RevokePermission(permission);
-        roles.Update(role);
-        await dbContext.SaveChangesAsync(cancellationToken);
-    }
-
     public async Task RemovePermissionsAsync(
         Role role,
         IEnumerable<Permission> permissions,
         CancellationToken cancellationToken = default
     )
     {
-        //check if role exists
-        if (!await roles.AnyAsync(r => r.Id == role.Id, cancellationToken))
-        {
-            throw new ArgumentException("Role does not exist.", nameof(role));
-        }
-
-        List<Permission> list = await ValidatePermissionListAsync(permissions, cancellationToken);
+        List<Permission> list = [.. permissions];
         List<Ulid> ids = list.ConvertAll(p => p.Id);
-        // check all permissions are assigned to role
         if (
             await dbContext
                 .Set<RolePermission>()
@@ -209,39 +165,11 @@ public class RoleManager(IEfDbContext dbContext) : IRoleManager
 
     public async Task ReplacePermissionAsync(
         Role role,
-        Permission oldPermission,
-        Permission newPermission,
-        CancellationToken cancellationToken = default
-    )
-    {
-        await dbContext.DatabaseFacade.BeginTransactionAsync(cancellationToken);
-
-        try
-        {
-            await RemovePermissionAsync(role, oldPermission, cancellationToken);
-            await AddPermissionAsync(role, newPermission, cancellationToken);
-            await dbContext.DatabaseFacade.CommitTransactionAsync(cancellationToken);
-        }
-        catch (Exception)
-        {
-            await dbContext.DatabaseFacade.RollbackTransactionAsync(cancellationToken);
-            throw;
-        }
-    }
-
-    public async Task ReplacePermissionAsync(
-        Role role,
         IEnumerable<Permission> permissions,
         CancellationToken cancellationToken = default
     )
     {
-        //check if role exists
-        if (await IsAvailableAsync(role.Id, cancellationToken) is false)
-        {
-            throw new ArgumentException("Role does not exist.", nameof(role));
-        }
-        List<Permission> list = await ValidatePermissionListAsync(permissions, cancellationToken);
-
+        List<Permission> list = [.. permissions];
         await dbContext.DatabaseFacade.BeginTransactionAsync(cancellationToken);
         try
         {
@@ -288,41 +216,16 @@ public class RoleManager(IEfDbContext dbContext) : IRoleManager
         CancellationToken cancellationToken = default
     )
     {
-        var normalized = roleName.ToScreamingSnakeCase();
-        return await roles.AnyAsync(r => r.Name == normalized, cancellationToken);
-    }
-    #endregion
-
-    private Task<bool> IsAvailableAsync(Ulid roleId, CancellationToken cancellationToken = default)
-    {
-        return roles.AnyAsync(r => r.Id == roleId, cancellationToken);
+        return await roles.AnyAsync(r => r.Name == roleName, cancellationToken);
     }
 
-    private async Task<List<Permission>> ValidatePermissionListAsync(
-        IEnumerable<Permission> permissions,
+    public async Task<bool> AllRolesExistAsync(
+        IEnumerable<string> roleNames,
         CancellationToken cancellationToken = default
     )
     {
-        List<Permission> list = [.. permissions];
-        //check list permissions duplicates
-        if (list.DistinctBy(x => x.Id).Count() != list.Count)
-        {
-            throw new ArgumentException("Duplicate permissions in the list.", nameof(permissions));
-        }
-
-        //check if all permissions exist
-        List<Ulid> ids = list.ConvertAll(p => p.Id);
-        if (
-            await dbContext.Set<Permission>().CountAsync(p => ids.Contains(p.Id), cancellationToken)
-            != list.Count
-        )
-        {
-            throw new ArgumentException(
-                "One or more permissions do not exist.",
-                nameof(permissions)
-            );
-        }
-
-        return list;
+        return await roles.CountAsync(r => roleNames.Contains(r.Name), cancellationToken)
+            == roleNames.Count();
     }
+    #endregion
 }
