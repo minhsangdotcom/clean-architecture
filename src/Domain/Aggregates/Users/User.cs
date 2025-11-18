@@ -54,6 +54,9 @@ public class User : AggregateRoot
         Avatar = avatar;
     }
 
+    public void HasPasswordAsync(string password) =>
+        Password = Guard.Against.NullOrWhiteSpace(password, nameof(password));
+
     public void ChangePassword(string password) =>
         Password = Guard.Against.NullOrWhiteSpace(password, nameof(password));
 
@@ -121,7 +124,7 @@ public class User : AggregateRoot
         Permissions.Clear();
     }
 
-    public User FromMapping(
+    public User Update(
         string firstName,
         string lastName,
         string email,
