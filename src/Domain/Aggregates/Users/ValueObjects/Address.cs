@@ -5,7 +5,7 @@ namespace Domain.Aggregates.Users.ValueObjects;
 
 public class Address : ValueObject
 {
-    public string? Street { get; private set; }
+    public string Street { get; private set; } = string.Empty;
 
     public Ulid ProvinceId { get; private set; }
     public string Province { get; private set; } = string.Empty;
@@ -45,14 +45,10 @@ public class Address : ValueObject
 
     protected override IEnumerable<object> GetEqualityComponents()
     {
-        yield return Street!;
+        yield return Street;
         yield return ProvinceId;
         yield return DistrictId;
-
-        if (Commune != null)
-        {
-            yield return CommuneId!;
-        }
+        yield return CommuneId!;
     }
 
     public override bool Equals(object? obj)
@@ -74,7 +70,7 @@ public class Address : ValueObject
 
     public override string ToString()
     {
-        string? commune = $"{Commune}," ?? null;
+        string commune = Commune != null ? $"{Commune}, " : string.Empty;
         return $"{Street},{commune}{District},{Province}";
     }
 }

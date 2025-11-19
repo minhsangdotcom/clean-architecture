@@ -4,7 +4,7 @@ using Contracts.Dtos.Responses;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 
-namespace Infrastructure.Services.Identity;
+namespace Infrastructure.Services.Aws;
 
 public class MediaUpdateService<T>(
     IStorageService storageService,

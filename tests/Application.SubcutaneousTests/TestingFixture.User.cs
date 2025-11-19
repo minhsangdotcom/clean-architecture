@@ -1,4 +1,5 @@
 using System.Text.Json;
+using Application.Common.Interfaces.Services.Identity;
 using Application.Common.Interfaces.UnitOfWorks;
 using Application.Features.Users.Commands.Create;
 using Contracts.ApiWrapper;
@@ -160,11 +161,8 @@ public partial class TestingFixture
     public async Task<User?> FindUserByIdAsync(Ulid userId)
     {
         using var scope = factory!.Services.CreateScope();
-        IEfUnitOfWork? unitOfWork = scope.ServiceProvider.GetService<IEfUnitOfWork>();
-
-        return await unitOfWork!
-            .DynamicReadOnlyRepository<User>()
-            .FindByConditionAsync(new GetUserByIdSpecification(userId));
+        IUserManager userManager = scope.ServiceProvider.GetRequiredService<IUserManager>();
+        return await userManager.FindByIdAsync(userId.ToString());
     }
 
     private static UserAddress GetDefaultAddress() =>

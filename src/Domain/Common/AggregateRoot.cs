@@ -4,7 +4,9 @@ using Mediator;
 
 namespace Domain.Common;
 
-public abstract class AggregateRoot : DefaultEntity, IAuditable
+public abstract class AggregateRoot : AggregateRoot<Ulid>;
+
+public abstract class AggregateRoot<T> : DefaultEntity<T>, IAuditable
 {
     public long Version { get; set; }
     public string CreatedBy { get; set; } = string.Empty;

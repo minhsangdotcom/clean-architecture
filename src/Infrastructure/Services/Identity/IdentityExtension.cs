@@ -1,4 +1,5 @@
 using Application.Common.Interfaces.Services.Identity;
+using Infrastructure.Services.Aws;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Infrastructure.Services.Identity;

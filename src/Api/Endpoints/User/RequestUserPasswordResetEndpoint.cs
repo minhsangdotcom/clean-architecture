@@ -9,7 +9,7 @@ using Microsoft.OpenApi.Models;
 
 namespace Api.Endpoints.User;
 
-public class RequestResetUserPasswordEndpoint : IEndpoint
+public class RequestUserPasswordResetEndpoint : IEndpoint
 {
     public EndpointVersion Version => EndpointVersion.One;
 
@@ -26,7 +26,7 @@ public class RequestResetUserPasswordEndpoint : IEndpoint
     }
 
     private async Task<Results<NoContent, ProblemHttpResult>> HandleAsync(
-        [FromBody] RequestResetUserPasswordCommand request,
+        [FromBody] RequestUserPasswordResetCommand request,
         ISender sender,
         CancellationToken cancellationToken = default
     )
