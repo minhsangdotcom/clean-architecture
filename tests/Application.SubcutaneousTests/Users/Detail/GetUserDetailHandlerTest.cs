@@ -14,7 +14,7 @@ public class GetUserDetailHandlerTest(TestingFixture testingFixture) : IAsyncLif
     public async Task GetUser_WhenIdNotFound_ShouldReturnNotFoundResult()
     {
         //arrage
-        Ulid Id = Ulid.Empty;
+        string Id = Ulid.Empty.ToString();
         //act
         var result = await testingFixture.SendAsync(new GetUserDetailQuery(Id));
         //assert
@@ -38,7 +38,7 @@ public class GetUserDetailHandlerTest(TestingFixture testingFixture) : IAsyncLif
             new UserAddress(regions.ProvinceId, regions.DistrictId, regions.CommuneId)
         );
         //act
-        var result = await testingFixture.SendAsync(new GetUserDetailQuery(user.Id));
+        var result = await testingFixture.SendAsync(new GetUserDetailQuery(user.Id.ToString()));
         //assert
         result.IsSuccess.ShouldBeTrue();
         result.Error.ShouldBeNull();
