@@ -14,50 +14,44 @@ public class MediaUpdateService<T>(
 {
     private readonly string Directory = $"{typeof(T).Name}s";
 
-    public async Task DeleteAvatarAsync(string? key)
+    public async Task DeleteAsync(string? key)
     {
         if (string.IsNullOrWhiteSpace(key))
         {
             return;
         }
 
-        var response = await storageService.DeleteAsync(key);
-
+        StorageResponse response = await storageService.DeleteAsync(key);
         if (!response.IsSuccess)
         {
-            logger.LogInformation(
-                "Remove object {key} fail with error: {error}",
-                key,
-                response.Error
-            );
+            logger.LogWarning("Remove object {key} fail with error: {error}", key, response.Error);
             return;
         }
 
         logger.LogInformation("Remove object {key} successfully.", key);
     }
 
-    public string? GetKey(IFormFile? avatar)
+    public string? GetKey(IFormFile? file)
     {
-        if (avatar == null)
+        if (file == null)
         {
             return null;
         }
 
-        return $"{Directory}/{storageService.UniqueFileName(avatar.FileName)}";
+        return $"{Directory}/{storageService.UniqueFileName(file.FileName)}";
     }
 
-    public async Task<string?> UploadAvatarAsync(IFormFile? avatar, string? key)
+    public async Task<string?> UploadAsync(IFormFile? file, string? key)
     {
-        if (avatar == null || string.IsNullOrEmpty(key))
+        if (file == null || string.IsNullOrEmpty(key))
         {
             return null;
         }
 
-        StorageResponse response = await storageService.UploadAsync(avatar!.OpenReadStream(), key);
-
+        StorageResponse response = await storageService.UploadAsync(file.OpenReadStream(), key);
         if (!response.IsSuccess)
         {
-            logger.LogInformation(
+            logger.LogWarning(
                 "\nUpdate User has had error with file upload: {error}.\n",
                 response.Error
             );

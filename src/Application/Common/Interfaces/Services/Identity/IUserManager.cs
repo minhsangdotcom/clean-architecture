@@ -7,9 +7,21 @@ namespace Application.Common.Interfaces.Services.Identity;
 public interface IUserManager
 {
     #region UserQueries
-    Task<User?> FindByIdAsync(Ulid userId, CancellationToken cancellationToken = default);
-    Task<User?> FindByNameAsync(string userName, CancellationToken cancellationToken = default);
-    Task<User?> FindByEmailAsync(string email, CancellationToken cancellationToken = default);
+    Task<User?> FindByIdAsync(
+        string userId,
+        bool isIncludeAllChildren = true,
+        CancellationToken cancellationToken = default
+    );
+    Task<User?> FindByNameAsync(
+        string userName,
+        bool isIncludeAllChildren = true,
+        CancellationToken cancellationToken = default
+    );
+    Task<User?> FindByEmailAsync(
+        string email,
+        bool isIncludeAllChildren = true,
+        CancellationToken cancellationToken = default
+    );
     Task<IList<Role>> GetRolesAsync(User user, CancellationToken cancellationToken = default);
     Task<IList<Permission>> GetPermissionsAsync(
         User user,
@@ -43,6 +55,9 @@ public interface IUserManager
         IEnumerable<string> roleNames,
         CancellationToken cancellationToken = default
     );
+
+    Task ClearRolesAsync(User user, CancellationToken cancellationToken = default);
+
     Task<bool> IsInAnyRoleAsync(
         User user,
         IEnumerable<string> roleNames,
@@ -73,6 +88,8 @@ public interface IUserManager
         IEnumerable<Permission> permissions,
         CancellationToken cancellationToken = default
     );
+
+    Task ClearPermissionsAsync(User user, CancellationToken cancellationToken = default);
 
     Task<bool> HasAnyPermissionAsync(
         User user,

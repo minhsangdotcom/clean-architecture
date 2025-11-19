@@ -1,7 +1,8 @@
 using Application.Common.Extensions;
-using Application.Common.Interfaces.Services;
 using Application.Common.Interfaces.UnitOfWorks;
 using Application.Features.Common.Requests.Users;
+using Domain.Aggregates.Permissions;
+using Domain.Aggregates.Roles;
 using Domain.Aggregates.Users;
 using FluentValidation;
 using SharedKernel.Common.Messages;
@@ -10,30 +11,16 @@ namespace Application.Features.Common.Validators.Users;
 
 public partial class UserValidator : AbstractValidator<UserUpsertCommand>
 {
-    private readonly IHttpContextAccessorService httpContextAccessorService;
     private readonly IEfUnitOfWork unitOfWork;
 
-    public UserValidator(
-        IEfUnitOfWork unitOfWork,
-        IHttpContextAccessorService httpContextAccessorService,
-        ICurrentUser currentUser
-    )
+    public UserValidator(IEfUnitOfWork unitOfWork)
     {
-        this.httpContextAccessorService = httpContextAccessorService;
         this.unitOfWork = unitOfWork;
-        ApplyRules(currentUser);
+        ApplyRules();
     }
 
-    private void ApplyRules(ICurrentUser currentUser)
+    private void ApplyRules()
     {
-        _ = Ulid.TryParse(httpContextAccessorService.GetId(), out Ulid id);
-        string? requestPath = httpContextAccessorService.GetRequestPath();
-
-        if (requestPath == "/api/v1/users/profile")
-        {
-            id = currentUser.Id!.Value;
-        }
-
         RuleFor(x => x.LastName)
             .NotEmpty()
             .WithState(x =>
@@ -71,69 +58,10 @@ public partial class UserValidator : AbstractValidator<UserUpsertCommand>
                     .Message(MessageType.MaximumLength)
                     .Build()
             );
-
-        RuleFor(x => x.Email)
-            .Cascade(CascadeMode.Stop)
-            .NotEmpty()
-            .WithState(x =>
-                Messenger
-                    .Create<User>()
-                    .Property(x => x.Email)
-                    .Message(MessageType.Null)
-                    .Negative()
-                    .Build()
-            )
-            .Must(x => x!.IsValidEmail())
-            .WithState(x =>
-                Messenger
-                    .Create<User>()
-                    .Property(x => x.Email)
-                    .Message(MessageType.Valid)
-                    .Negative()
-                    .Build()
-            )
-            .MustAsync(
-                (email, cancellationToken) => IsEmailAvailableAsync(email!, id, cancellationToken)
-            )
-            .When(
-                _ => httpContextAccessorService.GetHttpMethod() == HttpMethod.Put.ToString(),
-                ApplyConditionTo.CurrentValidator
-            )
-            .WithState(x =>
-                Messenger
-                    .Create<User>()
-                    .Property(x => x.Email)
-                    .Message(MessageType.Existence)
-                    .Build()
-            )
-            .MustAsync(
-                (email, cancellationToken) =>
-                    IsEmailAvailableAsync(email!, cancellationToken: cancellationToken)
-            )
-            .When(
-                _ => httpContextAccessorService.GetHttpMethod() == HttpMethod.Post.ToString(),
-                ApplyConditionTo.CurrentValidator
-            )
-            .WithState(x =>
-                Messenger
-                    .Create<User>()
-                    .Property(x => x.Email)
-                    .Message(MessageType.Existence)
-                    .Build()
-            );
-
         RuleFor(x => x.PhoneNumber)
             .Cascade(CascadeMode.Stop)
-            .NotEmpty()
-            .WithState(x =>
-                Messenger
-                    .Create<User>()
-                    .Property(x => x.PhoneNumber!)
-                    .Message(MessageType.Null)
-                    .Negative()
-                    .Build()
-            )
             .Must(x => x!.IsValidPhoneNumber())
+            .When(x => !string.IsNullOrEmpty(x.PhoneNumber))
             .WithState(x =>
                 Messenger
                     .Create<User>()
@@ -142,17 +70,87 @@ public partial class UserValidator : AbstractValidator<UserUpsertCommand>
                     .Negative()
                     .Build()
             );
+
+        RuleFor(x => x.Status)
+            .NotEmpty()
+            .WithState(x =>
+                Messenger
+                    .Create<UserUpsertCommand>(nameof(User))
+                    .Property(x => x.Status!)
+                    .Message(MessageType.Null)
+                    .Negative()
+                    .Build()
+            )
+            .IsInEnum()
+            .WithState(x =>
+                Messenger
+                    .Create<UserUpsertCommand>(nameof(User))
+                    .Property(x => x.Status!)
+                    .Negative()
+                    .Message(MessageType.AmongTheAllowedOptions)
+                    .Build()
+            );
+
+        RuleFor(x => x.Roles)
+            .NotEmpty()
+            .WithState(x =>
+                Messenger
+                    .Create<UserUpsertCommand>(nameof(User))
+                    .Property(x => x.Roles!)
+                    .Message(MessageType.Null)
+                    .Negative()
+                    .Build()
+            )
+            .Must(x => x!.Distinct().Count() == x!.Count)
+            .WithState(x =>
+                Messenger
+                    .Create<UserUpsertCommand>(nameof(User))
+                    .Property(x => x.Roles!)
+                    .Message(MessageType.Unique)
+                    .Negative()
+                    .Build()
+            )
+            .MustAsync((roles, _) => IsRolesAvailableAsync(roles!))
+            .WithState(x =>
+                Messenger
+                    .Create<UserUpsertCommand>(nameof(User))
+                    .Property(x => x.Roles!)
+                    .Message(MessageType.Found)
+                    .Negative()
+                    .Build()
+            );
+
+        When(
+            x => x.Permissions != null,
+            () =>
+            {
+                RuleFor(r => r.Permissions)
+                    .Must((p, _) => p.Permissions!.Distinct().Count() == p.Permissions!.Count)
+                    .WithState(req =>
+                        Messenger
+                            .Create<User>()
+                            .Property(req => req.Permissions)
+                            .Message(MessageType.Unique)
+                            .Negative()
+                            .BuildMessage()
+                    )
+                    .MustAsync((m, _) => IsPermissionsAvailableAsync(m!))
+                    .WithState(req =>
+                        Messenger
+                            .Create<UserUpsertCommand>(nameof(User))
+                            .Property(req => req.Roles!)
+                            .Message(MessageType.Found)
+                            .Negative()
+                            .Build()
+                    );
+            }
+        );
     }
 
-    private async Task<bool> IsEmailAvailableAsync(
-        string email,
-        Ulid? id = null,
-        CancellationToken cancellationToken = default
-    ) =>
-        !await unitOfWork
-            .Repository<User>()
-            .AnyAsync(
-                x => x.Email == email && (!id.HasValue || x.Id != id.Value),
-                cancellationToken
-            );
+    private async Task<bool> IsRolesAvailableAsync(IEnumerable<Ulid> roles) =>
+        await unitOfWork.Repository<Role>().CountAsync(x => roles.Contains(x.Id)) == roles.Count();
+
+    private async Task<bool> IsPermissionsAvailableAsync(IEnumerable<Ulid> permissions) =>
+        await unitOfWork.Repository<Permission>().CountAsync(x => permissions.Contains(x.Id))
+        == permissions.Count();
 }

@@ -1181,6 +1181,7 @@
         "dependencies": {
           "Microsoft.AspNetCore.Http": "[2.3.0, )",
           "Microsoft.AspNetCore.Mvc.Core": "[2.3.0, )",
+          "TranMinhSang.AspNetCore.Extensions": "[1.0.0, )",
           "minhsangdotcom.TheTemplate.SharedKernel": "[1.0.14, )"
         }
       },
@@ -1189,7 +1190,6 @@
         "dependencies": {
           "Ardalis.GuardClauses": "[5.0.0, )",
           "Mediator.Abstractions": "[3.0.1, )",
-          "TranMinhSang.AspNetCore.Extensions": "[1.0.0, )",
           "minhsangdotcom.TheTemplate.SharedKernel": "[1.0.14, )",
           "minhsangdotcom.TheTemplate.SpecificationPattern": "[1.0.4, )"
         }

@@ -5,9 +5,9 @@ namespace Application.Common.Interfaces.Services.Identity;
 public interface IMediaUpdateService<T>
     where T : class
 {
-    string? GetKey(IFormFile? avatar);
+    string? GetKey(IFormFile? file);
 
-    Task<string?> UploadAvatarAsync(IFormFile? avatar, string? key);
+    Task<string?> UploadAsync(IFormFile? file, string? key);
 
-    Task DeleteAvatarAsync(string? key);
+    Task DeleteAsync(string? key);
 }

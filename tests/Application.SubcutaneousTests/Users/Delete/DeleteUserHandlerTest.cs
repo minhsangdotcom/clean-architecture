@@ -17,7 +17,7 @@ public class DeleteUserHandlerTest(TestingFixture testingFixture) : IAsyncLifeti
     private async Task DeleteUser_WhenIdNotfound_ShouldThrowNotFoundException()
     {
         Result<string> result = await testingFixture.SendAsync(
-            new DeleteUserCommand(Ulid.NewUlid())
+            new DeleteUserCommand(Guid.Empty.ToString())
         );
         var expectedMessage = Messenger
             .Create<User>()
@@ -33,7 +33,7 @@ public class DeleteUserHandlerTest(TestingFixture testingFixture) : IAsyncLifeti
     [Fact]
     private async Task DeleteUser_WhenIdNotfound_ShouldDeleteSuccess()
     {
-        var result = await testingFixture.SendAsync(new DeleteUserCommand(id!.Value));
+        var result = await testingFixture.SendAsync(new DeleteUserCommand(id!.Value.ToString()));
         result.Error.ShouldBeNull();
     }
 

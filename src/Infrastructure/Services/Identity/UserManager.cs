@@ -19,32 +19,65 @@ public class UserManager(
     private readonly DbSet<User> users = dbContext.Set<User>();
 
     #region Queries
-    public async Task<User?> FindByIdAsync(Ulid userId, CancellationToken cancellationToken)
+    public async Task<User?> FindByIdAsync(
+        string userId,
+        bool isIncludeAllChildren = true,
+        CancellationToken cancellationToken = default
+    )
     {
-        return await users
-            .Include(x => x.Claims)
-            .Include(x => x.Permissions)
-            .ThenInclude(x => x.Permission)
+        IQueryable<User> query = users;
+        if (isIncludeAllChildren)
+        {
+            query = query
+                .Include(x => x.Claims)
+                .Include(x => x.Permissions)
+                .ThenInclude(x => x.Permission)
+                .Include(x => x.Roles)
+                .ThenInclude(x => x.Role);
+        }
+        return await query
             .AsSplitQuery()
-            .FirstOrDefaultAsync(x => x.Id == userId, cancellationToken);
+            .FirstOrDefaultAsync(x => x.Id.ToString() == userId, cancellationToken);
     }
 
-    public Task<User?> FindByNameAsync(string userName, CancellationToken cancellationToken)
+    public async Task<User?> FindByNameAsync(
+        string userName,
+        bool isIncludeAllChildren = true,
+        CancellationToken cancellationToken = default
+    )
     {
-        return users
-            .Include(x => x.Claims)
-            .Include(x => x.Permissions)
-            .ThenInclude(x => x.Permission)
+        IQueryable<User> query = users;
+        if (isIncludeAllChildren)
+        {
+            query = query
+                .Include(x => x.Claims)
+                .Include(x => x.Permissions)
+                .ThenInclude(x => x.Permission)
+                .Include(x => x.Roles)
+                .ThenInclude(x => x.Role);
+        }
+        return await query
             .AsSplitQuery()
             .FirstOrDefaultAsync(x => x.Username == userName, cancellationToken);
     }
 
-    public Task<User?> FindByEmailAsync(string email, CancellationToken cancellationToken)
+    public async Task<User?> FindByEmailAsync(
+        string email,
+        bool isIncludeAllChildren = true,
+        CancellationToken cancellationToken = default
+    )
     {
-        return users
-            .Include(x => x.Claims)
-            .Include(x => x.Permissions)
-            .ThenInclude(x => x.Permission)
+        IQueryable<User> query = users;
+        if (isIncludeAllChildren)
+        {
+            query = query
+                .Include(x => x.Claims)
+                .Include(x => x.Permissions)
+                .ThenInclude(x => x.Permission)
+                .Include(x => x.Roles)
+                .ThenInclude(x => x.Role);
+        }
+        return await query
             .AsSplitQuery()
             .FirstOrDefaultAsync(x => x.Email == email, cancellationToken);
     }
@@ -233,6 +266,13 @@ public class UserManager(
             );
         await dbContext.SaveChangesAsync(cancellationToken);
     }
+
+    public async Task ClearRolesAsync(User user, CancellationToken cancellationToken = default)
+    {
+        user.ClearAllRoles();
+        users.Update(user);
+        await dbContext.SaveChangesAsync(cancellationToken);
+    }
     #endregion
 
     #region permission boolean queries
@@ -323,6 +363,13 @@ public class UserManager(
                 cancellationToken
             );
         await dbContext.SaveChangesAsync(cancellationToken);
+    }
+
+    public Task ClearPermissionsAsync(User user, CancellationToken cancellationToken = default)
+    {
+        user.ClearAllPermissions();
+        users.Update(user);
+        return dbContext.SaveChangesAsync(cancellationToken);
     }
 
     #endregion

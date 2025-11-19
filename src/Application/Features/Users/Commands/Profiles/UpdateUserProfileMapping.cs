@@ -2,28 +2,16 @@ using Domain.Aggregates.Users;
 
 namespace Application.Features.Users.Commands.Profiles;
 
-// public class UpdateUserProfileMapping : Profile
-// {
-//     public UpdateUserProfileMapping()
-//     {
-//         CreateMap<UpdateUserProfileCommand, User>();
-//         CreateMap<User, UpdateUserProfileResponse>();
-//     }
-// }
-
 public static class UpdateUserProfileMapping
 {
-    public static User MapFromUpdateUserProfileCommand(
-        this User user,
-        UpdateUserProfileCommand profileCommand
-    )
+    public static User MapFromCommand(this User user, UpdateUserProfileCommand command)
     {
-        return user.Update(
-            profileCommand.FirstName!,
-            profileCommand.LastName!,
-            profileCommand.Email!,
-            profileCommand.PhoneNumber,
-            profileCommand.DateOfBirth
+        return user.UpdateProfile(
+            command.FirstName!,
+            command.LastName!,
+            command.Gender,
+            command.PhoneNumber,
+            command.DateOfBirth
         );
     }
 

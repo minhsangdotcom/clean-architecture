@@ -38,7 +38,7 @@ public class DeleteRoleEndpoint : IEndpoint
         CancellationToken cancellationToken = default
     )
     {
-        var result = await sender.Send(new DeleteRoleCommand(Ulid.Parse(id)), cancellationToken);
+        var result = await sender.Send(new DeleteRoleCommand(id), cancellationToken);
         return result.ToNoContentResult();
     }
 }

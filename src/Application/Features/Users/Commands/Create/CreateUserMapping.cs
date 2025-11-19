@@ -4,9 +4,8 @@ namespace Application.Features.Users.Commands.Create;
 
 public static class CreateUserMapping
 {
-    public static User ToUser(this CreateUserCommand command)
-    {
-        return new User(
+    public static User ToUser(this CreateUserCommand command) =>
+        new(
             command.FirstName!,
             command.LastName!,
             command.Username!,
@@ -16,11 +15,10 @@ public static class CreateUserMapping
             command.DateOfBirth,
             command.Gender
         );
-    }
 
     public static CreateUserResponse ToCreateUserResponse(this User user)
     {
-        var response = new CreateUserResponse();
+        CreateUserResponse response = new();
         response.MappingFrom(user);
         return response;
     }

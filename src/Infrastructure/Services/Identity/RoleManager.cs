@@ -4,62 +4,81 @@ using Domain.Aggregates.Permissions;
 using Domain.Aggregates.Roles;
 using DotNetCoreExtension.Extensions;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace Infrastructure.Services.Identity;
 
-public class RoleManager(IEfDbContext dbContext) : IRoleManager
+public class RoleManager(IEfDbContext dbContext, ILogger<RoleManager> logger) : IRoleManager
 {
     private readonly DbSet<Role> roles = dbContext.Set<Role>();
 
     #region CRUD
-
-    public async Task<Role> CreateAsync(Role role, CancellationToken cancellationToken = default)
+    public async Task<bool> CreateAsync(Role role, CancellationToken cancellationToken = default)
     {
-        roles.Add(role);
-        await dbContext.SaveChangesAsync(cancellationToken);
-        return role;
+        try
+        {
+            await roles.AddAsync(role, cancellationToken);
+            await dbContext.SaveChangesAsync(cancellationToken);
+            return true;
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Error creating role {RoleName}", role.Name);
+            return false;
+        }
     }
 
-    public async Task<Role> UpdateAsync(Role role, CancellationToken cancellationToken = default)
+    public async Task UpdateAsync(Role role, CancellationToken cancellationToken = default)
     {
         roles.Update(role);
         await dbContext.SaveChangesAsync(cancellationToken);
-        return role;
     }
 
-    public async Task<Role> DeleteAsync(Role role, CancellationToken cancellationToken = default)
+    public async Task DeleteAsync(Role role, CancellationToken cancellationToken = default)
     {
         roles.Remove(role);
         await dbContext.SaveChangesAsync(cancellationToken);
-        return role;
     }
 
     #endregion
 
     #region Queries
     public async Task<Role?> FindByIdAsync(
-        Ulid roleId,
+        string roleId,
+        bool isIncludeAllChildren = true,
         CancellationToken cancellationToken = default
     )
     {
-        return await roles
-            .Include(r => r.Permissions)
-            .ThenInclude(rp => rp.Permission)
-            .Include(r => r.Claims)
-            .FirstOrDefaultAsync(r => r.Id == roleId, cancellationToken);
+        IQueryable<Role> query = roles;
+        if (isIncludeAllChildren)
+        {
+            query = query
+                .Include(r => r.Permissions)
+                .ThenInclude(rp => rp.Permission)
+                .Include(r => r.Claims);
+        }
+        return await query
+            .AsSplitQuery()
+            .FirstOrDefaultAsync(r => r.Id.ToString() == roleId, cancellationToken);
     }
 
     public async Task<Role?> FindByNameAsync(
         string roleName,
+        bool isIncludeAllChildren = true,
         CancellationToken cancellationToken = default
     )
     {
-        var normalized = roleName.ToScreamingSnakeCase();
-        return await roles
-            .Include(r => r.Permissions)
-            .ThenInclude(rp => rp.Permission)
-            .Include(r => r.Claims)
-            .FirstOrDefaultAsync(r => r.Name == normalized, cancellationToken);
+        IQueryable<Role> query = roles;
+        if (isIncludeAllChildren)
+        {
+            query = query
+                .Include(r => r.Permissions)
+                .ThenInclude(rp => rp.Permission)
+                .Include(r => r.Claims);
+        }
+        return await query
+            .AsSplitQuery()
+            .FirstOrDefaultAsync(r => r.Name == roleName, cancellationToken);
     }
 
     public async Task<IReadOnlyList<Role>> GetAllAsync(

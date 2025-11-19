@@ -22,11 +22,11 @@ public class User : AggregateRoot
     #endregion
 
     #region Navigation Collections
-    public ICollection<UserClaim> Claims { get; set; } = [];
-    public ICollection<UserPermission> Permissions { get; set; } = [];
-    public ICollection<UserRole> Roles { get; set; } = [];
-    public ICollection<UserRefreshToken> RefreshTokens { get; set; } = [];
-    public ICollection<UserPasswordReset> PasswordResetRequests { get; set; } = [];
+    public ICollection<UserClaim> Claims { get; private set; } = [];
+    public ICollection<UserPermission> Permissions { get; private set; } = [];
+    public ICollection<UserRole> Roles { get; private set; } = [];
+    public ICollection<UserRefreshToken> RefreshTokens { get; private set; } = [];
+    public ICollection<UserPasswordReset> PasswordResetRequests { get; private set; } = [];
     #endregion
 
     private User() { }
@@ -80,96 +80,39 @@ public class User : AggregateRoot
         Status = UserStatus.Inactive;
     }
 
-    public void AssignRole(Ulid roleId)
-    {
-        if (Roles.Any(r => r.RoleId == roleId))
-        {
-            throw new RoleAlreadyAssignedException(Id, roleId);
-        }
+    public void ClearAllRoles() => Roles.Clear();
 
-        Roles.Add(new UserRole { RoleId = roleId, UserId = Id });
-    }
-
-    public void DeleteRole(Ulid roleId)
-    {
-        var role =
-            Roles.FirstOrDefault(r => r.RoleId == roleId)
-            ?? throw new RoleNotAssignedException(Id, roleId);
-        Roles.Remove(role);
-    }
-
-    public void ClearAllRoles()
-    {
-        Roles.Clear();
-    }
-
-    public void AssignPermission(Ulid permissionId)
-    {
-        if (Permissions.Any(p => p.PermissionId == permissionId))
-            throw new PermissionAlreadyAssignedException(Id, permissionId);
-
-        Permissions.Add(new UserPermission { PermissionId = permissionId, UserId = Id });
-    }
-
-    public void DeletePermission(Ulid permissionId)
-    {
-        var permission =
-            Permissions.FirstOrDefault(p => p.PermissionId == permissionId)
-            ?? throw new PermissionNotAssignedException(Id, permissionId);
-        Permissions.Remove(permission);
-    }
-
-    public void ClearAllPermissions()
-    {
-        Permissions.Clear();
-    }
+    public void ClearAllPermissions() => Permissions.Clear();
 
     public User Update(
         string firstName,
         string lastName,
-        string email,
         string? phoneNumber,
-        DateTime? dayOfBirth
-    )
-    {
-        if (!string.IsNullOrWhiteSpace(firstName))
-        {
-            FirstName = firstName;
-        }
-        if (!string.IsNullOrWhiteSpace(lastName))
-        {
-            LastName = lastName;
-        }
-        if (!string.IsNullOrWhiteSpace(email))
-        {
-            Email = email;
-        }
-        if (phoneNumber != null)
-        {
-            PhoneNumber = phoneNumber;
-        }
-
-        if (dayOfBirth != null)
-        {
-            DateOfBirth = dayOfBirth;
-        }
-
-        return this;
-    }
-
-    public void UpdateProfile(
-        string? firstName,
-        string? lastName,
-        string? phoneNumber = null,
-        DateTime? dateOfBirth = null,
-        string? avatar = null
+        DateTime? dateOfBirth
     )
     {
         PhoneNumber = phoneNumber ?? PhoneNumber;
         DateOfBirth = dateOfBirth ?? DateOfBirth;
         FirstName = firstName ?? FirstName;
         LastName = lastName ?? LastName;
-        Avatar = avatar ?? Avatar;
+        return this;
+    }
+
+    public User UpdateProfile(
+        string? firstName,
+        string? lastName,
+        Gender? gender = null,
+        string? phoneNumber = null,
+        DateTime? dateOfBirth = null
+    )
+    {
+        PhoneNumber = phoneNumber ?? PhoneNumber;
+        DateOfBirth = dateOfBirth ?? DateOfBirth;
+        FirstName = firstName ?? FirstName;
+        LastName = lastName ?? LastName;
+        Gender = gender ?? Gender;
+
+        return this;
     }
 
     protected override bool TryApplyDomainEvent(INotification domainEvent)

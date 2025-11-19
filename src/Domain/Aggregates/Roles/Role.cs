@@ -1,9 +1,6 @@
 using Ardalis.GuardClauses;
-using Domain.Aggregates.Permissions;
-using Domain.Aggregates.Roles.Exceptions;
 using Domain.Aggregates.Users;
 using Domain.Common;
-using DotNetCoreExtension.Extensions;
 using Mediator;
 
 namespace Domain.Aggregates.Roles;
@@ -21,14 +18,14 @@ public class Role : AggregateRoot
 
     public Role(string name, string? description = null)
     {
-        Name = Guard.Against.NullOrEmpty(name, nameof(name)).ToScreamingSnakeCase();
+        Name = Guard.Against.NullOrEmpty(name, nameof(name));
         Description = description;
     }
 
     public Role(Ulid id, string name, List<RolePermission> permissions, string? description)
     {
         Id = id;
-        Name = Guard.Against.NullOrEmpty(name, nameof(name)).ToScreamingSnakeCase();
+        Name = Guard.Against.NullOrEmpty(name, nameof(name));
         Description = description;
         Permissions = [.. Permissions.Concat(permissions)];
     }
@@ -39,29 +36,7 @@ public class Role : AggregateRoot
         Description = description;
     }
 
-    public void SetName(string name)
-    {
-        Guard.Against.NullOrEmpty(name, nameof(name));
-        Name = name.ToScreamingSnakeCase();
-    }
-
-    public void GrantPermission(Permission permission)
-    {
-        if (Permissions.Any(p => p.PermissionId == permission.Id))
-        {
-            throw new PermissionAlreadyGrantedException(Id, permission.Id);
-        }
-
-        Permissions.Add(new RolePermission { RoleId = Id, PermissionId = permission.Id });
-    }
-
-    public void RevokePermission(Permission permission)
-    {
-        var existentPermission =
-            Permissions.FirstOrDefault(p => p.PermissionId == permission.Id)
-            ?? throw new PermissionNotGrantedException(Id, permission.Id);
-        Permissions.Remove(existentPermission);
-    }
+    public void SetName(string name) => Name = Guard.Against.NullOrEmpty(name, nameof(name));
 
     public void ClearAllPermissions()
     {

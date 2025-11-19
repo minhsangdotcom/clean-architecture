@@ -6,11 +6,13 @@ namespace Application.Features.Common.Projections.Roles;
 
 public class RoleDetailProjection : RoleProjection
 {
-    public IReadOnlyCollection<PermissionDetailProjection>? Permissions { get; set; }
+    public IReadOnlyList<PermissionDetailProjection>? Permissions { get; set; }
 
     public override void MappingFrom(Role role)
     {
         base.MappingFrom(role);
-        Permissions = role.Permissions.Select(x => x.Permission!)?.ToPermissionDetailProjection();
+        Permissions = role
+            .Permissions.Select(x => x.Permission!)
+            ?.ToListPermissionDetailProjection();
     }
 }

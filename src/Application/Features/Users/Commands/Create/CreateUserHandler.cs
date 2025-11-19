@@ -1,15 +1,17 @@
 using Application.Common.Interfaces.Services.Identity;
 using Application.Common.Interfaces.UnitOfWorks;
 using Contracts.ApiWrapper;
+using Domain.Aggregates.Permissions;
+using Domain.Aggregates.Roles;
 using Domain.Aggregates.Users;
-using Domain.Aggregates.Users.Specifications;
 using Mediator;
 
 namespace Application.Features.Users.Commands.Create;
 
 public class CreateUserHandler(
     IEfUnitOfWork unitOfWork,
-    IMediaUpdateService<User> mediaUpdateService
+    IMediaUpdateService<User> mediaUpdateService,
+    IUserManager userManager
 ) : IRequestHandler<CreateUserCommand, Result<CreateUserResponse>>
 {
     public async ValueTask<Result<CreateUserResponse>> Handle(
@@ -17,39 +19,49 @@ public class CreateUserHandler(
         CancellationToken cancellationToken
     )
     {
-        User mappingUser = command.ToUser();
+        User user = command.ToUser();
 
-        //* adding user avatar
+        // upload avatar
         string? key = mediaUpdateService.GetKey(command.Avatar);
-        mappingUser.ChangeAvatar(await mediaUpdateService.UploadAvatarAsync(command.Avatar, key));
+        user.ChangeAvatar(await mediaUpdateService.UploadAsync(command.Avatar, key));
 
         string? userAvatar = null;
+        await unitOfWork.BeginTransactionAsync(cancellationToken);
         try
         {
-            await unitOfWork.BeginTransactionAsync(cancellationToken);
-
-            User user = await unitOfWork
-                .Repository<User>()
-                .AddAsync(mappingUser, cancellationToken);
+            _ = await userManager.CreateAsync(user, command.Password!, cancellationToken);
             userAvatar = user.Avatar;
 
-            // add roles and permissions
-            //    ????
-            //
-            CreateUserResponse? response = await unitOfWork
-                .DynamicReadOnlyRepository<User>()
-                .FindByConditionAsync(
-                    new GetUserByIdSpecification(user.Id),
-                    x => x.ToCreateUserResponse(),
-                    cancellationToken
-                );
-            return Result<CreateUserResponse>.Success(response!);
+            // add roles
+            List<string> roles = await unitOfWork
+                .Repository<Role>()
+                .ListAsync(x => command.Roles!.Contains(x.Id), x => x.Name, cancellationToken);
+            await userManager.AddToRolesAsync(user, roles, cancellationToken);
+
+            // add permissions
+            if (command.Permissions?.Count != 0)
+            {
+                List<Permission> permissions = await unitOfWork
+                    .Repository<Permission>()
+                    .ListAsync(
+                        x => command.Permissions!.Contains(x.Id),
+                        cancellationToken: cancellationToken
+                    );
+                await userManager.AddPermissionsAsync(user, permissions, cancellationToken);
+            }
+            await unitOfWork.CommitAsync(cancellationToken);
         }
         catch (Exception)
         {
-            await mediaUpdateService.DeleteAvatarAsync(userAvatar);
+            await mediaUpdateService.DeleteAsync(userAvatar);
             await unitOfWork.RollbackAsync(cancellationToken);
             throw;
         }
+
+        User? userResponse = await userManager.FindByIdAsync(
+            user.Id.ToString(),
+            cancellationToken: cancellationToken
+        );
+        return Result<CreateUserResponse>.Success(userResponse!.ToCreateUserResponse());
     }
 }

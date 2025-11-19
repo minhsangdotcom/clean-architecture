@@ -37,7 +37,7 @@ public class DeleteUserEndpoint : IEndpoint
         CancellationToken cancellationToken = default
     )
     {
-        var result = await sender.Send(new DeleteUserCommand(Ulid.Parse(id)), cancellationToken);
+        var result = await sender.Send(new DeleteUserCommand(id), cancellationToken);
         return result.ToNoContentResult();
     }
 }

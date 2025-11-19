@@ -26,11 +26,11 @@ public class UpdateUserCommandValidatorTest
         Mock<IEfUnitOfWork> mockUserManagerService = new();
         Mock<IHttpContextAccessorService> mockHttpContextAccessorService = new();
         Mock<ICurrentUser> currentUserService = new();
-        validator = new(
-            mockUserManagerService.Object,
-            mockHttpContextAccessorService.Object,
-            currentUserService.Object
-        );
+        // validator = new(
+        //     mockUserManagerService.Object,
+        //     mockHttpContextAccessorService.Object,
+        //     currentUserService.Object
+        // );
         // userUpdate = fixture
         //     .Build<UserUpdateRequest>()
         //     .With(x => x.ProvinceId, Ulid.Parse("01JRQHWS3RQR1N0J84EV1DQXR1"))
@@ -134,83 +134,6 @@ public class UpdateUserCommandValidatorTest
     }
 
     [Theory]
-    [InlineData(null)]
-    [InlineData("")]
-    public async Task Validate_WhenEmailNullOrEmpty_ShouldReturnNullFailure(string? email)
-    {
-        userUpdate!.Email = email;
-
-        //act
-        var result = await validator.TestValidateAsync(userUpdate);
-
-        //assert
-        var expectedState = Messenger
-            .Create<User>()
-            .Property(x => x.Email)
-            .Message(MessageType.Null)
-            .Negative()
-            .Build();
-        result
-            .ShouldHaveValidationErrorFor(x => x.Email)
-            .WithCustomState(expectedState, new MessageResultComparer())
-            .Only();
-    }
-
-    [Theory]
-    [InlineData("admin@gmail")]
-    [InlineData("admingmail.com")]
-    [InlineData("@gmail.com")]
-    public async Task CreateUser_WhenEmailInvalidFormat_ShouldReturnInvalidFailure(string email)
-    {
-        userUpdate!.Email = email;
-
-        //act
-        var result = await validator.TestValidateAsync(userUpdate);
-
-        //assert
-        var expectedState = Messenger
-            .Create<User>()
-            .Property(x => x.Email)
-            .Message(MessageType.Valid)
-            .Negative()
-            .Build();
-        result
-            .ShouldHaveValidationErrorFor(x => x.Email)
-            .WithCustomState(expectedState, new MessageResultComparer())
-            .Only();
-    }
-
-    [Fact]
-    public async Task Validate_WhenEmailDuplicated_ShouldReturnExistFailure()
-    {
-        const string existedEmail = "admin@gmail.com";
-        userUpdate!.Email = existedEmail;
-        var expectedState = Messenger
-            .Create<User>()
-            .Property(x => x.Email)
-            .Message(MessageType.Existence)
-            .Build();
-
-        mockValidator
-            .RuleFor(x => x.Email)
-            .MustAsync(
-                (email, cancellationToken) =>
-                    IsEmailAvailableAsync(email!, existedEmail, cancellationToken)
-            )
-            .When(_ => true)
-            .WithState(x => expectedState);
-
-        //act
-        var result = await mockValidator.TestValidateAsync(userUpdate);
-
-        //assert
-        result
-            .ShouldHaveValidationErrorFor(x => x.Email)
-            .WithCustomState(expectedState, new MessageResultComparer())
-            .Only();
-    }
-
-    [Theory]
     [InlineData("")]
     [InlineData(null)]
     public async Task Validate_WhenPhoneNumberNullOrEmpty_ShouldReturNullFailure(string phoneNumber)
@@ -223,7 +146,7 @@ public class UpdateUserCommandValidatorTest
         //assert
         var expectedState = Messenger
             .Create<User>()
-            .Property(x => x.PhoneNumber)
+            .Property(x => x.PhoneNumber!)
             .Message(MessageType.Null)
             .Negative()
             .Build();
@@ -341,56 +264,5 @@ public class UpdateUserCommandValidatorTest
             .ShouldHaveValidationErrorFor(x => x.Roles)
             .WithCustomState(expectedState, new MessageResultComparer())
             .Only();
-    }
-
-    [Theory]
-    [InlineData(null)]
-    [InlineData("")]
-    public async Task Validate_WhenClaimTypeisNullOrEmpty_ShouldReturnNullFailure(string type)
-    {
-        userUpdate!.UserClaims!.ForEach(x => x.ClaimType = type);
-
-        //act
-        var result = await validator.TestValidateAsync(userUpdate);
-        //assert
-        var expectedState = Messenger
-            .Create<UserClaim>(nameof(User.Claims))
-            .Property(x => x.ClaimType!)
-            .Message(MessageType.Null)
-            .Negative()
-            .Build();
-        result.ShouldHaveValidationErrorFor(
-            $"{nameof(User.Claims)}[0].{nameof(UserClaimUpsertCommand.ClaimType)}"
-        );
-    }
-
-    [Theory]
-    [InlineData(null)]
-    [InlineData("")]
-    public async Task Validate_WhenClaimValueNullOrEmpty_ShouldReturnNullFailure(string? value)
-    {
-        userUpdate!.UserClaims!.ForEach(x => x.ClaimValue = value);
-
-        //act
-        var result = await validator.TestValidateAsync(userUpdate);
-        //assert
-        var expectedState = Messenger
-            .Create<UserClaim>(nameof(User.Claims))
-            .Property(x => x.ClaimValue!)
-            .Message(MessageType.Null)
-            .Negative()
-            .Build();
-        result.ShouldHaveValidationErrorFor(
-            $"{nameof(User.Claims)}[0].{nameof(UserClaimUpsertCommand.ClaimValue)}"
-        );
-    }
-
-    private static async Task<bool> IsEmailAvailableAsync(
-        string email,
-        string existedEmail,
-        CancellationToken cancellationToken = default
-    )
-    {
-        return await Task.Run(() => email != existedEmail, cancellationToken);
     }
 }

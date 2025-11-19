@@ -15,7 +15,7 @@ public class CreateRoleHandler(IRoleManager manager, IEfUnitOfWork unitOfWork)
         CancellationToken cancellationToken
     )
     {
-        Role mappingRole = command.ToRole();
+        Role role = command.ToRole();
         List<Permission> permissions =
         [
             .. await unitOfWork
@@ -24,11 +24,9 @@ public class CreateRoleHandler(IRoleManager manager, IEfUnitOfWork unitOfWork)
         ];
 
         await unitOfWork.BeginTransactionAsync(cancellationToken);
-        Ulid roleId = Ulid.Empty;
         try
         {
-            Role role = await manager.CreateAsync(mappingRole, cancellationToken);
-            roleId = role.Id;
+            await manager.CreateAsync(role, cancellationToken);
             await manager.AddPermissionsAsync(role, permissions, cancellationToken);
             await unitOfWork.CommitAsync(cancellationToken);
         }
@@ -37,7 +35,10 @@ public class CreateRoleHandler(IRoleManager manager, IEfUnitOfWork unitOfWork)
             await unitOfWork.RollbackAsync(cancellationToken);
             throw;
         }
-        Role? roleResponse = await manager.FindByIdAsync(roleId, cancellationToken);
+        Role? roleResponse = await manager.FindByIdAsync(
+            role.Id.ToString(),
+            cancellationToken: cancellationToken
+        );
         return Result<CreateRoleResponse>.Success(roleResponse!.ToCreateRoleResponse());
     }
 }

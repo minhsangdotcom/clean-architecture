@@ -2,10 +2,8 @@ using Application.Common.Constants;
 using Application.Common.Errors;
 using Application.Common.Interfaces.Services;
 using Application.Common.Interfaces.Services.Identity;
-using Application.Common.Interfaces.UnitOfWorks;
 using Contracts.ApiWrapper;
 using Domain.Aggregates.Users;
-using Domain.Aggregates.Users.Specifications;
 using Mediator;
 using Microsoft.AspNetCore.Http;
 using SharedKernel.Common.Messages;
@@ -13,9 +11,9 @@ using SharedKernel.Common.Messages;
 namespace Application.Features.Users.Commands.Profiles;
 
 public class UpdateUserProfileHandler(
-    IEfUnitOfWork unitOfWork,
     ICurrentUser currentUser,
-    IMediaUpdateService<User> avatarUpdate
+    IMediaUpdateService<User> mediaUpdateService,
+    IUserManager userManager
 ) : IRequestHandler<UpdateUserProfileCommand, Result<UpdateUserProfileResponse>>
 {
     public async ValueTask<Result<UpdateUserProfileResponse>> Handle(
@@ -23,12 +21,11 @@ public class UpdateUserProfileHandler(
         CancellationToken cancellationToken
     )
     {
-        User? user = await unitOfWork
-            .DynamicReadOnlyRepository<User>()
-            .FindByConditionAsync(
-                new GetUserByIdWithoutIncludeSpecification(currentUser.Id ?? Ulid.Empty),
-                cancellationToken
-            );
+        User? user = await userManager.FindByIdAsync(
+            currentUser.Id?.ToString()!,
+            false,
+            cancellationToken
+        );
 
         if (user == null)
         {
@@ -48,31 +45,27 @@ public class UpdateUserProfileHandler(
         IFormFile? avatar = command.Avatar;
         string? oldAvatar = user.Avatar;
 
-        user.MapFromUpdateUserProfileCommand(command);
+        user.MapFromCommand(command);
 
-        string? key = avatarUpdate.GetKey(avatar);
-        user.ChangeAvatar(await avatarUpdate.UploadAvatarAsync(avatar, key));
+        string? key = mediaUpdateService.GetKey(avatar);
+        user.ChangeAvatar(await mediaUpdateService.UploadAsync(avatar, key));
 
         try
         {
-            await unitOfWork.Repository<User>().UpdateAsync(user);
-            await unitOfWork.SaveAsync(cancellationToken);
-            await avatarUpdate.DeleteAvatarAsync(oldAvatar);
+            await userManager.UpdateAsync(user, cancellationToken);
+            await mediaUpdateService.DeleteAsync(oldAvatar);
         }
         catch (Exception)
         {
-            await avatarUpdate.DeleteAvatarAsync(user.Avatar);
+            await mediaUpdateService.DeleteAsync(user.Avatar);
             throw;
         }
 
-        UpdateUserProfileResponse? response = await unitOfWork
-            .DynamicReadOnlyRepository<User>()
-            .FindByConditionAsync(
-                new GetUserByIdSpecification(user.Id),
-                x => x.ToUpdateUserProfileResponse(),
-                cancellationToken
-            );
+        var response = await userManager.FindByIdAsync(
+            currentUser.Id?.ToString()!,
+            cancellationToken: cancellationToken
+        );
 
-        return Result<UpdateUserProfileResponse>.Success(response!);
+        return Result<UpdateUserProfileResponse>.Success(response!.ToUpdateUserProfileResponse());
     }
 }

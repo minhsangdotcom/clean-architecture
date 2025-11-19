@@ -10,6 +10,6 @@ public class DistrictDetailProjection : DistrictProjection
     public sealed override void MappingFrom(District district)
     {
         base.MappingFrom(district);
-        Communes = district.Communes?.Select(x => x.ToCommuneProjection());
+        Communes = district.Communes?.ToListCommuneProjection();
     }
 }

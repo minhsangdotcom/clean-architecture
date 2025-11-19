@@ -6,15 +6,23 @@ namespace Application.Common.Interfaces.Services.Identity;
 public interface IRoleManager
 {
     #region CRUD
-    Task<Role> CreateAsync(Role role, CancellationToken cancellationToken = default);
-    Task<Role> UpdateAsync(Role role, CancellationToken cancellationToken = default);
-    Task<Role> DeleteAsync(Role role, CancellationToken cancellationToken = default);
+    Task<bool> CreateAsync(Role role, CancellationToken cancellationToken = default);
+    Task UpdateAsync(Role role, CancellationToken cancellationToken = default);
+    Task DeleteAsync(Role role, CancellationToken cancellationToken = default);
     #endregion
 
 
     #region Queries
-    Task<Role?> FindByIdAsync(Ulid roleId, CancellationToken cancellationToken = default);
-    Task<Role?> FindByNameAsync(string roleName, CancellationToken cancellationToken = default);
+    Task<Role?> FindByIdAsync(
+        string roleId,
+        bool isIncludeAllChildren = true,
+        CancellationToken cancellationToken = default
+    );
+    Task<Role?> FindByNameAsync(
+        string roleName,
+        bool isIncludeAllChildren = true,
+        CancellationToken cancellationToken = default
+    );
     Task<IReadOnlyList<Role>> GetAllAsync(CancellationToken cancellationToken = default);
     #endregion
 

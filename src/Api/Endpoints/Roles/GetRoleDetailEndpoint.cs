@@ -41,7 +41,7 @@ public class GetRoleDetailEndpoint : IEndpoint
         CancellationToken cancellationToken = default
     )
     {
-        var command = new GetRoleDetailQuery(Ulid.Parse(id));
+        var command = new GetRoleDetailQuery(id);
         var result = await sender.Send(command, cancellationToken);
         return result.ToResult();
     }

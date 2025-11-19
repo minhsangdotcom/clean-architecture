@@ -11,6 +11,7 @@
     <PackageReference Include="Microsoft.AspNetCore.Http" Version="2.3.0" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Core" Version="2.3.0" />
     <PackageReference Include="minhsangdotcom.TheTemplate.SharedKernel" Version="1.0.14" />
+    <PackageReference Include="TranMinhSang.AspNetCore.Extensions" Version="1.0.0" />
   </ItemGroup>
 
 </Project>

@@ -5,14 +5,14 @@ namespace Application.Features.Common.Mapping.Permissions;
 
 public static class PermissionMapping
 {
-    public static IReadOnlyCollection<PermissionDetailProjection> ToPermissionDetailProjection(
+    public static IReadOnlyList<PermissionDetailProjection> ToListPermissionDetailProjection(
         this IEnumerable<Permission> permissions
     ) =>
         [
-            .. permissions.Select(x =>
+            .. permissions.Select(permission =>
             {
                 PermissionDetailProjection projection = new();
-                projection.MappingFrom(x);
+                projection.MappingFrom(permission);
                 return projection;
             }),
         ];

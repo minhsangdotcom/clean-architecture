@@ -14,7 +14,6 @@ public static class UserMappingExtension
             {
                 FirstName = user.FirstName,
                 LastName = user.LastName,
-                Email = user.Email,
                 DateOfBirth = user.DateOfBirth,
                 PhoneNumber = user.PhoneNumber,
 
@@ -27,7 +26,6 @@ public static class UserMappingExtension
         {
             FirstName = user.FirstName,
             LastName = user.LastName,
-            Email = user.Email,
             DateOfBirth = user.DateOfBirth,
             PhoneNumber = user.PhoneNumber,
         };

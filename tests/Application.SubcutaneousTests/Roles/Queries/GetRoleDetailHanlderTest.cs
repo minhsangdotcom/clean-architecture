@@ -14,7 +14,7 @@ public class GetRoleDetailHanlderTest(TestingFixture testingFixture) : IAsyncLif
     public async Task GetRole_WhenIdNotFound_ShouldReturnNotFoundResult()
     {
         //arrage
-        Ulid Id = Ulid.Empty;
+        string Id = Ulid.Empty.ToString();
         //act
         var result = await testingFixture.SendAsync(new GetRoleDetailQuery(Id));
         //assert
@@ -35,7 +35,7 @@ public class GetRoleDetailHanlderTest(TestingFixture testingFixture) : IAsyncLif
         //arrage
         var role = await testingFixture.CreateNormalRoleAsync();
         //act
-        var result = await testingFixture.SendAsync(new GetRoleDetailQuery(role.Id));
+        var result = await testingFixture.SendAsync(new GetRoleDetailQuery(role.Id.ToString()));
         //assert
         result.IsSuccess.ShouldBeTrue();
         result.Error.ShouldBeNull();

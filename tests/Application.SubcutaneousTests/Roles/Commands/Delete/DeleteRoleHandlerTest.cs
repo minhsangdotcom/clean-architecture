@@ -16,7 +16,7 @@ public class DeleteRoleHandlerTest(TestingFixture testingFixture) : IAsyncLifeti
     [Fact]
     public async Task DeleteRole_WhenInvalidId_ShouldReturnNotFoundException()
     {
-        Ulid notFoundId = Ulid.NewUlid();
+        string notFoundId = Guid.Empty.ToString();
 
         Result<string> result = await testingFixture.SendAsync(new DeleteRoleCommand(notFoundId));
 
@@ -35,7 +35,7 @@ public class DeleteRoleHandlerTest(TestingFixture testingFixture) : IAsyncLifeti
     [Fact]
     public async Task DeleteRole_WhenValidId_ShouldDeleteRole()
     {
-        var result = await testingFixture.SendAsync(new DeleteRoleCommand(id));
+        var result = await testingFixture.SendAsync(new DeleteRoleCommand(id.ToString()));
         result.Error.ShouldBeNull();
     }
 

@@ -15,5 +15,5 @@ public class UserUpdateRequest : UserUpsertCommand
 {
     public List<Ulid>? Roles { get; set; }
 
-    public List<UserClaimUpsertCommand>? UserClaims { get; set; }
+    public List<Ulid>? Permissions { get; set; }
 }

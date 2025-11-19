@@ -87,7 +87,6 @@ public class CreateUserHandlerTest(TestingFixture testingFixture) : IAsyncLifeti
         command.DateOfBirth = null;
         command.Avatar = null;
         command.Gender = null;
-        command.UserClaims = null;
 
         //act
         Result<CreateUserResponse> result = await testingFixture.SendAsync(command);
@@ -110,15 +109,7 @@ public class CreateUserHandlerTest(TestingFixture testingFixture) : IAsyncLifeti
             () => user.Gender.ShouldBe(response.Gender),
             () => user.Avatar.ShouldBe(response.Avatar),
             () => user.Status.ShouldBe(response.Status),
-            () => user.Roles?.Select(x => x.RoleId).ShouldBe(response.Roles?.Select(x => x.Id)),
-            () =>
-                command
-                    .UserClaims?.All(x =>
-                        user.Claims?.Any(p =>
-                            p.ClaimType == x.ClaimType && p.ClaimValue == x.ClaimType
-                        ) == true
-                    )
-                    .ShouldBeTrue()
+            () => user.Roles?.Select(x => x.RoleId).ShouldBe(response.Roles?.Select(x => x.Id))
         );
     }
 

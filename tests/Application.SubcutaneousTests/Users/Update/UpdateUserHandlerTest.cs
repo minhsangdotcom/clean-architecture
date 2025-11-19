@@ -98,7 +98,6 @@ public class UpdateUserHandlerTest(TestingFixture testingFixture) : IAsyncLifeti
         var updateData = updateUserCommand.UpdateData;
         updateData.DateOfBirth = null;
         updateData.Avatar = null;
-        updateData.UserClaims = null;
         //act
         Result<UpdateUserResponse> result = await testingFixture.SendAsync(updateUserCommand);
 
@@ -121,14 +120,6 @@ public class UpdateUserHandlerTest(TestingFixture testingFixture) : IAsyncLifeti
             () =>
                 user
                     .Roles?.All(x => updateData.Roles?.Any(p => p == x.RoleId) == true)
-                    .ShouldBeTrue(),
-            () =>
-                updateData
-                    .UserClaims?.All(x =>
-                        user.Claims?.Any(p =>
-                            p.ClaimType == x.ClaimType && p.ClaimValue == x.ClaimType
-                        ) == true
-                    )
                     .ShouldBeTrue()
         );
     }
