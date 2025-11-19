@@ -20,7 +20,7 @@ public class UpdateRoleHandler(IRoleManager manager, IEfUnitOfWork unitOfWork)
     )
     {
         Role? role = await manager.FindByIdAsync(
-            command.RoleId,
+            Ulid.Parse(command.RoleId),
             cancellationToken: cancellationToken
         );
         if (role == null)

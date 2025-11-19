@@ -44,7 +44,7 @@ public class RoleManager(IEfDbContext dbContext, ILogger<RoleManager> logger) : 
 
     #region Queries
     public async Task<Role?> FindByIdAsync(
-        string roleId,
+        Ulid roleId,
         bool isIncludeAllChildren = true,
         CancellationToken cancellationToken = default
     )
@@ -59,7 +59,7 @@ public class RoleManager(IEfDbContext dbContext, ILogger<RoleManager> logger) : 
         }
         return await query
             .AsSplitQuery()
-            .FirstOrDefaultAsync(r => r.Id.ToString() == roleId, cancellationToken);
+            .FirstOrDefaultAsync(r => r.Id == roleId, cancellationToken);
     }
 
     public async Task<Role?> FindByNameAsync(

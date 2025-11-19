@@ -18,7 +18,7 @@ public class GetUserProfileHandler(IUserManager userManager, ICurrentUser curren
     )
     {
         User? user = await userManager.FindByIdAsync(
-            currentUser.Id.ToString()!,
+            currentUser.Id!.Value,
             cancellationToken: cancellationToken
         );
 

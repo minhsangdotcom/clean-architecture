@@ -16,7 +16,7 @@ public class GetRoleDetailHandler(IRoleManager manager)
         CancellationToken cancellationToken
     )
     {
-        Role? role = await manager.FindByIdAsync(query.Id, cancellationToken: cancellationToken);
+        Role? role = await manager.FindByIdAsync(Ulid.Parse(query.Id), cancellationToken: cancellationToken);
         if (role == null)
         {
             return Result<RoleDetailResponse>.Failure(

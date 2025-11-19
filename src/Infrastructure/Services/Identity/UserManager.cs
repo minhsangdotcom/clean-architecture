@@ -20,7 +20,7 @@ public class UserManager(
 
     #region Queries
     public async Task<User?> FindByIdAsync(
-        string userId,
+        Ulid userId,
         bool isIncludeAllChildren = true,
         CancellationToken cancellationToken = default
     )
@@ -37,7 +37,7 @@ public class UserManager(
         }
         return await query
             .AsSplitQuery()
-            .FirstOrDefaultAsync(x => x.Id.ToString() == userId, cancellationToken);
+            .FirstOrDefaultAsync(x => x.Id == userId, cancellationToken);
     }
 
     public async Task<User?> FindByNameAsync(

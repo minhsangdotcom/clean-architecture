@@ -20,66 +20,6 @@ public class CreateUserHandlerTest(TestingFixture testingFixture) : IAsyncLifeti
     private Ulid roleId;
     private CreateUserCommand command = new();
 
-    // [Fact]
-    // private async Task CreateUser_WhenProvinceNotFound_ShouldReturnNotFoundResult()
-    // {
-    //     command.ProvinceId = Ulid.NewUlid();
-    //     //act
-    //     Result<CreateUserResponse> result = await testingFixture.SendAsync(command);
-
-    //     //assert
-    //     var expectedMessage = Messenger
-    //         .Create<User>()
-    //         .Property(nameof(CreateUserCommand.ProvinceId))
-    //         .Message(MessageType.Existence)
-    //         .Negative()
-    //         .Build();
-
-    //     result.Error.ShouldNotBeNull();
-    //     result.Error.Status.ShouldBe(404);
-    //     result.Error.ErrorMessage.ShouldBe(expectedMessage, new MessageResultComparer());
-    // }
-
-    // [Fact]
-    // private async Task CreateUser_WhenDistrictNotFound_ShouldReturnNotFoundResult()
-    // {
-    //     command.DistrictId = Ulid.NewUlid();
-    //     //act
-    //     Result<CreateUserResponse> result = await testingFixture.SendAsync(command);
-
-    //     //assert
-    //     var expectedMessage = Messenger
-    //         .Create<User>()
-    //         .Property(nameof(CreateUserCommand.DistrictId))
-    //         .Message(MessageType.Existence)
-    //         .Negative()
-    //         .Build();
-
-    //     result.Error.ShouldNotBeNull();
-    //     result.Error.Status.ShouldBe(404);
-    //     result.Error.ErrorMessage.ShouldBe(expectedMessage, new MessageResultComparer());
-    // }
-
-    // [Fact]
-    // private async Task CreateUser_WhenCommuneNotFound_ShouldReturnNotFoundResult()
-    // {
-    //     command.CommuneId = Ulid.NewUlid();
-    //     //act
-    //     Result<CreateUserResponse> result = await testingFixture.SendAsync(command);
-
-    //     //assert
-    //     var expectedMessage = Messenger
-    //         .Create<User>()
-    //         .Property(nameof(CreateUserCommand.CommuneId))
-    //         .Message(MessageType.Existence)
-    //         .Negative()
-    //         .Build();
-
-    //     result.Error.ShouldNotBeNull();
-    //     result.Error.Status.ShouldBe(404);
-    //     result.Error.ErrorMessage.ShouldBe(expectedMessage, new MessageResultComparer());
-    // }
-
     [Fact]
     private async Task CreateUser_ShouldCreateSuccess()
     {

@@ -16,7 +16,7 @@ public class DeleteRoleHandler(IRoleManager manager)
         CancellationToken cancellationToken
     )
     {
-        Role? role = await manager.FindByIdAsync(command.RoleId, false, cancellationToken);
+        Role? role = await manager.FindByIdAsync(Ulid.Parse(command.RoleId), false, cancellationToken);
         if (role == null)
         {
             return Result<string>.Failure(

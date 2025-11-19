@@ -22,7 +22,7 @@ public class UpdateUserProfileHandler(
     )
     {
         User? user = await userManager.FindByIdAsync(
-            currentUser.Id?.ToString()!,
+            currentUser.Id!.Value,
             false,
             cancellationToken
         );
@@ -62,7 +62,7 @@ public class UpdateUserProfileHandler(
         }
 
         var response = await userManager.FindByIdAsync(
-            currentUser.Id?.ToString()!,
+            currentUser.Id!.Value,
             cancellationToken: cancellationToken
         );
 

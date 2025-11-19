@@ -14,7 +14,7 @@ public interface IRoleManager
 
     #region Queries
     Task<Role?> FindByIdAsync(
-        string roleId,
+        Ulid roleId,
         bool isIncludeAllChildren = true,
         CancellationToken cancellationToken = default
     );

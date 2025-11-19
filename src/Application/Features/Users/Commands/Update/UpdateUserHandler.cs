@@ -24,7 +24,7 @@ public class UpdateUserHandler(
     )
     {
         User? user = await userManager.FindByIdAsync(
-            command.UserId,
+            Ulid.Parse(command.UserId),
             cancellationToken: cancellationToken
         );
         if (user == null)

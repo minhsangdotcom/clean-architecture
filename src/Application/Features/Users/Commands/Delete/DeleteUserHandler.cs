@@ -18,7 +18,11 @@ public class DeleteUserHandler(
         CancellationToken cancellationToken
     )
     {
-        User? user = await userManager.FindByIdAsync(command.UserId, false, cancellationToken);
+        User? user = await userManager.FindByIdAsync(
+            Ulid.Parse(command.UserId),
+            false,
+            cancellationToken
+        );
         if (user == null)
         {
             return Result<string>.Failure(

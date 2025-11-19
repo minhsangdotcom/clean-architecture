@@ -36,7 +36,7 @@ public class CreateRoleHandler(IRoleManager manager, IEfUnitOfWork unitOfWork)
             throw;
         }
         Role? roleResponse = await manager.FindByIdAsync(
-            role.Id.ToString(),
+            role.Id,
             cancellationToken: cancellationToken
         );
         return Result<CreateRoleResponse>.Success(roleResponse!.ToCreateRoleResponse());

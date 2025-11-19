@@ -168,7 +168,7 @@ public class DbInitializer
         List<Permission> permissions = await unitOfWork
             .Repository<Permission>()
             .ListAsync(x => x.IsDeleted == false);
-        Role? role = await manager.FindByIdAsync(roleId.ToString());
+        Role? role = await manager.FindByIdAsync(roleId);
         if (role == null)
         {
             return;

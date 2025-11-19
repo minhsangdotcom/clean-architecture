@@ -17,7 +17,7 @@ public class GetUserDetailHandler(IUserManager userManager)
     )
     {
         User? user = await userManager.FindByIdAsync(
-            query.UserId,
+            Ulid.Parse(query.UserId),
             cancellationToken: cancellationToken
         );
 

@@ -59,7 +59,7 @@ public class CreateUserHandler(
         }
 
         User? userResponse = await userManager.FindByIdAsync(
-            user.Id.ToString(),
+            user.Id,
             cancellationToken: cancellationToken
         );
         return Result<CreateUserResponse>.Success(userResponse!.ToCreateUserResponse());

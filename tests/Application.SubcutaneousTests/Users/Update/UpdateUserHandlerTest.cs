@@ -14,66 +14,6 @@ public class UpdateUserHandlerTest(TestingFixture testingFixture) : IAsyncLifeti
 {
     private UpdateUserCommand updateUserCommand = new();
 
-    // [Fact]
-    // private async Task UpdateUser_WhenProvinceNotFound_ShouldReturnNotFoundResult()
-    // {
-    //     updateUserCommand.UpdateData.ProvinceId = Ulid.NewUlid();
-    //     //act
-    //     Result<UpdateUserResponse> result = await testingFixture.SendAsync(updateUserCommand);
-
-    //     //assert
-    //     var expectedMessage = Messenger
-    //         .Create<User>()
-    //         .Property(nameof(UserUpdateRequest.ProvinceId))
-    //         .Message(MessageType.Existence)
-    //         .Negative()
-    //         .Build();
-
-    //     result.Error.ShouldNotBeNull();
-    //     result.Error.Status.ShouldBe(404);
-    //     result.Error.ErrorMessage.ShouldBe(expectedMessage, new MessageResultComparer());
-    // }
-
-    // [Fact]
-    // private async Task UpdateUser_WhenDistrictNotFound_ShouldReturnNotFoundResult()
-    // {
-    //     updateUserCommand.UpdateData.DistrictId = Ulid.NewUlid();
-    //     //act
-    //     Result<UpdateUserResponse> result = await testingFixture.SendAsync(updateUserCommand);
-
-    //     //assert
-    //     var expectedMessage = Messenger
-    //         .Create<User>()
-    //         .Property(nameof(UserUpdateRequest.DistrictId))
-    //         .Message(MessageType.Existence)
-    //         .Negative()
-    //         .Build();
-
-    //     result.Error.ShouldNotBeNull();
-    //     result.Error.Status.ShouldBe(404);
-    //     result.Error.ErrorMessage.ShouldBe(expectedMessage, new MessageResultComparer());
-    // }
-
-    // [Fact]
-    // private async Task UpdateUser_WhenCommuneNotFound_ShouldReturnNotFoundResult()
-    // {
-    //     updateUserCommand.UpdateData.CommuneId = Ulid.NewUlid();
-    //     //act
-    //     Result<UpdateUserResponse> result = await testingFixture.SendAsync(updateUserCommand);
-
-    //     //assert
-    //     var expectedMessage = Messenger
-    //         .Create<User>()
-    //         .Property(nameof(UserUpdateRequest.CommuneId))
-    //         .Message(MessageType.Existence)
-    //         .Negative()
-    //         .Build();
-
-    //     result.Error.ShouldNotBeNull();
-    //     result.Error.Status.ShouldBe(404);
-    //     result.Error.ErrorMessage.ShouldBe(expectedMessage, new MessageResultComparer());
-    // }
-
     [Fact]
     private async Task UpdateUser_WhenIdNotfound_ShouldReturnNotFoundResult()
     {

@@ -8,7 +8,7 @@ public interface IUserManager
 {
     #region UserQueries
     Task<User?> FindByIdAsync(
-        string userId,
+        Ulid userId,
         bool isIncludeAllChildren = true,
         CancellationToken cancellationToken = default
     );

@@ -17,8 +17,11 @@ public class ChangeUserPasswordHandler(IUserManager userManager, ICurrentUser cu
         CancellationToken cancellationToken
     )
     {
-        Ulid? userId = currentUser.Id;
-        User? user = await userManager.FindByIdAsync(userId.ToString()!, false, cancellationToken);
+        User? user = await userManager.FindByIdAsync(
+            currentUser.Id!.Value,
+            false,
+            cancellationToken
+        );
 
         if (user == null)
         {

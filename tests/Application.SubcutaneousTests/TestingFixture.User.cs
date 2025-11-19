@@ -7,7 +7,6 @@ using Domain.Aggregates.Regions;
 using Domain.Aggregates.Roles;
 using Domain.Aggregates.Users;
 using Domain.Aggregates.Users.Enums;
-using Domain.Aggregates.Users.Specifications;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -162,7 +161,7 @@ public partial class TestingFixture
     {
         using var scope = factory!.Services.CreateScope();
         IUserManager userManager = scope.ServiceProvider.GetRequiredService<IUserManager>();
-        return await userManager.FindByIdAsync(userId.ToString());
+        return await userManager.FindByIdAsync(userId);
     }
 
     private static UserAddress GetDefaultAddress() =>
