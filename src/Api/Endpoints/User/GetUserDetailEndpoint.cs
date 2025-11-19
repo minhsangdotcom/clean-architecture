@@ -42,7 +42,7 @@ public class GetUserDetailEndpoint : IEndpoint
         CancellationToken cancellationToken = default
     )
     {
-        var command = new GetUserDetailQuery(Ulid.Parse(id));
+        var command = new GetUserDetailQuery(id);
         var result = await sender.Send(command, cancellationToken);
         return result.ToResult();
     }

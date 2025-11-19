@@ -1,7 +1,7 @@
 using Api.common.EndpointConfigurations;
 using Api.common.Results;
 using Api.common.Routers;
-using Application.Features.Users.Commands.RequestResetPassword;
+using Application.Features.Users.Commands.RequestPasswordReset;
 using Mediator;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;

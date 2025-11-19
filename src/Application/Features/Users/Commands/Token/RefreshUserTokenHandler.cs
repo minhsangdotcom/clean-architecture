@@ -27,7 +27,7 @@ public class RefreshUserTokenHandler(
         CancellationToken cancellationToken
     )
     {
-        bool isValid = ValidateRefreshToken(
+        bool isValid = DecodeRefreshToken(
             command.RefreshToken!,
             out DecodeTokenResponse? decodeToken
         );
@@ -100,6 +100,20 @@ public class RefreshUserTokenHandler(
             );
         }
 
+        if (validRefreshToken.ExpiredTime <= DateTimeOffset.UtcNow)
+        {
+            return Result<RefreshUserTokenResponse>.Failure(
+                new BadRequestError(
+                    "Error has occurred with refresh token",
+                    Messenger
+                        .Create<UserRefreshToken>(nameof(User))
+                        .Property(x => x.Token!)
+                        .Message(MessageType.Expired)
+                        .Build()
+                )
+            );
+        }
+
         if (validRefreshToken.User?.Status == UserStatus.Inactive)
         {
             return Result<RefreshUserTokenResponse>.Failure(
@@ -110,19 +124,17 @@ public class RefreshUserTokenHandler(
             );
         }
 
-        var accessTokenExpiredTime = tokenFactory.AccessTokenExpiredTime;
-        var accessToken = tokenFactory.CreateToken(
+        DateTime accessTokenExpiredTime = tokenFactory.AccessTokenExpiredTime;
+        string accessToken = tokenFactory.CreateToken(
             [new(ClaimTypes.Sub, decodeToken.Sub!)],
             accessTokenExpiredTime
         );
 
-        var refreshTokenExpiredTime = tokenFactory.RefreshTokenExpiredTime;
         string refreshToken = tokenFactory.CreateToken(
             [
                 new(ClaimTypes.Sub, decodeToken.Sub!),
                 new(ClaimTypes.TokenFamilyId, decodeToken.FamilyId!),
-            ],
-            refreshTokenExpiredTime
+            ]
         );
 
         var userAgent = new
@@ -134,15 +146,16 @@ public class RefreshUserTokenHandler(
             Engine = detectionService.Engine.Name,
         };
 
-        var userRefreshToken = new UserRefreshToken()
-        {
-            FamilyId = decodeToken.FamilyId,
-            UserId = Ulid.Parse(decodeToken.Sub!),
-            ExpiredTime = refreshTokenExpiredTime,
-            Token = refreshToken,
-            UserAgent = SerializerExtension.Serialize(userAgent).StringJson,
-            ClientIp = currentUser.ClientIp,
-        };
+        UserRefreshToken userRefreshToken =
+            new()
+            {
+                FamilyId = decodeToken.FamilyId,
+                UserId = Ulid.Parse(decodeToken.Sub!),
+                ExpiredTime = tokenFactory.RefreshTokenExpiredTime,
+                Token = refreshToken,
+                UserAgent = SerializerExtension.Serialize(userAgent).StringJson,
+                ClientIp = currentUser.ClientIp,
+            };
 
         await unitOfWork
             .Repository<UserRefreshToken>()
@@ -154,7 +167,7 @@ public class RefreshUserTokenHandler(
         );
     }
 
-    private bool ValidateRefreshToken(string token, out DecodeTokenResponse? decodeTokenResponse)
+    private bool DecodeRefreshToken(string token, out DecodeTokenResponse? decodeTokenResponse)
     {
         try
         {

@@ -11,5 +11,5 @@ public interface ITokenFactoryService
 
     DecodeTokenResponse DecodeToken(string token);
 
-    string CreateToken(IEnumerable<Claim> claims, DateTime expirationTime);
+    string CreateToken(IEnumerable<Claim> claims, DateTime? expirationTime = null);
 }

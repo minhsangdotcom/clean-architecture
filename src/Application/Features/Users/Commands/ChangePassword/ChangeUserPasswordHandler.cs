@@ -1,16 +1,15 @@
 using Application.Common.Constants;
 using Application.Common.Errors;
 using Application.Common.Interfaces.Services;
-using Application.Common.Interfaces.UnitOfWorks;
+using Application.Common.Interfaces.Services.Identity;
 using Contracts.ApiWrapper;
 using Domain.Aggregates.Users;
-using Domain.Aggregates.Users.Specifications;
 using Mediator;
 using SharedKernel.Common.Messages;
 
 namespace Application.Features.Users.Commands.ChangePassword;
 
-public class ChangeUserPasswordHandler(IEfUnitOfWork unitOfWork, ICurrentUser currentUser)
+public class ChangeUserPasswordHandler(IUserManager userManager, ICurrentUser currentUser)
     : IRequestHandler<ChangeUserPasswordCommand, Result<string>>
 {
     public async ValueTask<Result<string>> Handle(
@@ -19,12 +18,7 @@ public class ChangeUserPasswordHandler(IEfUnitOfWork unitOfWork, ICurrentUser cu
     )
     {
         Ulid? userId = currentUser.Id;
-        User? user = await unitOfWork
-            .DynamicReadOnlyRepository<User>()
-            .FindByConditionAsync(
-                new GetUserByIdWithoutIncludeSpecification(userId ?? Ulid.Empty),
-                cancellationToken
-            );
+        User? user = await userManager.FindByIdAsync(userId.ToString()!, false, cancellationToken);
 
         if (user == null)
         {
@@ -57,9 +51,7 @@ public class ChangeUserPasswordHandler(IEfUnitOfWork unitOfWork, ICurrentUser cu
         }
 
         user.ChangePassword(HashPassword(request.NewPassword));
-
-        await unitOfWork.Repository<User>().UpdateAsync(user);
-        await unitOfWork.SaveAsync(cancellationToken);
+        await userManager.UpdateAsync(user, cancellationToken);
 
         return Result<string>.Success();
     }

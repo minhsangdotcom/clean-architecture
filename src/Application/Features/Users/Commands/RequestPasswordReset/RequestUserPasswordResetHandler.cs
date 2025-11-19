@@ -1,34 +1,32 @@
 using Application.Common.Constants;
 using Application.Common.Errors;
-using Application.Common.Interfaces.Services.Mail;
 using Application.Common.Interfaces.UnitOfWorks;
 using Contracts.ApiWrapper;
-using Contracts.Dtos.Models;
-using Contracts.Dtos.Requests;
 using Domain.Aggregates.Users;
+using Domain.Aggregates.Users.Enums;
 using Domain.Aggregates.Users.Specifications;
 using DotNetCoreExtension.Extensions;
 using Mediator;
 using Microsoft.Extensions.Configuration;
 using SharedKernel.Common.Messages;
 
-namespace Application.Features.Users.Commands.RequestResetPassword;
+namespace Application.Features.Users.Commands.RequestPasswordReset;
 
-public class RequestResetUserPasswordHandler(
+public class RequestUserPasswordResetHandler(
     IEfUnitOfWork unitOfWork,
-    IConfiguration configuration,
-    IMailService mailService
-) : IRequestHandler<RequestResetUserPasswordCommand, Result<string>>
+    IPublisher publisher,
+    IConfiguration configuration
+) : IRequestHandler<RequestUserPasswordResetCommand, Result<string>>
 {
     public async ValueTask<Result<string>> Handle(
-        RequestResetUserPasswordCommand command,
+        RequestUserPasswordResetCommand command,
         CancellationToken cancellationToken
     )
     {
         User? user = await unitOfWork
             .DynamicReadOnlyRepository<User>()
             .FindByConditionAsync(
-                new GetUserByEmailSpecification(command.Email),
+                new GetUserByEmailIncludePasswordResetRequestSpecification(command.Email),
                 cancellationToken
             );
 
@@ -47,42 +45,42 @@ public class RequestResetUserPasswordHandler(
             );
         }
 
+        if (user.Status == UserStatus.Inactive)
+        {
+            return Result<string>.Failure(
+                new BadRequestError(
+                    "Error has occurred with the current user",
+                    Messenger.Create<User>().Message(MessageType.Active).Negative().BuildMessage()
+                )
+            );
+        }
+
         string token = StringExtension.GenerateRandomString(40);
         DateTimeOffset expiredTime = DateTimeOffset.UtcNow.AddHours(
             configuration.GetValue<int>("ForgotPasswordExpiredTimeInHour")
         );
-        UserPasswordReset UserPasswordReset =
-            new()
-            {
-                Token = token,
-                UserId = user.Id,
-                Expiry = expiredTime,
-            };
 
         await unitOfWork
             .Repository<UserPasswordReset>()
-            .DeleteRangeAsync(user.PasswordResetRequests!);
+            .DeleteRangeAsync(user.PasswordResetRequests);
         await unitOfWork
             .Repository<UserPasswordReset>()
-            .AddAsync(UserPasswordReset, cancellationToken);
+            .AddAsync(
+                new()
+                {
+                    Token = token,
+                    UserId = user.Id,
+                    Expiry = expiredTime,
+                },
+                cancellationToken
+            );
         await unitOfWork.SaveAsync(cancellationToken);
 
-        string domain = configuration.GetValue<string>("ForgotPasswordUrl")!;
-        var link = new UriBuilder(domain) { Query = $"token={token}&id={user.Id}" };
-        string expiry = expiredTime.ToLocalTime().ToString("dd/MM/yyyy hh:mm:ss");
+        string forgotPasswordUrl = configuration.GetValue<string>("ForgotPasswordUrl")!;
+        RequestUserPasswordResetNotification notification =
+            new(user.Email, token, user.Id, expiredTime, forgotPasswordUrl);
 
-        _ = await mailService.SendWithTemplateAsync(
-            new MailTemplateData()
-            {
-                DisplayName = "The Template Reset password",
-                Subject = "Reset password",
-                To = [user.Email],
-                Template = new(
-                    "ForgotPassword",
-                    new ResetPasswordModel() { ResetLink = link.ToString(), Expiry = expiry }
-                ),
-            }
-        );
+        await publisher.Publish(notification, cancellationToken);
         return Result<string>.Success();
     }
 }

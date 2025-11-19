@@ -1,16 +1,15 @@
 using Application.Common.Constants;
 using Application.Common.Errors;
 using Application.Common.Interfaces.Services;
-using Application.Common.Interfaces.UnitOfWorks;
+using Application.Common.Interfaces.Services.Identity;
 using Contracts.ApiWrapper;
 using Domain.Aggregates.Users;
-using Domain.Aggregates.Users.Specifications;
 using Mediator;
 using SharedKernel.Common.Messages;
 
 namespace Application.Features.Users.Queries.Profiles;
 
-public class GetUserProfileHandler(IEfUnitOfWork unitOfWork, ICurrentUser currentUser)
+public class GetUserProfileHandler(IUserManager userManager, ICurrentUser currentUser)
     : IRequestHandler<GetUserProfileQuery, Result<GetUserProfileResponse>>
 {
     public async ValueTask<Result<GetUserProfileResponse>> Handle(
@@ -18,13 +17,10 @@ public class GetUserProfileHandler(IEfUnitOfWork unitOfWork, ICurrentUser curren
         CancellationToken cancellationToken
     )
     {
-        GetUserProfileResponse? user = await unitOfWork
-            .DynamicReadOnlyRepository<User>()
-            .FindByConditionAsync(
-                new GetUserByIdSpecification(currentUser.Id!.Value),
-                x => x.ToGetUserProfileResponse(),
-                cancellationToken
-            );
+        User? user = await userManager.FindByIdAsync(
+            currentUser.Id.ToString()!,
+            cancellationToken: cancellationToken
+        );
 
         if (user == null)
         {
@@ -41,6 +37,6 @@ public class GetUserProfileHandler(IEfUnitOfWork unitOfWork, ICurrentUser curren
             );
         }
 
-        return Result<GetUserProfileResponse>.Success(user);
+        return Result<GetUserProfileResponse>.Success(user.ToGetUserProfileResponse());
     }
 }

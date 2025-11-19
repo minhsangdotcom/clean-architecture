@@ -31,6 +31,17 @@
           "Newtonsoft.Json": "13.0.3"
         }
       },
+      "JWT.Extensions.AspNetCore": {
+        "type": "Direct",
+        "requested": "[11.0.0-beta4, )",
+        "resolved": "11.0.0-beta4",
+        "contentHash": "NTY8Zl6NMa1wP15eA//hAmXfxrF4r9XSUwgjAVqgC9pcuGQhJlKEMvO5yvB7e/kb244dMUlYWCCab0ix3iqaHA==",
+        "dependencies": {
+          "JWT": "11.0.0-beta2",
+          "JWT.Extensions.DependencyInjection": "3.0.0-beta2",
+          "Newtonsoft.Json": "13.0.3"
+        }
+      },
       "MailKit": {
         "type": "Direct",
         "requested": "[4.12.1, )",
@@ -171,6 +182,16 @@
         "type": "Transitive",
         "resolved": "2.14.1",
         "contentHash": "lQKvtaTDOXnoVJ20ibTuSIOf2i0uO0MPbDhd1jm238I+U/2ZnRENj0cktKZhtchBMtCUSRQ5v4xBCUbKNmyVMw=="
+      },
+      "JWT.Extensions.DependencyInjection": {
+        "type": "Transitive",
+        "resolved": "3.0.0-beta2",
+        "contentHash": "BIHQCi7qe4h3KwJ5Lwe9yXdnFv0kscVKTijIhiZfqRrPJreV/G6Xnhue1oSMDI1uc01tdv/4ewsHEEegfhKn8Q==",
+        "dependencies": {
+          "JWT": "11.0.0-beta2",
+          "Microsoft.Extensions.DependencyInjection.Abstractions": "8.0.1",
+          "Newtonsoft.Json": "13.0.3"
+        }
       },
       "Mediator.Abstractions": {
         "type": "Transitive",

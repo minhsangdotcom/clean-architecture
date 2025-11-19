@@ -1,15 +1,14 @@
 using Application.Common.Constants;
 using Application.Common.Errors;
-using Application.Common.Interfaces.UnitOfWorks;
+using Application.Common.Interfaces.Services.Identity;
 using Contracts.ApiWrapper;
 using Domain.Aggregates.Users;
-using Domain.Aggregates.Users.Specifications;
 using Mediator;
 using SharedKernel.Common.Messages;
 
 namespace Application.Features.Users.Queries.Detail;
 
-public class GetUserDetailHandler(IEfUnitOfWork unitOfWork)
+public class GetUserDetailHandler(IUserManager userManager)
     : IRequestHandler<GetUserDetailQuery, Result<GetUserDetailResponse>>
 {
     public async ValueTask<Result<GetUserDetailResponse>> Handle(
@@ -17,13 +16,10 @@ public class GetUserDetailHandler(IEfUnitOfWork unitOfWork)
         CancellationToken cancellationToken
     )
     {
-        GetUserDetailResponse? user = await unitOfWork
-            .DynamicReadOnlyRepository<User>()
-            .FindByConditionAsync(
-                new GetUserByIdSpecification(query.UserId),
-                x => x.ToGetUserDetailResponse(),
-                cancellationToken
-            );
+        User? user = await userManager.FindByIdAsync(
+            query.UserId,
+            cancellationToken: cancellationToken
+        );
 
         if (user == null)
         {
@@ -40,6 +36,6 @@ public class GetUserDetailHandler(IEfUnitOfWork unitOfWork)
             );
         }
 
-        return Result<GetUserDetailResponse>.Success(user);
+        return Result<GetUserDetailResponse>.Success(user.ToGetUserDetailResponse());
     }
 }

@@ -23,14 +23,14 @@ public class LoginUserHandler(
 ) : IRequestHandler<LoginUserCommand, Result<LoginUserResponse>>
 {
     public async ValueTask<Result<LoginUserResponse>> Handle(
-        LoginUserCommand request,
+        LoginUserCommand command,
         CancellationToken cancellationToken
     )
     {
         User? user = await unitOfWork
             .DynamicReadOnlyRepository<User>()
             .FindByConditionAsync(
-                new GetUserByUsernameSpecification(request.Username!),
+                new GetUserByIdentifierSpecification(command.Identifier!),
                 cancellationToken
             );
         if (user == null)
@@ -47,7 +47,7 @@ public class LoginUserHandler(
                 )
             );
         }
-        if (!Verify(request.Password, user.Password))
+        if (!Verify(command.Password, user.Password))
         {
             return Result<LoginUserResponse>.Failure(
                 new BadRequestError(
@@ -64,34 +64,33 @@ public class LoginUserHandler(
 
         DateTime refreshExpireTime = tokenFactory.RefreshTokenExpiredTime;
         string familyId = StringExtension.GenerateRandomString(32);
+        string userAgent = detectionService.UserAgent.ToString();
 
-        var userAgent = detectionService.UserAgent.ToString();
+        UserRefreshToken userRefreshToken =
+            new()
+            {
+                ExpiredTime = refreshExpireTime,
+                UserId = user.Id,
+                FamilyId = familyId,
+                UserAgent = userAgent,
+                ClientIp = currentUser.ClientIp,
+            };
 
-        var UserRefreshToken = new UserRefreshToken()
-        {
-            ExpiredTime = refreshExpireTime,
-            UserId = user.Id,
-            FamilyId = familyId,
-            UserAgent = userAgent,
-            ClientIp = currentUser.ClientIp,
-        };
-
-        var accessTokenExpiredTime = tokenFactory.AccessTokenExpiredTime;
+        DateTime accessTokenExpiredTime = tokenFactory.AccessTokenExpiredTime;
         string accessToken = tokenFactory.CreateToken(
             [new(ClaimTypes.Sub, user.Id.ToString())],
             accessTokenExpiredTime
         );
 
         string refreshToken = tokenFactory.CreateToken(
-            [new(ClaimTypes.TokenFamilyId, familyId), new(ClaimTypes.Sub, user.Id.ToString())],
-            refreshExpireTime
+            [new(ClaimTypes.TokenFamilyId, familyId), new(ClaimTypes.Sub, user.Id.ToString())]
         );
 
-        UserRefreshToken.Token = refreshToken;
+        userRefreshToken.Token = refreshToken;
 
         await unitOfWork
             .Repository<UserRefreshToken>()
-            .AddAsync(UserRefreshToken, cancellationToken);
+            .AddAsync(userRefreshToken, cancellationToken);
         await unitOfWork.SaveAsync(cancellationToken);
 
         return Result<LoginUserResponse>.Success(
