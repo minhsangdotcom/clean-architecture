@@ -11,9 +11,4 @@ public class UpdateUserCommand : IRequest<Result<UpdateUserResponse>>
     public UserUpdateRequest UpdateData { get; set; } = null!;
 }
 
-public class UserUpdateRequest : UserUpsertCommand
-{
-    public List<Ulid>? Roles { get; set; }
-
-    public List<Ulid>? Permissions { get; set; }
-}
+public class UserUpdateRequest : UserUpsertCommand;

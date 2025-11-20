@@ -1,6 +1,7 @@
 using Application.Common.Constants;
 using Application.Common.Errors;
 using Application.Common.Interfaces.Services.Identity;
+using Application.Common.Interfaces.Services.Storage;
 using Application.Common.Interfaces.UnitOfWorks;
 using Contracts.ApiWrapper;
 using Domain.Aggregates.Permissions;
@@ -14,7 +15,7 @@ namespace Application.Features.Users.Commands.Update;
 
 public class UpdateUserHandler(
     IEfUnitOfWork unitOfWork,
-    IMediaUpdateService<User> mediaUpdateService,
+    IMediaStorageService<User> storageService,
     IUserManager userManager
 ) : IRequestHandler<UpdateUserCommand, Result<UpdateUserResponse>>
 {
@@ -47,8 +48,8 @@ public class UpdateUserHandler(
         string? oldAvatar = user.Avatar;
 
         user.FromUpdateUser(updateData);
-        string? key = mediaUpdateService.GetKey(avatar);
-        user.ChangeAvatar(await mediaUpdateService.UploadAsync(avatar, key));
+        string? key = storageService.GetKey(avatar);
+        user.ChangeAvatar(await storageService.UploadAsync(avatar, key));
 
         await unitOfWork.BeginTransactionAsync(cancellationToken);
         try
@@ -77,12 +78,12 @@ public class UpdateUserHandler(
         catch (Exception)
         {
             // rollback new avatar
-            await mediaUpdateService.DeleteAsync(user.Avatar);
+            await storageService.DeleteAsync(user.Avatar);
             await unitOfWork.RollbackAsync(cancellationToken);
             throw;
         }
         // delete old avatar after updating Successfully
-        await mediaUpdateService.DeleteAsync(oldAvatar);
+        await storageService.DeleteAsync(oldAvatar);
         return Result<UpdateUserResponse>.Success(user.ToUpdateUserResponse());
     }
 }

@@ -2,6 +2,7 @@ using Application.Common.Constants;
 using Application.Common.Errors;
 using Application.Common.Interfaces.Services;
 using Application.Common.Interfaces.Services.Identity;
+using Application.Common.Interfaces.Services.Storage;
 using Contracts.ApiWrapper;
 using Domain.Aggregates.Users;
 using Mediator;
@@ -12,7 +13,7 @@ namespace Application.Features.Users.Commands.Profiles;
 
 public class UpdateUserProfileHandler(
     ICurrentUser currentUser,
-    IMediaUpdateService<User> mediaUpdateService,
+    IMediaStorageService<User> storageService,
     IUserManager userManager
 ) : IRequestHandler<UpdateUserProfileCommand, Result<UpdateUserProfileResponse>>
 {
@@ -47,21 +48,21 @@ public class UpdateUserProfileHandler(
 
         user.MapFromCommand(command);
 
-        string? key = mediaUpdateService.GetKey(avatar);
-        user.ChangeAvatar(await mediaUpdateService.UploadAsync(avatar, key));
+        string? key = storageService.GetKey(avatar);
+        user.ChangeAvatar(await storageService.UploadAsync(avatar, key));
 
         try
         {
             await userManager.UpdateAsync(user, cancellationToken);
-            await mediaUpdateService.DeleteAsync(oldAvatar);
+            await storageService.DeleteAsync(oldAvatar);
         }
         catch (Exception)
         {
-            await mediaUpdateService.DeleteAsync(user.Avatar);
+            await storageService.DeleteAsync(user.Avatar);
             throw;
         }
 
-        var response = await userManager.FindByIdAsync(
+        User? response = await userManager.FindByIdAsync(
             currentUser.Id!.Value,
             cancellationToken: cancellationToken
         );

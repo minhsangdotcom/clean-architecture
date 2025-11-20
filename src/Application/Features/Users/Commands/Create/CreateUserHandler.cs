@@ -1,4 +1,5 @@
 using Application.Common.Interfaces.Services.Identity;
+using Application.Common.Interfaces.Services.Storage;
 using Application.Common.Interfaces.UnitOfWorks;
 using Contracts.ApiWrapper;
 using Domain.Aggregates.Permissions;
@@ -10,7 +11,7 @@ namespace Application.Features.Users.Commands.Create;
 
 public class CreateUserHandler(
     IEfUnitOfWork unitOfWork,
-    IMediaUpdateService<User> mediaUpdateService,
+    IMediaStorageService<User> storageService,
     IUserManager userManager
 ) : IRequestHandler<CreateUserCommand, Result<CreateUserResponse>>
 {
@@ -22,8 +23,8 @@ public class CreateUserHandler(
         User user = command.ToUser();
 
         // upload avatar
-        string? key = mediaUpdateService.GetKey(command.Avatar);
-        user.ChangeAvatar(await mediaUpdateService.UploadAsync(command.Avatar, key));
+        string? key = storageService.GetKey(command.Avatar);
+        user.ChangeAvatar(await storageService.UploadAsync(command.Avatar, key));
 
         string? userAvatar = null;
         await unitOfWork.BeginTransactionAsync(cancellationToken);
@@ -53,7 +54,7 @@ public class CreateUserHandler(
         }
         catch (Exception)
         {
-            await mediaUpdateService.DeleteAsync(userAvatar);
+            await storageService.DeleteAsync(userAvatar);
             await unitOfWork.RollbackAsync(cancellationToken);
             throw;
         }

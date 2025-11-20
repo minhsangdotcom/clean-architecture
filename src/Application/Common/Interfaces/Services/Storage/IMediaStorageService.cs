@@ -1,8 +1,8 @@
 using Microsoft.AspNetCore.Http;
 
-namespace Application.Common.Interfaces.Services.Identity;
+namespace Application.Common.Interfaces.Services.Storage;
 
-public interface IMediaUpdateService<T>
+public interface IMediaStorageService<T>
     where T : class
 {
     string? GetKey(IFormFile? file);

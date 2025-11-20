@@ -1,7 +1,6 @@
 using Application.Common.Interfaces.UnitOfWorks;
 using Contracts.ApiWrapper;
 using Mediator;
-using SharedKernel.Constants;
 
 namespace Application.Features.Permissions;
 
@@ -13,19 +12,6 @@ public class ListPermissionHandler(IEfUnitOfWork unitOfWork)
         CancellationToken cancellationToken
     )
     {
-        // var roleClaims = await unitOfWork.GetRolePermissionClaimsAsync();
-        // var responses = roleClaims.SelectMany(claim =>
-        //     claim.Select(parent => new ListPermissionResponse()
-        //     {
-        //         ClaimType = ClaimTypes.Permission,
-        //         ClaimValue = parent.Key,
-        //         Children = parent.Value.ConvertAll(child => new PermissionResponse()
-        //         {
-        //             ClaimType = ClaimTypes.Permission,
-        //             ClaimValue = child,
-        //         }),
-        //     })
-        // );
         return Result<IEnumerable<ListPermissionResponse>>.Success([]);
     }
 }

@@ -1,4 +1,3 @@
-using Application.Common.Interfaces.Services.Identity;
 using Application.Common.Interfaces.Services.Storage;
 using Contracts.Dtos.Responses;
 using Microsoft.AspNetCore.Http;
@@ -6,10 +5,10 @@ using Microsoft.Extensions.Logging;
 
 namespace Infrastructure.Services.Aws;
 
-public class MediaUpdateService<T>(
+public class MediaStorageService<T>(
     IStorageService storageService,
-    ILogger<MediaUpdateService<T>> logger
-) : IMediaUpdateService<T>
+    ILogger<MediaStorageService<T>> logger
+) : IMediaStorageService<T>
     where T : class
 {
     private readonly string Directory = $"{typeof(T).Name}s";

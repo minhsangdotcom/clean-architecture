@@ -1,5 +1,4 @@
 using Application.Common.Interfaces.Services.Identity;
-using Infrastructure.Services.Aws;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Infrastructure.Services.Identity;
@@ -10,7 +9,6 @@ public static class IdentityExtension
     {
         return services
             .AddScoped<IRoleManager, RoleManager>()
-            .AddScoped<IUserManager, UserManager>()
-            .AddSingleton(typeof(IMediaUpdateService<>), typeof(MediaUpdateService<>));
+            .AddScoped<IUserManager, UserManager>();
     }
 }

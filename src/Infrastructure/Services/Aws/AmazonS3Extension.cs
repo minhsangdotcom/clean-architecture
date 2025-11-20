@@ -33,7 +33,9 @@ public static class AmazonS3Extension
             s3AwsSettings.SecretKey,
             clientConfig
         );
-        services.AddSingleton<IAmazonS3>(s3Client);
+        services
+            .AddSingleton<IAmazonS3>(s3Client)
+            .AddSingleton(typeof(IMediaStorageService<>), typeof(MediaStorageService<>));
 
         return services;
     }
