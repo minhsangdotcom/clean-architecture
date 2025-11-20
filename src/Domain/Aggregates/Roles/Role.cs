@@ -22,12 +22,20 @@ public class Role : AggregateRoot
         Description = description;
     }
 
-    public Role(Ulid id, string name, List<RolePermission> permissions, string? description)
+    // for seeding purpose
+    public Role(
+        Ulid id,
+        string name,
+        List<RolePermission> permissions,
+        string? description,
+        string createdBy
+    )
     {
         Id = id;
         Name = Guard.Against.NullOrEmpty(name, nameof(name));
         Description = description;
         Permissions = [.. Permissions.Concat(permissions)];
+        CreatedBy = createdBy;
     }
 
     public void Update(string name, string? description)

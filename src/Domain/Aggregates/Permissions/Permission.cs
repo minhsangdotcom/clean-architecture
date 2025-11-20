@@ -31,7 +31,8 @@ public class Permission : AggregateRoot
         string? description = null,
         string? group = null,
         DateTimeOffset? effectiveFrom = null,
-        DateTimeOffset? effectiveTo = null
+        DateTimeOffset? effectiveTo = null,
+        string? createdBy = null
     )
     {
         Code = code;
@@ -40,6 +41,11 @@ public class Permission : AggregateRoot
         Group = group;
         EffectiveFrom = effectiveFrom;
         EffectiveTo = effectiveTo;
+
+        if (!string.IsNullOrWhiteSpace(createdBy))
+        {
+            CreatedBy = createdBy!;
+        }
     }
 
     public void Deactivate()

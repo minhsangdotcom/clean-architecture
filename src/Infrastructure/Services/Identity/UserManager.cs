@@ -114,12 +114,12 @@ public class UserManager(
     public async Task<bool> CreateAsync(
         User user,
         string password,
-        CancellationToken cancellationToken
+        CancellationToken cancellationToken = default
     )
     {
         try
         {
-            user.HasPasswordAsync(password);
+            user.HasPasswordAsync(HashPassword(password));
             users.Add(user);
             await dbContext.SaveChangesAsync(cancellationToken);
             return true;
@@ -131,13 +131,13 @@ public class UserManager(
         }
     }
 
-    public async Task UpdateAsync(User user, CancellationToken cancellationToken)
+    public async Task UpdateAsync(User user, CancellationToken cancellationToken = default)
     {
         users.Update(user);
         await dbContext.SaveChangesAsync(cancellationToken);
     }
 
-    public async Task DeleteAsync(User user, CancellationToken cancellationToken)
+    public async Task DeleteAsync(User user, CancellationToken cancellationToken = default)
     {
         users.Remove(user);
         await dbContext.SaveChangesAsync(cancellationToken);

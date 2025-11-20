@@ -54,6 +54,12 @@ public class User : AggregateRoot
         Avatar = avatar;
     }
 
+    public void InitializeIdentity(Ulid id, string createdBy)
+    {
+        Id = id;
+        CreatedBy = createdBy;
+    }
+
     public void HasPasswordAsync(string password) =>
         Password = Guard.Against.NullOrWhiteSpace(password, nameof(password));
 

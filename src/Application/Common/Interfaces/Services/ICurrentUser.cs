@@ -1,6 +1,3 @@
-using System.Security.Claims;
-using Microsoft.AspNetCore.Http;
-
 namespace Application.Common.Interfaces.Services;
 
 public interface ICurrentUser
@@ -10,8 +7,4 @@ public interface ICurrentUser
     public string? ClientIp { get; }
 
     public string? AuthenticationScheme { get; }
-
-    // void SetClientIp(HttpContext httpContext);
-
-    // void Set(ClaimsPrincipal user);
 }

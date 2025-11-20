@@ -4,9 +4,11 @@ using Contracts.Permissions;
 using Domain.Aggregates.Permissions;
 using Domain.Aggregates.Roles;
 using Domain.Aggregates.Users;
+using Domain.Aggregates.Users.Enums;
 using Infrastructure.Constants;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using static Contracts.Permissions.PermissionNames;
 
 namespace Infrastructure.Data.Seeds;
 
@@ -36,39 +38,76 @@ public class DbInitializer
                     p.Code,
                     p.Name,
                     p.Description,
-                    g.GroupName
+                    g.GroupName,
+                    createdBy: Credential.CREATED_BY_SYSTEM
                 ))
             ),
         ];
 
-        Ulid roleId = Ulid.Parse(Credential.ADMIN_ROLE_ID);
+        List<Permission> specificPermissions = permissions.FindAll(p =>
+            p.Code == PermissionGenerator.Generate(PermissionResource.Role, PermissionAction.Detail)
+            || p.Code
+                == PermissionGenerator.Generate(PermissionResource.Role, PermissionAction.Create)
+            || p.Code
+                == PermissionGenerator.Generate(PermissionResource.User, PermissionAction.Detail)
+            || p.Code
+                == PermissionGenerator.Generate(PermissionResource.User, PermissionAction.Create)
+        );
+
+        Ulid adminRoleId = Ulid.Parse(Credential.ADMIN_ROLE_ID);
+        Ulid managerRoleId = Ulid.Parse(Credential.MANAGER_ROLE_ID);
         Role adminRole =
             new(
-                roleId,
+                adminRoleId,
                 Credential.ADMIN_ROLE,
                 [
                     .. permissions.Select(p => new RolePermission
                     {
                         PermissionId = p.Id,
-                        RoleId = roleId,
+                        RoleId = adminRoleId,
                     }),
                 ],
-                null
+                null,
+                Credential.CREATED_BY_SYSTEM
             );
+        Role managerRole =
+            new(
+                managerRoleId,
+                Credential.MANAGER_ROLE,
+                [
+                    .. specificPermissions.Select(p => new RolePermission
+                    {
+                        PermissionId = p.Id,
+                        RoleId = managerRoleId,
+                    }),
+                ],
+                null,
+                Credential.CREATED_BY_SYSTEM
+            );
+
         List<PermissionDefinitionWithGroup> allDefinitions = GetPermissionDefinitionWithGroups(
             groupedPermissions
         );
         await unitOfWork.BeginTransactionAsync();
         try
         {
-            logger.LogInformation("Updating permissions is starting.............");
-            await UpdatePermissionAsync(allDefinitions, unitOfWork, logger);
-            logger.LogInformation("Updating permissions has finished.............");
+            if (!await unitOfWork.Repository<Permission>().AnyAsync())
+            {
+                logger.LogInformation("Inserting permissions is starting.............");
+                await unitOfWork.Repository<Permission>().AddRangeAsync(permissions);
+                await unitOfWork.SaveAsync();
+                logger.LogInformation("Inserting permissions has finished.............");
+            }
+            else
+            {
+                await UpdatePermissionAsync(allDefinitions, unitOfWork, logger);
+            }
 
             if (!await unitOfWork.Repository<Role>().AnyAsync())
             {
                 logger.LogInformation("Inserting roles is starting.............");
                 await roleManager.CreateAsync(adminRole);
+                await roleManager.CreateAsync(managerRole);
                 logger.LogInformation("Inserting roles has finished.............");
             }
 
@@ -77,6 +116,43 @@ public class DbInitializer
                 logger.LogInformation("Seeding user data is starting.............");
 
                 // Create default admin user
+                User adminUser =
+                    new(
+                        "Chloe",
+                        "Kim",
+                        "chloe.kim",
+                        Credential.USER_DEFAULT_PASSWORD,
+                        "chloe.kim@naver.kr",
+                        "01039247816",
+                        new DateTime(2002, 10, 1),
+                        Gender.Female
+                    );
+                adminUser.InitializeIdentity(
+                    Ulid.Parse(Credential.CHLOE_KIM_ID),
+                    Credential.CREATED_BY_SYSTEM
+                );
+
+                User managerUser =
+                    new(
+                        "Zayden",
+                        "Cruz",
+                        "zayden.cruz",
+                        Credential.USER_DEFAULT_PASSWORD,
+                        "zayden.cruz@gmail.com",
+                        "4157289034",
+                        new DateTime(2005, 10, 1),
+                        Gender.Female
+                    );
+                managerUser.InitializeIdentity(
+                    Ulid.Parse(Credential.ZAYDEN_CRUZ_ID),
+                    Credential.CREATED_BY_SYSTEM
+                );
+                await userManager.CreateAsync(adminUser, Credential.USER_DEFAULT_PASSWORD);
+                await userManager.CreateAsync(managerUser, Credential.USER_DEFAULT_PASSWORD);
+
+                // add roles for users
+                await userManager.AddToRolesAsync(adminUser, [adminRole.Name]);
+                await userManager.AddToRolesAsync(managerUser, [managerRole.Name]);
                 logger.LogInformation("Seeding user data has finished.............");
             }
 
@@ -117,7 +193,8 @@ public class DbInitializer
                 code: dp.Permission.Code,
                 name: dp.Permission.Name,
                 description: dp.Permission.Description,
-                group: dp.GroupName
+                group: dp.GroupName,
+                createdBy: Credential.CREATED_BY_SYSTEM
             ));
 
         if (permissionsToDelete.Count > 0)
