@@ -2,7 +2,7 @@ using Domain.Common;
 
 namespace Domain.Aggregates.Users;
 
-public class UserPasswordReset : BaseEntity
+public class UserPasswordReset : AuditableEntity
 {
     public string Token { get; set; } = string.Empty;
 

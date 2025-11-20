@@ -30,7 +30,7 @@ public class UpdateAuditableEntityInterceptor(ICurrentUser currentUser) : SaveCh
         DateTimeOffset currentTime = DateTimeOffset.UtcNow;
         var entities = context
             .ChangeTracker.Entries()
-            .Where(e => e.Entity is BaseEntity || e.Entity is AggregateRoot);
+            .Where(e => e.Entity is AuditableEntity || e.Entity is AggregateRoot);
 
         foreach (EntityEntry entry in entities)
         {

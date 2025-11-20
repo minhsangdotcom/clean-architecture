@@ -9,7 +9,7 @@ public abstract class AggregateRoot : AggregateRoot<Ulid>
     public override Ulid Id { get; protected set; } = Ulid.NewUlid();
 }
 
-public abstract class AggregateRoot<T> : DefaultEntity<T>, IAuditable
+public abstract class AggregateRoot<T> : Entity<T>, IAuditable
 {
     public long Version { get; set; }
     public string CreatedBy { get; set; } = string.Empty;

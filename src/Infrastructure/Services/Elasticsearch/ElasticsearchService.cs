@@ -158,7 +158,7 @@ public class ElasticsearchService<T>(
         }
 
         string sort = string.IsNullOrWhiteSpace(request.Sort)
-            ? $"{nameof(BaseEntity.CreatedAt)}{OrderTerm.DELIMITER}{OrderTerm.DESC}"
+            ? $"{nameof(AuditableEntity.CreatedAt)}{OrderTerm.DELIMITER}{OrderTerm.DESC}"
             : request.Sort.Trim();
 
         void Search(SearchRequestDescriptor<T> search)

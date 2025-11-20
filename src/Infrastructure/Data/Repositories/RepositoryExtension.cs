@@ -13,12 +13,12 @@ public static class RepositoryExtension
     public static string GetSort(this string? sort)
     {
         string defaultSort = sort.GetDefaultSort();
-        return $"{defaultSort},{nameof(BaseEntity.Id)}";
+        return $"{defaultSort},{nameof(AuditableEntity.Id)}";
     }
 
     public static string GetDefaultSort(this string? sort) =>
         string.IsNullOrWhiteSpace(sort)
-            ? $"{nameof(BaseEntity.CreatedAt)}{OrderTerm.DELIMITER}{OrderTerm.DESC}"
+            ? $"{nameof(AuditableEntity.CreatedAt)}{OrderTerm.DELIMITER}{OrderTerm.DESC}"
             : sort.Trim();
 
     public static string HashKey(params object?[] parameters)

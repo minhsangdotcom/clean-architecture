@@ -2,7 +2,7 @@ using Domain.Common;
 
 namespace Domain.Aggregates.Regions;
 
-public class Region : BaseEntity
+public class Region : AuditableEntity
 {
     public string Code { get; set; } = string.Empty;
 

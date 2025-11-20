@@ -40,7 +40,7 @@ public class SpecificationRepository<T>(IEfDbContext dbContext) : ISpecification
                         queryParam.After,
                         queryParam.PageSize,
                         queryParam.Sort.GetDefaultSort(),
-                        uniqueSort ?? nameof(BaseEntity.Id)
+                        uniqueSort ?? nameof(AuditableEntity.Id)
                     )
                 )
         ).ToPaginationResponse();

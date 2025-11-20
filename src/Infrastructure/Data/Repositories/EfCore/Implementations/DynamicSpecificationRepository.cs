@@ -104,7 +104,7 @@ public class DynamicSpecificationRepository<T>(IEfDbContext dbContext)
                         queryParam.After,
                         queryParam.PageSize,
                         queryParam.Sort.GetDefaultSort(),
-                        uniqueSort ?? nameof(BaseEntity.Id)
+                        uniqueSort ?? nameof(AuditableEntity.Id)
                     )
                 )
         ).ToPaginationResponse();

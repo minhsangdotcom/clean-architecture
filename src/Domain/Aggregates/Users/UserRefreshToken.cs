@@ -2,7 +2,7 @@ using Domain.Common;
 
 namespace Domain.Aggregates.Users;
 
-public class UserRefreshToken : BaseEntity
+public class UserRefreshToken : AuditableEntity
 {
     public string? Token { get; set; }
 
