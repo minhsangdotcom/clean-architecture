@@ -99,7 +99,7 @@ public class RoleManager(IEfDbContext dbContext, ILogger<RoleManager> logger) : 
         return await dbContext
             .Set<RolePermission>()
             .Where(rp => rp.RoleId == role.Id)
-            .Join(dbContext.Set<Permission>(), rp => rp.PermissionId, p => p.Id, (rp, p) => p)
+            .Select(x => x.Permission!)
             .AsNoTracking()
             .ToListAsync(cancellationToken);
     }
@@ -110,12 +110,12 @@ public class RoleManager(IEfDbContext dbContext, ILogger<RoleManager> logger) : 
         CancellationToken cancellationToken = default
     )
     {
-        var codes = permissionCode.ToList();
+        List<string> codes = [.. permissionCode];
         return dbContext
             .Set<RolePermission>()
             .Where(rp => rp.RoleId == role.Id)
-            .Join(dbContext.Set<Permission>(), rp => rp.PermissionId, p => p.Id, (rp, p) => p)
-            .AnyAsync(p => codes.Contains(p.Code), cancellationToken);
+            .Join(dbContext.Set<Permission>(), rp => rp.PermissionId, p => p.Id, (rp, p) => p.Code)
+            .AnyAsync(p => codes.Contains(p), cancellationToken);
     }
 
     public async Task<bool> HasAllPermissionAsync(
@@ -124,12 +124,17 @@ public class RoleManager(IEfDbContext dbContext, ILogger<RoleManager> logger) : 
         CancellationToken cancellationToken = default
     )
     {
-        var codes = permissionCode.ToList();
+        List<string> codes = [.. permissionCode];
         return await dbContext
                 .Set<RolePermission>()
                 .Where(rp => rp.RoleId == role.Id)
-                .Join(dbContext.Set<Permission>(), rp => rp.PermissionId, p => p.Id, (rp, p) => p)
-                .CountAsync(p => codes.Contains(p.Code), cancellationToken) == codes.Count;
+                .Join(
+                    dbContext.Set<Permission>(),
+                    rp => rp.PermissionId,
+                    p => p.Id,
+                    (rp, p) => p.Code
+                )
+                .CountAsync(p => codes.Contains(p), cancellationToken) == codes.Count;
     }
     #endregion
 
@@ -189,31 +194,18 @@ public class RoleManager(IEfDbContext dbContext, ILogger<RoleManager> logger) : 
     )
     {
         List<Permission> list = [.. permissions];
-        await dbContext.DatabaseFacade.BeginTransactionAsync(cancellationToken);
-        try
-        {
-            await dbContext
-                .Set<RolePermission>()
-                .Where(rp => rp.RoleId == role.Id)
-                .ExecuteDeleteAsync(cancellationToken);
+        await dbContext
+            .Set<RolePermission>()
+            .Where(rp => rp.RoleId == role.Id)
+            .ExecuteDeleteAsync(cancellationToken);
 
-            await dbContext
-                .Set<RolePermission>()
-                .AddRangeAsync(
-                    list.ConvertAll(p => new RolePermission
-                    {
-                        RoleId = role.Id,
-                        PermissionId = p.Id,
-                    }),
-                    cancellationToken
-                );
-            await dbContext.DatabaseFacade.CommitTransactionAsync(cancellationToken);
-        }
-        catch (Exception)
-        {
-            await dbContext.DatabaseFacade.RollbackTransactionAsync(cancellationToken);
-            throw;
-        }
+        await dbContext
+            .Set<RolePermission>()
+            .AddRangeAsync(
+                list.ConvertAll(p => new RolePermission { RoleId = role.Id, PermissionId = p.Id }),
+                cancellationToken
+            );
+        await dbContext.SaveChangesAsync(cancellationToken);
     }
 
     public async Task ClearPermissionsAsync(

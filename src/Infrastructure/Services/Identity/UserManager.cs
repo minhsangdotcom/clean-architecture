@@ -87,7 +87,7 @@ public class UserManager(
         IList<Role> roles = await dbContext
             .Set<UserRole>()
             .Where(ur => ur.UserId == user.Id)
-            .Join(dbContext.Set<Role>(), ur => ur.RoleId, r => r.Id, (ur, r) => r)
+            .Select(r => r.Role!)
             .AsNoTracking()
             .ToListAsync(cancellationToken);
 
@@ -101,8 +101,8 @@ public class UserManager(
     {
         IList<Permission> permissions = await dbContext
             .Set<UserPermission>()
-            .Where(ur => ur.UserId == user.Id)
-            .Join(dbContext.Set<Permission>(), up => up.PermissionId, p => p.Id, (up, p) => p)
+            .Where(up => up.UserId == user.Id)
+            .Select(p => p.Permission!)
             .AsNoTracking()
             .ToListAsync(cancellationToken);
 
