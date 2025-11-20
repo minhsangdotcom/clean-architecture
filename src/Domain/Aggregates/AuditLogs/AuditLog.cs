@@ -4,6 +4,7 @@ namespace Domain.Aggregates.AuditLogs;
 
 public class AuditLog : DefaultEntity<string>
 {
+    public override string Id { get; protected set; } = Ulid.NewUlid().ToString();
     public string Entity { get; set; } = string.Empty;
 
     public byte Type { get; set; }

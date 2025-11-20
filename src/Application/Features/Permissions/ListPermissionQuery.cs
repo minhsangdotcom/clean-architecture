@@ -7,7 +7,7 @@ namespace Application.Features.Permissions;
 
 public class ListPermissionQuery
     : QueryParamRequest,
-        IRequest<Result<IEnumerable<ListPermissionResponse>>>
+        IRequest<Result<IReadOnlyList<ListGroupPermissionResponse>>>
 {
     public static ValueTask<ListPermissionQuery> BindAsync(HttpContext context)
     {

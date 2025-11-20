@@ -4,16 +4,16 @@ namespace Domain.Common;
 
 public abstract class DefaultEntity
 {
-    public Ulid Id { get; set; } = Ulid.NewUlid();
+    public Ulid Id { get; protected set; } = Ulid.NewUlid();
 
-    public DateTimeOffset CreatedAt { get; set; } = DateTimeOffset.UtcNow;
+    public DateTimeOffset CreatedAt { get; protected set; } = DateTimeOffset.UtcNow;
 }
 
 public abstract class DefaultEntity<T>
 {
-    public T Id { get; set; } = default!;
+    public virtual T Id { get; protected set; } = default!;
 
-    public DateTimeOffset CreatedAt { get; set; } = DateTimeOffset.UtcNow;
+    public DateTimeOffset CreatedAt { get; protected set; } = DateTimeOffset.UtcNow;
 }
 
 public abstract class BaseEntity : DefaultEntity, IAuditable

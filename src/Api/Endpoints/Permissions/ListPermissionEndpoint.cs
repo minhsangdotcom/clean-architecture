@@ -28,7 +28,7 @@ public class ListPermissionEndpoint : IEndpoint
     }
 
     private async Task<
-        Results<Ok<ApiResponse<IEnumerable<ListPermissionResponse>>>, ProblemHttpResult>
+        Results<Ok<ApiResponse<IReadOnlyList<ListGroupPermissionResponse>>>, ProblemHttpResult>
     > HandleAsync(
         ListPermissionQuery request,
         [FromServices] ISender sender,

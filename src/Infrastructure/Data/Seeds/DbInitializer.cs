@@ -55,18 +55,15 @@ public class DbInitializer
                 ],
                 null
             );
-
+        List<PermissionDefinitionWithGroup> allDefinitions = GetPermissionDefinitionWithGroups(
+            groupedPermissions
+        );
+        await unitOfWork.BeginTransactionAsync();
         try
         {
-            await unitOfWork.BeginTransactionAsync();
-
-            if (!await unitOfWork.Repository<Permission>().AnyAsync())
-            {
-                logger.LogInformation("Inserting permissions is starting.............");
-                await unitOfWork.Repository<Permission>().AddRangeAsync(permissions);
-                await unitOfWork.SaveAsync();
-                logger.LogInformation("Inserting permissions has finished.............");
-            }
+            logger.LogInformation("Updating permissions is starting.............");
+            await UpdatePermissionAsync(allDefinitions, unitOfWork, logger);
+            logger.LogInformation("Updating permissions has finished.............");
 
             if (!await unitOfWork.Repository<Role>().AnyAsync())
             {
@@ -83,11 +80,6 @@ public class DbInitializer
                 logger.LogInformation("Seeding user data has finished.............");
             }
 
-            List<PermissionDefinitionWithGroup> allDefinitions = GetPermissionDefinitionWithGroups(
-                groupedPermissions
-            );
-
-            await UpdatePermissionAsync(allDefinitions, unitOfWork, logger);
             await UpdatePermissionToRoleAsync(
                 allDefinitions,
                 adminRole.Id,

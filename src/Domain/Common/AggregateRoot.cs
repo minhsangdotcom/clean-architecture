@@ -4,7 +4,10 @@ using Mediator;
 
 namespace Domain.Common;
 
-public abstract class AggregateRoot : AggregateRoot<Ulid>;
+public abstract class AggregateRoot : AggregateRoot<Ulid>
+{
+    public override Ulid Id { get; protected set; } = Ulid.NewUlid();
+}
 
 public abstract class AggregateRoot<T> : DefaultEntity<T>, IAuditable
 {
