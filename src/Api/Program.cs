@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Runtime.InteropServices;
 using Api.common.EndpointConfigurations;
 using Api.common.Routers;
@@ -11,6 +12,7 @@ using Infrastructure;
 using Infrastructure.Data;
 using Infrastructure.Data.Seeds;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using Microsoft.AspNetCore.Localization;
 using Serilog;
 using Swashbuckle.AspNetCore.SwaggerUI;
 
@@ -39,6 +41,7 @@ services.AddOpenTelemetryTracing(configuration);
 builder.AddSerilog();
 services.AddHealthChecks();
 services.AddDatabaseHealthCheck(configuration);
+services.AddLocalizationConfigs();
 
 List<CorsProfileSettings> corsProfiles =
     configuration.GetSection(nameof(CorsProfileSettings)).Get<List<CorsProfileSettings>>()
@@ -118,12 +121,19 @@ try
     {
         app.UseCors(profile.Name!);
     }
-    app.UseStatusCodePages();
+
     app.UseExceptionHandler();
+    app.UseStatusCodePages();
     app.UseStaticFiles();
+    app.UseRequestLocalization(
+        new RequestLocalizationOptions
+        {
+            DefaultRequestCulture = new RequestCulture(new CultureInfo("en-US")),
+        }
+    );
+    app.UseDetection();
     app.UseAuthentication();
     app.UseAuthorization();
-    app.UseDetection();
 
     app.MapEndpoints(apiVersion: EndpointVersion.One);
     Log.Logger.Information("Application is hosted on {os}", RuntimeInformation.OSDescription);
