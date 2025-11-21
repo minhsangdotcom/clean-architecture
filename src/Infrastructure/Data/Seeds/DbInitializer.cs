@@ -1,6 +1,6 @@
 using Application.Common.Interfaces.Services.Identity;
 using Application.Common.Interfaces.UnitOfWorks;
-using Contracts.Permissions;
+using Application.Contracts.Permissions;
 using Domain.Aggregates.Permissions;
 using Domain.Aggregates.Roles;
 using Domain.Aggregates.Users;
@@ -8,7 +8,7 @@ using Domain.Aggregates.Users.Enums;
 using Infrastructure.Constants;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using static Contracts.Permissions.PermissionNames;
+using static Application.Contracts.Permissions.PermissionNames;
 
 namespace Infrastructure.Data.Seeds;
 

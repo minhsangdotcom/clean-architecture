@@ -1,6 +1,6 @@
 using Application.Common.Interfaces.Contexts;
-using Contracts.ApiWrapper;
-using Contracts.Permissions;
+using Application.Contracts.ApiWrapper;
+using Application.Contracts.Permissions;
 using Domain.Aggregates.Permissions;
 using Mediator;
 using Microsoft.EntityFrameworkCore;

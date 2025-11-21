@@ -1,6 +1,6 @@
 using Application.Common.Interfaces.Repositories;
 using Application.Common.Interfaces.Services.Cache;
-using Contracts.Dtos.Requests;
+using Application.Contracts.Dtos.Requests;
 using Microsoft.Extensions.Logging;
 using SharedKernel.Models;
 using Specification.Interfaces;

@@ -1,5 +1,5 @@
 using Application.Common.Interfaces.Services.Elasticsearch;
-using Contracts.ApiWrapper;
+using Application.Contracts.ApiWrapper;
 using Domain.Aggregates.AuditLogs;
 using Elastic.Clients.Elasticsearch;
 using Mediator;

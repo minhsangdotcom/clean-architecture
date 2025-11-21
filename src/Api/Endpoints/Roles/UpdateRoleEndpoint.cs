@@ -1,13 +1,13 @@
 using Api.common.EndpointConfigurations;
 using Api.common.Results;
 using Api.common.Routers;
+using Application.Contracts.ApiWrapper;
 using Application.Features.Roles.Commands.Update;
-using Contracts.ApiWrapper;
 using Mediator;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.OpenApi.Models;
-using static Contracts.Permissions.PermissionNames;
+using static Application.Contracts.Permissions.PermissionNames;
 
 namespace Api.Endpoints.Roles;
 
@@ -27,7 +27,10 @@ public class UpdateRoleEndpoint : IEndpoint
             })
             .WithRequestValidation<UpdateRoleRequest>()
             .RequireAuth(
-                permissions: PermissionGenerator.Generate(PermissionAction.Update, PermissionResource.Role)
+                permissions: PermissionGenerator.Generate(
+                    PermissionAction.Update,
+                    PermissionResource.Role
+                )
             );
     }
 

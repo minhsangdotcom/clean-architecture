@@ -1,8 +1,8 @@
 using System.Reflection;
 using Api.common.Routers;
+using Application.Contracts.Constants;
 using Asp.Versioning;
 using Asp.Versioning.Builder;
-using Contracts.Constants;
 
 namespace Api.common.EndpointConfigurations;
 

@@ -1,7 +1,7 @@
 using System.Linq.Expressions;
 using Application.Common.Interfaces.Contexts;
 using Application.Common.Interfaces.Repositories;
-using Contracts.Dtos.Requests;
+using Application.Contracts.Dtos.Requests;
 using Domain.Common;
 using DynamicQuery.Extensions;
 using DynamicQuery.Models;

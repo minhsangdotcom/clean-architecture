@@ -1,5 +1,5 @@
 using Application.Common.Interfaces.Services.Elasticsearch;
-using Contracts.Dtos.Requests;
+using Application.Contracts.Dtos.Requests;
 using Domain.Common;
 using Elastic.Clients.Elasticsearch;
 using Elastic.Clients.Elasticsearch.Fluent;

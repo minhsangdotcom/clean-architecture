@@ -1,6 +1,6 @@
 using Application.Common.Interfaces.Services.Queue;
-using Contracts.Dtos.Requests;
-using Contracts.Dtos.Responses;
+using Application.Contracts.Dtos.Requests;
+using Application.Contracts.Dtos.Responses;
 using DotNetCoreExtension.Extensions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;

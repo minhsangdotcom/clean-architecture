@@ -1562,8 +1562,8 @@
       "application": {
         "type": "Project",
         "dependencies": {
+          "Application.Contracts": "[1.0.0, )",
           "BCrypt.Net-Next": "[4.0.3, )",
-          "Contracts": "[1.0.0, )",
           "Domain": "[1.0.0, )",
           "FluentValidation.DependencyInjectionExtensions": "[12.0.0, )",
           "Mediator.Abstractions": "[3.0.1, )",
@@ -1571,7 +1571,7 @@
           "minhsangdotcom.TheTemplate.ElasticsearchFluentConfig": "[1.0.1-alpha, )"
         }
       },
-      "contracts": {
+      "application.contracts": {
         "type": "Project",
         "dependencies": {
           "Microsoft.AspNetCore.Http": "[2.3.0, )",

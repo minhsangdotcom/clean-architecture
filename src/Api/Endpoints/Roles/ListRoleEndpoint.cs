@@ -2,13 +2,13 @@ using Api.common.Documents;
 using Api.common.EndpointConfigurations;
 using Api.common.Results;
 using Api.common.Routers;
+using Application.Contracts.ApiWrapper;
 using Application.Features.Roles.Queries.List;
-using Contracts.ApiWrapper;
 using Mediator;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.OpenApi.Models;
-using static Contracts.Permissions.PermissionNames;
+using static Application.Contracts.Permissions.PermissionNames;
 
 namespace Api.Endpoints.Roles;
 
@@ -36,7 +36,7 @@ public class ListRoleEndpoint : IEndpoint
     }
 
     private async Task<
-        Results<Ok<ApiResponse<IEnumerable<ListRoleResponse>>>, ProblemHttpResult>
+        Results<Ok<ApiResponse<IReadOnlyList<ListRoleResponse>>>, ProblemHttpResult>
     > HandleAsync(
         ListRoleQuery request,
         [FromServices] ISender sender,

@@ -3,7 +3,7 @@ using Application.Common.Errors;
 using Application.Common.Interfaces.Services;
 using Application.Common.Interfaces.Services.Identity;
 using Application.Common.Interfaces.Services.Storage;
-using Contracts.ApiWrapper;
+using Application.Contracts.ApiWrapper;
 using Domain.Aggregates.Users;
 using Mediator;
 using Microsoft.AspNetCore.Http;

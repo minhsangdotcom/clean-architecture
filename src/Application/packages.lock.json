@@ -980,7 +980,7 @@
         "resolved": "5.4.0",
         "contentHash": "9Icv3SGFRiYsjI1IPvqVi+0/GJXkYPVXhEuf7r5y0+c29NBEL8CLvKWXIBAeYiMHbTixJ5JomoUVSPmtjXGdlA=="
       },
-      "contracts": {
+      "application.contracts": {
         "type": "Project",
         "dependencies": {
           "Microsoft.AspNetCore.Http": "[2.3.0, )",

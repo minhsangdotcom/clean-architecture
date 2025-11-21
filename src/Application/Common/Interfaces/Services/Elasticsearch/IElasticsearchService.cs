@@ -1,4 +1,4 @@
-using Contracts.Dtos.Requests;
+using Application.Contracts.Dtos.Requests;
 using Elastic.Clients.Elasticsearch;
 using Elastic.Clients.Elasticsearch.QueryDsl;
 using SharedKernel.Models;

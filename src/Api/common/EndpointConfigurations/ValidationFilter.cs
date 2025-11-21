@@ -1,5 +1,5 @@
 using Application.Common.Errors;
-using Contracts.ApiWrapper;
+using Application.Contracts.ApiWrapper;
 using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
 

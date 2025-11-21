@@ -1,4 +1,4 @@
-using Contracts.ApiWrapper;
+using Application.Contracts.ApiWrapper;
 using Domain.Aggregates.Users;
 using Microsoft.AspNetCore.Http;
 using SharedKernel.Common.Messages;

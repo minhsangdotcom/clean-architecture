@@ -1,5 +1,5 @@
 using Application.Common.Interfaces.Services;
-using Contracts.Constants;
+using Application.Contracts.Constants;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 

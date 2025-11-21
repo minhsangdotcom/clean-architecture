@@ -1,6 +1,6 @@
 using Application.Common.Interfaces.Services.Mail;
-using Contracts.Dtos.Models;
-using Contracts.Dtos.Requests;
+using Application.Contracts.Dtos.Models;
+using Application.Contracts.Dtos.Requests;
 using Mediator;
 
 namespace Application.Features.Users.Commands.RequestPasswordReset;

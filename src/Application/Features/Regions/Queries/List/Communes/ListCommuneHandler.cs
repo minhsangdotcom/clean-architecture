@@ -1,8 +1,8 @@
 using Application.Common.Interfaces.UnitOfWorks;
 using Application.Common.QueryStringProcessing;
+using Application.Contracts.ApiWrapper;
 using Application.Features.Common.Mapping.Regions;
 using Application.Features.Common.Projections.Regions;
-using Contracts.ApiWrapper;
 using Domain.Aggregates.Regions;
 using Domain.Aggregates.Regions.Specifications;
 using Mediator;

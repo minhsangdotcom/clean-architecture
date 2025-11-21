@@ -1,5 +1,5 @@
 using Application.Common.Interfaces.Services.Storage;
-using Contracts.Dtos.Responses;
+using Application.Contracts.Dtos.Responses;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 

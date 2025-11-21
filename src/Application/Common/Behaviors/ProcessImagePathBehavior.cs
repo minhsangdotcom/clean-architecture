@@ -2,7 +2,7 @@ using System.Collections;
 using System.Reflection;
 using Application.Common.Interfaces.Services.Storage;
 using Application.Common.Security;
-using Contracts.ApiWrapper;
+using Application.Contracts.ApiWrapper;
 using Mediator;
 using Microsoft.Extensions.Logging;
 using SharedKernel.Models;

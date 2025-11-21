@@ -1,5 +1,5 @@
+using Application.Contracts.ApiWrapper;
 using Application.Features.Common.Requests.Users;
-using Contracts.ApiWrapper;
 using Domain.Aggregates.Users.Enums;
 using Mediator;
 

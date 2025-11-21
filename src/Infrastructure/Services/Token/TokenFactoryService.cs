@@ -1,6 +1,6 @@
 using System.Security.Claims;
 using Application.Common.Interfaces.Services.Token;
-using Contracts.Dtos.Responses;
+using Application.Contracts.Dtos.Responses;
 using DotNetCoreExtension.Extensions;
 using JWT.Algorithms;
 using JWT.Builder;

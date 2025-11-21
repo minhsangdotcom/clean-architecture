@@ -1,6 +1,6 @@
 using System.Reflection;
 using Application.Common.Errors;
-using Contracts.Dtos.Requests;
+using Application.Contracts.Dtos.Requests;
 using DotNetCoreExtension.Extensions;
 using DotNetCoreExtension.Extensions.Reflections;
 using DotNetCoreExtension.Results;

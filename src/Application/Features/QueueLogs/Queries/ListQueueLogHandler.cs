@@ -1,6 +1,6 @@
 using Application.Common.Interfaces.UnitOfWorks;
 using Application.Common.QueryStringProcessing;
-using Contracts.ApiWrapper;
+using Application.Contracts.ApiWrapper;
 using Domain.Aggregates.QueueLogs;
 using Domain.Aggregates.QueueLogs.Specifications;
 using Mediator;

@@ -1,4 +1,5 @@
-using Contracts.Constants;
+
+using Application.Contracts.Constants;
 
 namespace Api.common.Routers;
 

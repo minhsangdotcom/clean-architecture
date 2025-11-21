@@ -1,6 +1,6 @@
 using Application.Common.Interfaces.Contexts;
 using Application.Common.Interfaces.Services.Identity;
-using Contracts.Permissions;
+using Application.Contracts.Permissions;
 using Domain.Aggregates.Permissions;
 using Domain.Aggregates.Roles;
 using Domain.Aggregates.Users;

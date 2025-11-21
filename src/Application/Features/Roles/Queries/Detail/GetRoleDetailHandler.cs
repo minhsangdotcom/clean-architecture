@@ -1,7 +1,7 @@
 using Application.Common.Constants;
 using Application.Common.Errors;
 using Application.Common.Interfaces.Services.Identity;
-using Contracts.ApiWrapper;
+using Application.Contracts.ApiWrapper;
 using Domain.Aggregates.Roles;
 using Mediator;
 using SharedKernel.Common.Messages;

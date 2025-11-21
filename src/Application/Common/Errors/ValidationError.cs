@@ -1,4 +1,4 @@
-using Contracts.ApiWrapper;
+using Application.Contracts.ApiWrapper;
 using FluentValidation.Results;
 using Microsoft.AspNetCore.Http;
 using SharedKernel.Common.Messages;

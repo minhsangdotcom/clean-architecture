@@ -1,4 +1,4 @@
-using Contracts.ApiWrapper;
+using Application.Contracts.ApiWrapper;
 using Domain.Aggregates.Users.Enums;
 using Mediator;
 using Microsoft.AspNetCore.Http;

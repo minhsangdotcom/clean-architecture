@@ -1,5 +1,5 @@
 using System.Security.Claims;
-using Contracts.Dtos.Responses;
+using Application.Contracts.Dtos.Responses;
 
 namespace Application.Common.Interfaces.Services.Token;
 

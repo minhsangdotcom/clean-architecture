@@ -1,7 +1,7 @@
 using Application.Common.Constants;
+using Application.Contracts.ApiWrapper;
 using Application.Features.Users.Commands.Delete;
 using Application.SubcutaneousTests.Extensions;
-using Contracts.ApiWrapper;
 using Domain.Aggregates.Users;
 using SharedKernel.Common.Messages;
 using Shouldly;

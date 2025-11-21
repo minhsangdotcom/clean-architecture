@@ -1,5 +1,5 @@
-using Contracts.ApiWrapper;
-using Contracts.Dtos.Requests;
+using Application.Contracts.ApiWrapper;
+using Application.Contracts.Dtos.Requests;
 using Mediator;
 using Microsoft.AspNetCore.Http;
 using SharedKernel.Models;

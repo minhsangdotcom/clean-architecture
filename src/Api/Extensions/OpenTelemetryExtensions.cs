@@ -1,6 +1,6 @@
 using System.Diagnostics;
 using Api.Settings;
-using Contracts.Constants;
+using Application.Contracts.Constants;
 using OpenTelemetry.Logs;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;

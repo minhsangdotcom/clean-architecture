@@ -1,4 +1,4 @@
-using Contracts.Dtos.Requests;
+using Application.Contracts.Dtos.Requests;
 
 namespace Application.Common.Interfaces.Services.Queue;
 

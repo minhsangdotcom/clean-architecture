@@ -1,7 +1,7 @@
 using System.Reflection;
 using Application.Common.Auth;
 using Application.Common.Behaviors;
-using Contracts.Permissions;
+using Application.Contracts.Permissions;
 using Domain.Aggregates.Permissions;
 using FluentValidation;
 using Mediator;

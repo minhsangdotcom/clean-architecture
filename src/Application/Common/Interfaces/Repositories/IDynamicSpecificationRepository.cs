@@ -1,5 +1,5 @@
 using System.Linq.Expressions;
-using Contracts.Dtos.Requests;
+using Application.Contracts.Dtos.Requests;
 using SharedKernel.Models;
 using Specification.Interfaces;
 

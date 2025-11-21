@@ -1,6 +1,6 @@
 using Application.Common.Interfaces.Services.Identity;
 using Application.Common.Interfaces.UnitOfWorks;
-using Contracts.ApiWrapper;
+using Application.Contracts.ApiWrapper;
 using Domain.Aggregates.Permissions;
 using Domain.Aggregates.Roles;
 using Mediator;

@@ -1,8 +1,8 @@
+using Application.Contracts.ApiWrapper;
 using Application.Features.Common.Requests.Users;
 using Application.Features.Users.Commands.Create;
 using Application.SubcutaneousTests.Extensions;
 using AutoFixture;
-using Contracts.ApiWrapper;
 using Domain.Aggregates.Roles;
 using Domain.Aggregates.Users;
 using Infrastructure.Constants;
