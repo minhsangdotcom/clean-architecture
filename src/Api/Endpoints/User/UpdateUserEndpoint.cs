@@ -25,7 +25,7 @@ public class UpdateUserEndpoint : IEndpoint
                 Tags = [new OpenApiTag() { Name = Router.UserRoute.Tags }],
             })
             .WithRequestValidation<UserUpdateRequest>()
-            .RequireAuth(
+            .Authorize(
                 permissions: PermissionGenerator.Generate(
                     PermissionAction.Update,
                     PermissionResource.User

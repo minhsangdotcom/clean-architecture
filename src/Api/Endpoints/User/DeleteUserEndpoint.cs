@@ -23,7 +23,7 @@ public class DeleteUserEndpoint : IEndpoint
                 Description = "Deletes an existing user identified by their unique ID.",
                 Tags = [new OpenApiTag() { Name = Router.UserRoute.Tags }],
             })
-            .RequireAuth(
+            .Authorize(
                 permissions: PermissionGenerator.Generate(
                     PermissionAction.Delete,
                     PermissionResource.User

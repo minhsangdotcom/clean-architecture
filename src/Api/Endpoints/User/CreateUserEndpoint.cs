@@ -25,7 +25,7 @@ public class CreateUserEndpoint : IEndpoint
                 Tags = [new OpenApiTag() { Name = Router.UserRoute.Tags }],
             })
             .WithRequestValidation<CreateUserCommand>()
-            .RequireAuth(
+            .Authorize(
                 permissions: PermissionGenerator.Generate(
                     PermissionAction.Create,
                     PermissionResource.User

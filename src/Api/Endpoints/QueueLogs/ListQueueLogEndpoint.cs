@@ -27,7 +27,7 @@ public class ListQueueLogEndpoint : IEndpoint
                 Tags = [new OpenApiTag() { Name = Router.QueueLogRoute.Tags }],
                 Parameters = operation.AddDocs(),
             })
-            .RequireAuth(
+            .Authorize(
                 permissions: PermissionGenerator.Generate(
                     PermissionAction.List,
                     PermissionResource.QueueLog

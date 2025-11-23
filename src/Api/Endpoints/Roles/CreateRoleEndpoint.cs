@@ -26,7 +26,7 @@ public class CreateRoleEndpoint : IEndpoint
                 Tags = [new OpenApiTag() { Name = Router.RoleRoute.Tags }],
             })
             .WithRequestValidation<CreateRoleCommand>()
-            .RequireAuth(
+            .Authorize(
                 permissions: PermissionGenerator.Generate(
                     PermissionAction.Create,
                     PermissionResource.Role

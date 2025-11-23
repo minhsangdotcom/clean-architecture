@@ -25,7 +25,7 @@ public class GetUserProfileEndpoint : IEndpoint
                 Description = "Returns user profile if found",
                 Tags = [new OpenApiTag() { Name = Router.UserRoute.Tags }],
             })
-            .RequireAuth();
+            .Authorize();
     }
 
     private async Task<

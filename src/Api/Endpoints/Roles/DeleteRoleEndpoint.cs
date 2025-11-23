@@ -24,7 +24,7 @@ public class DeleteRoleEndpoint : IEndpoint
                     "Deletes an existing role by its unique ID. Once deleted, the role and its associated claims/permission will no longer be available",
                 Tags = [new OpenApiTag() { Name = Router.RoleRoute.Tags }],
             })
-            .RequireAuth(
+            .Authorize(
                 permissions: PermissionGenerator.Generate(
                     PermissionAction.Delete,
                     PermissionResource.Role

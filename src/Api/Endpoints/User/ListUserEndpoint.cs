@@ -27,7 +27,7 @@ public class ListUserEndpoint : IEndpoint
                 Tags = [new OpenApiTag() { Name = Router.UserRoute.Tags }],
                 Parameters = operation.AddDocs(),
             })
-            .RequireAuth(
+            .Authorize(
                 permissions: PermissionGenerator.Generate(
                     PermissionAction.List,
                     PermissionResource.User

@@ -27,7 +27,7 @@ public class ListRoleEndpoint : IEndpoint
                 Tags = [new OpenApiTag() { Name = Router.RoleRoute.Tags }],
                 Parameters = operation.AddDocs(),
             })
-            .RequireAuth(
+            .Authorize(
                 permissions: PermissionGenerator.Generate(
                     PermissionAction.List,
                     PermissionResource.Role

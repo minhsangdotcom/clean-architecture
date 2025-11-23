@@ -26,7 +26,7 @@ public class GetRoleDetailEndpoint : IEndpoint
                     "Retrieves detailed information about a specific role, including its name and associated claims/permissions. Use this to review or audit the role’s configurations.",
                 Tags = [new OpenApiTag() { Name = Router.RoleRoute.Tags }],
             })
-            .RequireAuth(
+            .Authorize(
                 permissions: PermissionGenerator.Generate(
                     PermissionAction.Detail,
                     PermissionResource.Role
