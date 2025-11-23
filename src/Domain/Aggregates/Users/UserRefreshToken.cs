@@ -4,7 +4,7 @@ namespace Domain.Aggregates.Users;
 
 public class UserRefreshToken : AuditableEntity
 {
-    public string? Token { get; set; }
+    public string Token { get; set; } = string.Empty;
 
     public string? ClientIp { get; set; }
 
@@ -12,10 +12,9 @@ public class UserRefreshToken : AuditableEntity
 
     public string? FamilyId { get; set; }
 
+    public DateTimeOffset ExpiredTime { get; set; }
     public bool IsBlocked { get; set; }
 
     public Ulid UserId { get; set; }
     public User? User { get; set; }
-
-    public DateTimeOffset ExpiredTime { get; set; }
 }
