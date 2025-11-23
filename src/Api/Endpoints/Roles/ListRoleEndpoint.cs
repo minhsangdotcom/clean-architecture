@@ -22,8 +22,7 @@ public class ListRoleEndpoint : IEndpoint
             .WithOpenApi(operation => new OpenApiOperation(operation)
             {
                 Summary = "Get list of roles 📋",
-                Description =
-                    "Retrieves a list of all available roles in the system, along with their basic information (e.g., name, assigned permissions, etc.).",
+                Description = "Retrieves all roles with their basic information.",
                 Tags = [new OpenApiTag() { Name = Router.RoleRoute.Tags }],
                 Parameters = operation.AddDocs(),
             })

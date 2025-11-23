@@ -21,8 +21,7 @@ public class CreateRoleEndpoint : IEndpoint
             .WithOpenApi(x => new OpenApiOperation(x)
             {
                 Summary = "Create role 👮",
-                Description =
-                    "Creates a new role with optional claims like permissions, etc. This endpoint can be used to define the authorization boundaries within your application. Provide a list of claims to associate them with the newly created role.",
+                Description = "Creates a new role and assigns permission IDs.",
                 Tags = [new OpenApiTag() { Name = Router.RoleRoute.Tags }],
             })
             .WithRequestValidation<CreateRoleCommand>()

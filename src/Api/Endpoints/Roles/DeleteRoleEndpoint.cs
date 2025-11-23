@@ -20,8 +20,7 @@ public class DeleteRoleEndpoint : IEndpoint
             .WithOpenApi(operation => new OpenApiOperation(operation)
             {
                 Summary = " Delete role 🗑️",
-                Description =
-                    "Deletes an existing role by its unique ID. Once deleted, the role and its associated claims/permission will no longer be available",
+                Description = "Deletes a role by its ID along with its permissions.",
                 Tags = [new OpenApiTag() { Name = Router.RoleRoute.Tags }],
             })
             .Authorize(

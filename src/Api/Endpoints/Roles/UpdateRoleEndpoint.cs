@@ -21,8 +21,7 @@ public class UpdateRoleEndpoint : IEndpoint
             .WithOpenApi(operation => new OpenApiOperation(operation)
             {
                 Summary = "Update role 📝",
-                Description =
-                    "Updates an existing role's information. You can modify the name and add or remove claims/permissions. This endpoint helps ensure your authorization model stays current with your users' needs.",
+                Description = "Updates a role’s name and its permissions using permission IDs.",
                 Tags = [new OpenApiTag() { Name = Router.RoleRoute.Tags }],
             })
             .WithRequestValidation<UpdateRoleRequest>()
