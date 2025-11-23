@@ -1,11 +1,13 @@
 using Application.Common.Interfaces.Services;
 using Application.Common.Interfaces.UnitOfWorks;
+using Application.Contracts.ApiWrapper;
+using Application.Contracts.Messages;
 using Application.Features.Common.Requests.Roles;
 using Domain.Aggregates.Permissions;
 using Domain.Aggregates.Roles;
 using DotNetCoreExtension.Extensions;
 using FluentValidation;
-using SharedKernel.Common.Messages;
+using Microsoft.Extensions.Localization;
 
 namespace Application.Features.Common.Validators.Roles;
 
@@ -13,14 +15,17 @@ public class RoleValidator : AbstractValidator<RoleUpsertCommand>
 {
     private readonly IEfUnitOfWork unitOfWork;
     private readonly IHttpContextAccessorService httpContextAccessorService;
+    private readonly IStringLocalizer stringLocalizer;
 
     public RoleValidator(
         IEfUnitOfWork unitOfWork,
-        IHttpContextAccessorService httpContextAccessorService
+        IHttpContextAccessorService httpContextAccessorService,
+        IStringLocalizer stringLocalizer
     )
     {
         this.unitOfWork = unitOfWork;
         this.httpContextAccessorService = httpContextAccessorService;
+        this.stringLocalizer = stringLocalizer;
         ApplyRules();
     }
 
@@ -30,22 +35,27 @@ public class RoleValidator : AbstractValidator<RoleUpsertCommand>
 
         RuleFor(x => x.Name)
             .NotEmpty()
-            .WithState(x =>
-                Messenger
-                    .Create<RoleUpsertCommand>(nameof(Role))
-                    .Property(x => x.Name!)
+            .WithState(state =>
+            {
+                string errorMessage = Messenger
+                    .Create<Role>()
+                    .Property(x => x.Name)
                     .Negative()
-                    .Message(MessageType.Null)
-                    .Build()
-            )
+                    .WithError(MessageErrorType.Required)
+                    .GetFullMessage();
+                return new ErrorReason(errorMessage, stringLocalizer[errorMessage]);
+            })
             .MaximumLength(256)
-            .WithState(x =>
-                Messenger
-                    .Create<RoleUpsertCommand>(nameof(Role))
+            .WithState(state =>
+            {
+                string errorMessage = Messenger
+                    .Create<Role>(nameof(Role))
                     .Property(x => x.Name!)
-                    .Message(MessageType.MaximumLength)
-                    .Build()
-            )
+                    .WithError(MessageErrorType.TooLong)
+                    .GetFullMessage();
+
+                return new ErrorReason(errorMessage, stringLocalizer[errorMessage]);
+            })
             .MustAsync(
                 (name, cancellationToken) =>
                     IsNameAvailableAsync(name, cancellationToken: cancellationToken)
@@ -54,13 +64,16 @@ public class RoleValidator : AbstractValidator<RoleUpsertCommand>
                 _ => httpContextAccessorService.GetHttpMethod() == HttpMethod.Post.ToString(),
                 ApplyConditionTo.CurrentValidator
             )
-            .WithState(x =>
-                Messenger
-                    .Create<RoleUpsertCommand>(nameof(Role))
+            .WithState(state =>
+            {
+                string errorMessage = Messenger
+                    .Create<Role>()
                     .Property(x => x.Name!)
-                    .Message(MessageType.Existence)
-                    .Build()
-            )
+                    .WithError(MessageErrorType.Existent)
+                    .GetFullMessage();
+
+                return new ErrorReason(errorMessage, stringLocalizer[errorMessage]);
+            })
             .MustAsync(
                 (name, cancellationToken) => IsNameAvailableAsync(name, id, cancellationToken)
             )
@@ -68,56 +81,71 @@ public class RoleValidator : AbstractValidator<RoleUpsertCommand>
                 _ => httpContextAccessorService.GetHttpMethod() == HttpMethod.Put.ToString(),
                 ApplyConditionTo.CurrentValidator
             )
-            .WithState(x =>
-                Messenger
-                    .Create<RoleUpsertCommand>(nameof(Role))
+            .WithState(state =>
+            {
+                string errorMessage = Messenger
+                    .Create<Role>()
                     .Property(x => x.Name!)
-                    .Message(MessageType.Existence)
-                    .Build()
-            );
+                    .WithError(MessageErrorType.Existent)
+                    .GetFullMessage();
+
+                return new ErrorReason(errorMessage, stringLocalizer[errorMessage]);
+            });
 
         RuleFor(x => x.Description)
             .MaximumLength(1000)
-            .When(x => x.Description != null, ApplyConditionTo.CurrentValidator)
-            .WithState(x =>
-                Messenger
-                    .Create<RoleUpsertCommand>(nameof(Role))
+            .When(x => !string.IsNullOrWhiteSpace(x.Description), ApplyConditionTo.CurrentValidator)
+            .WithState(state =>
+            {
+                string errorMessage = Messenger
+                    .Create<Role>()
                     .Property(x => x.Description!)
-                    .Message(MessageType.MaximumLength)
-                    .Build()
-            );
+                    .WithError(MessageErrorType.TooLong)
+                    .GetFullMessage();
+
+                return new ErrorReason(errorMessage, stringLocalizer[errorMessage]);
+            });
 
         RuleFor(x => x.PermissionIds)
             .NotEmpty()
-            .WithState(x =>
-                Messenger
+            .WithState(state =>
+            {
+                string errorMessage = Messenger
                     .Create<Role>()
                     .Property(x => x.Permissions)
                     .Negative()
-                    .Message(MessageType.Null)
-                    .Build()
-            )
+                    .WithError(MessageErrorType.Required)
+                    .GetFullMessage();
+
+                return new ErrorReason(errorMessage, stringLocalizer[errorMessage]);
+            })
             .Must(x => x!.Distinct().Count() == x!.Count)
-            .WithState(x =>
-                Messenger
+            .WithState(state =>
+            {
+                string errorMessage = Messenger
                     .Create<Role>()
                     .Property(x => x.Permissions)
-                    .Message(MessageType.Unique)
                     .Negative()
-                    .Build()
-            )
+                    .WithError(MessageErrorType.Unique)
+                    .GetFullMessage();
+
+                return new ErrorReason(errorMessage, stringLocalizer[errorMessage]);
+            })
             .MustAsync(
                 (permissionIds, cancellationToken) =>
                     IsAllPermissionExistentAsync(permissionIds!, cancellationToken)
             )
-            .WithState(x =>
-                Messenger
+            .WithState(state =>
+            {
+                string errorMessage = Messenger
                     .Create<Role>()
                     .Property(x => x.Permissions)
-                    .Message(MessageType.Existence)
                     .Negative()
-                    .Build()
-            );
+                    .WithError(MessageErrorType.Existent)
+                    .GetFullMessage();
+
+                return new ErrorReason(errorMessage, stringLocalizer[errorMessage]);
+            });
     }
 
     private async Task<bool> IsNameAvailableAsync(

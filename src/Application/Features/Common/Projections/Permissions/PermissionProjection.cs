@@ -1,9 +1,9 @@
+using Application.Contracts.Dtos.Responses;
 using Domain.Aggregates.Permissions;
-using SharedKernel.Models;
 
 namespace Application.Features.Common.Projections.Permissions;
 
-public class PermissionProjection : BaseResponse
+public class PermissionProjection : AuditableEntityResponse
 {
     public string? Code { get; set; }
 

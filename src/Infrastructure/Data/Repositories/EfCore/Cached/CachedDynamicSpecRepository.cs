@@ -2,8 +2,8 @@ using System.Linq.Expressions;
 using Application.Common.Interfaces.Repositories;
 using Application.Common.Interfaces.Services.Cache;
 using Application.Contracts.Dtos.Requests;
+using Application.Contracts.Dtos.Responses;
 using Microsoft.Extensions.Logging;
-using SharedKernel.Models;
 using Specification.Interfaces;
 
 namespace Infrastructure.Data.Repositories.EfCore.Cached;

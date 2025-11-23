@@ -1,13 +1,13 @@
 using Application.Common.Interfaces.Services.Elasticsearch;
 using Application.Contracts.Dtos.Requests;
-using Domain.Common;
+using Application.Contracts.Dtos.Responses;
 using Elastic.Clients.Elasticsearch;
 using Elastic.Clients.Elasticsearch.Fluent;
 using Elastic.Clients.Elasticsearch.QueryDsl;
 using FluentConfiguration.Configurations;
 using Microsoft.Extensions.Options;
 using SharedKernel.Constants;
-using SharedKernel.Models;
+using SharedKernel.Entities;
 
 namespace Infrastructure.Services.Elasticsearch;
 

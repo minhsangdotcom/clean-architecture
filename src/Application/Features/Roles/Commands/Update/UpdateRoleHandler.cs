@@ -1,17 +1,21 @@
-using Application.Common.Constants;
 using Application.Common.Errors;
 using Application.Common.Interfaces.Services.Identity;
 using Application.Common.Interfaces.UnitOfWorks;
 using Application.Contracts.ApiWrapper;
+using Application.Contracts.Constants;
+using Application.Contracts.Messages;
 using Domain.Aggregates.Permissions;
 using Domain.Aggregates.Roles;
 using Mediator;
-using SharedKernel.Common.Messages;
+using Microsoft.Extensions.Localization;
 
 namespace Application.Features.Roles.Commands.Update;
 
-public class UpdateRoleHandler(IRoleManager manager, IEfUnitOfWork unitOfWork)
-    : IRequestHandler<UpdateRoleCommand, Result<UpdateRoleResponse>>
+public class UpdateRoleHandler(
+    IRoleManager manager,
+    IEfUnitOfWork unitOfWork,
+    IStringLocalizer<UpdateRoleHandler> stringLocalizer
+) : IRequestHandler<UpdateRoleCommand, Result<UpdateRoleResponse>>
 {
     public async ValueTask<Result<UpdateRoleResponse>> Handle(
         UpdateRoleCommand command,
@@ -24,15 +28,15 @@ public class UpdateRoleHandler(IRoleManager manager, IEfUnitOfWork unitOfWork)
         );
         if (role == null)
         {
+            string errorMessage = Messenger
+                .Create<Role>()
+                .WithError(MessageErrorType.Found)
+                .Negative()
+                .GetFullMessage();
             return Result<UpdateRoleResponse>.Failure(
                 new NotFoundError(
                     TitleMessage.RESOURCE_NOT_FOUND,
-                    Messenger
-                        .Create<Role>()
-                        .Message(MessageType.Found)
-                        .Negative()
-                        .VietnameseTranslation(TranslatableMessage.VI_ROLE_NOT_FOUND)
-                        .BuildMessage()
+                    new(errorMessage, stringLocalizer[errorMessage])
                 )
             );
         }

@@ -1,8 +1,8 @@
 using Application.Common.Interfaces.Services;
-using Domain.Common;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Diagnostics;
+using SharedKernel.Entities;
 
 namespace Infrastructure.Data.Interceptors;
 

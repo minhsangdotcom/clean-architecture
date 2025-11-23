@@ -1,7 +1,8 @@
 using Domain.Aggregates.Permissions.Enums;
 using Domain.Aggregates.Permissions.Exceptions;
-using Domain.Common;
 using Mediator;
+using SharedKernel.DomainEvents;
+using SharedKernel.Entities;
 
 namespace Domain.Aggregates.Permissions;
 
@@ -66,8 +67,8 @@ public class Permission : AggregateRoot
         Status = PermissionStatus.Inactive;
     }
 
-    protected override bool TryApplyDomainEvent(INotification domainEvent)
+    protected override bool TryApplyDomainEvent(IDomainEvent domainEvent)
     {
-        return false;
+        throw new NotImplementedException();
     }
 }

@@ -2,11 +2,11 @@ using System.Linq.Expressions;
 using Application.Common.Interfaces.Contexts;
 using Application.Common.Interfaces.Repositories;
 using Application.Contracts.Dtos.Requests;
-using Domain.Common;
+using Application.Contracts.Dtos.Responses;
 using DynamicQuery.Extensions;
 using DynamicQuery.Models;
 using Microsoft.EntityFrameworkCore;
-using SharedKernel.Models;
+using SharedKernel.Entities;
 using Specification.Evaluators;
 using Specification.Interfaces;
 

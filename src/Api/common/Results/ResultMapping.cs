@@ -1,7 +1,7 @@
 using Application.Contracts.ApiWrapper;
+using Application.Contracts.Messages;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
-using SharedKernel.Common.Messages;
 
 namespace Api.common.Results;
 

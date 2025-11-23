@@ -468,10 +468,10 @@
       },
       "minhsangdotcom.TheTemplate.SharedKernel": {
         "type": "Transitive",
-        "resolved": "1.0.14",
-        "contentHash": "6J+H4lTev/X/btyRve1tX2PnMvr2Va7bGieHi2FMqHYAR/MXZwOnS+zYd1QU02fyDge7L3n0gzZ5TG2GxVNZiA==",
+        "resolved": "2.0.0",
+        "contentHash": "Tz+RccNA33+DCZ02RHzfljzUqjVQcHUYPnyZK457SDA1WKXJToYmG9hKDKi6L9hwSmR4Or2vwMzTjKbW7+NezA==",
         "dependencies": {
-          "CaseConverter": "2.0.1",
+          "Mediator.Abstractions": "3.0.1",
           "Ulid": "1.4.1"
         }
       },
@@ -983,18 +983,18 @@
       "application.contracts": {
         "type": "Project",
         "dependencies": {
+          "CaseConverter": "[2.0.1, )",
           "Microsoft.AspNetCore.Http": "[2.3.0, )",
           "Microsoft.AspNetCore.Mvc.Core": "[2.3.0, )",
           "TranMinhSang.AspNetCore.Extensions": "[1.0.0, )",
-          "minhsangdotcom.TheTemplate.SharedKernel": "[1.0.14, )"
+          "minhsangdotcom.TheTemplate.SharedKernel": "[2.0.0, )"
         }
       },
       "domain": {
         "type": "Project",
         "dependencies": {
           "Ardalis.GuardClauses": "[5.0.0, )",
-          "Mediator.Abstractions": "[3.0.1, )",
-          "minhsangdotcom.TheTemplate.SharedKernel": "[1.0.14, )",
+          "minhsangdotcom.TheTemplate.SharedKernel": "[2.0.0, )",
           "minhsangdotcom.TheTemplate.SpecificationPattern": "[1.0.4, )"
         }
       }

@@ -1,17 +1,5 @@
 namespace Application.Contracts.ApiWrapper;
 
-public class InvalidParam
-{
-    public string? PropertyName { get; set; }
+public record struct InvalidParam(string PropertyName, IReadOnlyList<ErrorReason> Reasons);
 
-    public IEnumerable<ErrorReason> Reasons { get; set; } = [];
-}
-
-public class ErrorReason
-{
-    public string? Message { get; set; }
-
-    public string? En { get; set; }
-
-    public string? Vi { get; set; }
-}
+public readonly record struct ErrorReason(string Code, string Description);

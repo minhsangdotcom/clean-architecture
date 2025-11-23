@@ -1,20 +1,22 @@
-using Application.Common.Constants;
 using Application.Common.Errors;
 using Application.Common.Interfaces.Services;
 using Application.Common.Interfaces.Services.Identity;
 using Application.Common.Interfaces.Services.Storage;
 using Application.Contracts.ApiWrapper;
+using Application.Contracts.Constants;
+using Application.Contracts.Messages;
 using Domain.Aggregates.Users;
 using Mediator;
 using Microsoft.AspNetCore.Http;
-using SharedKernel.Common.Messages;
+using Microsoft.Extensions.Localization;
 
 namespace Application.Features.Users.Commands.Profiles;
 
 public class UpdateUserProfileHandler(
-    ICurrentUser currentUser,
+    IUserManager userManager,
     IMediaStorageService<User> storageService,
-    IUserManager userManager
+    IStringLocalizer<UpdateUserProfileHandler> stringLocalizer,
+    ICurrentUser currentUser
 ) : IRequestHandler<UpdateUserProfileCommand, Result<UpdateUserProfileResponse>>
 {
     public async ValueTask<Result<UpdateUserProfileResponse>> Handle(
@@ -30,15 +32,15 @@ public class UpdateUserProfileHandler(
 
         if (user == null)
         {
+            string errorMessage = Messenger
+                .Create<User>()
+                .WithError(MessageErrorType.Found)
+                .Negative()
+                .GetFullMessage();
             return Result<UpdateUserProfileResponse>.Failure(
                 new NotFoundError(
                     TitleMessage.RESOURCE_NOT_FOUND,
-                    Messenger
-                        .Create<User>()
-                        .Message(MessageType.Found)
-                        .Negative()
-                        .VietnameseTranslation(TranslatableMessage.VI_USER_NOT_FOUND)
-                        .BuildMessage()
+                    new(errorMessage, stringLocalizer[errorMessage])
                 )
             );
         }

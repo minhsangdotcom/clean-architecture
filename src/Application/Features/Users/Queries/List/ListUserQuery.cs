@@ -1,8 +1,8 @@
 using Application.Contracts.ApiWrapper;
 using Application.Contracts.Dtos.Requests;
+using Application.Contracts.Dtos.Responses;
 using Mediator;
 using Microsoft.AspNetCore.Http;
-using SharedKernel.Models;
 
 namespace Application.Features.Users.Queries.List;
 

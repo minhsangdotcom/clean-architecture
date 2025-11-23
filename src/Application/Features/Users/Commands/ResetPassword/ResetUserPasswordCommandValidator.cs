@@ -1,43 +1,56 @@
 using Application.Common.Extensions;
+using Application.Contracts.ApiWrapper;
+using Application.Contracts.Messages;
 using Domain.Aggregates.Users;
 using FluentValidation;
-using SharedKernel.Common.Messages;
+using Microsoft.Extensions.Localization;
 
 namespace Application.Features.Users.Commands.ResetPassword;
 
 public class UpdateUserPasswordValidator : AbstractValidator<UpdateUserPassword>
 {
-    public UpdateUserPasswordValidator()
+    public UpdateUserPasswordValidator(
+        IStringLocalizer<UpdateUserPasswordValidator> stringLocalizer
+    )
     {
         RuleFor(x => x.Token)
             .NotEmpty()
-            .WithState(x =>
-                Messenger
+            .WithState(state =>
+            {
+                string errorMessage = Messenger
                     .Create<UserPasswordReset>()
                     .Property(x => x.Token)
-                    .Message(MessageType.Null)
+                    .WithError(MessageErrorType.Required)
                     .Negative()
-                    .Build()
-            );
+                    .GetFullMessage();
+
+                return new ErrorReason(errorMessage, stringLocalizer[errorMessage]);
+            });
 
         RuleFor(x => x.Password)
             .NotEmpty()
-            .WithState(x =>
-                Messenger
+            .WithState(state =>
+            {
+                string errorMessage = Messenger
                     .Create<User>()
                     .Property(x => x.Password!)
-                    .Message(MessageType.Null)
+                    .WithError(MessageErrorType.Required)
                     .Negative()
-                    .Build()
-            )
+                    .GetFullMessage();
+
+                return new ErrorReason(errorMessage, stringLocalizer[errorMessage]);
+            })
             .Must(x => x!.IsValidPassword())
-            .WithState(x =>
-                Messenger
+            .WithState(state =>
+            {
+                string errorMessage = Messenger
                     .Create<User>(nameof(User))
                     .Property(x => x.Password)
-                    .Message(MessageType.Strong)
+                    .WithError(MessageErrorType.Strong)
                     .Negative()
-                    .Build()
-            );
+                    .GetFullMessage();
+
+                return new ErrorReason(errorMessage, stringLocalizer[errorMessage]);
+            });
     }
 }

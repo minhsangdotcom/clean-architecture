@@ -1,5 +1,5 @@
 using Domain.Aggregates.AuditLogs;
-using Domain.Common;
+using SharedKernel.Entities;
 
 namespace Application.Features.AuditLogs.Queries;
 

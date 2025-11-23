@@ -3,9 +3,9 @@ using System.Reflection;
 using Application.Common.Interfaces.Services.Storage;
 using Application.Common.Security;
 using Application.Contracts.ApiWrapper;
+using Application.Contracts.Dtos.Responses;
 using Mediator;
 using Microsoft.Extensions.Logging;
-using SharedKernel.Models;
 
 namespace Application.Common.Behaviors;
 

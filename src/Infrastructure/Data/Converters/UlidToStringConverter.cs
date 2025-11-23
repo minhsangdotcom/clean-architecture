@@ -1,6 +1,6 @@
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
-namespace Domain.Common;
+namespace Infrastructure.Data.Converters;
 
 public class UlidToStringConverter(ConverterMappingHints mappingHints = null!)
     : ValueConverter<Ulid, string>(

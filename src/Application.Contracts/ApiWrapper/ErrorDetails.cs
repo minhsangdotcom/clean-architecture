@@ -1,5 +1,4 @@
 using Microsoft.AspNetCore.Http;
-using SharedKernel.Common.Messages;
 
 namespace Application.Contracts.ApiWrapper;
 
@@ -11,7 +10,7 @@ public abstract class ErrorDetails
 
     public string? Detail { get; set; }
     public List<InvalidParam>? InvalidParams { get; set; }
-    public MessageResult? ErrorMessage { get; set; }
+    public LocalizedTextResult? ErrorMessage { get; set; }
 
     protected ErrorDetails(string title, string detail, string? type = null, int? status = null)
     {
@@ -36,7 +35,7 @@ public abstract class ErrorDetails
 
     protected ErrorDetails(
         string title,
-        MessageResult errorMessage,
+        LocalizedTextResult errorMessage,
         string? type = null,
         int? status = null
     )

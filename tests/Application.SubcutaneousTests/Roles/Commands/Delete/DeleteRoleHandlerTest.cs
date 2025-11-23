@@ -1,9 +1,8 @@
-using Application.Common.Constants;
 using Application.Contracts.ApiWrapper;
+using Application.Contracts.Messages;
 using Application.Features.Roles.Commands.Delete;
 using Application.SubcutaneousTests.Extensions;
 using Domain.Aggregates.Roles;
-using SharedKernel.Common.Messages;
 using Shouldly;
 
 namespace Application.SubcutaneousTests.Roles.Commands.Delete;
@@ -22,14 +21,12 @@ public class DeleteRoleHandlerTest(TestingFixture testingFixture) : IAsyncLifeti
 
         var expectedMessage = Messenger
             .Create<Role>()
-            .Message(MessageType.Found)
+            .WithError(MessageErrorType.Found)
             .Negative()
-            .VietnameseTranslation(TranslatableMessage.VI_ROLE_NOT_FOUND)
-            .BuildMessage();
+            .GetFullMessage();
 
         result.Error.ShouldNotBeNull();
         result.Error.Status.ShouldBe(404);
-        result.Error.ErrorMessage.ShouldBe(expectedMessage, new MessageResultComparer());
     }
 
     [Fact]

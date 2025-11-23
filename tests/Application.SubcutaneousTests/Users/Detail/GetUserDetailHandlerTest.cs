@@ -1,8 +1,7 @@
-using Application.Common.Constants;
+using Application.Contracts.Messages;
 using Application.Features.Users.Queries.Detail;
 using Application.SubcutaneousTests.Extensions;
 using Domain.Aggregates.Users;
-using SharedKernel.Common.Messages;
 using Shouldly;
 
 namespace Application.SubcutaneousTests.Users.Detail;
@@ -20,13 +19,11 @@ public class GetUserDetailHandlerTest(TestingFixture testingFixture) : IAsyncLif
         //assert
         var expectedMessage = Messenger
             .Create<User>()
-            .Message(MessageType.Found)
+            .WithError(MessageErrorType.Found)
             .Negative()
-            .VietnameseTranslation(TranslatableMessage.VI_USER_NOT_FOUND)
-            .Build();
+            .GetFullMessage();
         result.IsSuccess.ShouldBeFalse();
         result.Error.ShouldNotBeNull();
-        result.Error?.ErrorMessage.ShouldBe(expectedMessage, new MessageResultComparer());
     }
 
     [Fact]

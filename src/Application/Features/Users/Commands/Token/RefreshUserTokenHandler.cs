@@ -4,12 +4,13 @@ using Application.Common.Interfaces.Services.Token;
 using Application.Common.Interfaces.UnitOfWorks;
 using Application.Contracts.ApiWrapper;
 using Application.Contracts.Dtos.Responses;
+using Application.Contracts.Messages;
 using Domain.Aggregates.Users;
 using Domain.Aggregates.Users.Enums;
 using Domain.Aggregates.Users.Specifications;
 using DotNetCoreExtension.Extensions;
 using Mediator;
-using SharedKernel.Common.Messages;
+using Microsoft.Extensions.Localization;
 using SharedKernel.Constants;
 using Wangkanai.Detection.Services;
 
@@ -19,7 +20,8 @@ public class RefreshUserTokenHandler(
     IEfUnitOfWork unitOfWork,
     ITokenFactoryService tokenFactory,
     IDetectionService detectionService,
-    ICurrentUser currentUser
+    ICurrentUser currentUser,
+    IStringLocalizer<RefreshUserTokenHandler> stringLocalizer
 ) : IRequestHandler<RefreshUserTokenCommand, Result<RefreshUserTokenResponse>>
 {
     public async ValueTask<Result<RefreshUserTokenResponse>> Handle(
@@ -33,15 +35,16 @@ public class RefreshUserTokenHandler(
         );
         if (!isValid)
         {
+            string errorMessage = Messenger
+                .Create<UserRefreshToken>(nameof(User))
+                .Property(x => x.Token!)
+                .WithError(MessageErrorType.Valid)
+                .Negative()
+                .GetFullMessage();
             return Result<RefreshUserTokenResponse>.Failure(
                 new BadRequestError(
                     "Error has occurred with the Refresh token",
-                    Messenger
-                        .Create<UserRefreshToken>(nameof(User))
-                        .Property(x => x.Token!)
-                        .Message(MessageType.Valid)
-                        .Negative()
-                        .BuildMessage()
+                    new(errorMessage, stringLocalizer[errorMessage])
                 )
             );
         }
@@ -64,16 +67,17 @@ public class RefreshUserTokenHandler(
 
         if (refreshTokens.Count <= 0)
         {
+            string errorMessage = Messenger
+                .Create<UserRefreshToken>(nameof(User))
+                .Property(x => x.Token!)
+                .Negative()
+                .WithError(MessageErrorType.Identical)
+                .ToObject("TheCurrentOne")
+                .GetFullMessage();
             return Result<RefreshUserTokenResponse>.Failure(
                 new UnauthorizedError(
                     "Error has occurred with the Refresh token",
-                    Messenger
-                        .Create<UserRefreshToken>(nameof(User))
-                        .Property(x => x.Token!)
-                        .Negative()
-                        .Message(MessageType.Identical)
-                        .Object("TheCurrentOne")
-                        .BuildMessage()
+                    new(errorMessage, stringLocalizer[errorMessage])
                 )
             );
         }
@@ -86,40 +90,47 @@ public class RefreshUserTokenHandler(
             await unitOfWork.Repository<UserRefreshToken>().DeleteRangeAsync(refreshTokens);
             await unitOfWork.SaveAsync(cancellationToken);
 
+            string errorMessage = Messenger
+                .Create<UserRefreshToken>(nameof(User))
+                .Property(x => x.Token!)
+                .Negative()
+                .WithError(MessageErrorType.Identical)
+                .ToObject("TheCurrentOne")
+                .GetFullMessage();
             return Result<RefreshUserTokenResponse>.Failure(
                 new UnauthorizedError(
                     "Error has occurred with the Refresh token",
-                    Messenger
-                        .Create<UserRefreshToken>(nameof(User))
-                        .Property(x => x.Token!)
-                        .Negative()
-                        .Message(MessageType.Identical)
-                        .Object("TheCurrentOne")
-                        .BuildMessage()
+                    new(errorMessage, stringLocalizer[errorMessage])
                 )
             );
         }
 
         if (validRefreshToken.ExpiredTime <= DateTimeOffset.UtcNow)
         {
+            string errorMessage = Messenger
+                .Create<UserRefreshToken>(nameof(User))
+                .Property(x => x.Token!)
+                .WithError(MessageErrorType.Expired)
+                .GetFullMessage();
             return Result<RefreshUserTokenResponse>.Failure(
                 new BadRequestError(
                     "Error has occurred with refresh token",
-                    Messenger
-                        .Create<UserRefreshToken>(nameof(User))
-                        .Property(x => x.Token!)
-                        .Message(MessageType.Expired)
-                        .Build()
+                    new(errorMessage, stringLocalizer[errorMessage])
                 )
             );
         }
 
         if (validRefreshToken.User?.Status == UserStatus.Inactive)
         {
+            string errorMessage = Messenger
+                .Create<User>()
+                .WithError(MessageErrorType.Active)
+                .Negative()
+                .GetFullMessage();
             return Result<RefreshUserTokenResponse>.Failure(
                 new BadRequestError(
                     "Error has occurred with the current user",
-                    Messenger.Create<User>().Message(MessageType.Active).Negative().BuildMessage()
+                    new(errorMessage, stringLocalizer[errorMessage])
                 )
             );
         }

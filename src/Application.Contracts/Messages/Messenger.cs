@@ -42,7 +42,7 @@ public static class Messenger
     public static Message<T> Message<T>(this Message<T> message, string customMessage)
         where T : class
     {
-        message.CustomMessage = customMessage;
+        message.CustomErrorMessage = customMessage;
         return message;
     }
 

@@ -1,11 +1,11 @@
 using Application.Common.Security;
+using Application.Contracts.Dtos.Responses;
 using Domain.Aggregates.Users;
 using Domain.Aggregates.Users.Enums;
-using SharedKernel.Models;
 
 namespace Application.Features.Common.Projections.Users;
 
-public class UserProjection : BaseResponse
+public class UserProjection : AuditableEntityResponse
 {
     public string? FirstName { get; set; }
 

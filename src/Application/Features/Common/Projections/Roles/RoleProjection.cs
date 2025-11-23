@@ -1,9 +1,9 @@
+using Application.Contracts.Dtos.Responses;
 using Domain.Aggregates.Roles;
-using SharedKernel.Models;
 
 namespace Application.Features.Common.Projections.Roles;
 
-public class RoleProjection : BaseResponse
+public class RoleProjection : AuditableEntityResponse
 {
     public string? Description { get; set; }
 
@@ -12,8 +12,11 @@ public class RoleProjection : BaseResponse
     public virtual void MappingFrom(Role role)
     {
         Id = role.Id;
-        CreatedAt = role.CreatedAt;
         Name = role.Name;
         Description = role.Description;
+        CreatedAt = role.CreatedAt;
+        CreatedBy = role.CreatedBy;
+        UpdatedAt = role.UpdatedAt;
+        UpdatedBy = role.UpdatedBy;
     }
 }

@@ -8,22 +8,13 @@
         "resolved": "5.0.0",
         "contentHash": "jVPRvLw0xIUFto2cMrKgRYADWIHbEEfzZHGiU/swwNgl1zo28Q1zfSa3VUC3C0s9DyhFDPSaF4dEDQRyTZUcyQ=="
       },
-      "Mediator.Abstractions": {
-        "type": "Direct",
-        "requested": "[3.0.1, )",
-        "resolved": "3.0.1",
-        "contentHash": "WLWp7S7pt818wsK2IiFwGwvUhwq0E/7F0LkglDQKx+4rSzRWVKD3CHtaCi1fpeURH+v44ZPxaRVBCNV7uWOBYQ==",
-        "dependencies": {
-          "Microsoft.Extensions.DependencyInjection.Abstractions": "8.0.0"
-        }
-      },
       "minhsangdotcom.TheTemplate.SharedKernel": {
         "type": "Direct",
-        "requested": "[1.0.14, )",
-        "resolved": "1.0.14",
-        "contentHash": "6J+H4lTev/X/btyRve1tX2PnMvr2Va7bGieHi2FMqHYAR/MXZwOnS+zYd1QU02fyDge7L3n0gzZ5TG2GxVNZiA==",
+        "requested": "[2.0.0, )",
+        "resolved": "2.0.0",
+        "contentHash": "Tz+RccNA33+DCZ02RHzfljzUqjVQcHUYPnyZK457SDA1WKXJToYmG9hKDKi6L9hwSmR4Or2vwMzTjKbW7+NezA==",
         "dependencies": {
-          "CaseConverter": "2.0.1",
+          "Mediator.Abstractions": "3.0.1",
           "Ulid": "1.4.1"
         }
       },
@@ -37,10 +28,13 @@
           "Microsoft.EntityFrameworkCore.Relational": "8.0.17"
         }
       },
-      "CaseConverter": {
+      "Mediator.Abstractions": {
         "type": "Transitive",
-        "resolved": "2.0.1",
-        "contentHash": "asjS7JV9U1NdnO+AzyNJzCENFUp+l2Fn4u7Ub8iOCEf43IEaGbH3rlHJzxKRM5xfwFEAxcijJzBFY7lG1gFHNA=="
+        "resolved": "3.0.1",
+        "contentHash": "WLWp7S7pt818wsK2IiFwGwvUhwq0E/7F0LkglDQKx+4rSzRWVKD3CHtaCi1fpeURH+v44ZPxaRVBCNV7uWOBYQ==",
+        "dependencies": {
+          "Microsoft.Extensions.DependencyInjection.Abstractions": "8.0.0"
+        }
       },
       "Microsoft.EntityFrameworkCore": {
         "type": "Transitive",

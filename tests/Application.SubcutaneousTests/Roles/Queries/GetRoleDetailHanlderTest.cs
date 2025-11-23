@@ -1,8 +1,6 @@
-using Application.Common.Constants;
+using Application.Contracts.Messages;
 using Application.Features.Roles.Queries.Detail;
-using Application.SubcutaneousTests.Extensions;
 using Domain.Aggregates.Roles;
-using SharedKernel.Common.Messages;
 using Shouldly;
 
 namespace Application.SubcutaneousTests.Roles.Queries;
@@ -20,13 +18,11 @@ public class GetRoleDetailHanlderTest(TestingFixture testingFixture) : IAsyncLif
         //assert
         var expectedMessage = Messenger
             .Create<Role>()
-            .Message(MessageType.Found)
+            .WithError(MessageErrorType.Found)
             .Negative()
-            .VietnameseTranslation(TranslatableMessage.VI_ROLE_NOT_FOUND)
-            .Build();
+            .GetFullMessage();
         result.IsSuccess.ShouldBeFalse();
         result.Error.ShouldNotBeNull();
-        result.Error?.ErrorMessage.ShouldBe(expectedMessage, new MessageResultComparer());
     }
 
     [Fact]

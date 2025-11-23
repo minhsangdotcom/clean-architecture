@@ -1,8 +1,8 @@
-using SharedKernel.Models;
+using Application.Contracts.Dtos.Responses;
 
 namespace Application.Features.Common.Projections.Roles;
 
-public class RoleClaimDetailProjection : DefaultBaseResponse
+public class RoleClaimDetailProjection : EntityResponse
 {
     public string? ClaimType { get; set; }
 

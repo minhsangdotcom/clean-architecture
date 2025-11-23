@@ -1,15 +1,16 @@
-using Application.Common.Constants;
 using Application.Common.Errors;
 using Application.Common.Interfaces.Services;
 using Application.Common.Interfaces.Services.Token;
 using Application.Common.Interfaces.UnitOfWorks;
 using Application.Contracts.ApiWrapper;
+using Application.Contracts.Constants;
+using Application.Contracts.Messages;
 using Application.Features.Common.Mapping.Users;
 using Domain.Aggregates.Users;
 using Domain.Aggregates.Users.Specifications;
 using DotNetCoreExtension.Extensions;
 using Mediator;
-using SharedKernel.Common.Messages;
+using Microsoft.Extensions.Localization;
 using SharedKernel.Constants;
 using Wangkanai.Detection.Services;
 
@@ -19,7 +20,8 @@ public class LoginUserHandler(
     IEfUnitOfWork unitOfWork,
     ITokenFactoryService tokenFactory,
     IDetectionService detectionService,
-    ICurrentUser currentUser
+    ICurrentUser currentUser,
+    IStringLocalizer<LoginUserHandler> stringLocalizer
 ) : IRequestHandler<LoginUserCommand, Result<LoginUserResponse>>
 {
     public async ValueTask<Result<LoginUserResponse>> Handle(
@@ -35,29 +37,30 @@ public class LoginUserHandler(
             );
         if (user == null)
         {
+            string errorMessage = Messenger
+                .Create<User>()
+                .WithError(MessageErrorType.Found)
+                .Negative()
+                .GetFullMessage();
             return Result<LoginUserResponse>.Failure(
                 new NotFoundError(
                     TitleMessage.RESOURCE_NOT_FOUND,
-                    Messenger
-                        .Create<User>()
-                        .Message(MessageType.Found)
-                        .Negative()
-                        .VietnameseTranslation(TranslatableMessage.VI_USER_NOT_FOUND)
-                        .BuildMessage()
+                    new(errorMessage, stringLocalizer[errorMessage])
                 )
             );
         }
         if (!Verify(command.Password, user.Password))
         {
+            string errorMessage = Messenger
+                .Create<User>()
+                .Property(x => x.Password)
+                .WithError(MessageErrorType.Correct)
+                .Negative()
+                .GetFullMessage();
             return Result<LoginUserResponse>.Failure(
                 new BadRequestError(
                     "Error has occurred with password",
-                    Messenger
-                        .Create<User>()
-                        .Property(x => x.Password)
-                        .Message(MessageType.Correct)
-                        .Negative()
-                        .BuildMessage()
+                    new(errorMessage, stringLocalizer[errorMessage])
                 )
             );
         }

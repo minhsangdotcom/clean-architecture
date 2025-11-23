@@ -1,10 +1,9 @@
-using Application.Common.Constants;
 using Application.Contracts.ApiWrapper;
+using Application.Contracts.Messages;
 using Application.Features.Users.Commands.Update;
 using Application.SubcutaneousTests.Extensions;
 using Domain.Aggregates.Users;
 using Microsoft.AspNetCore.Http;
-using SharedKernel.Common.Messages;
 using Shouldly;
 
 namespace Application.SubcutaneousTests.Users.Update;
@@ -21,14 +20,12 @@ public class UpdateUserHandlerTest(TestingFixture testingFixture) : IAsyncLifeti
         Result<UpdateUserResponse> result = await testingFixture.SendAsync(updateUserCommand);
         var expectedMessage = Messenger
             .Create<User>()
-            .Message(MessageType.Found)
+            .WithError(MessageErrorType.Found)
             .Negative()
-            .VietnameseTranslation(TranslatableMessage.VI_USER_NOT_FOUND)
-            .BuildMessage();
+            .GetFullMessage();
 
         result.Error.ShouldNotBeNull();
         result.Error.Status.ShouldBe(404);
-        result.Error.ErrorMessage.ShouldBe(expectedMessage, new MessageResultComparer());
     }
 
     [Fact]

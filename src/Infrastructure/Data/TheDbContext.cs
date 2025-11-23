@@ -1,7 +1,7 @@
 using System.Reflection;
 using Application.Common.Interfaces.Contexts;
-using Domain.Common;
 using DynamicQuery.Extensions;
+using Infrastructure.Data.Converters;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 

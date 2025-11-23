@@ -1,13 +1,15 @@
 using Application.Common.Interfaces.Services;
 using Application.Common.Interfaces.UnitOfWorks;
+using Application.Contracts.ApiWrapper;
+using Application.Contracts.Messages;
 using Application.Features.Common.Requests.Roles;
 using Application.Features.Roles.Commands.Create;
 using AutoFixture;
 using Domain.Aggregates.Roles;
 using FluentValidation;
 using FluentValidation.TestHelper;
+using Microsoft.Extensions.Localization;
 using Moq;
-using SharedKernel.Common.Messages;
 
 namespace Application.UnitTest.Roles;
 
@@ -17,19 +19,20 @@ public class CreateRoleCommandValidatorTest
     private readonly CreateRoleCommandValidator validator;
 
     private readonly CreateRoleCommand command;
-    private readonly List<RoleClaimUpsertCommand> roleClaims;
     private readonly Fixture fixture = new();
-    private readonly Mock<IEfUnitOfWork> mockRoleManager = new();
+    private readonly Mock<IEfUnitOfWork> unitOfWork = new();
     private readonly Mock<IHttpContextAccessorService> mockHttpContextAccessorService = new();
+    private readonly Mock<IStringLocalizer> stringLocalizer = new();
 
     public CreateRoleCommandValidatorTest()
     {
         mockValidator = [];
         validator = new CreateRoleCommandValidator(
-            mockRoleManager.Object,
-            mockHttpContextAccessorService.Object
+            unitOfWork.Object,
+            mockHttpContextAccessorService.Object,
+            stringLocalizer.Object
         );
-        roleClaims = [.. fixture.Build<RoleClaimUpsertCommand>().Without(x => x.Id).CreateMany(2)];
+        command = new();
     }
 
     [Theory]
@@ -44,16 +47,17 @@ public class CreateRoleCommandValidatorTest
         var result = await validator.TestValidateAsync(command);
 
         //assert
-        MessageResult expectedState = Messenger
+        string errorMessage = Messenger
             .Create<RoleUpsertCommand>(nameof(Role))
             .Property(x => x.Name!)
             .Negative()
-            .Message(MessageType.Null)
-            .Build();
+            .WithError(MessageErrorType.Required)
+            .GetFullMessage();
+        ErrorReason expectedState = new(errorMessage, stringLocalizer.Object[errorMessage]);
 
         result
             .ShouldHaveValidationErrorFor(x => x.Name)
-            .WithCustomState(expectedState, new MessageResultComparer())
+            .WithCustomState(expectedState, new ErrorReasonComparer())
             .Only();
     }
 
@@ -67,15 +71,17 @@ public class CreateRoleCommandValidatorTest
         var result = await validator.TestValidateAsync(command);
 
         //assert
-        MessageResult expectedState = Messenger
+        string errorMessage = Messenger
             .Create<RoleUpsertCommand>(nameof(Role))
             .Property(x => x.Name!)
-            .Message(MessageType.MaximumLength)
-            .Build();
+            .WithError(MessageErrorType.TooLong)
+            .GetFullMessage();
+
+        ErrorReason expectedState = new(errorMessage, stringLocalizer.Object[errorMessage]);
 
         result
             .ShouldHaveValidationErrorFor(x => x.Name)
-            .WithCustomState(expectedState, new MessageResultComparer())
+            .WithCustomState(expectedState, new ErrorReasonComparer())
             .Only();
     }
 
@@ -85,11 +91,13 @@ public class CreateRoleCommandValidatorTest
         //arrage
         const string existedName = "ADMIN";
         command.Name = existedName;
-        MessageResult expectedState = Messenger
+        string errorMessage = Messenger
             .Create<RoleUpsertCommand>(nameof(Role))
             .Property(x => x.Name!)
-            .Message(MessageType.Existence)
-            .Build();
+            .WithError(MessageErrorType.Existent)
+            .GetFullMessage();
+
+        ErrorReason expectedState = new(errorMessage, stringLocalizer.Object[errorMessage]);
 
         mockValidator
             .RuleFor(x => x.Name)
@@ -102,7 +110,7 @@ public class CreateRoleCommandValidatorTest
         //assert
         result
             .ShouldHaveValidationErrorFor(x => x.Name)
-            .WithCustomState(expectedState, new MessageResultComparer())
+            .WithCustomState(expectedState, new ErrorReasonComparer())
             .Only();
     }
 
@@ -116,15 +124,17 @@ public class CreateRoleCommandValidatorTest
         var result = await validator.TestValidateAsync(command);
 
         //assert
-        MessageResult expectedState = Messenger
+        string errorMessage = Messenger
             .Create<RoleUpsertCommand>(nameof(Role))
             .Property(x => x.Description!)
-            .Message(MessageType.MaximumLength)
-            .Build();
+            .WithError(MessageErrorType.TooLong)
+            .GetFullMessage();
+
+        ErrorReason expectedState = new(errorMessage, stringLocalizer.Object[errorMessage]);
 
         result
             .ShouldHaveValidationErrorFor(x => x.Description)
-            .WithCustomState(expectedState, new MessageResultComparer())
+            .WithCustomState(expectedState, new ErrorReasonComparer())
             .Only();
     }
 }

@@ -1,5 +1,5 @@
 using Domain.Aggregates.QueueLogs.Enums;
-using Domain.Common;
+using SharedKernel.Entities;
 
 namespace Domain.Aggregates.QueueLogs;
 

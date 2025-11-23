@@ -1,10 +1,10 @@
 using System.Text.Json.Serialization;
+using Application.Contracts.Dtos.Responses;
 using Domain.Aggregates.Users.Enums;
-using SharedKernel.Models;
 
 namespace Application.Features.Common.Projections.Users;
 
-public class UserClaimDetailProjection : DefaultBaseResponse
+public class UserClaimDetailProjection : EntityResponse
 {
     public string? ClaimType { get; set; }
 

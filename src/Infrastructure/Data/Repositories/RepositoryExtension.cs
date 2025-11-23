@@ -1,10 +1,10 @@
 using System.Security.Cryptography;
 using System.Text;
-using Domain.Common;
+using Application.Contracts.Dtos.Responses;
 using DynamicQuery.Models;
 using Newtonsoft.Json;
 using SharedKernel.Constants;
-using SharedKernel.Models;
+using SharedKernel.Entities;
 
 namespace Infrastructure.Data.Repositories;
 

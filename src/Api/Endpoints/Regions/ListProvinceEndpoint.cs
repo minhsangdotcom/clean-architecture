@@ -3,13 +3,13 @@ using Api.common.EndpointConfigurations;
 using Api.common.Results;
 using Api.common.Routers;
 using Application.Contracts.ApiWrapper;
+using Application.Contracts.Dtos.Responses;
 using Application.Features.Common.Projections.Regions;
 using Application.Features.Regions.Queries.List.Provinces;
 using Mediator;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.OpenApi.Models;
-using SharedKernel.Models;
 
 namespace Api.Endpoints.Regions;
 

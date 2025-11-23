@@ -1,16 +1,20 @@
-using Application.Common.Constants;
 using Application.Common.Errors;
 using Application.Common.Interfaces.Services;
 using Application.Common.Interfaces.Services.Identity;
 using Application.Contracts.ApiWrapper;
+using Application.Contracts.Constants;
+using Application.Contracts.Messages;
 using Domain.Aggregates.Users;
 using Mediator;
-using SharedKernel.Common.Messages;
+using Microsoft.Extensions.Localization;
 
 namespace Application.Features.Users.Commands.ChangePassword;
 
-public class ChangeUserPasswordHandler(IUserManager userManager, ICurrentUser currentUser)
-    : IRequestHandler<ChangeUserPasswordCommand, Result<string>>
+public class ChangeUserPasswordHandler(
+    IUserManager userManager,
+    ICurrentUser currentUser,
+    IStringLocalizer<ChangeUserPasswordHandler> stringLocalizer
+) : IRequestHandler<ChangeUserPasswordCommand, Result<string>>
 {
     public async ValueTask<Result<string>> Handle(
         ChangeUserPasswordCommand request,
@@ -25,30 +29,31 @@ public class ChangeUserPasswordHandler(IUserManager userManager, ICurrentUser cu
 
         if (user == null)
         {
+            string errorMessage = Messenger
+                .Create<User>()
+                .WithError(MessageErrorType.Found)
+                .Negative()
+                .GetFullMessage();
             return Result<string>.Failure(
                 new NotFoundError(
-                    "The TitleMessage.RESOURCE_NOT_FOUND",
-                    Messenger
-                        .Create<User>()
-                        .Message(MessageType.Found)
-                        .Negative()
-                        .VietnameseTranslation(TranslatableMessage.VI_USER_NOT_FOUND)
-                        .Build()
+                    TitleMessage.RESOURCE_NOT_FOUND,
+                    new(errorMessage, stringLocalizer[errorMessage])
                 )
             );
         }
 
         if (!Verify(request.OldPassword, user.Password))
         {
+            string errorMessage = Messenger
+                .Create<ChangeUserPasswordCommand>(nameof(User))
+                .Property(x => x.OldPassword!)
+                .WithError(MessageErrorType.Correct)
+                .Negative()
+                .GetFullMessage();
             return Result<string>.Failure(
                 new BadRequestError(
-                    "Error has occured with password",
-                    Messenger
-                        .Create<ChangeUserPasswordCommand>(nameof(User))
-                        .Property(x => x.OldPassword!)
-                        .Message(MessageType.Correct)
-                        .Negative()
-                        .Build()
+                    "Error has occurred with password",
+                    new(errorMessage, stringLocalizer[errorMessage])
                 )
             );
         }

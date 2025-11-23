@@ -1,42 +1,36 @@
 using System.Reflection;
-using Application.Common.Errors;
 using Application.Contracts.Dtos.Requests;
+using Application.Contracts.Messages;
 using DotNetCoreExtension.Extensions;
 using DotNetCoreExtension.Extensions.Reflections;
 using DotNetCoreExtension.Results;
 using Microsoft.Extensions.Logging;
-using SharedKernel.Common.Messages;
 
 namespace Application.Common.QueryStringProcessing;
 
 public static partial class QueryParamValidate
 {
-    private const string Message = "Your request parameters didn't validate.";
-
-    public static ValidationRequestResult<T, BadRequestError> ValidateQuery<T>(this T request)
+    public static ValidationRequestResult<T> ValidateQuery<T>(this T request)
         where T : QueryParamRequest
     {
         if (!string.IsNullOrWhiteSpace(request.Before) && !string.IsNullOrWhiteSpace(request.After))
         {
             return new(
-                Error: new BadRequestError(
-                    Message,
-                    Messenger
-                        .Create<QueryParamRequest>("QueryParam")
-                        .Property("Cursor")
-                        .Message(MessageType.Redundant)
-                        .Build()
-                )
+                Error: Messenger
+                    .Create<QueryParamRequest>("QueryParam")
+                    .Property("Cursor")
+                    .WithError(MessageErrorType.Redundant)
+                    .GetFullMessage()
             );
         }
 
         return new(request);
     }
 
-    public static ValidationRequestResult<TRequest, BadRequestError> ValidateFilter<
-        TRequest,
-        TResponse
-    >(this TRequest request, ILogger logger)
+    public static ValidationRequestResult<TRequest> ValidateFilter<TRequest, TResponse>(
+        this TRequest request,
+        ILogger logger
+    )
         where TResponse : class
         where TRequest : QueryParamRequest
     {
@@ -63,15 +57,12 @@ public static partial class QueryParamValidate
             if (!ValidateArrayOperator(query.CleanKey))
             {
                 return new(
-                    Error: new BadRequestError(
-                        Message,
-                        Messenger
-                            .Create<QueryParamRequest>("QueryParam")
-                            .Property(x => x.Filter!)
-                            .Message(MessageType.Missing)
-                            .Object("ArrayIndex")
-                            .Build()
-                    )
+                    Error: Messenger
+                        .Create<QueryParamRequest>("QueryParam")
+                        .Property(x => x.Filter!)
+                        .WithError(MessageErrorType.Missing)
+                        .ToObject("ArrayIndex")
+                        .GetFullMessage()
                 );
             }
 
@@ -79,16 +70,13 @@ public static partial class QueryParamValidate
             if (i == 0 && !ValidateArrayOperatorInvalidIndex(query.CleanKey))
             {
                 return new(
-                    Error: new BadRequestError(
-                        Message,
-                        Messenger
-                            .Create<QueryParamRequest>("QueryParam")
-                            .Property(x => x.Filter!)
-                            .Message(MessageType.Valid)
-                            .Negative()
-                            .Object("ArrayIndex")
-                            .Build()
-                    )
+                    Error: Messenger
+                        .Create<QueryParamRequest>("QueryParam")
+                        .Property(x => x.Filter!)
+                        .WithError(MessageErrorType.Valid)
+                        .Negative()
+                        .ToObject("ArrayIndex")
+                        .GetFullMessage()
                 );
             }
 
@@ -96,15 +84,12 @@ public static partial class QueryParamValidate
             if (!ValidateLackOfOperator(query.CleanKey))
             {
                 return new(
-                    Error: new BadRequestError(
-                        Message,
-                        Messenger
-                            .Create<QueryParamRequest>("QueryParam")
-                            .Property(x => x.Filter!)
-                            .Message(MessageType.Missing)
-                            .Object("Operator")
-                            .Build()
-                    )
+                    Error: Messenger
+                        .Create<QueryParamRequest>("QueryParam")
+                        .Property(x => x.Filter!)
+                        .WithError(MessageErrorType.Missing)
+                        .ToObject("Operator")
+                        .GetFullMessage()
                 );
             }
 
@@ -112,15 +97,12 @@ public static partial class QueryParamValidate
             if (LackOfElementInArrayOperator(query.CleanKey))
             {
                 return new(
-                    Error: new BadRequestError(
-                        Message,
-                        Messenger
-                            .Create<QueryParamRequest>("QueryParam")
-                            .Property(x => x.Filter!)
-                            .Message(MessageType.Missing)
-                            .Object("Element")
-                            .Build()
-                    )
+                    Error: Messenger
+                        .Create<QueryParamRequest>("QueryParam")
+                        .Property(x => x.Filter!)
+                        .WithError(MessageErrorType.Missing)
+                        .ToObject("Element")
+                        .GetFullMessage()
                 );
             }
 
@@ -135,15 +117,12 @@ public static partial class QueryParamValidate
             if (!properties.Any())
             {
                 return new(
-                    Error: new BadRequestError(
-                        Message,
-                        Messenger
-                            .Create<QueryParamRequest>("QueryParam")
-                            .Property(x => x.Filter!)
-                            .Message(MessageType.Missing)
-                            .Object("Property")
-                            .Build()
-                    )
+                    Error: Messenger
+                        .Create<QueryParamRequest>("QueryParam")
+                        .Property(x => x.Filter!)
+                        .WithError(MessageErrorType.Missing)
+                        .ToObject("Property")
+                        .GetFullMessage()
                 );
             }
             Type type = typeof(TResponse);
@@ -158,15 +137,12 @@ public static partial class QueryParamValidate
             )
             {
                 return new(
-                    Error: new BadRequestError(
-                        Message,
-                        Messenger
-                            .Create<QueryParamRequest>("QueryParam")
-                            .Property("FilterValue")
-                            .Negative()
-                            .Object("Integer")
-                            .Build()
-                    )
+                    Error: Messenger
+                        .Create<QueryParamRequest>("QueryParam")
+                        .Property("FilterValue")
+                        .Negative()
+                        .ToObject("Integer")
+                        .GetFullMessage()
                 );
             }
 
@@ -180,15 +156,12 @@ public static partial class QueryParamValidate
             )
             {
                 return new(
-                    Error: new BadRequestError(
-                        Message,
-                        Messenger
-                            .Create<QueryParamRequest>("QueryParam")
-                            .Property("FilterValue")
-                            .Negative()
-                            .Object("Datetime")
-                            .Build()
-                    )
+                    Error: Messenger
+                        .Create<QueryParamRequest>("QueryParam")
+                        .Property("FilterValue")
+                        .Negative()
+                        .ToObject("Datetime")
+                        .GetFullMessage()
                 );
             }
 
@@ -196,15 +169,12 @@ public static partial class QueryParamValidate
             if ((nullableType == typeof(Ulid)) && !Ulid.TryParse(query.Value, out _))
             {
                 return new(
-                    Error: new BadRequestError(
-                        Message,
-                        Messenger
-                            .Create<QueryParamRequest>("QueryParam")
-                            .Property("FilterValue")
-                            .Negative()
-                            .Object("Ulid")
-                            .Build()
-                    )
+                    Error: Messenger
+                        .Create<QueryParamRequest>("QueryParam")
+                        .Property("FilterValue")
+                        .Negative()
+                        .ToObject("Ulid")
+                        .GetFullMessage()
                 );
             }
         }
@@ -213,16 +183,13 @@ public static partial class QueryParamValidate
         if (!ValidateBetweenOperator("$between", queries))
         {
             return new(
-                Error: new BadRequestError(
-                    Message,
-                    Messenger
-                        .Create<QueryParamRequest>("QueryParam")
-                        .Property(x => x.Filter!)
-                        .Message(MessageType.Valid)
-                        .Object("BetweenOperator")
-                        .Negative()
-                        .Build()
-                )
+                Error: Messenger
+                    .Create<QueryParamRequest>("QueryParam")
+                    .Property(x => x.Filter!)
+                    .WithError(MessageErrorType.Valid)
+                    .ToObject("BetweenOperator")
+                    .Negative()
+                    .GetFullMessage()
             );
         }
 
@@ -231,15 +198,12 @@ public static partial class QueryParamValidate
         if (trimQueries.Distinct().Count() != queries.Count)
         {
             return new(
-                Error: new BadRequestError(
-                    Message,
-                    Messenger
-                        .Create<QueryParamRequest>("QueryParam")
-                        .Property("FilterElement")
-                        .Message(MessageType.Unique)
-                        .Negative()
-                        .Build()
-                )
+                Error: Messenger
+                    .Create<QueryParamRequest>("QueryParam")
+                    .Property("FilterElement")
+                    .WithError(MessageErrorType.Unique)
+                    .Negative()
+                    .GetFullMessage()
             );
         }
 

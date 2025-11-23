@@ -1,9 +1,9 @@
 using Application.Common.Interfaces.Services.Elasticsearch;
 using Application.Contracts.ApiWrapper;
+using Application.Contracts.Dtos.Responses;
 using Domain.Aggregates.AuditLogs;
 using Elastic.Clients.Elasticsearch;
 using Mediator;
-using SharedKernel.Models;
 
 namespace Application.Features.AuditLogs.Queries;
 

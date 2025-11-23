@@ -1,44 +1,57 @@
 using Application.Common.Extensions;
+using Application.Contracts.ApiWrapper;
+using Application.Contracts.Messages;
 using Domain.Aggregates.Users;
 using FluentValidation;
-using SharedKernel.Common.Messages;
+using Microsoft.Extensions.Localization;
 
 namespace Application.Features.Users.Commands.ChangePassword;
 
 public class ChangeUserPasswordCommandValidator : AbstractValidator<ChangeUserPasswordCommand>
 {
-    public ChangeUserPasswordCommandValidator()
+    public ChangeUserPasswordCommandValidator(
+        IStringLocalizer<ChangeUserPasswordCommandValidator> stringLocalizer
+    )
     {
         RuleFor(x => x.OldPassword)
             .NotEmpty()
-            .WithState(x =>
-                Messenger
+            .WithState(state =>
+            {
+                string errorMessage = Messenger
                     .Create<ChangeUserPasswordCommand>(nameof(User))
                     .Property(x => x.OldPassword!)
-                    .Message(MessageType.Null)
+                    .WithError(MessageErrorType.Required)
                     .Negative()
-                    .Build()
-            );
+                    .GetFullMessage();
+
+                return new ErrorReason(errorMessage, stringLocalizer[errorMessage]);
+            });
 
         RuleFor(x => x.NewPassword)
             .Cascade(CascadeMode.Stop)
             .NotEmpty()
-            .WithState(x =>
-                Messenger
+            .WithState(state =>
+            {
+                string errorMessage = Messenger
                     .Create<ChangeUserPasswordCommand>(nameof(User))
                     .Property(x => x.NewPassword!)
-                    .Message(MessageType.Null)
+                    .WithError(MessageErrorType.Required)
                     .Negative()
-                    .Build()
-            )
+                    .GetFullMessage();
+
+                return new ErrorReason(errorMessage, stringLocalizer[errorMessage]);
+            })
             .Must(x => x!.IsValidPassword())
-            .WithState(x =>
-                Messenger
+            .WithState(state =>
+            {
+                string errorMessage = Messenger
                     .Create<ChangeUserPasswordCommand>(nameof(User))
                     .Property(x => x.NewPassword!)
-                    .Message(MessageType.Strong)
+                    .WithError(MessageErrorType.Strong)
                     .Negative()
-                    .Build()
-            );
+                    .GetFullMessage();
+
+                return new ErrorReason(errorMessage, stringLocalizer[errorMessage]);
+            });
     }
 }

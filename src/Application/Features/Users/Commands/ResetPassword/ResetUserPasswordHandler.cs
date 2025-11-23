@@ -1,17 +1,20 @@
-using Application.Common.Constants;
 using Application.Common.Errors;
 using Application.Common.Interfaces.UnitOfWorks;
 using Application.Contracts.ApiWrapper;
+using Application.Contracts.Constants;
+using Application.Contracts.Messages;
 using Domain.Aggregates.Users;
 using Domain.Aggregates.Users.Enums;
 using Domain.Aggregates.Users.Specifications;
 using Mediator;
-using SharedKernel.Common.Messages;
+using Microsoft.Extensions.Localization;
 
 namespace Application.Features.Users.Commands.ResetPassword;
 
-public class ResetUserPasswordHandler(IEfUnitOfWork unitOfWork)
-    : IRequestHandler<ResetUserPasswordCommand, Result<string>>
+public class ResetUserPasswordHandler(
+    IEfUnitOfWork unitOfWork,
+    IStringLocalizer<ResetUserPasswordHandler> stringLocalizer
+) : IRequestHandler<ResetUserPasswordCommand, Result<string>>
 {
     public async ValueTask<Result<string>> Handle(
         ResetUserPasswordCommand command,
@@ -27,15 +30,15 @@ public class ResetUserPasswordHandler(IEfUnitOfWork unitOfWork)
 
         if (user == null)
         {
+            string errorMessage = Messenger
+                .Create<User>()
+                .WithError(MessageErrorType.Found)
+                .Negative()
+                .GetFullMessage();
             return Result<string>.Failure(
                 new NotFoundError(
-                    "The TitleMessage.RESOURCE_NOT_FOUND",
-                    Messenger
-                        .Create<User>()
-                        .Message(MessageType.Found)
-                        .Negative()
-                        .VietnameseTranslation(TranslatableMessage.VI_USER_NOT_FOUND)
-                        .Build()
+                    TitleMessage.RESOURCE_NOT_FOUND,
+                    new(errorMessage, stringLocalizer[errorMessage])
                 )
             );
         }
@@ -47,39 +50,46 @@ public class ResetUserPasswordHandler(IEfUnitOfWork unitOfWork)
 
         if (resetPassword == null)
         {
+            string errorMessage = Messenger
+                .Create<UserPasswordReset>()
+                .Property(x => x.Token)
+                .WithError(MessageErrorType.Correct)
+                .Negative()
+                .GetFullMessage();
             return Result<string>.Failure(
                 new BadRequestError(
                     "Error has occurred with reset password token",
-                    Messenger
-                        .Create<UserPasswordReset>()
-                        .Property(x => x.Token)
-                        .Message(MessageType.Correct)
-                        .Negative()
-                        .Build()
+                    new(errorMessage, stringLocalizer[errorMessage])
                 )
             );
         }
 
         if (resetPassword.Expiry <= DateTimeOffset.UtcNow)
         {
+            string errorMessage = Messenger
+                .Create<UserPasswordReset>()
+                .Property(x => x.Token)
+                .WithError(MessageErrorType.Expired)
+                .GetFullMessage();
             return Result<string>.Failure(
                 new BadRequestError(
                     "Error has occurred with reset password token",
-                    Messenger
-                        .Create<UserPasswordReset>()
-                        .Property(x => x.Token)
-                        .Message(MessageType.Expired)
-                        .Build()
+                    new(errorMessage, stringLocalizer[errorMessage])
                 )
             );
         }
 
         if (user.Status == UserStatus.Inactive)
         {
+            string errorMessage = Messenger
+                .Create<User>()
+                .WithError(MessageErrorType.Active)
+                .Negative()
+                .GetFullMessage();
             return Result<string>.Failure(
                 new BadRequestError(
                     "Error has occurred with current user",
-                    Messenger.Create<User>().Message(MessageType.Active).Negative().Build()
+                    new(errorMessage, stringLocalizer[errorMessage])
                 )
             );
         }

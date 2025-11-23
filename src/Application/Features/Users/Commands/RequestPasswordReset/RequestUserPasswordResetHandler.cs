@@ -1,21 +1,23 @@
-using Application.Common.Constants;
 using Application.Common.Errors;
 using Application.Common.Interfaces.UnitOfWorks;
 using Application.Contracts.ApiWrapper;
+using Application.Contracts.Constants;
+using Application.Contracts.Messages;
 using Domain.Aggregates.Users;
 using Domain.Aggregates.Users.Enums;
 using Domain.Aggregates.Users.Specifications;
 using DotNetCoreExtension.Extensions;
 using Mediator;
 using Microsoft.Extensions.Configuration;
-using SharedKernel.Common.Messages;
+using Microsoft.Extensions.Localization;
 
 namespace Application.Features.Users.Commands.RequestPasswordReset;
 
 public class RequestUserPasswordResetHandler(
     IEfUnitOfWork unitOfWork,
     IPublisher publisher,
-    IConfiguration configuration
+    IConfiguration configuration,
+    IStringLocalizer<RequestUserPasswordResetHandler> stringLocalizer
 ) : IRequestHandler<RequestUserPasswordResetCommand, Result<string>>
 {
     public async ValueTask<Result<string>> Handle(
@@ -32,25 +34,30 @@ public class RequestUserPasswordResetHandler(
 
         if (user == null)
         {
+            string errorMessage = Messenger
+                .Create<User>()
+                .WithError(MessageErrorType.Found)
+                .Negative()
+                .GetFullMessage();
             return Result<string>.Failure(
                 new NotFoundError(
-                    "the TitleMessage.RESOURCE_NOT_FOUND",
-                    Messenger
-                        .Create<User>()
-                        .Message(MessageType.Found)
-                        .Negative()
-                        .VietnameseTranslation(TranslatableMessage.VI_USER_NOT_FOUND)
-                        .Build()
+                    TitleMessage.RESOURCE_NOT_FOUND,
+                    new(errorMessage, stringLocalizer[errorMessage])
                 )
             );
         }
 
         if (user.Status == UserStatus.Inactive)
         {
+            string errorMessage = Messenger
+                .Create<User>()
+                .WithError(MessageErrorType.Active)
+                .Negative()
+                .GetFullMessage();
             return Result<string>.Failure(
                 new BadRequestError(
                     "Error has occurred with the current user",
-                    Messenger.Create<User>().Message(MessageType.Active).Negative().BuildMessage()
+                    new(errorMessage, stringLocalizer[errorMessage])
                 )
             );
         }

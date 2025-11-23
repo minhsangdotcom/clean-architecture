@@ -29,7 +29,7 @@ public class Message<T>(string? entity = null)
     // object is tart-time
     public string? Object { get; set; }
 
-    public string? CustomMessage { get; set; }
+    public string? CustomErrorMessage { get; set; }
 
     public bool IsNegative { get; internal set; }
 
@@ -89,9 +89,9 @@ public class Message<T>(string? entity = null)
 
     public string GetFullMessage()
     {
-        if (!string.IsNullOrWhiteSpace(CustomMessage))
+        if (!string.IsNullOrWhiteSpace(CustomErrorMessage))
         {
-            return CustomMessage;
+            return CustomErrorMessage;
         }
         string subjectProperty = Entity.ToKebabCase();
         if (!string.IsNullOrWhiteSpace(Property))

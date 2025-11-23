@@ -1,7 +1,8 @@
 using Ardalis.GuardClauses;
 using Domain.Aggregates.Users;
-using Domain.Common;
 using Mediator;
+using SharedKernel.DomainEvents;
+using SharedKernel.Entities;
 
 namespace Domain.Aggregates.Roles;
 
@@ -51,8 +52,8 @@ public class Role : AggregateRoot
         Permissions.Clear();
     }
 
-    protected override bool TryApplyDomainEvent(INotification domainEvent)
+    protected override bool TryApplyDomainEvent(IDomainEvent domainEvent)
     {
-        return true;
+        throw new NotImplementedException();
     }
 }

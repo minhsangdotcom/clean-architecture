@@ -1,11 +1,13 @@
 using System.Text;
 using Application.Common.Errors;
 using Application.Common.Interfaces.Services.Token;
+using Application.Contracts.Messages;
+using Domain.Aggregates.Users;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Localization;
 using Microsoft.IdentityModel.Tokens;
-using SharedKernel.Common.Messages;
 
 namespace Infrastructure.Services.Token;
 
@@ -48,17 +50,34 @@ public static class TokenExtension
                     OnChallenge = context =>
                     {
                         context.HandleResponse();
-                        return TokenErrorExtension.UnauthorizedException(
-                            context,
-                            !context.Response.HasStarted
-                                ? new UnauthorizedError(Message.UNAUTHORIZED)
-                                : new UnauthorizedError(Message.TOKEN_EXPIRED)
-                        );
+                        bool isUnauthorized = !context.Response.HasStarted;
+                        IStringLocalizer stringLocalizer =
+                            context.HttpContext.RequestServices.GetRequiredService<IStringLocalizer>();
+
+                        string unauthorizedMessage = Messenger
+                            .Create<User>()
+                            .Message("user_unauthorized")
+                            .GetFullMessage();
+                        string tokenExpiredMessage = Messenger
+                            .Create<User>()
+                            .Property("Token")
+                            .WithError(MessageErrorType.Expired)
+                            .GetFullMessage();
+
+                        UnauthorizedError unauthorizedError = isUnauthorized
+                            ? new UnauthorizedError(
+                                Message.UNAUTHORIZED,
+                                new(unauthorizedMessage, stringLocalizer[unauthorizedMessage])
+                            )
+                            : new UnauthorizedError(
+                                Message.TOKEN_EXPIRED,
+                                new(tokenExpiredMessage, stringLocalizer[tokenExpiredMessage])
+                            );
+                        return context.UnauthorizedException(unauthorizedError);
                     },
                     OnForbidden = context =>
-                        TokenErrorExtension.ForbiddenException(
-                            context,
-                            new ForbiddenError(Message.FORBIDDEN)
+                        context.ForbiddenException(
+                            Messenger.Create<User>().Message("user_forbidden").GetFullMessage()
                         ),
                 };
             })

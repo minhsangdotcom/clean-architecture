@@ -1,6 +1,6 @@
 using System.Linq.Expressions;
 using Application.Contracts.Dtos.Requests;
-using SharedKernel.Models;
+using Application.Contracts.Dtos.Responses;
 using Specification.Interfaces;
 
 namespace Application.Common.Interfaces.Repositories;

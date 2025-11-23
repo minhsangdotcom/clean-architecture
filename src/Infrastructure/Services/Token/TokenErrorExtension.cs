@@ -1,20 +1,27 @@
 using Application.Common.Errors;
+using Application.Contracts.Messages;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Localization;
 
 namespace Infrastructure.Services.Token;
 
-public class TokenErrorExtension
+public static class TokenErrorExtension
 {
     public static async Task ForbiddenException(
-        ForbiddenContext httpContext,
-        ForbiddenError forbiddenError
+        this ForbiddenContext httpContext,
+        string errorMessage
     )
     {
-        var problemDetailsService =
+        IProblemDetailsService problemDetailsService =
             httpContext.HttpContext.RequestServices.GetRequiredService<IProblemDetailsService>();
+        IStringLocalizer stringLocalizer =
+            httpContext.HttpContext.RequestServices.GetRequiredService<IStringLocalizer>();
+
+        ForbiddenError forbiddenError =
+            new(Message.FORBIDDEN, new(errorMessage, stringLocalizer[errorMessage]));
 
         int statusCode = forbiddenError.Status;
         httpContext.Response.StatusCode = statusCode;
@@ -37,11 +44,11 @@ public class TokenErrorExtension
     }
 
     public static async Task UnauthorizedException(
-        JwtBearerChallengeContext httpContext,
+        this JwtBearerChallengeContext httpContext,
         UnauthorizedError unauthorizedError
     )
     {
-        var problemDetailsService =
+        IProblemDetailsService problemDetailsService =
             httpContext.HttpContext.RequestServices.GetRequiredService<IProblemDetailsService>();
 
         int statusCode = unauthorizedError.Status;

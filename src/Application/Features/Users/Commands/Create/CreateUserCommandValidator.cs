@@ -1,118 +1,149 @@
 using Application.Common.Extensions;
 using Application.Common.Interfaces.UnitOfWorks;
+using Application.Contracts.ApiWrapper;
+using Application.Contracts.Messages;
 using Application.Features.Common.Validators.Users;
 using Domain.Aggregates.Users;
 using FluentValidation;
-using SharedKernel.Common.Messages;
+using Microsoft.Extensions.Localization;
 
 namespace Application.Features.Users.Commands.Create;
 
 public class CreateUserCommandValidator : AbstractValidator<CreateUserCommand>
 {
     private readonly IEfUnitOfWork unitOfWork;
+    private readonly IStringLocalizer stringLocalizer;
 
-    public CreateUserCommandValidator(IEfUnitOfWork unitOfWork)
+    public CreateUserCommandValidator(IEfUnitOfWork unitOfWork, IStringLocalizer stringLocalizer)
     {
         this.unitOfWork = unitOfWork;
+        this.stringLocalizer = stringLocalizer;
         ApplyRules();
     }
 
     private void ApplyRules()
     {
-        Include(new UserValidator(unitOfWork)!);
+        Include(new UserValidator(unitOfWork, stringLocalizer)!);
         RuleFor(x => x.Username)
             .NotEmpty()
-            .WithState(x =>
-                Messenger
-                    .Create<CreateUserCommand>(nameof(User))
-                    .Property(x => x.Username!)
-                    .Message(MessageType.Null)
+            .WithState(state =>
+            {
+                string errorMessage = Messenger
+                    .Create<User>()
+                    .Property(x => x.Username)
+                    .WithError(MessageErrorType.Required)
                     .Negative()
-                    .Build()
-            )
+                    .GetFullMessage();
+
+                return new ErrorReason(errorMessage, stringLocalizer[errorMessage]);
+            })
             .Must((_, x) => x!.IsValidUsername())
-            .WithState(x =>
-                Messenger
-                    .Create<CreateUserCommand>(nameof(User))
-                    .Property(x => x.Username!)
-                    .Message(MessageType.Valid)
+            .WithState(state =>
+            {
+                string errorMessage = Messenger
+                    .Create<User>()
+                    .Property(x => x.Username)
+                    .WithError(MessageErrorType.Valid)
                     .Negative()
-                    .Build()
-            )
+                    .GetFullMessage();
+
+                return new ErrorReason(errorMessage, stringLocalizer[errorMessage]);
+            })
             .MustAsync(
                 (username, cancellationToken) =>
                     IsUsernameAvailableAsync(username!, cancellationToken: cancellationToken)
             )
-            .WithState(x =>
-                Messenger
+            .WithState(state =>
+            {
+                string errorMessage = Messenger
                     .Create<User>()
                     .Property(x => x.Username)
-                    .Message(MessageType.Existence)
-                    .Build()
-            );
+                    .WithError(MessageErrorType.Existent)
+                    .GetFullMessage();
+
+                return new ErrorReason(errorMessage, stringLocalizer[errorMessage]);
+            });
 
         RuleFor(x => x.Email)
             .Cascade(CascadeMode.Stop)
             .NotEmpty()
-            .WithState(x =>
-                Messenger
+            .WithState(state =>
+            {
+                string errorMessage = Messenger
                     .Create<User>()
                     .Property(x => x.Email)
-                    .Message(MessageType.Null)
+                    .WithError(MessageErrorType.Required)
                     .Negative()
-                    .Build()
-            )
+                    .GetFullMessage();
+
+                return new ErrorReason(errorMessage, stringLocalizer[errorMessage]);
+            })
             .Must(x => x!.IsValidEmail())
-            .WithState(x =>
-                Messenger
+            .WithState(state =>
+            {
+                string errorMessage = Messenger
                     .Create<User>()
                     .Property(x => x.Email)
-                    .Message(MessageType.Valid)
+                    .WithError(MessageErrorType.Valid)
                     .Negative()
-                    .Build()
-            )
+                    .GetFullMessage();
+
+                return new ErrorReason(errorMessage, stringLocalizer[errorMessage]);
+            })
             .MustAsync(
                 (email, cancellationToken) =>
                     IsEmailAvailableAsync(email!, cancellationToken: cancellationToken)
             )
-            .WithState(x =>
-                Messenger
+            .WithState(state =>
+            {
+                string errorMessage = Messenger
                     .Create<User>()
                     .Property(x => x.Email)
-                    .Message(MessageType.Existence)
-                    .Build()
-            );
+                    .WithError(MessageErrorType.Existent)
+                    .GetFullMessage();
+
+                return new ErrorReason(errorMessage, stringLocalizer[errorMessage]);
+            });
 
         RuleFor(x => x.Password)
             .NotEmpty()
-            .WithState(x =>
-                Messenger
+            .WithState(state =>
+            {
+                string errorMessage = Messenger
                     .Create<User>()
                     .Property(x => x.Password)
-                    .Message(MessageType.Null)
+                    .WithError(MessageErrorType.Required)
                     .Negative()
-                    .Build()
-            )
+                    .GetFullMessage();
+
+                return new ErrorReason(errorMessage, stringLocalizer[errorMessage]);
+            })
             .Must((_, x) => x!.IsValidPassword())
-            .WithState(x =>
-                Messenger
+            .WithState(state =>
+            {
+                string errorMessage = Messenger
                     .Create<User>()
                     .Property(x => x.Password)
-                    .Message(MessageType.Strong)
+                    .WithError(MessageErrorType.Strong)
                     .Negative()
-                    .Build()
-            );
+                    .GetFullMessage();
+
+                return new ErrorReason(errorMessage, stringLocalizer[errorMessage]);
+            });
 
         RuleFor(x => x.Gender)
             .IsInEnum()
-            .WithState(x =>
-                Messenger
+            .WithState(state =>
+            {
+                string errorMessage = Messenger
                     .Create<User>()
                     .Property(x => x.Gender!)
                     .Negative()
-                    .Message(MessageType.AmongTheAllowedOptions)
-                    .Build()
-            );
+                    .WithError(MessageErrorType.AmongTheAllowedOptions)
+                    .GetFullMessage();
+
+                return new ErrorReason(errorMessage, stringLocalizer[errorMessage]);
+            });
     }
 
     private async Task<bool> IsUsernameAvailableAsync(

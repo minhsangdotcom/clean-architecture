@@ -1,21 +1,25 @@
 using Application.Common.Extensions;
 using Application.Common.Interfaces.UnitOfWorks;
+using Application.Contracts.ApiWrapper;
+using Application.Contracts.Messages;
 using Application.Features.Common.Requests.Users;
 using Domain.Aggregates.Permissions;
 using Domain.Aggregates.Roles;
 using Domain.Aggregates.Users;
 using FluentValidation;
-using SharedKernel.Common.Messages;
+using Microsoft.Extensions.Localization;
 
 namespace Application.Features.Common.Validators.Users;
 
 public partial class UserValidator : AbstractValidator<UserUpsertCommand>
 {
     private readonly IEfUnitOfWork unitOfWork;
+    private readonly IStringLocalizer stringLocalizer;
 
-    public UserValidator(IEfUnitOfWork unitOfWork)
+    public UserValidator(IEfUnitOfWork unitOfWork, IStringLocalizer stringLocalizer)
     {
         this.unitOfWork = unitOfWork;
+        this.stringLocalizer = stringLocalizer;
         ApplyRules();
     }
 
@@ -23,102 +27,135 @@ public partial class UserValidator : AbstractValidator<UserUpsertCommand>
     {
         RuleFor(x => x.LastName)
             .NotEmpty()
-            .WithState(x =>
-                Messenger
+            .WithState(state =>
+            {
+                string errorMessage = Messenger
                     .Create<User>()
                     .Property(x => x.LastName)
-                    .Message(MessageType.Null)
+                    .WithError(MessageErrorType.Required)
                     .Negative()
-                    .Build()
-            )
+                    .GetFullMessage();
+
+                return new ErrorReason(errorMessage, stringLocalizer[errorMessage]);
+            })
             .MaximumLength(256)
-            .WithState(x =>
-                Messenger
+            .WithState(state =>
+            {
+                string errorMessage = Messenger
                     .Create<User>()
                     .Property(x => x.LastName)
-                    .Message(MessageType.MaximumLength)
-                    .Build()
-            );
+                    .WithError(MessageErrorType.TooLong)
+                    .GetFullMessage();
+
+                return new ErrorReason(errorMessage, stringLocalizer[errorMessage]);
+            });
 
         RuleFor(x => x.FirstName)
             .NotEmpty()
-            .WithState(x =>
-                Messenger
+            .WithState(state =>
+            {
+                string errorMessage = Messenger
                     .Create<User>()
                     .Property(x => x.FirstName)
-                    .Message(MessageType.Null)
+                    .WithError(MessageErrorType.Required)
                     .Negative()
-                    .Build()
-            )
+                    .GetFullMessage();
+
+                return new ErrorReason(errorMessage, stringLocalizer[errorMessage]);
+            })
             .MaximumLength(256)
-            .WithState(x =>
-                Messenger
+            .WithState(state =>
+            {
+                string errorMessage = Messenger
                     .Create<User>()
                     .Property(x => x.FirstName)
-                    .Message(MessageType.MaximumLength)
-                    .Build()
-            );
+                    .WithError(MessageErrorType.TooLong)
+                    .GetFullMessage();
+
+                return new ErrorReason(errorMessage, stringLocalizer[errorMessage]);
+            });
+
         RuleFor(x => x.PhoneNumber)
             .Cascade(CascadeMode.Stop)
             .Must(x => x!.IsValidPhoneNumber())
             .When(x => !string.IsNullOrEmpty(x.PhoneNumber))
-            .WithState(x =>
-                Messenger
+            .WithState(state =>
+            {
+                string errorMessage = Messenger
                     .Create<User>()
                     .Property(x => x.PhoneNumber!)
-                    .Message(MessageType.Valid)
+                    .WithError(MessageErrorType.Valid)
                     .Negative()
-                    .Build()
-            );
+                    .GetFullMessage();
+
+                return new ErrorReason(errorMessage, stringLocalizer[errorMessage]);
+            });
 
         RuleFor(x => x.Status)
             .NotEmpty()
-            .WithState(x =>
-                Messenger
-                    .Create<UserUpsertCommand>(nameof(User))
-                    .Property(x => x.Status!)
-                    .Message(MessageType.Null)
+            .WithState(state =>
+            {
+                string errorMessage = Messenger
+                    .Create<User>()
+                    .Property(x => x.Status)
+                    .WithError(MessageErrorType.Required)
                     .Negative()
-                    .Build()
-            )
+                    .GetFullMessage();
+
+                return new ErrorReason(errorMessage, stringLocalizer[errorMessage]);
+            })
             .IsInEnum()
-            .WithState(x =>
-                Messenger
-                    .Create<UserUpsertCommand>(nameof(User))
-                    .Property(x => x.Status!)
+            .WithState(state =>
+            {
+                string errorMessage = Messenger
+                    .Create<User>()
+                    .Property(x => x.Status)
                     .Negative()
-                    .Message(MessageType.AmongTheAllowedOptions)
-                    .Build()
-            );
+                    .WithError(MessageErrorType.AmongTheAllowedOptions)
+                    .GetFullMessage();
+
+                return new ErrorReason(errorMessage, stringLocalizer[errorMessage]);
+            });
 
         RuleFor(x => x.Roles)
             .NotEmpty()
-            .WithState(x =>
-                Messenger
+            .WithState(state =>
+            {
+                string errorMessage = Messenger
                     .Create<UserUpsertCommand>(nameof(User))
                     .Property(x => x.Roles!)
-                    .Message(MessageType.Null)
+                    .WithError(MessageErrorType.Required)
                     .Negative()
-                    .Build()
-            )
+                    .GetFullMessage();
+
+                return new ErrorReason(errorMessage, stringLocalizer[errorMessage]);
+            })
             .Must(x => x!.Distinct().Count() == x!.Count)
-            .WithState(x =>
-                Messenger
+            .WithState(state =>
+            {
+                string errorMessage = Messenger
                     .Create<UserUpsertCommand>(nameof(User))
                     .Property(x => x.Roles!)
-                    .Message(MessageType.Unique)
+                    .WithError(MessageErrorType.Unique)
                     .Negative()
-                    .Build()
+                    .GetFullMessage();
+
+                return new ErrorReason(errorMessage, stringLocalizer[errorMessage]);
+            })
+            .MustAsync(
+                (roles, cancellationToken) => IsRolesAvailableAsync(roles!, cancellationToken)
             )
-            .MustAsync((roles, _) => IsRolesAvailableAsync(roles!))
-            .WithState(x =>
-                Messenger
+            .WithState(state =>
+            {
+                string errorMessage = Messenger
                     .Create<UserUpsertCommand>(nameof(User))
                     .Property(x => x.Roles!)
-                    .Message(MessageType.Found)
+                    .WithError(MessageErrorType.Found)
                     .Negative()
-                    .Build()
-            );
+                    .GetFullMessage();
+
+                return new ErrorReason(errorMessage, stringLocalizer[errorMessage]);
+            });
 
         When(
             x => x.Permissions != null,
@@ -126,31 +163,48 @@ public partial class UserValidator : AbstractValidator<UserUpsertCommand>
             {
                 RuleFor(r => r.Permissions)
                     .Must((p, _) => p.Permissions!.Distinct().Count() == p.Permissions!.Count)
-                    .WithState(req =>
-                        Messenger
-                            .Create<User>()
-                            .Property(req => req.Permissions)
-                            .Message(MessageType.Unique)
+                    .WithState(state =>
+                    {
+                        string errorMessage = Messenger
+                            .Create<UserUpsertCommand>(nameof(User))
+                            .Property(req => req.Permissions!)
+                            .WithError(MessageErrorType.Unique)
                             .Negative()
-                            .BuildMessage()
+                            .GetFullMessage();
+
+                        return new ErrorReason(errorMessage, stringLocalizer[errorMessage]);
+                    })
+                    .MustAsync(
+                        (permissions, cancellationToken) =>
+                            IsPermissionsAvailableAsync(permissions!, cancellationToken)
                     )
-                    .MustAsync((m, _) => IsPermissionsAvailableAsync(m!))
-                    .WithState(req =>
-                        Messenger
+                    .WithState(state =>
+                    {
+                        string errorMessage = Messenger
                             .Create<UserUpsertCommand>(nameof(User))
                             .Property(req => req.Roles!)
-                            .Message(MessageType.Found)
+                            .WithError(MessageErrorType.Found)
                             .Negative()
-                            .Build()
-                    );
+                            .GetFullMessage();
+
+                        return new ErrorReason(errorMessage, stringLocalizer[errorMessage]);
+                    });
             }
         );
     }
 
-    private async Task<bool> IsRolesAvailableAsync(IEnumerable<Ulid> roles) =>
-        await unitOfWork.Repository<Role>().CountAsync(x => roles.Contains(x.Id)) == roles.Count();
+    private async Task<bool> IsRolesAvailableAsync(
+        IEnumerable<Ulid> roles,
+        CancellationToken cancellationToken = default
+    ) =>
+        await unitOfWork.Repository<Role>().CountAsync(x => roles.Contains(x.Id), cancellationToken)
+        == roles.Count();
 
-    private async Task<bool> IsPermissionsAvailableAsync(IEnumerable<Ulid> permissions) =>
-        await unitOfWork.Repository<Permission>().CountAsync(x => permissions.Contains(x.Id))
-        == permissions.Count();
+    private async Task<bool> IsPermissionsAvailableAsync(
+        IEnumerable<Ulid> permissions,
+        CancellationToken cancellationToken
+    ) =>
+        await unitOfWork
+            .Repository<Permission>()
+            .CountAsync(x => permissions.Contains(x.Id), cancellationToken) == permissions.Count();
 }

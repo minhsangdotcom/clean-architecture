@@ -7,7 +7,6 @@ using Domain.Aggregates.Roles;
 using Domain.Aggregates.Users;
 using Infrastructure.Constants;
 using Microsoft.AspNetCore.Http;
-using SharedKernel.Common.Messages;
 using SharedKernel.Constants;
 using Shouldly;
 

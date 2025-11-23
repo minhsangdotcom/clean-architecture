@@ -1,4 +1,4 @@
-using Domain.Common;
+using SharedKernel.Entities;
 
 namespace Domain.Aggregates.AuditLogs;
 

@@ -1,8 +1,8 @@
 using Ardalis.GuardClauses;
 using Domain.Aggregates.Users.Enums;
 using Domain.Aggregates.Users.Exceptions;
-using Domain.Common;
-using Mediator;
+using SharedKernel.DomainEvents;
+using SharedKernel.Entities;
 
 namespace Domain.Aggregates.Users;
 
@@ -121,8 +121,8 @@ public class User : AggregateRoot
         return this;
     }
 
-    protected override bool TryApplyDomainEvent(INotification domainEvent)
+    protected override bool TryApplyDomainEvent(IDomainEvent domainEvent)
     {
-        return true;
+        throw new NotImplementedException();
     }
 }
