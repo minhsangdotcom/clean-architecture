@@ -1,4 +1,4 @@
-using Application.Common.Interfaces.Repositories;
+using Application.Common.Interfaces.Repositories.EfCore;
 using Application.Common.Interfaces.Services.Cache;
 using Application.Contracts.Dtos.Requests;
 using Application.Contracts.Dtos.Responses;

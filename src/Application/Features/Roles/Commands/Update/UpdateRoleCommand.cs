@@ -1,5 +1,5 @@
 using Application.Contracts.ApiWrapper;
-using Application.Features.Common.Requests.Roles;
+using Application.SharedFeatures.Requests.Roles;
 using Mediator;
 
 namespace Application.Features.Roles.Commands.Update;

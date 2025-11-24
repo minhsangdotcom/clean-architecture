@@ -1,10 +1,6 @@
-using Application.Common.Interfaces.Services;
-using Application.Common.Interfaces.Services.Identity;
 using Application.Common.Interfaces.UnitOfWorks;
 using Application.Contracts.ApiWrapper;
 using Application.Contracts.Messages;
-using Application.Features.Common.Projections.Users;
-using Application.Features.Common.Requests.Users;
 using Application.Features.Users.Commands.Update;
 using AutoFixture;
 using Domain.Aggregates.Users;

@@ -5,7 +5,7 @@ using Application.Common.Interfaces.UnitOfWorks;
 using Application.Contracts.ApiWrapper;
 using Application.Contracts.Constants;
 using Application.Contracts.Messages;
-using Application.Features.Common.Mapping.Users;
+using Application.SharedFeatures.Mapping.Users;
 using Domain.Aggregates.Users;
 using Domain.Aggregates.Users.Specifications;
 using DotNetCoreExtension.Extensions;

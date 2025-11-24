@@ -1,13 +1,9 @@
 using Application.Contracts.ApiWrapper;
-using Application.Features.Common.Requests.Users;
 using Application.Features.Users.Commands.Create;
 using Application.SubcutaneousTests.Extensions;
 using AutoFixture;
 using Domain.Aggregates.Roles;
-using Domain.Aggregates.Users;
-using Infrastructure.Constants;
 using Microsoft.AspNetCore.Http;
-using SharedKernel.Constants;
 using Shouldly;
 
 namespace Application.SubcutaneousTests.Users.Create;

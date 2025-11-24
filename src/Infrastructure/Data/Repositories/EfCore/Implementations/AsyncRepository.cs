@@ -1,6 +1,6 @@
 using System.Linq.Expressions;
 using Application.Common.Interfaces.Contexts;
-using Application.Common.Interfaces.Repositories;
+using Application.Common.Interfaces.Repositories.EfCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Query;

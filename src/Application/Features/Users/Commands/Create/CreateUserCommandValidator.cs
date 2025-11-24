@@ -2,7 +2,7 @@ using Application.Common.Extensions;
 using Application.Common.Interfaces.UnitOfWorks;
 using Application.Contracts.ApiWrapper;
 using Application.Contracts.Messages;
-using Application.Features.Common.Validators.Users;
+using Application.SharedFeatures.Validators.Users;
 using Domain.Aggregates.Users;
 using FluentValidation;
 using Microsoft.Extensions.Localization;

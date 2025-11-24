@@ -1,6 +1,6 @@
 using System.Linq.Expressions;
 using Application.Common.Interfaces.Contexts;
-using Application.Common.Interfaces.Repositories;
+using Application.Common.Interfaces.Repositories.EfCore;
 using Application.Contracts.Dtos.Requests;
 using Application.Contracts.Dtos.Responses;
 using DynamicQuery.Extensions;

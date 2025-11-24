@@ -1,4 +1,4 @@
-using Application.Features.Common.Projections.Permissions;
+using Application.SharedFeatures.Projections.Permissions;
 
 namespace Application.Features.Permissions;
 

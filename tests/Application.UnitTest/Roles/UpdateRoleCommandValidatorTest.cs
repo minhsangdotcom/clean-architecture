@@ -1,11 +1,9 @@
 using Application.Common.Interfaces.Services;
-using Application.Common.Interfaces.Services.Identity;
 using Application.Common.Interfaces.UnitOfWorks;
 using Application.Contracts.ApiWrapper;
 using Application.Contracts.Messages;
-using Application.Features.Common.Projections.Roles;
-using Application.Features.Common.Requests.Roles;
 using Application.Features.Roles.Commands.Update;
+using Application.SharedFeatures.Requests.Roles;
 using AutoFixture;
 using Domain.Aggregates.Roles;
 using FluentValidation;

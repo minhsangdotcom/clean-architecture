@@ -1,4 +1,4 @@
-using Application.Features.Common.Projections.Roles;
+using Application.SharedFeatures.Projections.Roles;
 
 namespace Application.Features.Roles.Queries.Detail;
 

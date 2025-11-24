@@ -1,6 +1,6 @@
 using Application.Contracts.ApiWrapper;
-using Application.Features.Common.Requests.Roles;
 using Application.Features.Roles.Commands.Create;
+using Application.SharedFeatures.Requests.Roles;
 using Application.SubcutaneousTests.Extensions;
 using Domain.Aggregates.Roles;
 

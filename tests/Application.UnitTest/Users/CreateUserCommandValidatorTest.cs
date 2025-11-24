@@ -1,9 +1,6 @@
 using System.Text.RegularExpressions;
 using Application.Contracts.ApiWrapper;
 using Application.Contracts.Messages;
-using Application.Features.Common.Projections.Users;
-using Application.Features.Common.Requests.Users;
-using Application.Features.Common.Validators.Users;
 using Application.Features.Users.Commands.Create;
 using Application.UnitTest.Extensions;
 using AutoFixture;

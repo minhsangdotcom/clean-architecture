@@ -1,6 +1,6 @@
 using System.Data.Common;
 using Application.Common.Interfaces.Contexts;
-using Application.Common.Interfaces.Repositories;
+using Application.Common.Interfaces.Repositories.EfCore;
 using Application.Common.Interfaces.Services.Cache;
 using Application.Common.Interfaces.UnitOfWorks;
 using Infrastructure.Data.Repositories.EfCore.Cached;

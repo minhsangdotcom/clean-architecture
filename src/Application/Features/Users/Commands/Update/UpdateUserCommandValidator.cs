@@ -1,5 +1,5 @@
 using Application.Common.Interfaces.UnitOfWorks;
-using Application.Features.Common.Validators.Users;
+using Application.SharedFeatures.Validators.Users;
 using FluentValidation;
 using Microsoft.Extensions.Localization;
 

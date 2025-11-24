@@ -1,5 +1,5 @@
 using System.Data.Common;
-using Application.Common.Interfaces.Repositories;
+using Application.Common.Interfaces.Repositories.EfCore;
 
 namespace Application.Common.Interfaces.UnitOfWorks;
 
