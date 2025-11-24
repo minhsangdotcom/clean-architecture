@@ -179,9 +179,7 @@ public class DbInitializer
         ILogger logger
     )
     {
-        List<Permission> permissions = await unitOfWork
-            .Repository<Permission>()
-            .ListAsync(x => x.IsDeleted == false);
+        List<Permission> permissions = await unitOfWork.Repository<Permission>().ListAsync();
 
         var permissionsToDelete = permissions.FindAll(rp =>
             !allDefinitions.Exists(dp => dp.Permission.Code == rp.Code)
@@ -202,10 +200,7 @@ public class DbInitializer
             List<Ulid> idsToDelete = permissionsToDelete.ConvertAll(x => x.Id);
             await unitOfWork
                 .Repository<Permission>()
-                .ExecuteUpdateAsync(
-                    x => idsToDelete.Contains(x.Id),
-                    x => x.SetProperty(p => p.IsDeleted, true)
-                );
+                .ExecuteDeleteAsync(x => idsToDelete.Contains(x.Id));
             await unitOfWork.SaveAsync();
             logger.LogInformation(
                 "deleting {count} permissions include {data}",
@@ -234,9 +229,7 @@ public class DbInitializer
         ILogger logger
     )
     {
-        List<Permission> permissions = await unitOfWork
-            .Repository<Permission>()
-            .ListAsync(x => x.IsDeleted == false);
+        List<Permission> permissions = await unitOfWork.Repository<Permission>().ListAsync();
         Role? role = await manager.FindByIdAsync(roleId);
         if (role == null)
         {

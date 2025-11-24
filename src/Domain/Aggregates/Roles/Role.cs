@@ -1,6 +1,5 @@
 using Ardalis.GuardClauses;
 using Domain.Aggregates.Users;
-using Mediator;
 using SharedKernel.DomainEvents;
 using SharedKernel.Entities;
 
@@ -11,8 +10,8 @@ public class Role : AggregateRoot
     public string Name { get; private set; } = string.Empty;
     public string? Description { get; set; }
 
-    public ICollection<UserRole>? Users { get; private set; } = [];
-    public ICollection<RoleClaim>? Claims { get; private set; } = [];
+    public ICollection<UserRole> Users { get; private set; } = [];
+    public ICollection<RoleClaim> Claims { get; private set; } = [];
     public ICollection<RolePermission> Permissions { get; private set; } = [];
 
     private Role() { }

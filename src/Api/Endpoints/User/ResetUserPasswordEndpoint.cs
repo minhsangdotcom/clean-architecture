@@ -22,7 +22,8 @@ public class ResetUserPasswordEndpoint : IEndpoint
                 Description =
                     "Resets a user's password using a valid token from a password reset request.",
                 Tags = [new OpenApiTag() { Name = Router.UserRoute.Tags }],
-            }).WithRequestValidation<UpdateUserPassword>();
+            })
+            .WithRequestValidation<UpdateUserPassword>();
     }
 
     private async Task<Results<NoContent, ProblemHttpResult>> HandleAsync(
