@@ -16,9 +16,9 @@ public class PaginationResponse<T>
 
     public PaginationResponse(
         IEnumerable<T> data,
-        int totalItemCount,
-        int currentPage,
-        int pageSize
+        long totalItemCount,
+        long currentPage,
+        long pageSize
     )
     {
         Data = data;
@@ -27,8 +27,8 @@ public class PaginationResponse<T>
 
     public PaginationResponse(
         IEnumerable<T> data,
-        int totalItemCount,
-        int pageSize,
+        long totalItemCount,
+        long pageSize,
         string? previousCursor = null,
         string? nextCursor = null
     )
@@ -41,11 +41,11 @@ public class PaginationResponse<T>
 public class Paging<T>
 {
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-    public int? CurrentPage { get; set; }
+    public long? CurrentPage { get; set; }
 
-    public int PageSize { get; set; }
+    public long PageSize { get; set; }
 
-    public int TotalPage { get; set; }
+    public long TotalPage { get; set; }
 
     public bool? HasNextPage { get; set; }
 
@@ -55,25 +55,25 @@ public class Paging<T>
 
     public string? After { get; set; }
 
-    public Paging(int totalItemCount, int currentPage = 1, int pageSize = 10)
+    public Paging(long totalItemCount, long currentPage = 1, long pageSize = 10)
     {
         CurrentPage = currentPage;
         PageSize = pageSize;
-        TotalPage = (int)Math.Ceiling(totalItemCount / (double)pageSize);
+        TotalPage = (long)Math.Ceiling(totalItemCount / (double)pageSize);
 
         HasNextPage = CurrentPage < TotalPage;
         HasPreviousPage = currentPage > 1;
     }
 
     public Paging(
-        int totalItemCount,
-        int pageSize = 10,
+        long totalItemCount,
+        long pageSize = 10,
         string? previousCursor = null,
         string? nextCursor = null
     )
     {
         PageSize = pageSize;
-        TotalPage = (int)Math.Ceiling(totalItemCount / (double)pageSize);
+        TotalPage = (long)Math.Ceiling(totalItemCount / (double)pageSize);
         After = nextCursor;
         HasNextPage = nextCursor != null;
         Before = previousCursor;
@@ -81,9 +81,9 @@ public class Paging<T>
     }
 
     public Paging(
-        int? currentPage,
-        int pageSize,
-        int totalPage,
+        long? currentPage,
+        long pageSize,
+        long totalPage,
         bool? hasNext,
         bool? hasPrevious,
         string? before = null,
