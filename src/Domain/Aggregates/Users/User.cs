@@ -123,6 +123,6 @@ public class User : AggregateRoot
 
     protected override bool TryApplyDomainEvent(IDomainEvent domainEvent)
     {
-        throw new NotImplementedException();
+        return false;
     }
 }

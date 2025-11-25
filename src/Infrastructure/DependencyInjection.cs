@@ -1,4 +1,3 @@
-using Application.Common.Interfaces.Contexts;
 using Application.Common.Interfaces.Services;
 using Application.Common.Interfaces.UnitOfWorks;
 using Infrastructure.Data;
