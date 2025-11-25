@@ -1,9 +1,9 @@
+using Application.Common.ErrorCodes;
 using Application.Common.Errors;
 using Application.Common.Interfaces.Services.Identity;
 using Application.Common.Interfaces.UnitOfWorks;
 using Application.Contracts.ApiWrapper;
 using Application.Contracts.Constants;
-using Application.Contracts.Messages;
 using Domain.Aggregates.Permissions;
 using Domain.Aggregates.Roles;
 using Mediator;
@@ -28,15 +28,13 @@ public class UpdateRoleHandler(
         );
         if (role == null)
         {
-            string errorMessage = Messenger
-                .Create<Role>()
-                .WithError(MessageErrorType.Found)
-                .Negative()
-                .GetFullMessage();
             return Result<UpdateRoleResponse>.Failure(
                 new NotFoundError(
                     TitleMessage.RESOURCE_NOT_FOUND,
-                    new(errorMessage, stringLocalizer[errorMessage])
+                    new(
+                        RoleErrorMessages.RoleNotFound,
+                        stringLocalizer[RoleErrorMessages.RoleNotFound]
+                    )
                 )
             );
         }

@@ -1,3 +1,4 @@
+using Application.Common.ErrorCodes;
 using Application.Common.Errors;
 using Application.Common.Interfaces.Services.Identity;
 using Application.Contracts.ApiWrapper;
@@ -26,15 +27,13 @@ public class DeleteRoleHandler(
         );
         if (role == null)
         {
-            string errorMessage = Messenger
-                .Create<Role>()
-                .WithError(MessageErrorType.Found)
-                .Negative()
-                .GetFullMessage();
             return Result<string>.Failure(
                 new NotFoundError(
                     TitleMessage.RESOURCE_NOT_FOUND,
-                    new(errorMessage, stringLocalizer[errorMessage])
+                    new(
+                        RoleErrorMessages.RoleNotFound,
+                        stringLocalizer[RoleErrorMessages.RoleNotFound]
+                    )
                 )
             );
         }
