@@ -1,3 +1,4 @@
+using Application.Common.ErrorCodes;
 using Application.Common.Errors;
 using Application.Common.Interfaces.Services;
 using Application.Common.Interfaces.Services.Token;
@@ -45,7 +46,10 @@ public class LoginUserHandler(
             return Result<LoginUserResponse>.Failure(
                 new NotFoundError(
                     TitleMessage.RESOURCE_NOT_FOUND,
-                    new(errorMessage, stringLocalizer[errorMessage])
+                    new(
+                        UserErrorMessages.UserNotFound,
+                        stringLocalizer[UserErrorMessages.UserNotFound]
+                    )
                 )
             );
         }
@@ -60,7 +64,10 @@ public class LoginUserHandler(
             return Result<LoginUserResponse>.Failure(
                 new BadRequestError(
                     "Error has occurred with password",
-                    new(errorMessage, stringLocalizer[errorMessage])
+                    new(
+                        UserErrorMessages.UserPasswordIncorrect,
+                        stringLocalizer[UserErrorMessages.UserPasswordIncorrect]
+                    )
                 )
             );
         }

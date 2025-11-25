@@ -1,5 +1,6 @@
 using Application.Contracts.ErrorCodes;
 using Application.Contracts.Messages;
+using Application.Features.Users.Commands.ChangePassword;
 using Application.SharedFeatures.Requests.Users;
 using Domain.Aggregates.Users;
 
@@ -221,4 +222,73 @@ public static class UserErrorMessages
             .Negative()
             .WithError(MessageErrorType.AmongTheAllowedOptions)
             .GetFullMessage();
+
+    // --------------------------------
+    // User
+    // --------------------------------
+    [ErrorKey(nameof(UserNotFound))]
+    public static string UserNotFound =>
+        Messenger.Create<User>().WithError(MessageErrorType.Found).Negative().GetFullMessage();
+
+    [ErrorKey(nameof(UserOldPasswordIncorrect))]
+    public static string UserOldPasswordIncorrect =>
+        Messenger
+            .Create<ChangeUserPasswordCommand>(nameof(User))
+            .Property(x => x.OldPassword!)
+            .WithError(MessageErrorType.Correct)
+            .Negative()
+            .GetFullMessage();
+
+    [ErrorKey(nameof(UserPasswordIncorrect))]
+    public static string UserPasswordIncorrect =>
+        Messenger
+            .Create<User>()
+            .Property(x => x.Password)
+            .WithError(MessageErrorType.Correct)
+            .Negative()
+            .GetFullMessage();
+
+    [ErrorKey(nameof(UserInactiveNotAllowed))]
+    public static string UserInactiveNotAllowed =>
+        Messenger.Create<User>().WithError(MessageErrorType.Active).Negative().GetFullMessage();
+
+    [ErrorKey(nameof(UserResetPasswordTokenInvalid))]
+    public static string UserResetPasswordTokenInvalid =>
+        Messenger
+            .Create<UserPasswordReset>()
+            .Property(x => x.Token)
+            .WithError(MessageErrorType.Correct)
+            .Negative()
+            .GetFullMessage();
+
+    [ErrorKey(nameof(UserRefreshTokenInvalid))]
+    public static string UserRefreshTokenInvalid =>
+        Messenger
+            .Create<UserRefreshToken>(nameof(User))
+            .Property(x => x.Token!)
+            .WithError(MessageErrorType.Valid)
+            .Negative()
+            .GetFullMessage();
+
+    [ErrorKey(nameof(UserRefreshTokenIdentical))]
+    public static string UserRefreshTokenIdentical =>
+        Messenger
+            .Create<UserRefreshToken>(nameof(User))
+            .Property(x => x.Token!)
+            .Negative()
+            .WithError(MessageErrorType.Identical)
+            .ToObject("TheCurrentOne")
+            .GetFullMessage();
+
+    [ErrorKey(nameof(UserRefreshTokenExpired))]
+    public static string UserRefreshTokenExpired =>
+        Messenger
+            .Create<UserRefreshToken>(nameof(User))
+            .Property(x => x.Token!)
+            .WithError(MessageErrorType.Expired)
+            .GetFullMessage();
+
+    [ErrorKey(nameof(UserInactiveForRefreshToken))]
+    public static string UserInactiveForRefreshToken =>
+        Messenger.Create<User>().WithError(MessageErrorType.Active).Negative().GetFullMessage();
 }

@@ -1,3 +1,4 @@
+using Application.Common.ErrorCodes;
 using Application.Common.Errors;
 using Application.Common.Interfaces.UnitOfWorks;
 using Application.Contracts.ApiWrapper;
@@ -34,15 +35,13 @@ public class RequestUserPasswordResetHandler(
 
         if (user == null)
         {
-            string errorMessage = Messenger
-                .Create<User>()
-                .WithError(MessageErrorType.Found)
-                .Negative()
-                .GetFullMessage();
             return Result<string>.Failure(
                 new NotFoundError(
                     TitleMessage.RESOURCE_NOT_FOUND,
-                    new(errorMessage, stringLocalizer[errorMessage])
+                    new(
+                        UserErrorMessages.UserNotFound,
+                        stringLocalizer[UserErrorMessages.UserNotFound]
+                    )
                 )
             );
         }
@@ -57,7 +56,10 @@ public class RequestUserPasswordResetHandler(
             return Result<string>.Failure(
                 new BadRequestError(
                     "Error has occurred with the current user",
-                    new(errorMessage, stringLocalizer[errorMessage])
+                    new(
+                        UserErrorMessages.UserInactiveNotAllowed,
+                        stringLocalizer[UserErrorMessages.UserInactiveNotAllowed]
+                    )
                 )
             );
         }

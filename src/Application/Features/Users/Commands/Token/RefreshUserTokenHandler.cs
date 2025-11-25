@@ -1,3 +1,4 @@
+using Application.Common.ErrorCodes;
 using Application.Common.Errors;
 using Application.Common.Interfaces.Services;
 using Application.Common.Interfaces.Services.Token;
@@ -35,16 +36,13 @@ public class RefreshUserTokenHandler(
         );
         if (!isValid)
         {
-            string errorMessage = Messenger
-                .Create<UserRefreshToken>(nameof(User))
-                .Property(x => x.Token!)
-                .WithError(MessageErrorType.Valid)
-                .Negative()
-                .GetFullMessage();
             return Result<RefreshUserTokenResponse>.Failure(
                 new BadRequestError(
                     "Error has occurred with the Refresh token",
-                    new(errorMessage, stringLocalizer[errorMessage])
+                    new(
+                        UserErrorMessages.UserRefreshTokenInvalid,
+                        stringLocalizer[UserErrorMessages.UserRefreshTokenInvalid]
+                    )
                 )
             );
         }
@@ -56,7 +54,7 @@ public class RefreshUserTokenHandler(
                     decodeToken!.FamilyId!,
                     Ulid.Parse(decodeToken.Sub!)
                 ),
-                new()
+                queryParam: new()
                 {
                     Sort =
                         $"{nameof(UserRefreshToken.CreatedAt)}{OrderTerm.DELIMITER}{OrderTerm.DESC}",
@@ -77,7 +75,10 @@ public class RefreshUserTokenHandler(
             return Result<RefreshUserTokenResponse>.Failure(
                 new UnauthorizedError(
                     "Error has occurred with the Refresh token",
-                    new(errorMessage, stringLocalizer[errorMessage])
+                    new(
+                        UserErrorMessages.UserRefreshTokenIdentical,
+                        stringLocalizer[UserErrorMessages.UserRefreshTokenIdentical]
+                    )
                 )
             );
         }
@@ -100,7 +101,10 @@ public class RefreshUserTokenHandler(
             return Result<RefreshUserTokenResponse>.Failure(
                 new UnauthorizedError(
                     "Error has occurred with the Refresh token",
-                    new(errorMessage, stringLocalizer[errorMessage])
+                    new(
+                        UserErrorMessages.UserRefreshTokenIdentical,
+                        stringLocalizer[UserErrorMessages.UserRefreshTokenIdentical]
+                    )
                 )
             );
         }
@@ -115,7 +119,10 @@ public class RefreshUserTokenHandler(
             return Result<RefreshUserTokenResponse>.Failure(
                 new BadRequestError(
                     "Error has occurred with refresh token",
-                    new(errorMessage, stringLocalizer[errorMessage])
+                    new(
+                        UserErrorMessages.UserRefreshTokenExpired,
+                        stringLocalizer[UserErrorMessages.UserRefreshTokenExpired]
+                    )
                 )
             );
         }
@@ -130,7 +137,10 @@ public class RefreshUserTokenHandler(
             return Result<RefreshUserTokenResponse>.Failure(
                 new BadRequestError(
                     "Error has occurred with the current user",
-                    new(errorMessage, stringLocalizer[errorMessage])
+                    new(
+                        UserErrorMessages.UserInactiveForRefreshToken,
+                        stringLocalizer[UserErrorMessages.UserInactiveForRefreshToken]
+                    )
                 )
             );
         }

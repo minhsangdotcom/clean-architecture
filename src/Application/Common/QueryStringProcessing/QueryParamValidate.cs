@@ -1,4 +1,5 @@
 using System.Reflection;
+using Application.Common.ErrorCodes;
 using Application.Contracts.Dtos.Requests;
 using Application.Contracts.Messages;
 using DotNetCoreExtension.Extensions;
@@ -10,22 +11,221 @@ namespace Application.Common.QueryStringProcessing;
 
 public static partial class QueryParamValidate
 {
+    // public static ValidationRequestResult<T> ValidateQuery<T>(this T request)
+    //     where T : QueryParamRequest
+    // {
+    //     if (!string.IsNullOrWhiteSpace(request.Before) && !string.IsNullOrWhiteSpace(request.After))
+    //     {
+    //         return new(
+    //             Error: Messenger
+    //                 .Create<QueryParamRequest>("QueryParam")
+    //                 .Property("Cursor")
+    //                 .WithError(MessageErrorType.Redundant)
+    //                 .GetFullMessage()
+    //         );
+    //     }
+
+    //     return new(request);
+    // }
+
     public static ValidationRequestResult<T> ValidateQuery<T>(this T request)
         where T : QueryParamRequest
     {
         if (!string.IsNullOrWhiteSpace(request.Before) && !string.IsNullOrWhiteSpace(request.After))
         {
-            return new(
-                Error: Messenger
-                    .Create<QueryParamRequest>("QueryParam")
-                    .Property("Cursor")
-                    .WithError(MessageErrorType.Redundant)
-                    .GetFullMessage()
-            );
+            return new(Error: QueryParamRequestErrorMessages.QueryParamBeforeAfterRedundant);
         }
 
         return new(request);
     }
+
+    // public static ValidationRequestResult<TRequest> ValidateFilter<TRequest, TResponse>(
+    //     this TRequest request,
+    //     ILogger logger
+    // )
+    //     where TResponse : class
+    //     where TRequest : QueryParamRequest
+    // {
+    //     if (request.OriginFilters?.Length <= 0)
+    //     {
+    //         return new(request);
+    //     }
+
+    //     List<QueryResult> queries =
+    //     [
+    //         .. StringExtension.TransformStringQuery(
+    //             request.OriginFilters!,
+    //             nameof(QueryParamRequest.Filter)
+    //         ),
+    //     ];
+
+    //     int length = queries.Count;
+
+    //     for (int i = 0; i < length; i++)
+    //     {
+    //         QueryResult query = queries[i];
+
+    //         //if it's $and,$or,$in and $between then they must have a index after like $or[0],$[in][1]
+    //         if (!ValidateArrayOperator(query.CleanKey))
+    //         {
+    //             return new(
+    //                 Error: Messenger
+    //                     .Create<QueryParamRequest>("QueryParam")
+    //                     .Property(x => x.Filter!)
+    //                     .WithError(MessageErrorType.Missing)
+    //                     .ToObject("ArrayIndex")
+    //                     .GetFullMessage()
+    //             );
+    //         }
+
+    //         /// check if the index of array operator has to start with 0 like $and[0][firstName]
+    //         if (i == 0 && !ValidateArrayOperatorInvalidIndex(query.CleanKey))
+    //         {
+    //             return new(
+    //                 Error: Messenger
+    //                     .Create<QueryParamRequest>("QueryParam")
+    //                     .Property(x => x.Filter!)
+    //                     .WithError(MessageErrorType.Valid)
+    //                     .Negative()
+    //                     .ToObject("ArrayIndex")
+    //                     .GetFullMessage()
+    //             );
+    //         }
+
+    //         // lack of operator
+    //         if (!ValidateLackOfOperator(query.CleanKey))
+    //         {
+    //             return new(
+    //                 Error: Messenger
+    //                     .Create<QueryParamRequest>("QueryParam")
+    //                     .Property(x => x.Filter!)
+    //                     .WithError(MessageErrorType.Missing)
+    //                     .ToObject("Operator")
+    //                     .GetFullMessage()
+    //             );
+    //         }
+
+    //         // if the last element is logical operator ($and, $or) it's wrong like filter[$and][0] which is lack of body
+    //         if (LackOfElementInArrayOperator(query.CleanKey))
+    //         {
+    //             return new(
+    //                 Error: Messenger
+    //                     .Create<QueryParamRequest>("QueryParam")
+    //                     .Property(x => x.Filter!)
+    //                     .WithError(MessageErrorType.Missing)
+    //                     .ToObject("Element")
+    //                     .GetFullMessage()
+    //             );
+    //         }
+
+    //         IEnumerable<string> properties = query.CleanKey.Where(x =>
+    //             string.Compare(x, "$or", StringComparison.OrdinalIgnoreCase) != 0
+    //             && string.Compare(x, "$and", StringComparison.OrdinalIgnoreCase) != 0
+    //             && !x.IsDigit()
+    //             && !validOperators.Contains(x.ToLower())
+    //         );
+
+    //         // lack of property
+    //         if (!properties.Any())
+    //         {
+    //             return new(
+    //                 Error: Messenger
+    //                     .Create<QueryParamRequest>("QueryParam")
+    //                     .Property(x => x.Filter!)
+    //                     .WithError(MessageErrorType.Missing)
+    //                     .ToObject("Property")
+    //                     .GetFullMessage()
+    //             );
+    //         }
+    //         Type type = typeof(TResponse);
+    //         PropertyInfo propertyInfo = type.GetNestedPropertyInfo(string.Join(".", properties));
+    //         Type[] arguments = propertyInfo.PropertyType.GetGenericArguments();
+    //         Type nullableType = arguments.Length > 0 ? arguments[0] : propertyInfo.PropertyType;
+
+    //         // value must be enum
+    //         if (
+    //             (nullableType.IsEnum || IsNumericType(nullableType))
+    //             && query.Value?.IsDigit() == false
+    //         )
+    //         {
+    //             return new(
+    //                 Error: Messenger
+    //                     .Create<QueryParamRequest>("QueryParam")
+    //                     .Property("FilterValue")
+    //                     .Negative()
+    //                     .ToObject("Integer")
+    //                     .GetFullMessage()
+    //             );
+    //         }
+
+    //         // value must be datetime
+    //         if (
+    //             (nullableType == typeof(DateTime) && !DateTime.TryParse(query.Value, out _))
+    //             || (
+    //                 nullableType == typeof(DateTimeOffset)
+    //                 && !DateTimeOffset.TryParse(query.Value, out _)
+    //             )
+    //         )
+    //         {
+    //             return new(
+    //                 Error: Messenger
+    //                     .Create<QueryParamRequest>("QueryParam")
+    //                     .Property("FilterValue")
+    //                     .Negative()
+    //                     .ToObject("Datetime")
+    //                     .GetFullMessage()
+    //             );
+    //         }
+
+    //         // value must be Ulid
+    //         if ((nullableType == typeof(Ulid)) && !Ulid.TryParse(query.Value, out _))
+    //         {
+    //             return new(
+    //                 Error: Messenger
+    //                     .Create<QueryParamRequest>("QueryParam")
+    //                     .Property("FilterValue")
+    //                     .Negative()
+    //                     .ToObject("Ulid")
+    //                     .GetFullMessage()
+    //             );
+    //         }
+    //     }
+
+    //     // validate between operator is correct in format like [age][$between][0] = 1 & [age][$between][1] = 2
+    //     if (!ValidateBetweenOperator("$between", queries))
+    //     {
+    //         return new(
+    //             Error: Messenger
+    //                 .Create<QueryParamRequest>("QueryParam")
+    //                 .Property(x => x.Filter!)
+    //                 .WithError(MessageErrorType.Valid)
+    //                 .ToObject("BetweenOperator")
+    //                 .Negative()
+    //                 .GetFullMessage()
+    //         );
+    //     }
+
+    //     // duplicated element of filter
+    //     var trimQueries = queries.Select(x => string.Join(".", x.CleanKey));
+    //     if (trimQueries.Distinct().Count() != queries.Count)
+    //     {
+    //         return new(
+    //             Error: Messenger
+    //                 .Create<QueryParamRequest>("QueryParam")
+    //                 .Property("FilterElement")
+    //                 .WithError(MessageErrorType.Unique)
+    //                 .Negative()
+    //                 .GetFullMessage()
+    //         );
+    //     }
+
+    //     request.Filter = StringExtension.Parse(queries);
+
+    //     string filter = SerializerExtension.Serialize(request.Filter!).StringJson;
+    //     logger.LogInformation("Filter has been bound {filter}", filter);
+
+    //     return new(request);
+    // }
 
     public static ValidationRequestResult<TRequest> ValidateFilter<TRequest, TResponse>(
         this TRequest request,
@@ -53,60 +253,32 @@ public static partial class QueryParamValidate
         {
             QueryResult query = queries[i];
 
-            //if it's $and,$or,$in and $between then they must have a index after like $or[0],$[in][1]
+            // if it's $and,$or,$in and $between then they must have an index after like $or[0], $in[1]
             if (!ValidateArrayOperator(query.CleanKey))
             {
-                return new(
-                    Error: Messenger
-                        .Create<QueryParamRequest>("QueryParam")
-                        .Property(x => x.Filter!)
-                        .WithError(MessageErrorType.Missing)
-                        .ToObject("ArrayIndex")
-                        .GetFullMessage()
-                );
+                return new(Error: QueryParamRequestErrorMessages.QueryParamFilterArrayIndexMissing);
             }
 
             /// check if the index of array operator has to start with 0 like $and[0][firstName]
             if (i == 0 && !ValidateArrayOperatorInvalidIndex(query.CleanKey))
             {
-                return new(
-                    Error: Messenger
-                        .Create<QueryParamRequest>("QueryParam")
-                        .Property(x => x.Filter!)
-                        .WithError(MessageErrorType.Valid)
-                        .Negative()
-                        .ToObject("ArrayIndex")
-                        .GetFullMessage()
-                );
+                return new(Error: QueryParamRequestErrorMessages.QueryParamFilterArrayIndexInvalid);
             }
 
             // lack of operator
             if (!ValidateLackOfOperator(query.CleanKey))
             {
-                return new(
-                    Error: Messenger
-                        .Create<QueryParamRequest>("QueryParam")
-                        .Property(x => x.Filter!)
-                        .WithError(MessageErrorType.Missing)
-                        .ToObject("Operator")
-                        .GetFullMessage()
-                );
+                return new(Error: QueryParamRequestErrorMessages.QueryParamFilterOperatorMissing);
             }
 
-            // if the last element is logical operator ($and, $or) it's wrong like filter[$and][0] which is lack of body
+            // if the last element is logical operator ($and, $or) it's wrong like filter[$and][0]
+            // which is lack of body
             if (LackOfElementInArrayOperator(query.CleanKey))
             {
-                return new(
-                    Error: Messenger
-                        .Create<QueryParamRequest>("QueryParam")
-                        .Property(x => x.Filter!)
-                        .WithError(MessageErrorType.Missing)
-                        .ToObject("Element")
-                        .GetFullMessage()
-                );
+                return new(Error: QueryParamRequestErrorMessages.QueryParamFilterElementMissing);
             }
 
-            IEnumerable<string> properties = query.CleanKey.Where(x =>
+            List<string> properties = query.CleanKey.FindAll(x =>
                 string.Compare(x, "$or", StringComparison.OrdinalIgnoreCase) != 0
                 && string.Compare(x, "$and", StringComparison.OrdinalIgnoreCase) != 0
                 && !x.IsDigit()
@@ -114,35 +286,24 @@ public static partial class QueryParamValidate
             );
 
             // lack of property
-            if (!properties.Any())
+            if (properties.Count == 0)
             {
-                return new(
-                    Error: Messenger
-                        .Create<QueryParamRequest>("QueryParam")
-                        .Property(x => x.Filter!)
-                        .WithError(MessageErrorType.Missing)
-                        .ToObject("Property")
-                        .GetFullMessage()
-                );
+                return new(Error: QueryParamRequestErrorMessages.QueryParamFilterPropertyMissing);
             }
+
             Type type = typeof(TResponse);
             PropertyInfo propertyInfo = type.GetNestedPropertyInfo(string.Join(".", properties));
             Type[] arguments = propertyInfo.PropertyType.GetGenericArguments();
             Type nullableType = arguments.Length > 0 ? arguments[0] : propertyInfo.PropertyType;
 
-            // value must be enum
+            // value must be enum or number
             if (
                 (nullableType.IsEnum || IsNumericType(nullableType))
                 && query.Value?.IsDigit() == false
             )
             {
                 return new(
-                    Error: Messenger
-                        .Create<QueryParamRequest>("QueryParam")
-                        .Property("FilterValue")
-                        .Negative()
-                        .ToObject("Integer")
-                        .GetFullMessage()
+                    Error: QueryParamRequestErrorMessages.QueryParamFilterValueIntegerInvalid
                 );
             }
 
@@ -156,55 +317,29 @@ public static partial class QueryParamValidate
             )
             {
                 return new(
-                    Error: Messenger
-                        .Create<QueryParamRequest>("QueryParam")
-                        .Property("FilterValue")
-                        .Negative()
-                        .ToObject("Datetime")
-                        .GetFullMessage()
+                    Error: QueryParamRequestErrorMessages.QueryParamFilterValueDatetimeInvalid
                 );
             }
 
             // value must be Ulid
             if ((nullableType == typeof(Ulid)) && !Ulid.TryParse(query.Value, out _))
             {
-                return new(
-                    Error: Messenger
-                        .Create<QueryParamRequest>("QueryParam")
-                        .Property("FilterValue")
-                        .Negative()
-                        .ToObject("Ulid")
-                        .GetFullMessage()
-                );
+                return new(Error: QueryParamRequestErrorMessages.QueryParamFilterValueUlidInvalid);
             }
         }
 
-        // validate between operator is correct in format like [age][$between][0] = 1 & [age][$between][1] = 2
+        // validate between operator is correct format like:
+        // [age][$between][0] = 1 && [age][$between][1] = 2
         if (!ValidateBetweenOperator("$between", queries))
         {
-            return new(
-                Error: Messenger
-                    .Create<QueryParamRequest>("QueryParam")
-                    .Property(x => x.Filter!)
-                    .WithError(MessageErrorType.Valid)
-                    .ToObject("BetweenOperator")
-                    .Negative()
-                    .GetFullMessage()
-            );
+            return new(Error: QueryParamRequestErrorMessages.QueryParamBetweenOperatorInvalid);
         }
 
         // duplicated element of filter
-        var trimQueries = queries.Select(x => string.Join(".", x.CleanKey));
+        List<string> trimQueries = queries.ConvertAll(x => string.Join(".", x.CleanKey));
         if (trimQueries.Distinct().Count() != queries.Count)
         {
-            return new(
-                Error: Messenger
-                    .Create<QueryParamRequest>("QueryParam")
-                    .Property("FilterElement")
-                    .WithError(MessageErrorType.Unique)
-                    .Negative()
-                    .GetFullMessage()
-            );
+            return new(Error: QueryParamRequestErrorMessages.QueryParamFilterElementDuplicate);
         }
 
         request.Filter = StringExtension.Parse(queries);

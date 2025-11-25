@@ -1,3 +1,4 @@
+using Application.Common.ErrorCodes;
 using Application.Common.Errors;
 using Application.Common.Interfaces.Services;
 using Application.Common.Interfaces.Services.Identity;
@@ -29,15 +30,13 @@ public class ChangeUserPasswordHandler(
 
         if (user == null)
         {
-            string errorMessage = Messenger
-                .Create<User>()
-                .WithError(MessageErrorType.Found)
-                .Negative()
-                .GetFullMessage();
             return Result<string>.Failure(
                 new NotFoundError(
                     TitleMessage.RESOURCE_NOT_FOUND,
-                    new(errorMessage, stringLocalizer[errorMessage])
+                    new(
+                        UserErrorMessages.UserNotFound,
+                        stringLocalizer[UserErrorMessages.UserNotFound]
+                    )
                 )
             );
         }
@@ -53,7 +52,10 @@ public class ChangeUserPasswordHandler(
             return Result<string>.Failure(
                 new BadRequestError(
                     "Error has occurred with password",
-                    new(errorMessage, stringLocalizer[errorMessage])
+                    new(
+                        UserErrorMessages.UserOldPasswordIncorrect,
+                        stringLocalizer[UserErrorMessages.UserOldPasswordIncorrect]
+                    )
                 )
             );
         }

@@ -1,3 +1,4 @@
+using Application.Common.ErrorCodes;
 using Application.Common.Errors;
 using Application.Common.Interfaces.UnitOfWorks;
 using Application.Contracts.ApiWrapper;
@@ -30,15 +31,13 @@ public class ResetUserPasswordHandler(
 
         if (user == null)
         {
-            string errorMessage = Messenger
-                .Create<User>()
-                .WithError(MessageErrorType.Found)
-                .Negative()
-                .GetFullMessage();
             return Result<string>.Failure(
                 new NotFoundError(
                     TitleMessage.RESOURCE_NOT_FOUND,
-                    new(errorMessage, stringLocalizer[errorMessage])
+                    new(
+                        UserErrorMessages.UserNotFound,
+                        stringLocalizer[UserErrorMessages.UserNotFound]
+                    )
                 )
             );
         }
@@ -50,16 +49,13 @@ public class ResetUserPasswordHandler(
 
         if (resetPassword == null)
         {
-            string errorMessage = Messenger
-                .Create<UserPasswordReset>()
-                .Property(x => x.Token)
-                .WithError(MessageErrorType.Correct)
-                .Negative()
-                .GetFullMessage();
             return Result<string>.Failure(
                 new BadRequestError(
                     "Error has occurred with reset password token",
-                    new(errorMessage, stringLocalizer[errorMessage])
+                    new(
+                        UserErrorMessages.UserResetPasswordTokenInvalid,
+                        stringLocalizer[UserErrorMessages.UserResetPasswordTokenInvalid]
+                    )
                 )
             );
         }
