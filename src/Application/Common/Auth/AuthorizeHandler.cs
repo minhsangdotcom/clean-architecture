@@ -1,11 +1,9 @@
-using Application.Common.Interfaces.Contexts;
 using Application.Common.Interfaces.Services;
 using Application.Common.Interfaces.Services.Identity;
 using Domain.Aggregates.Users;
 using Domain.Aggregates.Users.Enums;
 using DotNetCoreExtension.Extensions;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Application.Common.Auth;
@@ -20,7 +18,6 @@ public class AuthorizeHandler(IServiceProvider serviceProvider, ICurrentUser cur
     {
         using var scope = serviceProvider.CreateScope();
         IUserManager userManager = scope.ServiceProvider.GetRequiredService<IUserManager>();
-        IEfDbContext dbContext = scope.ServiceProvider.GetRequiredService<IEfDbContext>();
 
         Ulid? userId = currentUser.Id;
         if (userId == null)
@@ -28,7 +25,12 @@ public class AuthorizeHandler(IServiceProvider serviceProvider, ICurrentUser cur
             context.Fail(new AuthorizationFailureReason(this, "User is UnAuthenticated"));
             return;
         }
-        User user = await dbContext.Set<User>().FirstAsync(x => x.Id == userId.Value);
+        User? user = await userManager.FindByIdAsync(userId.Value, false);
+        if (user == null)
+        {
+            context.Fail(new AuthorizationFailureReason(this, "User is not found"));
+            return;
+        }
         if (user.Status == UserStatus.Inactive)
         {
             context.Fail(new AuthorizationFailureReason(this, "User is Inactive"));

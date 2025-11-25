@@ -64,7 +64,7 @@ public class UpdateUserProfileHandler(
         }
 
         User? response = await userManager.FindByIdAsync(
-            currentUser.Id!.Value,
+            user.Id,
             cancellationToken: cancellationToken
         );
 

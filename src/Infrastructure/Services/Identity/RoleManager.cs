@@ -1,8 +1,8 @@
+using Application.Common.Interfaces.DbContexts;
 using Application.Common.Interfaces.Services.Identity;
 using Domain.Aggregates.Permissions;
 using Domain.Aggregates.Roles;
 using DotNetCoreExtension.Extensions;
-using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 

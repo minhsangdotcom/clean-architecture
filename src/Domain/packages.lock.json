@@ -20,9 +20,9 @@
       },
       "minhsangdotcom.TheTemplate.SpecificationPattern": {
         "type": "Direct",
-        "requested": "[1.0.4, )",
-        "resolved": "1.0.4",
-        "contentHash": "zvQA18+BM7T5v1zOOB9xrMi7kJabW3xBI7vidW2eny1iMJxkO63N2eF/6LSZtp4d0OhNpBI7HuwEtM1ckZKz5g==",
+        "requested": "[1.0.5, )",
+        "resolved": "1.0.5",
+        "contentHash": "CRs0CrXzB4zKxstAhSq+FPpIHhUAw/6QNSk74GKYJ6hKpp1QDpsiWasaxLFfgUO7EmsqxzB+0mHHL1cTIHpbJw==",
         "dependencies": {
           "Microsoft.EntityFrameworkCore": "8.0.17",
           "Microsoft.EntityFrameworkCore.Relational": "8.0.17"

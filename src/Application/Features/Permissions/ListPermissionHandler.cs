@@ -1,4 +1,4 @@
-using Application.Common.Interfaces.Contexts;
+using Application.Common.Interfaces.DbContexts;
 using Application.Contracts.ApiWrapper;
 using Application.Contracts.Permissions;
 using Domain.Aggregates.Permissions;

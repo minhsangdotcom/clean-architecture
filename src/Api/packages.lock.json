@@ -864,8 +864,8 @@
       },
       "minhsangdotcom.TheTemplate.SpecificationPattern": {
         "type": "Transitive",
-        "resolved": "1.0.4",
-        "contentHash": "zvQA18+BM7T5v1zOOB9xrMi7kJabW3xBI7vidW2eny1iMJxkO63N2eF/6LSZtp4d0OhNpBI7HuwEtM1ckZKz5g==",
+        "resolved": "1.0.5",
+        "contentHash": "CRs0CrXzB4zKxstAhSq+FPpIHhUAw/6QNSk74GKYJ6hKpp1QDpsiWasaxLFfgUO7EmsqxzB+0mHHL1cTIHpbJw==",
         "dependencies": {
           "Microsoft.EntityFrameworkCore": "8.0.17",
           "Microsoft.EntityFrameworkCore.Relational": "8.0.17"
@@ -1191,7 +1191,7 @@
         "dependencies": {
           "Ardalis.GuardClauses": "[5.0.0, )",
           "minhsangdotcom.TheTemplate.SharedKernel": "[2.0.0, )",
-          "minhsangdotcom.TheTemplate.SpecificationPattern": "[1.0.4, )"
+          "minhsangdotcom.TheTemplate.SpecificationPattern": "[1.0.5, )"
         }
       },
       "infrastructure": {
