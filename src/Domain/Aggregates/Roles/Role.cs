@@ -53,6 +53,6 @@ public class Role : AggregateRoot
 
     protected override bool TryApplyDomainEvent(IDomainEvent domainEvent)
     {
-        throw new NotImplementedException();
+        return false;
     }
 }

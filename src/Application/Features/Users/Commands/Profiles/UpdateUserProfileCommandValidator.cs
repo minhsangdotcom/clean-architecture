@@ -1,7 +1,6 @@
+using Application.Common.ErrorCodes;
 using Application.Common.Extensions;
 using Application.Contracts.ApiWrapper;
-using Application.Contracts.Messages;
-using Domain.Aggregates.Users;
 using FluentValidation;
 using Microsoft.Extensions.Localization;
 
@@ -15,82 +14,42 @@ public class UpdateUserProfileCommandValidator : AbstractValidator<UpdateUserPro
     {
         RuleFor(x => x.LastName)
             .NotEmpty()
-            .WithState(state =>
-            {
-                string errorMessage = Messenger
-                    .Create<User>()
-                    .Property(x => x.LastName)
-                    .WithError(MessageErrorType.Required)
-                    .Negative()
-                    .GetFullMessage();
-
-                return new ErrorReason(errorMessage, stringLocalizer[errorMessage]);
-            })
+            .WithState(_ => new ErrorReason(
+                UserErrorMessages.UserLastNameRequired,
+                stringLocalizer[UserErrorMessages.UserLastNameRequired]
+            ))
             .MaximumLength(256)
-            .WithState(state =>
-            {
-                string errorMessage = Messenger
-                    .Create<User>()
-                    .Property(x => x.LastName)
-                    .WithError(MessageErrorType.TooLong)
-                    .GetFullMessage();
-
-                return new ErrorReason(errorMessage, stringLocalizer[errorMessage]);
-            });
+            .WithState(_ => new ErrorReason(
+                UserErrorMessages.UserLastNameTooLong,
+                stringLocalizer[UserErrorMessages.UserLastNameTooLong]
+            ));
 
         RuleFor(x => x.FirstName)
             .NotEmpty()
-            .WithState(state =>
-            {
-                string errorMessage = Messenger
-                    .Create<User>()
-                    .Property(x => x.FirstName)
-                    .WithError(MessageErrorType.Required)
-                    .Negative()
-                    .GetFullMessage();
-
-                return new ErrorReason(errorMessage, stringLocalizer[errorMessage]);
-            })
+            .WithState(_ => new ErrorReason(
+                UserErrorMessages.UserFirstNameRequired,
+                stringLocalizer[UserErrorMessages.UserFirstNameRequired]
+            ))
             .MaximumLength(256)
-            .WithState(state =>
-            {
-                string errorMessage = Messenger
-                    .Create<User>()
-                    .Property(x => x.FirstName)
-                    .WithError(MessageErrorType.TooLong)
-                    .GetFullMessage();
-
-                return new ErrorReason(errorMessage, stringLocalizer[errorMessage]);
-            });
+            .WithState(_ => new ErrorReason(
+                UserErrorMessages.UserFirstNameTooLong,
+                stringLocalizer[UserErrorMessages.UserFirstNameTooLong]
+            ));
 
         RuleFor(x => x.PhoneNumber)
             .Cascade(CascadeMode.Stop)
             .Must(x => x!.IsValidPhoneNumber())
             .When(x => !string.IsNullOrEmpty(x.PhoneNumber))
-            .WithState(state =>
-            {
-                string errorMessage = Messenger
-                    .Create<User>()
-                    .Property(x => x.PhoneNumber!)
-                    .WithError(MessageErrorType.Valid)
-                    .Negative()
-                    .GetFullMessage();
-
-                return new ErrorReason(errorMessage, stringLocalizer[errorMessage]);
-            });
+            .WithState(_ => new ErrorReason(
+                UserErrorMessages.UserPhoneNumberInvalid,
+                stringLocalizer[UserErrorMessages.UserPhoneNumberInvalid]
+            ));
 
         RuleFor(x => x.Gender)
             .IsInEnum()
-            .WithState(state =>
-            {
-                string errorMessage = Messenger
-                    .Create<User>()
-                    .Property(x => x.Gender!)
-                    .Negative()
-                    .WithError(MessageErrorType.AmongTheAllowedOptions)
-                    .GetFullMessage();
-
-                return new ErrorReason(errorMessage, stringLocalizer[errorMessage]);
-            });
+            .WithState(_ => new ErrorReason(
+                UserErrorMessages.UserGenderNotInEnum,
+                stringLocalizer[UserErrorMessages.UserGenderNotInEnum]
+            ));
     }
 }
