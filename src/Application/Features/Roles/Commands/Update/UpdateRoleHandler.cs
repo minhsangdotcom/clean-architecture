@@ -4,6 +4,7 @@ using Application.Common.Interfaces.Services.Identity;
 using Application.Common.Interfaces.UnitOfWorks;
 using Application.Contracts.ApiWrapper;
 using Application.Contracts.Constants;
+using Application.Contracts.Localization;
 using Domain.Aggregates.Permissions;
 using Domain.Aggregates.Roles;
 using Mediator;
@@ -14,7 +15,7 @@ namespace Application.Features.Roles.Commands.Update;
 public class UpdateRoleHandler(
     IRoleManager manager,
     IEfUnitOfWork unitOfWork,
-    IStringLocalizer<UpdateRoleHandler> stringLocalizer
+    IMessageTranslatorService translator
 ) : IRequestHandler<UpdateRoleCommand, Result<UpdateRoleResponse>>
 {
     public async ValueTask<Result<UpdateRoleResponse>> Handle(
@@ -33,7 +34,7 @@ public class UpdateRoleHandler(
                     TitleMessage.RESOURCE_NOT_FOUND,
                     new(
                         RoleErrorMessages.RoleNotFound,
-                        stringLocalizer[RoleErrorMessages.RoleNotFound]
+                        translator.Translate(RoleErrorMessages.RoleNotFound)
                     )
                 )
             );

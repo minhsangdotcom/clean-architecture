@@ -3,6 +3,7 @@ using Application.Common.Errors;
 using Application.Common.Interfaces.UnitOfWorks;
 using Application.Contracts.ApiWrapper;
 using Application.Contracts.Constants;
+using Application.Contracts.Localization;
 using Application.Contracts.Messages;
 using Domain.Aggregates.Users;
 using Domain.Aggregates.Users.Enums;
@@ -14,7 +15,7 @@ namespace Application.Features.Users.Commands.ResetPassword;
 
 public class ResetUserPasswordHandler(
     IEfUnitOfWork unitOfWork,
-    IStringLocalizer<ResetUserPasswordHandler> stringLocalizer
+    IMessageTranslatorService translator
 ) : IRequestHandler<ResetUserPasswordCommand, Result<string>>
 {
     public async ValueTask<Result<string>> Handle(
@@ -36,7 +37,7 @@ public class ResetUserPasswordHandler(
                     TitleMessage.RESOURCE_NOT_FOUND,
                     new(
                         UserErrorMessages.UserNotFound,
-                        stringLocalizer[UserErrorMessages.UserNotFound]
+                        translator.Translate(UserErrorMessages.UserNotFound)
                     )
                 )
             );
@@ -54,7 +55,7 @@ public class ResetUserPasswordHandler(
                     "Error has occurred with reset password token",
                     new(
                         UserErrorMessages.UserResetPasswordTokenInvalid,
-                        stringLocalizer[UserErrorMessages.UserResetPasswordTokenInvalid]
+                        translator.Translate(UserErrorMessages.UserResetPasswordTokenInvalid)
                     )
                 )
             );
@@ -70,7 +71,7 @@ public class ResetUserPasswordHandler(
             return Result<string>.Failure(
                 new BadRequestError(
                     "Error has occurred with reset password token",
-                    new(errorMessage, stringLocalizer[errorMessage])
+                    new(errorMessage, translator.Translate(errorMessage))
                 )
             );
         }
@@ -85,7 +86,7 @@ public class ResetUserPasswordHandler(
             return Result<string>.Failure(
                 new BadRequestError(
                     "Error has occurred with current user",
-                    new(errorMessage, stringLocalizer[errorMessage])
+                    new(errorMessage, translator.Translate(errorMessage))
                 )
             );
         }

@@ -2,25 +2,23 @@ using Application.Common.ErrorCodes;
 using Application.Common.Extensions;
 using Application.Common.Interfaces.UnitOfWorks;
 using Application.Contracts.ApiWrapper;
-using Application.Contracts.Messages;
+using Application.Contracts.Localization;
 using Application.SharedFeatures.Requests.Users;
 using Domain.Aggregates.Permissions;
 using Domain.Aggregates.Roles;
-using Domain.Aggregates.Users;
 using FluentValidation;
-using Microsoft.Extensions.Localization;
 
 namespace Application.SharedFeatures.Validators.Users;
 
 public partial class UserValidator : AbstractValidator<UserUpsertCommand>
 {
     private readonly IEfUnitOfWork unitOfWork;
-    private readonly IStringLocalizer stringLocalizer;
+    private readonly IMessageTranslatorService translator;
 
-    public UserValidator(IEfUnitOfWork unitOfWork, IStringLocalizer stringLocalizer)
+    public UserValidator(IEfUnitOfWork unitOfWork, IMessageTranslatorService translator)
     {
         this.unitOfWork = unitOfWork;
-        this.stringLocalizer = stringLocalizer;
+        this.translator = translator;
         ApplyRules();
     }
 
@@ -30,24 +28,24 @@ public partial class UserValidator : AbstractValidator<UserUpsertCommand>
             .NotEmpty()
             .WithState(_ => new ErrorReason(
                 UserErrorMessages.UserLastNameRequired,
-                stringLocalizer[UserErrorMessages.UserLastNameRequired]
+                translator.Translate(UserErrorMessages.UserLastNameRequired)
             ))
             .MaximumLength(256)
             .WithState(_ => new ErrorReason(
                 UserErrorMessages.UserLastNameTooLong,
-                stringLocalizer[UserErrorMessages.UserLastNameTooLong]
+                translator.Translate(UserErrorMessages.UserLastNameTooLong)
             ));
 
         RuleFor(x => x.FirstName)
             .NotEmpty()
             .WithState(_ => new ErrorReason(
                 UserErrorMessages.UserFirstNameRequired,
-                stringLocalizer[UserErrorMessages.UserFirstNameRequired]
+                translator.Translate(UserErrorMessages.UserFirstNameRequired)
             ))
             .MaximumLength(256)
             .WithState(_ => new ErrorReason(
                 UserErrorMessages.UserFirstNameTooLong,
-                stringLocalizer[UserErrorMessages.UserFirstNameTooLong]
+                translator.Translate(UserErrorMessages.UserFirstNameTooLong)
             ));
 
         RuleFor(x => x.PhoneNumber)
@@ -56,36 +54,36 @@ public partial class UserValidator : AbstractValidator<UserUpsertCommand>
             .When(x => !string.IsNullOrEmpty(x.PhoneNumber))
             .WithState(_ => new ErrorReason(
                 UserErrorMessages.UserPhoneNumberInvalid,
-                stringLocalizer[UserErrorMessages.UserPhoneNumberInvalid]
+                translator.Translate(UserErrorMessages.UserPhoneNumberInvalid)
             ));
 
         RuleFor(x => x.Status)
             .NotEmpty()
             .WithState(_ => new ErrorReason(
                 UserErrorMessages.UserStatusRequired,
-                stringLocalizer[UserErrorMessages.UserStatusRequired]
+                translator.Translate(UserErrorMessages.UserStatusRequired)
             ))
             .IsInEnum()
             .WithState(_ => new ErrorReason(
                 UserErrorMessages.UserStatusNotInEnum,
-                stringLocalizer[UserErrorMessages.UserStatusNotInEnum]
+                translator.Translate(UserErrorMessages.UserStatusNotInEnum)
             ));
 
         RuleFor(x => x.Roles)
             .NotEmpty()
             .WithState(_ => new ErrorReason(
                 UserErrorMessages.UserRolesRequired,
-                stringLocalizer[UserErrorMessages.UserRolesRequired]
+                translator.Translate(UserErrorMessages.UserRolesRequired)
             ))
             .Must(x => x!.Distinct().Count() == x!.Count)
             .WithState(_ => new ErrorReason(
                 UserErrorMessages.UserRolesNotUnique,
-                stringLocalizer[UserErrorMessages.UserRolesNotUnique]
+                translator.Translate(UserErrorMessages.UserRolesNotUnique)
             ))
             .MustAsync((roles, ct) => IsRolesAvailableAsync(roles!, ct))
             .WithState(_ => new ErrorReason(
                 UserErrorMessages.UserRolesNotFound,
-                stringLocalizer[UserErrorMessages.UserRolesNotFound]
+                translator.Translate(UserErrorMessages.UserRolesNotFound)
             ));
 
         When(
@@ -96,12 +94,12 @@ public partial class UserValidator : AbstractValidator<UserUpsertCommand>
                     .Must((p, _) => p.Permissions!.Distinct().Count() == p.Permissions!.Count)
                     .WithState(_ => new ErrorReason(
                         UserErrorMessages.UserPermissionsNotUnique,
-                        stringLocalizer[UserErrorMessages.UserPermissionsNotUnique]
+                        translator.Translate(UserErrorMessages.UserPermissionsNotUnique)
                     ))
                     .MustAsync((p, ct) => IsPermissionsAvailableAsync(p!, ct))
                     .WithState(_ => new ErrorReason(
                         UserErrorMessages.UserPermissionsNotFound,
-                        stringLocalizer[UserErrorMessages.UserPermissionsNotFound]
+                        translator.Translate(UserErrorMessages.UserPermissionsNotFound)
                     ));
             }
         );

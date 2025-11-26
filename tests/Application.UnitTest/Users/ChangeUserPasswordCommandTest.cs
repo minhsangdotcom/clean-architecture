@@ -1,4 +1,5 @@
 using Application.Contracts.ApiWrapper;
+using Application.Contracts.Localization;
 using Application.Contracts.Messages;
 using Application.Features.Users.Commands.ChangePassword;
 using Domain.Aggregates.Users;
@@ -13,14 +14,13 @@ public class ChangeUserPasswordCommandTest
     private readonly ChangeUserPasswordCommand command =
         new() { OldPassword = "Admin@123", NewPassword = "Admin@456" };
 
-    private readonly Mock<IStringLocalizer<ChangeUserPasswordCommandValidator>> stringLocalizer =
-        new();
+    private readonly Mock<IMessageTranslatorService> translator = new();
 
     private readonly ChangeUserPasswordCommandValidator validator;
 
     public ChangeUserPasswordCommandTest()
     {
-        validator = new ChangeUserPasswordCommandValidator(stringLocalizer.Object);
+        validator = new ChangeUserPasswordCommandValidator(translator.Object);
     }
 
     [Theory]
@@ -44,7 +44,7 @@ public class ChangeUserPasswordCommandTest
             .WithError(MessageErrorType.Required)
             .GetFullMessage();
 
-        ErrorReason expectedState = new(errorMessage, stringLocalizer.Object[errorMessage]);
+        ErrorReason expectedState = new(errorMessage, translator.Object.Translate(errorMessage));
         result
             .ShouldHaveValidationErrorFor(x => x.OldPassword)
             .WithCustomState(expectedState, new ErrorReasonComparer())
@@ -70,7 +70,7 @@ public class ChangeUserPasswordCommandTest
             .WithError(MessageErrorType.Required)
             .GetFullMessage();
 
-        ErrorReason expectedState = new(errorMessage, stringLocalizer.Object[errorMessage]);
+        ErrorReason expectedState = new(errorMessage, translator.Object.Translate(errorMessage));
         result
             .ShouldHaveValidationErrorFor(x => x.NewPassword)
             .WithCustomState(expectedState, new ErrorReasonComparer())
@@ -97,7 +97,7 @@ public class ChangeUserPasswordCommandTest
             .WithError(MessageErrorType.Strong)
             .GetFullMessage();
 
-        ErrorReason expectedState = new(errorMessage, stringLocalizer.Object[errorMessage]);
+        ErrorReason expectedState = new(errorMessage, translator.Object.Translate(errorMessage));
 
         result
             .ShouldHaveValidationErrorFor(x => x.NewPassword)

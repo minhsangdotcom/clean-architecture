@@ -2,6 +2,7 @@ using Application.Common.Interfaces.Services;
 using Application.Common.Interfaces.Services.Identity;
 using Application.Common.Interfaces.UnitOfWorks;
 using Application.Contracts.ApiWrapper;
+using Application.Contracts.Localization;
 using Application.Contracts.Messages;
 using Application.Features.Users.Commands.Profiles;
 using AutoFixture;
@@ -20,15 +21,14 @@ public class UpdateUserProfileCommandValidatorTest
 
     private readonly UpdateUserProfileCommandValidator validator;
     private readonly InlineValidator<UpdateUserProfileCommand> mockValidator = [];
-    private readonly Mock<IStringLocalizer<UpdateUserProfileCommandValidator>> stringLocalizer =
-        new();
+    private readonly Mock<IMessageTranslatorService> translator = new();
 
     public UpdateUserProfileCommandValidatorTest()
     {
         Mock<IEfUnitOfWork> unitOfWork = new();
         Mock<IHttpContextAccessorService> mockHttpContextAccessorService = new();
         Mock<ICurrentUser> currentUserService = new();
-        validator = new(stringLocalizer.Object);
+        validator = new(translator.Object);
     }
 
     [Theory]
@@ -47,7 +47,7 @@ public class UpdateUserProfileCommandValidatorTest
             .WithError(MessageErrorType.Required) // Null → Required
             .GetFullMessage();
 
-        ErrorReason expectedState = new(errorMessage, stringLocalizer.Object[errorMessage]);
+        ErrorReason expectedState = new(errorMessage, translator.Object.Translate(errorMessage));
 
         result
             .ShouldHaveValidationErrorFor(x => x.FirstName)
@@ -68,7 +68,7 @@ public class UpdateUserProfileCommandValidatorTest
             .WithError(MessageErrorType.TooLong)
             .GetFullMessage();
 
-        ErrorReason expectedState = new(errorMessage, stringLocalizer.Object[errorMessage]);
+        ErrorReason expectedState = new(errorMessage, translator.Object.Translate(errorMessage));
 
         result
             .ShouldHaveValidationErrorFor(x => x.FirstName)
@@ -92,7 +92,7 @@ public class UpdateUserProfileCommandValidatorTest
             .WithError(MessageErrorType.Required)
             .GetFullMessage();
 
-        ErrorReason expectedState = new(errorMessage, stringLocalizer.Object[errorMessage]);
+        ErrorReason expectedState = new(errorMessage, translator.Object.Translate(errorMessage));
 
         result
             .ShouldHaveValidationErrorFor(x => x.LastName)
@@ -113,7 +113,7 @@ public class UpdateUserProfileCommandValidatorTest
             .WithError(MessageErrorType.TooLong)
             .GetFullMessage();
 
-        ErrorReason expectedState = new(errorMessage, stringLocalizer.Object[errorMessage]);
+        ErrorReason expectedState = new(errorMessage, translator.Object.Translate(errorMessage));
 
         result
             .ShouldHaveValidationErrorFor(x => x.LastName)
@@ -139,7 +139,7 @@ public class UpdateUserProfileCommandValidatorTest
             .WithError(MessageErrorType.Required)
             .GetFullMessage();
 
-        ErrorReason expectedState = new(errorMessage, stringLocalizer.Object[errorMessage]);
+        ErrorReason expectedState = new(errorMessage, translator.Object.Translate(errorMessage));
 
         result
             .ShouldHaveValidationErrorFor(x => x.PhoneNumber)
@@ -165,7 +165,7 @@ public class UpdateUserProfileCommandValidatorTest
             .WithError(MessageErrorType.Valid)
             .GetFullMessage();
 
-        ErrorReason expectedState = new(errorMessage, stringLocalizer.Object[errorMessage]);
+        ErrorReason expectedState = new(errorMessage, translator.Object.Translate(errorMessage));
 
         result
             .ShouldHaveValidationErrorFor(x => x.PhoneNumber)

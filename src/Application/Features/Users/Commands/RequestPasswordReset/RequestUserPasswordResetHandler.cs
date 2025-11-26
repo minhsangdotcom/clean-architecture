@@ -3,6 +3,7 @@ using Application.Common.Errors;
 using Application.Common.Interfaces.UnitOfWorks;
 using Application.Contracts.ApiWrapper;
 using Application.Contracts.Constants;
+using Application.Contracts.Localization;
 using Application.Contracts.Messages;
 using Domain.Aggregates.Users;
 using Domain.Aggregates.Users.Enums;
@@ -18,7 +19,7 @@ public class RequestUserPasswordResetHandler(
     IEfUnitOfWork unitOfWork,
     IPublisher publisher,
     IConfiguration configuration,
-    IStringLocalizer<RequestUserPasswordResetHandler> stringLocalizer
+    IMessageTranslatorService translator
 ) : IRequestHandler<RequestUserPasswordResetCommand, Result<string>>
 {
     public async ValueTask<Result<string>> Handle(
@@ -40,7 +41,7 @@ public class RequestUserPasswordResetHandler(
                     TitleMessage.RESOURCE_NOT_FOUND,
                     new(
                         UserErrorMessages.UserNotFound,
-                        stringLocalizer[UserErrorMessages.UserNotFound]
+                        translator.Translate(UserErrorMessages.UserNotFound)
                     )
                 )
             );
@@ -57,8 +58,8 @@ public class RequestUserPasswordResetHandler(
                 new BadRequestError(
                     "Error has occurred with the current user",
                     new(
-                        UserErrorMessages.UserInactiveNotAllowed,
-                        stringLocalizer[UserErrorMessages.UserInactiveNotAllowed]
+                        UserErrorMessages.UserInactive,
+                        translator.Translate(UserErrorMessages.UserInactive)
                     )
                 )
             );

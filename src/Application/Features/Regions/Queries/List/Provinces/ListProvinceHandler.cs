@@ -4,6 +4,7 @@ using Application.Common.QueryStringProcessing;
 using Application.Contracts.ApiWrapper;
 using Application.Contracts.Constants;
 using Application.Contracts.Dtos.Responses;
+using Application.Contracts.Localization;
 using Application.SharedFeatures.Projections.Regions;
 using Domain.Aggregates.Regions;
 using Domain.Aggregates.Regions.Specifications;
@@ -16,7 +17,7 @@ namespace Application.Features.Regions.Queries.List.Provinces;
 public class ListProvinceHandler(
     IEfUnitOfWork unitOfWork,
     ILogger<ListProvinceHandler> logger,
-    IStringLocalizer<ListProvinceHandler> stringLocalizer
+    IMessageTranslatorService translator
 ) : IRequestHandler<ListProvinceQuery, Result<PaginationResponse<ProvinceProjection>>>
 {
     public async ValueTask<Result<PaginationResponse<ProvinceProjection>>> Handle(
@@ -30,7 +31,7 @@ public class ListProvinceHandler(
             return Result<PaginationResponse<ProvinceProjection>>.Failure(
                 new BadRequestError(
                     TitleMessage.VALIDATION_ERROR,
-                    new(validationResult.Error, stringLocalizer[validationResult.Error])
+                    new(validationResult.Error, translator.Translate(validationResult.Error))
                 )
             );
         }
@@ -41,7 +42,10 @@ public class ListProvinceHandler(
             return Result<PaginationResponse<ProvinceProjection>>.Failure(
                 new BadRequestError(
                     TitleMessage.VALIDATION_ERROR,
-                    new(validationFilterResult.Error, stringLocalizer[validationFilterResult.Error])
+                    new(
+                        validationFilterResult.Error,
+                        translator.Translate(validationFilterResult.Error)
+                    )
                 )
             );
         }

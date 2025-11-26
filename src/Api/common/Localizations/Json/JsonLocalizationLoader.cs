@@ -1,7 +1,7 @@
 using Application.Common.Interfaces.Services.Cache;
 using DotNetCoreExtension.Extensions;
 
-namespace Api.Localizations.Json;
+namespace Api.common.Localizations.Json;
 
 public class JsonLocalizationLoader(IMemoryCacheService cache, string basePath)
 {

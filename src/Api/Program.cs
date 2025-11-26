@@ -41,18 +41,11 @@ services.AddOpenTelemetryTracing(configuration);
 builder.AddSerilog();
 services.AddHealthChecks();
 services.AddDatabaseHealthCheck(configuration);
-services.AddLocalizationConfigs();
+services.AddLocalizationConfigurations(configuration);
 
 List<CorsProfileSettings> corsProfiles =
     configuration.GetSection(nameof(CorsProfileSettings)).Get<List<CorsProfileSettings>>()
-    ??
-    [
-        new CorsProfileSettings()
-        {
-            Name = "AllowClientWith3000Port",
-            Origin = "http://localhost:3000",
-        },
-    ];
+    ?? [new CorsProfileSettings()];
 services.AddCors(options =>
 {
     foreach (CorsProfileSettings profile in corsProfiles)
@@ -136,6 +129,11 @@ try
     app.UseAuthorization();
 
     app.MapEndpoints(apiVersion: EndpointVersion.One);
+    if (isDevelopment)
+    {
+        app.AddSynchronizedLocalizationEndpoint();
+    }
+
     Log.Logger.Information("Application is hosted on {os}", RuntimeInformation.OSDescription);
     app.Run();
 }

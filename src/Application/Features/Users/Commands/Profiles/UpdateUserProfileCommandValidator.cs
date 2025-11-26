@@ -1,39 +1,37 @@
 using Application.Common.ErrorCodes;
 using Application.Common.Extensions;
 using Application.Contracts.ApiWrapper;
+using Application.Contracts.Localization;
 using FluentValidation;
-using Microsoft.Extensions.Localization;
 
 namespace Application.Features.Users.Commands.Profiles;
 
 public class UpdateUserProfileCommandValidator : AbstractValidator<UpdateUserProfileCommand>
 {
-    public UpdateUserProfileCommandValidator(
-        IStringLocalizer<UpdateUserProfileCommandValidator> stringLocalizer
-    )
+    public UpdateUserProfileCommandValidator(IMessageTranslatorService translator)
     {
         RuleFor(x => x.LastName)
             .NotEmpty()
             .WithState(_ => new ErrorReason(
                 UserErrorMessages.UserLastNameRequired,
-                stringLocalizer[UserErrorMessages.UserLastNameRequired]
+                translator.Translate(UserErrorMessages.UserLastNameRequired)
             ))
             .MaximumLength(256)
             .WithState(_ => new ErrorReason(
                 UserErrorMessages.UserLastNameTooLong,
-                stringLocalizer[UserErrorMessages.UserLastNameTooLong]
+                translator.Translate(UserErrorMessages.UserLastNameTooLong)
             ));
 
         RuleFor(x => x.FirstName)
             .NotEmpty()
             .WithState(_ => new ErrorReason(
                 UserErrorMessages.UserFirstNameRequired,
-                stringLocalizer[UserErrorMessages.UserFirstNameRequired]
+                translator.Translate(UserErrorMessages.UserFirstNameRequired)
             ))
             .MaximumLength(256)
             .WithState(_ => new ErrorReason(
                 UserErrorMessages.UserFirstNameTooLong,
-                stringLocalizer[UserErrorMessages.UserFirstNameTooLong]
+                translator.Translate(UserErrorMessages.UserFirstNameTooLong)
             ));
 
         RuleFor(x => x.PhoneNumber)
@@ -42,14 +40,14 @@ public class UpdateUserProfileCommandValidator : AbstractValidator<UpdateUserPro
             .When(x => !string.IsNullOrEmpty(x.PhoneNumber))
             .WithState(_ => new ErrorReason(
                 UserErrorMessages.UserPhoneNumberInvalid,
-                stringLocalizer[UserErrorMessages.UserPhoneNumberInvalid]
+                translator.Translate(UserErrorMessages.UserPhoneNumberInvalid)
             ));
 
         RuleFor(x => x.Gender)
             .IsInEnum()
             .WithState(_ => new ErrorReason(
                 UserErrorMessages.UserGenderNotInEnum,
-                stringLocalizer[UserErrorMessages.UserGenderNotInEnum]
+                translator.Translate(UserErrorMessages.UserGenderNotInEnum)
             ));
     }
 }

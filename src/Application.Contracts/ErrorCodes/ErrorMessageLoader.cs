@@ -10,7 +10,9 @@ public class ErrorMessageLoader
         {
             var attribute = prop.GetCustomAttribute<ErrorKeyAttribute>();
             if (attribute == null)
+            {
                 continue;
+            }
 
             string key = attribute.Key;
             string message = (string)prop.GetValue(null)!;

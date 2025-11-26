@@ -1,6 +1,7 @@
 using Application.Common.Interfaces.Services;
 using Application.Common.Interfaces.UnitOfWorks;
 using Application.Contracts.ApiWrapper;
+using Application.Contracts.Localization;
 using Application.Contracts.Messages;
 using Application.Features.Roles.Commands.Update;
 using Application.SharedFeatures.Requests.Roles;
@@ -21,7 +22,7 @@ public sealed class UpdateRoleCommandValidatorTest
     private readonly UpdateRoleRequest command;
     private readonly Fixture fixture = new();
     private readonly Mock<IEfUnitOfWork> unitOfWork = new();
-    private readonly Mock<IStringLocalizer> stringLocalizer = new();
+    private readonly Mock<IMessageTranslatorService> translator = new();
     private readonly Mock<IHttpContextAccessorService> mockHttpContextAccessorService = new();
 
     public UpdateRoleCommandValidatorTest()
@@ -30,7 +31,7 @@ public sealed class UpdateRoleCommandValidatorTest
         validator = new UpdateRoleCommandValidator(
             unitOfWork.Object,
             mockHttpContextAccessorService.Object,
-            stringLocalizer.Object
+            translator.Object
         );
     }
 
@@ -53,7 +54,7 @@ public sealed class UpdateRoleCommandValidatorTest
             .WithError(MessageErrorType.Required)
             .GetFullMessage();
 
-        ErrorReason expectedState = new(errorMessage, stringLocalizer.Object[errorMessage]);
+        ErrorReason expectedState = new(errorMessage, translator.Object.Translate(errorMessage));
 
         result
             .ShouldHaveValidationErrorFor(x => x.Name)
@@ -78,7 +79,7 @@ public sealed class UpdateRoleCommandValidatorTest
             .WithError(MessageErrorType.Required)
             .GetFullMessage();
 
-        ErrorReason expectedState = new(errorMessage, stringLocalizer.Object[errorMessage]);
+        ErrorReason expectedState = new(errorMessage, translator.Object.Translate(errorMessage));
 
         result
             .ShouldHaveValidationErrorFor(x => x.Name)
@@ -98,7 +99,7 @@ public sealed class UpdateRoleCommandValidatorTest
             .WithError(MessageErrorType.Existent)
             .GetFullMessage();
 
-        ErrorReason expectedState = new(errorMessage, stringLocalizer.Object[errorMessage]);
+        ErrorReason expectedState = new(errorMessage, translator.Object.Translate(errorMessage));
 
         mockValidator
             .RuleFor(x => x.Name)
@@ -126,7 +127,7 @@ public sealed class UpdateRoleCommandValidatorTest
             .WithError(MessageErrorType.TooLong)
             .GetFullMessage();
 
-        ErrorReason expectedState = new(errorMessage, stringLocalizer.Object[errorMessage]);
+        ErrorReason expectedState = new(errorMessage, translator.Object.Translate(errorMessage));
 
         result
             .ShouldHaveValidationErrorFor(x => x.Description)

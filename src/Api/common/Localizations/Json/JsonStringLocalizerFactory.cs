@@ -1,8 +1,9 @@
+using Application.Common.Interfaces.Services.Cache;
 using Microsoft.Extensions.Localization;
 
-namespace Api.Localizations.Json;
+namespace Api.common.Localizations.Json;
 
-public class JsonStringLocalizerFactory(IServiceProvider provider) : IStringLocalizerFactory
+public class JsonStringLocalizerFactory(IMemoryCacheService cacheService) : IStringLocalizerFactory
 {
     private readonly string basePath = Path.Combine(Directory.GetCurrentDirectory(), "Resources");
 
@@ -18,11 +19,7 @@ public class JsonStringLocalizerFactory(IServiceProvider provider) : IStringLoca
 
     private JsonStringLocalizer CreateLocalizer()
     {
-        JsonLocalizationLoader loader = ActivatorUtilities.CreateInstance<JsonLocalizationLoader>(
-            provider,
-            basePath
-        );
-
+        JsonLocalizationLoader loader = new(cacheService, basePath);
         return new JsonStringLocalizer(loader);
     }
 }

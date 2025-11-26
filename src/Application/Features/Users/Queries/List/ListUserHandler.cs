@@ -4,6 +4,7 @@ using Application.Common.QueryStringProcessing;
 using Application.Contracts.ApiWrapper;
 using Application.Contracts.Constants;
 using Application.Contracts.Dtos.Responses;
+using Application.Contracts.Localization;
 using Domain.Aggregates.Users;
 using Domain.Aggregates.Users.Specifications;
 using Mediator;
@@ -14,7 +15,7 @@ namespace Application.Features.Users.Queries.List;
 
 public class ListUserHandler(
     IEfUnitOfWork unitOfWork,
-    IStringLocalizer<ListUserHandler> stringLocalizer,
+    IMessageTranslatorService translator,
     ILogger<ListUserHandler> logger
 ) : IRequestHandler<ListUserQuery, Result<PaginationResponse<ListUserResponse>>>
 {
@@ -29,7 +30,7 @@ public class ListUserHandler(
             return Result<PaginationResponse<ListUserResponse>>.Failure(
                 new BadRequestError(
                     TitleMessage.VALIDATION_ERROR,
-                    new(validationResult.Error, stringLocalizer[validationResult.Error])
+                    new(validationResult.Error, translator.Translate(validationResult.Error))
                 )
             );
         }
@@ -40,7 +41,10 @@ public class ListUserHandler(
             return Result<PaginationResponse<ListUserResponse>>.Failure(
                 new BadRequestError(
                     TitleMessage.VALIDATION_ERROR,
-                    new(validationFilterResult.Error, stringLocalizer[validationFilterResult.Error])
+                    new(
+                        validationFilterResult.Error,
+                        translator.Translate(validationFilterResult.Error)
+                    )
                 )
             );
         }

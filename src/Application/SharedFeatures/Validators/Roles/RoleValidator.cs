@@ -2,6 +2,7 @@ using Application.Common.ErrorCodes;
 using Application.Common.Interfaces.Services;
 using Application.Common.Interfaces.UnitOfWorks;
 using Application.Contracts.ApiWrapper;
+using Application.Contracts.Localization;
 using Application.Contracts.Messages;
 using Application.SharedFeatures.Requests.Roles;
 using Domain.Aggregates.Permissions;
@@ -16,17 +17,17 @@ public class RoleValidator : AbstractValidator<RoleUpsertCommand>
 {
     private readonly IEfUnitOfWork unitOfWork;
     private readonly IHttpContextAccessorService httpContextAccessorService;
-    private readonly IStringLocalizer stringLocalizer;
+    private readonly IMessageTranslatorService translator;
 
     public RoleValidator(
         IEfUnitOfWork unitOfWork,
         IHttpContextAccessorService httpContextAccessorService,
-        IStringLocalizer stringLocalizer
+        IMessageTranslatorService translator
     )
     {
         this.unitOfWork = unitOfWork;
         this.httpContextAccessorService = httpContextAccessorService;
-        this.stringLocalizer = stringLocalizer;
+        this.translator = translator;
         ApplyRules();
     }
 
@@ -38,12 +39,12 @@ public class RoleValidator : AbstractValidator<RoleUpsertCommand>
             .NotEmpty()
             .WithState(_ => new ErrorReason(
                 RoleErrorMessages.RoleNameRequired,
-                stringLocalizer[RoleErrorMessages.RoleNameRequired]
+                translator.Translate(RoleErrorMessages.RoleNameRequired)
             ))
             .MaximumLength(256)
             .WithState(_ => new ErrorReason(
                 RoleErrorMessages.RoleNameTooLong,
-                stringLocalizer[RoleErrorMessages.RoleNameTooLong]
+                translator.Translate(RoleErrorMessages.RoleNameTooLong)
             ))
             .MustAsync((name, ct) => IsNameAvailableAsync(name, cancellationToken: ct))
             .When(
@@ -51,8 +52,8 @@ public class RoleValidator : AbstractValidator<RoleUpsertCommand>
                 ApplyConditionTo.CurrentValidator
             )
             .WithState(_ => new ErrorReason(
-                RoleErrorMessages.RoleNameExistentOnCreate,
-                stringLocalizer[RoleErrorMessages.RoleNameExistentOnCreate]
+                RoleErrorMessages.RoleNameExistent,
+                translator.Translate(RoleErrorMessages.RoleNameExistent)
             ))
             .MustAsync((name, ct) => IsNameAvailableAsync(name, id, ct))
             .When(
@@ -60,8 +61,8 @@ public class RoleValidator : AbstractValidator<RoleUpsertCommand>
                 ApplyConditionTo.CurrentValidator
             )
             .WithState(_ => new ErrorReason(
-                RoleErrorMessages.RoleNameExistentOnUpdate,
-                stringLocalizer[RoleErrorMessages.RoleNameExistentOnUpdate]
+                RoleErrorMessages.RoleNameExistent,
+                translator.Translate(RoleErrorMessages.RoleNameExistent)
             ));
 
         RuleFor(x => x.Description)
@@ -69,24 +70,24 @@ public class RoleValidator : AbstractValidator<RoleUpsertCommand>
             .When(x => !string.IsNullOrWhiteSpace(x.Description), ApplyConditionTo.CurrentValidator)
             .WithState(_ => new ErrorReason(
                 RoleErrorMessages.RoleDescriptionTooLong,
-                stringLocalizer[RoleErrorMessages.RoleDescriptionTooLong]
+                translator.Translate(RoleErrorMessages.RoleDescriptionTooLong)
             ));
 
         RuleFor(x => x.PermissionIds)
             .NotEmpty()
             .WithState(_ => new ErrorReason(
                 RoleErrorMessages.RolePermissionsRequired,
-                stringLocalizer[RoleErrorMessages.RolePermissionsRequired]
+                translator.Translate(RoleErrorMessages.RolePermissionsRequired)
             ))
             .Must(x => x!.Distinct().Count() == x!.Count)
             .WithState(_ => new ErrorReason(
                 RoleErrorMessages.RolePermissionsUnique,
-                stringLocalizer[RoleErrorMessages.RolePermissionsUnique]
+                translator.Translate(RoleErrorMessages.RolePermissionsUnique)
             ))
             .MustAsync((permissionIds, ct) => IsAllPermissionExistentAsync(permissionIds!, ct))
             .WithState(_ => new ErrorReason(
                 RoleErrorMessages.RolePermissionsExistent,
-                stringLocalizer[RoleErrorMessages.RolePermissionsExistent]
+                translator.Translate(RoleErrorMessages.RolePermissionsExistent)
             ));
     }
 

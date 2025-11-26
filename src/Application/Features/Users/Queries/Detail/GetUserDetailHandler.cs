@@ -3,17 +3,14 @@ using Application.Common.Errors;
 using Application.Common.Interfaces.Services.Identity;
 using Application.Contracts.ApiWrapper;
 using Application.Contracts.Constants;
-using Application.Contracts.Messages;
+using Application.Contracts.Localization;
 using Domain.Aggregates.Users;
 using Mediator;
-using Microsoft.Extensions.Localization;
 
 namespace Application.Features.Users.Queries.Detail;
 
-public class GetUserDetailHandler(
-    IUserManager userManager,
-    IStringLocalizer<GetUserDetailHandler> stringLocalizer
-) : IRequestHandler<GetUserDetailQuery, Result<GetUserDetailResponse>>
+public class GetUserDetailHandler(IUserManager userManager, IMessageTranslatorService translator)
+    : IRequestHandler<GetUserDetailQuery, Result<GetUserDetailResponse>>
 {
     public async ValueTask<Result<GetUserDetailResponse>> Handle(
         GetUserDetailQuery query,
@@ -32,7 +29,7 @@ public class GetUserDetailHandler(
                     TitleMessage.RESOURCE_NOT_FOUND,
                     new(
                         UserErrorMessages.UserNotFound,
-                        stringLocalizer[UserErrorMessages.UserNotFound]
+                        translator.Translate(UserErrorMessages.UserNotFound)
                     )
                 )
             );

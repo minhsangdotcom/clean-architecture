@@ -26,16 +26,8 @@ public class RoleErrorMessages
             .WithError(MessageErrorType.TooLong)
             .GetFullMessage();
 
-    [ErrorKey(nameof(RoleNameExistentOnCreate))]
-    public static string RoleNameExistentOnCreate =>
-        Messenger
-            .Create<Role>()
-            .Property(x => x.Name!)
-            .WithError(MessageErrorType.Existent)
-            .GetFullMessage();
-
-    [ErrorKey(nameof(RoleNameExistentOnUpdate))]
-    public static string RoleNameExistentOnUpdate =>
+    [ErrorKey(nameof(RoleNameExistent))]
+    public static string RoleNameExistent =>
         Messenger
             .Create<Role>()
             .Property(x => x.Name!)

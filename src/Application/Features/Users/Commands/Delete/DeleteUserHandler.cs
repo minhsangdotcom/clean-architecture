@@ -4,17 +4,16 @@ using Application.Common.Interfaces.Services.Identity;
 using Application.Common.Interfaces.Services.Storage;
 using Application.Contracts.ApiWrapper;
 using Application.Contracts.Constants;
-using Application.Contracts.Messages;
+using Application.Contracts.Localization;
 using Domain.Aggregates.Users;
 using Mediator;
-using Microsoft.Extensions.Localization;
 
 namespace Application.Features.Users.Commands.Delete;
 
 public class DeleteUserHandler(
     IUserManager userManager,
     IMediaStorageService<User> mediaUpdateService,
-    IStringLocalizer<DeleteUserHandler> stringLocalizer
+    IMessageTranslatorService translator
 ) : IRequestHandler<DeleteUserCommand, Result<string>>
 {
     public async ValueTask<Result<string>> Handle(
@@ -34,7 +33,7 @@ public class DeleteUserHandler(
                     TitleMessage.RESOURCE_NOT_FOUND,
                     new(
                         UserErrorMessages.UserNotFound,
-                        stringLocalizer[UserErrorMessages.UserNotFound]
+                        translator.Translate(UserErrorMessages.UserNotFound)
                     )
                 )
             );

@@ -1,7 +1,7 @@
 using System.Globalization;
 using Microsoft.Extensions.Localization;
 
-namespace Api.Localizations.Json;
+namespace Api.common.Localizations.Json;
 
 public class JsonStringLocalizer(JsonLocalizationLoader loader) : IStringLocalizer
 {

@@ -3,17 +3,14 @@ using Application.Common.Errors;
 using Application.Common.Interfaces.Services.Identity;
 using Application.Contracts.ApiWrapper;
 using Application.Contracts.Constants;
-using Application.Contracts.Messages;
+using Application.Contracts.Localization;
 using Domain.Aggregates.Roles;
 using Mediator;
-using Microsoft.Extensions.Localization;
 
 namespace Application.Features.Roles.Queries.Detail;
 
-public class GetRoleDetailHandler(
-    IRoleManager manager,
-    IStringLocalizer<GetRoleDetailHandler> stringLocalizer
-) : IRequestHandler<GetRoleDetailQuery, Result<RoleDetailResponse>>
+public class GetRoleDetailHandler(IRoleManager manager, IMessageTranslatorService translator)
+    : IRequestHandler<GetRoleDetailQuery, Result<RoleDetailResponse>>
 {
     public async ValueTask<Result<RoleDetailResponse>> Handle(
         GetRoleDetailQuery query,
@@ -31,7 +28,7 @@ public class GetRoleDetailHandler(
                     TitleMessage.RESOURCE_NOT_FOUND,
                     new(
                         RoleErrorMessages.RoleNotFound,
-                        stringLocalizer[RoleErrorMessages.RoleNotFound]
+                        translator.Translate(RoleErrorMessages.RoleNotFound)
                     )
                 )
             );

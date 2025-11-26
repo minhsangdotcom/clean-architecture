@@ -248,8 +248,8 @@ public static class UserErrorMessages
             .Negative()
             .GetFullMessage();
 
-    [ErrorKey(nameof(UserInactiveNotAllowed))]
-    public static string UserInactiveNotAllowed =>
+    [ErrorKey(nameof(UserInactive))]
+    public static string UserInactive =>
         Messenger.Create<User>().WithError(MessageErrorType.Active).Negative().GetFullMessage();
 
     [ErrorKey(nameof(UserResetPasswordTokenInvalid))]
@@ -287,8 +287,4 @@ public static class UserErrorMessages
             .Property(x => x.Token!)
             .WithError(MessageErrorType.Expired)
             .GetFullMessage();
-
-    [ErrorKey(nameof(UserInactiveForRefreshToken))]
-    public static string UserInactiveForRefreshToken =>
-        Messenger.Create<User>().WithError(MessageErrorType.Active).Negative().GetFullMessage();
 }

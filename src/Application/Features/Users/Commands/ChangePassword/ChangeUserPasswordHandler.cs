@@ -4,6 +4,7 @@ using Application.Common.Interfaces.Services;
 using Application.Common.Interfaces.Services.Identity;
 using Application.Contracts.ApiWrapper;
 using Application.Contracts.Constants;
+using Application.Contracts.Localization;
 using Application.Contracts.Messages;
 using Domain.Aggregates.Users;
 using Mediator;
@@ -14,7 +15,7 @@ namespace Application.Features.Users.Commands.ChangePassword;
 public class ChangeUserPasswordHandler(
     IUserManager userManager,
     ICurrentUser currentUser,
-    IStringLocalizer<ChangeUserPasswordHandler> stringLocalizer
+    IMessageTranslatorService translator
 ) : IRequestHandler<ChangeUserPasswordCommand, Result<string>>
 {
     public async ValueTask<Result<string>> Handle(
@@ -35,7 +36,7 @@ public class ChangeUserPasswordHandler(
                     TitleMessage.RESOURCE_NOT_FOUND,
                     new(
                         UserErrorMessages.UserNotFound,
-                        stringLocalizer[UserErrorMessages.UserNotFound]
+                        translator.Translate(UserErrorMessages.UserNotFound)
                     )
                 )
             );
@@ -54,7 +55,7 @@ public class ChangeUserPasswordHandler(
                     "Error has occurred with password",
                     new(
                         UserErrorMessages.UserOldPasswordIncorrect,
-                        stringLocalizer[UserErrorMessages.UserOldPasswordIncorrect]
+                        translator.Translate(UserErrorMessages.UserOldPasswordIncorrect)
                     )
                 )
             );

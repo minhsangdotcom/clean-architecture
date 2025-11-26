@@ -3,17 +3,14 @@ using Application.Common.Errors;
 using Application.Common.Interfaces.Services.Identity;
 using Application.Contracts.ApiWrapper;
 using Application.Contracts.Constants;
-using Application.Contracts.Messages;
+using Application.Contracts.Localization;
 using Domain.Aggregates.Roles;
 using Mediator;
-using Microsoft.Extensions.Localization;
 
 namespace Application.Features.Roles.Commands.Delete;
 
-public class DeleteRoleHandler(
-    IRoleManager manager,
-    IStringLocalizer<DeleteRoleHandler> stringLocalizer
-) : IRequestHandler<DeleteRoleCommand, Result<string>>
+public class DeleteRoleHandler(IRoleManager manager, IMessageTranslatorService translator)
+    : IRequestHandler<DeleteRoleCommand, Result<string>>
 {
     public async ValueTask<Result<string>> Handle(
         DeleteRoleCommand command,
@@ -32,7 +29,7 @@ public class DeleteRoleHandler(
                     TitleMessage.RESOURCE_NOT_FOUND,
                     new(
                         RoleErrorMessages.RoleNotFound,
-                        stringLocalizer[RoleErrorMessages.RoleNotFound]
+                        translator.Translate(RoleErrorMessages.RoleNotFound)
                     )
                 )
             );

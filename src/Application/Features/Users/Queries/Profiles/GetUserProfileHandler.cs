@@ -4,6 +4,7 @@ using Application.Common.Interfaces.Services;
 using Application.Common.Interfaces.Services.Identity;
 using Application.Contracts.ApiWrapper;
 using Application.Contracts.Constants;
+using Application.Contracts.Localization;
 using Application.Contracts.Messages;
 using Domain.Aggregates.Users;
 using Mediator;
@@ -14,7 +15,7 @@ namespace Application.Features.Users.Queries.Profiles;
 public class GetUserProfileHandler(
     IUserManager userManager,
     ICurrentUser currentUser,
-    IStringLocalizer<GetUserProfileHandler> stringLocalizer
+    IMessageTranslatorService translator
 ) : IRequestHandler<GetUserProfileQuery, Result<GetUserProfileResponse>>
 {
     public async ValueTask<Result<GetUserProfileResponse>> Handle(
@@ -34,7 +35,7 @@ public class GetUserProfileHandler(
                     TitleMessage.RESOURCE_NOT_FOUND,
                     new(
                         UserErrorMessages.UserNotFound,
-                        stringLocalizer[UserErrorMessages.UserNotFound]
+                        translator.Translate(UserErrorMessages.UserNotFound)
                     )
                 )
             );

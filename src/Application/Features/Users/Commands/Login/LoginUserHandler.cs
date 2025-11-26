@@ -5,6 +5,7 @@ using Application.Common.Interfaces.Services.Token;
 using Application.Common.Interfaces.UnitOfWorks;
 using Application.Contracts.ApiWrapper;
 using Application.Contracts.Constants;
+using Application.Contracts.Localization;
 using Application.Contracts.Messages;
 using Application.SharedFeatures.Mapping.Users;
 using Domain.Aggregates.Users;
@@ -22,7 +23,7 @@ public class LoginUserHandler(
     ITokenFactoryService tokenFactory,
     IDetectionService detectionService,
     ICurrentUser currentUser,
-    IStringLocalizer<LoginUserHandler> stringLocalizer
+    IMessageTranslatorService translator
 ) : IRequestHandler<LoginUserCommand, Result<LoginUserResponse>>
 {
     public async ValueTask<Result<LoginUserResponse>> Handle(
@@ -48,7 +49,7 @@ public class LoginUserHandler(
                     TitleMessage.RESOURCE_NOT_FOUND,
                     new(
                         UserErrorMessages.UserNotFound,
-                        stringLocalizer[UserErrorMessages.UserNotFound]
+                        translator.Translate(UserErrorMessages.UserNotFound)
                     )
                 )
             );
@@ -66,7 +67,7 @@ public class LoginUserHandler(
                     "Error has occurred with password",
                     new(
                         UserErrorMessages.UserPasswordIncorrect,
-                        stringLocalizer[UserErrorMessages.UserPasswordIncorrect]
+                        translator.Translate(UserErrorMessages.UserPasswordIncorrect)
                     )
                 )
             );

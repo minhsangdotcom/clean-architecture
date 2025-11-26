@@ -5,6 +5,7 @@ namespace Application.Contracts.ErrorCodes;
 public class ErrorMessageRegistry
 {
     private static readonly Dictionary<string, string> messages = [];
+    public static Dictionary<string, string> Messages => messages;
 
     public static void Register(string key, string message)
     {

@@ -1,17 +1,15 @@
 using Application.Common.Extensions;
 using Application.Contracts.ApiWrapper;
+using Application.Contracts.Localization;
 using Application.Contracts.Messages;
 using Domain.Aggregates.Users;
 using FluentValidation;
-using Microsoft.Extensions.Localization;
 
 namespace Application.Features.Users.Commands.ResetPassword;
 
 public class UpdateUserPasswordValidator : AbstractValidator<UpdateUserPassword>
 {
-    public UpdateUserPasswordValidator(
-        IStringLocalizer<UpdateUserPasswordValidator> stringLocalizer
-    )
+    public UpdateUserPasswordValidator(IMessageTranslatorService translator)
     {
         RuleFor(x => x.Token)
             .NotEmpty()
@@ -24,7 +22,7 @@ public class UpdateUserPasswordValidator : AbstractValidator<UpdateUserPassword>
                     .Negative()
                     .GetFullMessage();
 
-                return new ErrorReason(errorMessage, stringLocalizer[errorMessage]);
+                return new ErrorReason(errorMessage, translator.Translate(errorMessage));
             });
 
         RuleFor(x => x.Password)
@@ -38,7 +36,7 @@ public class UpdateUserPasswordValidator : AbstractValidator<UpdateUserPassword>
                     .Negative()
                     .GetFullMessage();
 
-                return new ErrorReason(errorMessage, stringLocalizer[errorMessage]);
+                return new ErrorReason(errorMessage, translator.Translate(errorMessage));
             })
             .Must(x => x!.IsValidPassword())
             .WithState(state =>
@@ -50,7 +48,7 @@ public class UpdateUserPasswordValidator : AbstractValidator<UpdateUserPassword>
                     .Negative()
                     .GetFullMessage();
 
-                return new ErrorReason(errorMessage, stringLocalizer[errorMessage]);
+                return new ErrorReason(errorMessage, translator.Translate(errorMessage));
             });
     }
 }

@@ -1,30 +1,103 @@
+using Api.common.Localizations.Json;
 using Api.Middlewares;
+using Api.Services.Localizations;
+using Application.Common.ErrorCodes;
+using Application.Contracts.ErrorCodes;
+using Application.Contracts.Localization;
+using Application.Contracts.Permissions;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Localization;
+using Microsoft.Extensions.Options;
 
 namespace Api.Extensions;
 
 public static class LocalizationExtension
 {
-    public static IServiceCollection AddLocalizationConfigs(this IServiceCollection services)
+    public static IServiceCollection AddLocalizationConfigurations(
+        this IServiceCollection services,
+        IConfiguration configuration
+    )
     {
         services.AddLocalization(options => options.ResourcesPath = "Resources");
 
-        services.AddSingleton<
-            IStringLocalizerFactory,
-            Localizations.Json.JsonStringLocalizerFactory
-        >();
-        services.AddTransient(typeof(IStringLocalizer<>), typeof(StringLocalizer<>));
+        services.AddSingleton<IStringLocalizerFactory, JsonStringLocalizerFactory>();
+        //services.AddScoped(typeof(IStringLocalizer<>), typeof(StringLocalizer<>));
+        services.AddScoped<IMessageTranslatorService, MessageTranslatorService>();
+        services.AddScoped<IPermissionTranslatorService, PermissionTranslatorService>();
         services.AddSingleton<LocalizerMiddleware>();
 
-        var supportedCultures = new[] { "en", "vi" };
+        LocalizationSettings localizationSettings = new();
+        configuration.GetSection(nameof(LocalizationSettings)).Bind(localizationSettings);
 
+        services.Configure<LocalizationSettings>(
+            configuration.GetSection(nameof(LocalizationSettings))
+        );
+
+        string[] supportedCultures = localizationSettings.SupportedCultures;
         services.Configure<RequestLocalizationOptions>(options =>
         {
-            options.SetDefaultCulture("en");
+            options.SetDefaultCulture(localizationSettings.DefaultCulture);
 
             options.AddSupportedCultures(supportedCultures);
             options.AddSupportedUICultures(supportedCultures);
         });
         return services;
+    }
+
+    public static void AddSynchronizedLocalizationEndpoint(this WebApplication application)
+    {
+        application.MapGet(
+            "/api/localization/sync",
+            (
+                [FromServices] PermissionDefinitionContext permissionDefinitionContext,
+                [FromServices] IOptions<LocalizationSettings> options
+            ) =>
+            {
+                ErrorMessageLoader.LoadFromType(typeof(UserErrorMessages));
+                ErrorMessageLoader.LoadFromType(typeof(RoleErrorMessages));
+                ErrorMessageLoader.LoadFromType(typeof(QueryParamRequestErrorMessages));
+
+                List<string> errorMessages =
+                [
+                    .. ErrorMessageRegistry.Messages.Select(x => x.Value).Distinct(),
+                ];
+
+                string baseFolder = Path.Combine(Directory.GetCurrentDirectory(), "Resources");
+                string messageFolder = Path.Combine(baseFolder, "Messages");
+                Directory.CreateDirectory(messageFolder);
+
+                List<string> permissionKeys =
+                [
+                    .. permissionDefinitionContext.Groups.SelectMany(x =>
+                    {
+                        List<string> permissionCode = [x.Key];
+                        permissionCode.AddRange(
+                            x.Value.Permissions.Flatten().Select(x => x.Code).Distinct()
+                        );
+                        return permissionCode;
+                    }),
+                ];
+                string permissionFolder = Path.Combine(baseFolder, "Permissions");
+                Directory.CreateDirectory(permissionFolder);
+
+                string[] cultures = options.Value.SupportedCultures;
+                foreach (string culture in cultures)
+                {
+                    string messagePath = Path.Combine(
+                        messageFolder,
+                        $"{nameof(Messages)}.{culture}.json"
+                    );
+                    TranslationFileHelper.SyncTranslationFile(messagePath, errorMessages);
+
+                    string permissionPath = Path.Combine(
+                        permissionFolder,
+                        $"{nameof(Permissions)}.{culture}.json"
+                    );
+                    TranslationFileHelper.SyncTranslationFile(permissionPath, permissionKeys);
+                }
+
+                return Results.Ok();
+            }
+        );
     }
 }

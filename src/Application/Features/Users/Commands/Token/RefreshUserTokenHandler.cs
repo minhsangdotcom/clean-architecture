@@ -6,13 +6,12 @@ using Application.Common.Interfaces.UnitOfWorks;
 using Application.Contracts.ApiWrapper;
 using Application.Contracts.Constants;
 using Application.Contracts.Dtos.Responses;
-using Application.Contracts.Messages;
+using Application.Contracts.Localization;
 using Domain.Aggregates.Users;
 using Domain.Aggregates.Users.Enums;
 using Domain.Aggregates.Users.Specifications;
 using DotNetCoreExtension.Extensions;
 using Mediator;
-using Microsoft.Extensions.Localization;
 using SharedKernel.Constants;
 using Wangkanai.Detection.Services;
 
@@ -23,7 +22,7 @@ public class RefreshUserTokenHandler(
     ITokenFactoryService tokenFactory,
     IDetectionService detectionService,
     ICurrentUser currentUser,
-    IStringLocalizer<RefreshUserTokenHandler> stringLocalizer
+    IMessageTranslatorService translator
 ) : IRequestHandler<RefreshUserTokenCommand, Result<RefreshUserTokenResponse>>
 {
     public async ValueTask<Result<RefreshUserTokenResponse>> Handle(
@@ -42,7 +41,7 @@ public class RefreshUserTokenHandler(
                     TitleMessage.REFRESH_TOKEN_ERROR,
                     new(
                         UserErrorMessages.UserRefreshTokenInvalid,
-                        stringLocalizer[UserErrorMessages.UserRefreshTokenInvalid]
+                        translator.Translate(UserErrorMessages.UserRefreshTokenInvalid)
                     )
                 )
             );
@@ -71,7 +70,7 @@ public class RefreshUserTokenHandler(
                     TitleMessage.REFRESH_TOKEN_ERROR,
                     new(
                         UserErrorMessages.UserRefreshTokenIdentical,
-                        stringLocalizer[UserErrorMessages.UserRefreshTokenIdentical]
+                        translator.Translate(UserErrorMessages.UserRefreshTokenIdentical)
                     )
                 )
             );
@@ -90,7 +89,7 @@ public class RefreshUserTokenHandler(
                     TitleMessage.REFRESH_TOKEN_ERROR,
                     new(
                         UserErrorMessages.UserRefreshTokenIdentical,
-                        stringLocalizer[UserErrorMessages.UserRefreshTokenIdentical]
+                        translator.Translate(UserErrorMessages.UserRefreshTokenIdentical)
                     )
                 )
             );
@@ -103,7 +102,7 @@ public class RefreshUserTokenHandler(
                     "Error has occurred with refresh token",
                     new(
                         UserErrorMessages.UserRefreshTokenExpired,
-                        stringLocalizer[UserErrorMessages.UserRefreshTokenExpired]
+                        translator.Translate(UserErrorMessages.UserRefreshTokenExpired)
                     )
                 )
             );
@@ -115,8 +114,8 @@ public class RefreshUserTokenHandler(
                 new BadRequestError(
                     "Error has occurred with the current user",
                     new(
-                        UserErrorMessages.UserInactiveForRefreshToken,
-                        stringLocalizer[UserErrorMessages.UserInactiveForRefreshToken]
+                        UserErrorMessages.UserInactive,
+                        translator.Translate(UserErrorMessages.UserInactive)
                     )
                 )
             );

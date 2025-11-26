@@ -4,18 +4,20 @@ using Application.Common.QueryStringProcessing;
 using Application.Contracts.ApiWrapper;
 using Application.Contracts.Constants;
 using Application.Contracts.Dtos.Responses;
+using Application.Contracts.Localization;
 using Domain.Aggregates.QueueLogs;
 using Domain.Aggregates.QueueLogs.Specifications;
 using Mediator;
 using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Logging;
+using Org.BouncyCastle.Utilities.Encoders;
 
 namespace Application.Features.QueueLogs.Queries;
 
 public class ListQueueLogHandler(
     IEfUnitOfWork unitOfWork,
     ILogger<ListQueueLogHandler> logger,
-    IStringLocalizer<ListQueueLogHandler> stringLocalizer
+    IMessageTranslatorService translator
 ) : IRequestHandler<ListQueueLogQuery, Result<PaginationResponse<ListQueueLogResponse>>>
 {
     public async ValueTask<Result<PaginationResponse<ListQueueLogResponse>>> Handle(
@@ -29,7 +31,7 @@ public class ListQueueLogHandler(
             return Result<PaginationResponse<ListQueueLogResponse>>.Failure(
                 new BadRequestError(
                     TitleMessage.VALIDATION_ERROR,
-                    new(validationResult.Error, stringLocalizer[validationResult.Error])
+                    new(validationResult.Error, translator.Translate(validationResult.Error))
                 )
             );
         }
@@ -40,7 +42,10 @@ public class ListQueueLogHandler(
             return Result<PaginationResponse<ListQueueLogResponse>>.Failure(
                 new BadRequestError(
                     TitleMessage.VALIDATION_ERROR,
-                    new(validationFilterResult.Error, stringLocalizer[validationFilterResult.Error])
+                    new(
+                        validationFilterResult.Error,
+                        translator.Translate(validationFilterResult.Error)
+                    )
                 )
             );
         }
