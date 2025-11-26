@@ -21,10 +21,15 @@ public static class LocalizationExtension
         services.AddLocalization(options => options.ResourcesPath = "Resources");
 
         services.AddSingleton<IStringLocalizerFactory, JsonStringLocalizerFactory>();
-        //services.AddScoped(typeof(IStringLocalizer<>), typeof(StringLocalizer<>));
+        // services.AddTransient<IStringLocalizer, JsonStringLocalizer>();
+        // services.AddSingleton<JsonLocalizationLoader>();
+        services.AddTransient(option =>
+        {
+            var factory = option.GetRequiredService<IStringLocalizerFactory>();
+            return factory.Create("", "");
+        });
         services.AddScoped<IMessageTranslatorService, MessageTranslatorService>();
         services.AddScoped<IPermissionTranslatorService, PermissionTranslatorService>();
-        services.AddSingleton<LocalizerMiddleware>();
 
         LocalizationSettings localizationSettings = new();
         configuration.GetSection(nameof(LocalizationSettings)).Bind(localizationSettings);

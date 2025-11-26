@@ -27,8 +27,8 @@ public class UpdateUserEndpoint : IEndpoint
             .WithRequestValidation<UserUpdateRequest>()
             .Authorize(
                 permissions: PermissionGenerator.Generate(
-                    PermissionAction.Update,
-                    PermissionResource.User
+                    PermissionResource.User,
+                    PermissionAction.Update
                 )
             )
             .DisableAntiforgery();

@@ -29,8 +29,8 @@ public class ListQueueLogEndpoint : IEndpoint
             })
             .Authorize(
                 permissions: PermissionGenerator.Generate(
-                    PermissionAction.List,
-                    PermissionResource.QueueLog
+                    PermissionResource.QueueLog,
+                    PermissionAction.List
                 )
             );
     }

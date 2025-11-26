@@ -27,8 +27,8 @@ public class CreateRoleEndpoint : IEndpoint
             .WithRequestValidation<CreateRoleCommand>()
             .Authorize(
                 permissions: PermissionGenerator.Generate(
-                    PermissionAction.Create,
-                    PermissionResource.Role
+                    PermissionResource.Role,
+                    PermissionAction.Create
                 )
             );
     }

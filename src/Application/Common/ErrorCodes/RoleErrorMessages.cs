@@ -14,7 +14,6 @@ public class RoleErrorMessages
         Messenger
             .Create<Role>()
             .Property(x => x.Name)
-            .Negative()
             .WithError(MessageErrorType.Required)
             .GetFullMessage();
 
@@ -53,7 +52,6 @@ public class RoleErrorMessages
         Messenger
             .Create<Role>()
             .Property(x => x.Permissions)
-            .Negative()
             .WithError(MessageErrorType.Required)
             .GetFullMessage();
 

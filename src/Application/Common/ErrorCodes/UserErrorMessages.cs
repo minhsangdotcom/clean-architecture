@@ -17,7 +17,6 @@ public static class UserErrorMessages
             .Create<User>()
             .Property(x => x.LastName)
             .WithError(MessageErrorType.Required)
-            .Negative()
             .GetFullMessage();
 
     [ErrorKey(nameof(UserLastNameTooLong))]
@@ -37,7 +36,6 @@ public static class UserErrorMessages
             .Create<User>()
             .Property(x => x.FirstName)
             .WithError(MessageErrorType.Required)
-            .Negative()
             .GetFullMessage();
 
     [ErrorKey(nameof(UserFirstNameTooLong))]
@@ -69,7 +67,6 @@ public static class UserErrorMessages
             .Create<User>()
             .Property(x => x.Status)
             .WithError(MessageErrorType.Required)
-            .Negative()
             .GetFullMessage();
 
     [ErrorKey(nameof(UserStatusNotInEnum))]
@@ -90,7 +87,6 @@ public static class UserErrorMessages
             .Create<UserUpsertCommand>(nameof(User))
             .Property(x => x.Roles!)
             .WithError(MessageErrorType.Required)
-            .Negative()
             .GetFullMessage();
 
     [ErrorKey(nameof(UserRolesNotUnique))]
@@ -141,7 +137,6 @@ public static class UserErrorMessages
             .Create<User>()
             .Property(x => x.Username)
             .WithError(MessageErrorType.Required)
-            .Negative()
             .GetFullMessage();
 
     [ErrorKey(nameof(UserUsernameInvalid))]
@@ -170,7 +165,6 @@ public static class UserErrorMessages
             .Create<User>()
             .Property(x => x.Email)
             .WithError(MessageErrorType.Required)
-            .Negative()
             .GetFullMessage();
 
     [ErrorKey(nameof(UserEmailInvalid))]
@@ -199,7 +193,6 @@ public static class UserErrorMessages
             .Create<User>()
             .Property(x => x.Password)
             .WithError(MessageErrorType.Required)
-            .Negative()
             .GetFullMessage();
 
     [ErrorKey(nameof(UserPasswordWeak))]
@@ -257,7 +250,7 @@ public static class UserErrorMessages
         Messenger
             .Create<UserPasswordReset>()
             .Property(x => x.Token)
-            .WithError(MessageErrorType.Correct)
+            .WithError(MessageErrorType.Valid)
             .Negative()
             .GetFullMessage();
 

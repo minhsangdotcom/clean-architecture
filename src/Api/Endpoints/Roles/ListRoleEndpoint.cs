@@ -28,8 +28,8 @@ public class ListRoleEndpoint : IEndpoint
             })
             .Authorize(
                 permissions: PermissionGenerator.Generate(
-                    PermissionAction.List,
-                    PermissionResource.Role
+                    PermissionResource.Role,
+                    PermissionAction.List
                 )
             );
     }

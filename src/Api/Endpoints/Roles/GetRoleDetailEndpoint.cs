@@ -27,8 +27,8 @@ public class GetRoleDetailEndpoint : IEndpoint
             })
             .Authorize(
                 permissions: PermissionGenerator.Generate(
-                    PermissionAction.Detail,
-                    PermissionResource.Role
+                    PermissionResource.Role,
+                    PermissionAction.Detail
                 )
             );
     }

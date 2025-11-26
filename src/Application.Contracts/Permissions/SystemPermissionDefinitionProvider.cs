@@ -107,5 +107,17 @@ public class SystemPermissionDefinitionProvider : PermissionDefinitionProvider
         );
         deleteUser.AddChild(listUser);
         #endregion
+
+        PermissionGroupDefinition queueGroup = context.AddGroup(
+            "QueueManagement",
+            "Queue Management"
+        );
+        queueGroup.AddPermission(
+            PermissionNames.PermissionGenerator.Generate(
+                PermissionNames.PermissionResource.QueueLog,
+                PermissionNames.PermissionAction.List
+            ),
+            "List Queue"
+        );
     }
 }

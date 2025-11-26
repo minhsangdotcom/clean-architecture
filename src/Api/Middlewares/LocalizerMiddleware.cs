@@ -1,41 +1,61 @@
 using System.Globalization;
-using Microsoft.Extensions.Primitives;
+using Api.Services.Localizations;
+using Microsoft.Extensions.Options;
 
 namespace Api.Middlewares;
 
-public class LocalizerMiddleware : IMiddleware
+public class LocalizerMiddleware(RequestDelegate next)
 {
-    public async Task InvokeAsync(HttpContext context, RequestDelegate next)
+    public async Task InvokeAsync(HttpContext context, IOptions<LocalizationSettings> options)
     {
-        // Set the culture key based on the request header
-        StringValues cultureKey = context.Request.Headers.AcceptLanguage;
+        string? acceptLang = context.Request.Headers.AcceptLanguage.ToString();
 
-        // If there is supplied a culture
-        if (!string.IsNullOrEmpty(cultureKey))
+        string? cultureKey = ExtractPrimaryLanguage(acceptLang);
+
+        if (!string.IsNullOrWhiteSpace(cultureKey) && CultureExists(cultureKey))
         {
-            // Check if the culture exists
-            if (DoesCultureExist(cultureKey!))
-            {
-                // Set the culture Info
-                var culture = new CultureInfo(cultureKey!);
-
-                // Set the culture in the current thread responsible for that request
-                Thread.CurrentThread.CurrentCulture = culture;
-                Thread.CurrentThread.CurrentUICulture = culture;
-            }
+            var culture = new CultureInfo(cultureKey);
+            CultureInfo.CurrentCulture = culture;
+            CultureInfo.CurrentUICulture = culture;
+        }
+        else
+        {
+            var fallback = new CultureInfo(options.Value.DefaultCulture);
+            CultureInfo.CurrentCulture = fallback;
+            CultureInfo.CurrentUICulture = fallback;
         }
 
-        // Await the next request
         await next(context);
     }
 
-    private static bool DoesCultureExist(string cultureName)
+    private static string? ExtractPrimaryLanguage(string? header)
     {
-        // Return the culture where the culture equals the culture name set
+        if (string.IsNullOrWhiteSpace(header))
+            return null;
+
+        // Example: "en-US,en;q=0.9"
+        // Take before first comma → "en-US"
+        string first = header.Split(',').First();
+
+        try
+        {
+            // Use full language (e.g. "en-US")
+            return new CultureInfo(first).Name;
+        }
+        catch
+        {
+            // Try two-letter code fallback
+            if (first.Length >= 2)
+                return first[..2];
+
+            return null;
+        }
+    }
+
+    private static bool CultureExists(string culture)
+    {
         return CultureInfo
             .GetCultures(CultureTypes.AllCultures)
-            .Any(culture =>
-                string.Equals(culture.Name, cultureName, StringComparison.CurrentCultureIgnoreCase)
-            );
+            .Any(c => c.Name.Equals(culture, StringComparison.OrdinalIgnoreCase));
     }
 }

@@ -4,6 +4,7 @@ using Api.common.EndpointConfigurations;
 using Api.common.Routers;
 using Api.Converters;
 using Api.Extensions;
+using Api.Middlewares;
 using Api.Settings;
 using Application;
 using Cysharp.Serialization.Json;
@@ -128,6 +129,7 @@ try
     app.UseAuthentication();
     app.UseAuthorization();
 
+    app.UseRequestLocalizationMiddleware();
     app.MapEndpoints(apiVersion: EndpointVersion.One);
     if (isDevelopment)
     {

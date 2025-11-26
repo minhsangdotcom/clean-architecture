@@ -26,32 +26,8 @@
     <Using Include="Xunit" />
     <ProjectReference Include="..\..\src\Api\Api.csproj" />
 
-    <None Include="..\..\src\Api\Resources\Translations\Message.en.resx">
-      <Link>Resources\Translations\Message.en.resx</Link>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="..\..\src\Api\Resources\Translations\Message.vi.resx">
-      <Link>Resources\Translations\Message.vi.resx</Link>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
     <None Include="..\..\src\Api\wwwroot\Templates\ForgotPassword.cshtml">
       <Link>Templates\ForgotPassword.cshtml</Link>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="..\..\src\Infrastructure\Data\Seeds\Resources\Provinces.json">
-      <Link>Data\Seeds\Resources\Provinces.json</Link>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="..\..\src\Infrastructure\Data\Seeds\Resources\Districts.json">
-      <Link>Data\Seeds\Resources\Districts.json</Link>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="..\..\src\Infrastructure\Data\Seeds\Resources\Wards.json">
-      <Link>Data\Seeds\Resources\Wards.json</Link>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Files\avatar_cute_2.jpg">
-      <Link>Files\avatar_cute_2.jpg</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>

@@ -18,8 +18,9 @@ public class MessageTranslatorService : IMessageTranslatorService
         string result = string.Empty;
         if (!string.IsNullOrWhiteSpace(prefix))
         {
-            result += $"{prefix}:{key}";
+            result += $"{prefix}:";
         }
+        result += key;
         return stringLocalizer[result];
     }
 }

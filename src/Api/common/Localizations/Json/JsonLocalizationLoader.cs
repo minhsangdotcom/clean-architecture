@@ -3,7 +3,7 @@ using DotNetCoreExtension.Extensions;
 
 namespace Api.common.Localizations.Json;
 
-public class JsonLocalizationLoader(IMemoryCacheService cache, string basePath)
+public class JsonLocalizationLoader(IMemoryCacheService cache, string basePath, string? type = null)
 {
     public string? GetValue(string key, string culture)
     {
@@ -30,7 +30,7 @@ public class JsonLocalizationLoader(IMemoryCacheService cache, string basePath)
         }
         string[] jsonFiles = Directory.GetFiles(
             basePath,
-            $"{culture}.json",
+            string.IsNullOrWhiteSpace(type) ? $"*.{culture}.json" : $"{type}.{culture}.json",
             SearchOption.AllDirectories
         );
 

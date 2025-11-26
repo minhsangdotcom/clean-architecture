@@ -27,8 +27,8 @@ public class UpdateRoleEndpoint : IEndpoint
             .WithRequestValidation<UpdateRoleRequest>()
             .Authorize(
                 permissions: PermissionGenerator.Generate(
-                    PermissionAction.Update,
-                    PermissionResource.Role
+                    PermissionResource.Role,
+                    PermissionAction.Update
                 )
             );
     }

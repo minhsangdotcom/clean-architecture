@@ -23,14 +23,6 @@
     <Using Include="Xunit" />
     <ProjectReference Include="..\..\src\Application\Application.csproj" />
 
-    <None Include="..\..\src\Api\Resources\Translations\Message.en.resx">
-      <Link>Resources\Translations\Message.en.resx</Link>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="..\..\src\Api\Resources\Translations\Message.vi.resx">
-      <Link>Resources\Translations\Message.vi.resx</Link>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
     <None Include="..\..\src\Api\wwwroot\Templates\ForgotPassword.cshtml">
       <Link>Templates\ForgotPassword.cshtml</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

@@ -29,8 +29,8 @@ public class ListUserEndpoint : IEndpoint
             })
             .Authorize(
                 permissions: PermissionGenerator.Generate(
-                    PermissionAction.List,
-                    PermissionResource.User
+                    PermissionResource.User,
+                    PermissionAction.List
                 )
             );
     }

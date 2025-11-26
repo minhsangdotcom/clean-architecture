@@ -25,8 +25,8 @@ public class DeleteUserEndpoint : IEndpoint
             })
             .Authorize(
                 permissions: PermissionGenerator.Generate(
-                    PermissionAction.Delete,
-                    PermissionResource.User
+                    PermissionResource.User,
+                    PermissionAction.Delete
                 )
             );
     }
