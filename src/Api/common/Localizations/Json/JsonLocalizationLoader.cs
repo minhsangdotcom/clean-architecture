@@ -1,10 +1,19 @@
+using Api.Services.Localizations;
 using Application.Common.Interfaces.Services.Cache;
 using DotNetCoreExtension.Extensions;
+using Microsoft.Extensions.Options;
 
 namespace Api.common.Localizations.Json;
 
-public class JsonLocalizationLoader(IMemoryCacheService cache, string basePath, string? type = null)
+public class JsonLocalizationLoader(
+    IMemoryCacheService cache,
+    IOptions<LocalizationSettings> options,
+    string basePath,
+    string? type = null
+)
 {
+    private readonly LocalizationSettings settings = options.Value;
+
     public string? GetValue(string key, string culture)
     {
         string cacheKey = $"locale_{culture}_{key}";
@@ -17,7 +26,7 @@ public class JsonLocalizationLoader(IMemoryCacheService cache, string basePath, 
             new CacheOptions()
             {
                 ExpirationType = CacheExpirationType.Sliding,
-                Expiration = TimeSpan.FromMinutes(30),
+                Expiration = TimeSpan.FromMinutes(settings.TranslationCacheInMinutes),
             }
         );
     }

@@ -1,5 +1,5 @@
+using System.Reflection;
 using Api.common.Localizations.Json;
-using Api.Middlewares;
 using Api.Services.Localizations;
 using Application.Common.ErrorCodes;
 using Application.Contracts.ErrorCodes;
@@ -58,9 +58,16 @@ public static class LocalizationExtension
                 [FromServices] IOptions<LocalizationSettings> options
             ) =>
             {
-                ErrorMessageLoader.LoadFromType(typeof(UserErrorMessages));
-                ErrorMessageLoader.LoadFromType(typeof(RoleErrorMessages));
-                ErrorMessageLoader.LoadFromType(typeof(QueryParamRequestErrorMessages));
+                IEnumerable<Type> messageTypes = typeof(UserErrorMessages)
+                    .Assembly.GetTypes()
+                    .Where(t =>
+                        t.IsClass && t.GetCustomAttribute<ErrorMessageContainerAttribute>() != null
+                    );
+
+                foreach (Type type in messageTypes)
+                {
+                    ErrorMessageLoader.LoadFromType(type);
+                }
 
                 List<string> errorMessages =
                 [

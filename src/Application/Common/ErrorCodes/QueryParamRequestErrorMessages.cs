@@ -1,13 +1,10 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Application.Contracts.Dtos.Requests;
 using Application.Contracts.ErrorCodes;
 using Application.Contracts.Messages;
 
 namespace Application.Common.ErrorCodes;
 
+[ErrorMessageContainer]
 public class QueryParamRequestErrorMessages
 {
     // ---------------------------------------------------------

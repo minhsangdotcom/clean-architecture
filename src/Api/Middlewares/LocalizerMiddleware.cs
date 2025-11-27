@@ -9,7 +9,6 @@ public class LocalizerMiddleware(RequestDelegate next)
     public async Task InvokeAsync(HttpContext context, IOptions<LocalizationSettings> options)
     {
         string? acceptLang = context.Request.Headers.AcceptLanguage.ToString();
-
         string? cultureKey = ExtractPrimaryLanguage(acceptLang);
 
         if (!string.IsNullOrWhiteSpace(cultureKey) && CultureExists(cultureKey))

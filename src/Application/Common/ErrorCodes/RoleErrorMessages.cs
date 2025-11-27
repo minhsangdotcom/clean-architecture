@@ -4,6 +4,7 @@ using Domain.Aggregates.Roles;
 
 namespace Application.Common.ErrorCodes;
 
+[ErrorMessageContainer]
 public class RoleErrorMessages
 {
     // -------------------------

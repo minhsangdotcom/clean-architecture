@@ -1,5 +1,3 @@
-using System.Globalization;
-
 namespace Api.Middlewares;
 
 public static class MiddlewareExtensions

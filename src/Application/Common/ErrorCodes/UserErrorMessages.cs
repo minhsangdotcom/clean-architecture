@@ -6,7 +6,8 @@ using Domain.Aggregates.Users;
 
 namespace Application.Common.ErrorCodes;
 
-public static class UserErrorMessages
+[ErrorMessageContainer]
+public class UserErrorMessages
 {
     // -------------------------
     // LastName

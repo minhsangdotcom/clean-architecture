@@ -1,12 +1,11 @@
 using Api.Services.Localizations;
-using Application.Common.Interfaces.Services.Cache;
 using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Options;
 
 namespace Api.common.Localizations.Json;
 
 public class JsonStringLocalizerFactory(
-    IMemoryCacheService cacheService,
+    IServiceProvider serviceProvider,
     IOptions<LocalizationSettings> options
 ) : IStringLocalizerFactory
 {
@@ -24,7 +23,11 @@ public class JsonStringLocalizerFactory(
 
     private JsonStringLocalizer CreateLocalizer(string? subPath = null)
     {
-        JsonLocalizationLoader loader = new(cacheService, basePath, subPath!);
+        JsonLocalizationLoader loader = ActivatorUtilities.CreateInstance<JsonLocalizationLoader>(
+            serviceProvider,
+            basePath,
+            subPath!
+        );
         return new JsonStringLocalizer(loader, options);
     }
 }

@@ -16,6 +16,7 @@ public class PermissionProjection : AuditableEntityResponse
     public virtual void MappingFrom(Permission permission)
     {
         Id = permission.Id;
+        Code = permission.Code;
         Name = permission.Name;
         Description = permission.Description;
         CreatedAt = permission.CreatedAt;
