@@ -1,8 +1,8 @@
 using Application.Common.ErrorCodes;
 using Application.Common.Extensions;
+using Application.Common.Interfaces.Services.Localization;
 using Application.Common.Interfaces.UnitOfWorks;
 using Application.Contracts.ApiWrapper;
-using Application.Contracts.Localization;
 using Application.SharedFeatures.Validators.Users;
 using Domain.Aggregates.Users;
 using FluentValidation;

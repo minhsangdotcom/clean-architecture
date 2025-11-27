@@ -1,18 +1,17 @@
 using Application.Common.ErrorCodes;
 using Application.Common.Errors;
 using Application.Common.Interfaces.Services;
+using Application.Common.Interfaces.Services.Localization;
 using Application.Common.Interfaces.Services.Token;
 using Application.Common.Interfaces.UnitOfWorks;
 using Application.Contracts.ApiWrapper;
 using Application.Contracts.Constants;
-using Application.Contracts.Localization;
 using Application.Contracts.Messages;
 using Application.SharedFeatures.Mapping.Users;
 using Domain.Aggregates.Users;
 using Domain.Aggregates.Users.Specifications;
 using DotNetCoreExtension.Extensions;
 using Mediator;
-using Microsoft.Extensions.Localization;
 using SharedKernel.Constants;
 using Wangkanai.Detection.Services;
 

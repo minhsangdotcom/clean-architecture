@@ -1,6 +1,6 @@
 using Application.Common.Extensions;
+using Application.Common.Interfaces.Services.Localization;
 using Application.Contracts.ApiWrapper;
-using Application.Contracts.Localization;
 using Application.Contracts.Messages;
 using Domain.Aggregates.Users;
 using FluentValidation;

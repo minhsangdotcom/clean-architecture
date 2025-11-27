@@ -1,7 +1,7 @@
 using Application.Common.ErrorCodes;
 using Application.Common.Extensions;
+using Application.Common.Interfaces.Services.Localization;
 using Application.Contracts.ApiWrapper;
-using Application.Contracts.Localization;
 using FluentValidation;
 
 namespace Application.Features.Users.Commands.Profiles;

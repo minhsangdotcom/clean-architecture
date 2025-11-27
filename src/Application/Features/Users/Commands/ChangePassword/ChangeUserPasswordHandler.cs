@@ -2,13 +2,12 @@ using Application.Common.ErrorCodes;
 using Application.Common.Errors;
 using Application.Common.Interfaces.Services;
 using Application.Common.Interfaces.Services.Identity;
+using Application.Common.Interfaces.Services.Localization;
 using Application.Contracts.ApiWrapper;
 using Application.Contracts.Constants;
-using Application.Contracts.Localization;
 using Application.Contracts.Messages;
 using Domain.Aggregates.Users;
 using Mediator;
-using Microsoft.Extensions.Localization;
 
 namespace Application.Features.Users.Commands.ChangePassword;
 

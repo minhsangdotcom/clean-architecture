@@ -1,6 +1,6 @@
 using Application.Common.Interfaces.Services;
+using Application.Common.Interfaces.Services.Localization;
 using Application.Common.Interfaces.UnitOfWorks;
-using Application.Contracts.Localization;
 using Application.SharedFeatures.Validators.Roles;
 using FluentValidation;
 

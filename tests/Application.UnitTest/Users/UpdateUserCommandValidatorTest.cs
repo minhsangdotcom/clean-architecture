@@ -1,13 +1,12 @@
+using Application.Common.Interfaces.Services.Localization;
 using Application.Common.Interfaces.UnitOfWorks;
 using Application.Contracts.ApiWrapper;
-using Application.Contracts.Localization;
 using Application.Contracts.Messages;
 using Application.Features.Users.Commands.Update;
 using AutoFixture;
 using Domain.Aggregates.Users;
 using FluentValidation;
 using FluentValidation.TestHelper;
-using Microsoft.Extensions.Localization;
 using Moq;
 
 namespace Application.UnitTest.Users;

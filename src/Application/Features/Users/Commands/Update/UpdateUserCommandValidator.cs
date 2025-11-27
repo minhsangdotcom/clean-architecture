@@ -1,5 +1,5 @@
+using Application.Common.Interfaces.Services.Localization;
 using Application.Common.Interfaces.UnitOfWorks;
-using Application.Contracts.Localization;
 using Application.SharedFeatures.Validators.Users;
 using FluentValidation;
 

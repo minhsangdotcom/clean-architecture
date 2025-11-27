@@ -1,7 +1,7 @@
 using Application.Common.Interfaces.Services;
+using Application.Common.Interfaces.Services.Localization;
 using Application.Common.Interfaces.UnitOfWorks;
 using Application.Contracts.ApiWrapper;
-using Application.Contracts.Localization;
 using Application.Contracts.Messages;
 using Application.Features.Roles.Commands.Update;
 using Application.SharedFeatures.Requests.Roles;
@@ -9,7 +9,6 @@ using AutoFixture;
 using Domain.Aggregates.Roles;
 using FluentValidation;
 using FluentValidation.TestHelper;
-using Microsoft.Extensions.Localization;
 using Moq;
 
 namespace Application.UnitTest.Roles;

@@ -1,9 +1,9 @@
 using Application.Common.ErrorCodes;
 using Application.Common.Errors;
+using Application.Common.Interfaces.Services.Localization;
 using Application.Common.Interfaces.UnitOfWorks;
 using Application.Contracts.ApiWrapper;
 using Application.Contracts.Constants;
-using Application.Contracts.Localization;
 using Application.Contracts.Messages;
 using Domain.Aggregates.Users;
 using Domain.Aggregates.Users.Enums;

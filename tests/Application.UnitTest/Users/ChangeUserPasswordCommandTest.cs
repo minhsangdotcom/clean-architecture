@@ -1,10 +1,9 @@
+using Application.Common.Interfaces.Services.Localization;
 using Application.Contracts.ApiWrapper;
-using Application.Contracts.Localization;
 using Application.Contracts.Messages;
 using Application.Features.Users.Commands.ChangePassword;
 using Domain.Aggregates.Users;
 using FluentValidation.TestHelper;
-using Microsoft.Extensions.Localization;
 using Moq;
 
 namespace Application.UnitTest.Users;

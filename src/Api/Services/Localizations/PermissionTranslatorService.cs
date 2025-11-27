@@ -1,4 +1,4 @@
-using Application.Contracts.Localization;
+using Application.Common.Interfaces.Services.Localization;
 using Microsoft.Extensions.Localization;
 
 namespace Api.Services.Localizations;
