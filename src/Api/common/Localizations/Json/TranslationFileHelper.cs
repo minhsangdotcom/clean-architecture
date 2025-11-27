@@ -35,6 +35,10 @@ public class TranslationFileHelper
         }
 
         // 5. Save pretty JSON
+        if (keysToAdd.Count == 0 && keysToRemove.Count == 0)
+        {
+            return;
+        }
         string output = JsonSerializer.Serialize(
             existing,
             new JsonSerializerOptions

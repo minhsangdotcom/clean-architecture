@@ -1,15 +1,19 @@
 {
-  "RoleManagement": "",
-  "role.list": "",
-  "role.detail": "",
-  "role.create": "",
-  "role.update": "",
-  "role.delete": "",
-  "role.test": "",
-  "UserManagement": "",
-  "user.list": "",
-  "user.detail": "",
-  "user.create": "",
-  "user.update": "",
-  "user.delete": ""
+  "RoleManagement": "Quản lý Vai trò",
+  "role.list": "Xem danh sách Vai trò",
+  "role.detail": "Xem Chi tiết Vai trò",
+  "role.create": "Tạo Vai trò",
+  "role.update": "Cập nhật Vai trò",
+  "role.delete": "Xóa Vai trò",
+  "role.test": "Kiểm tra Vai trò",
+
+  "UserManagement": "Quản lý Người dùng",
+  "user.list": "Xem danh sách Người dùng",
+  "user.detail": "Xem Chi tiết Người dùng",
+  "user.create": "Tạo Người dùng",
+  "user.update": "Cập nhật Người dùng",
+  "user.delete": "Xóa Người dùng",
+
+  "QueueManagement": "Quản lý Hàng đợi",
+  "queue-log.list": "Xem danh sách Nhật ký Hàng đợi"
 }

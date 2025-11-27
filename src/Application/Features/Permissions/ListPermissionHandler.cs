@@ -1,4 +1,5 @@
 using Application.Common.Interfaces.DbContexts;
+using Application.Common.Interfaces.Services.Localization;
 using Application.Contracts.ApiWrapper;
 using Application.Contracts.Permissions;
 using Domain.Aggregates.Permissions;
@@ -9,7 +10,8 @@ namespace Application.Features.Permissions;
 
 public class ListPermissionHandler(
     IEfDbContext efDbContext,
-    PermissionDefinitionContext permissionDefinitionContext
+    PermissionDefinitionContext permissionDefinitionContext,
+    IPermissionTranslatorService translator
 ) : IRequestHandler<ListPermissionQuery, Result<IReadOnlyList<ListGroupPermissionResponse>>>
 {
     public async ValueTask<Result<IReadOnlyList<ListGroupPermissionResponse>>> Handle(
@@ -23,13 +25,12 @@ public class ListPermissionHandler(
             .GroupBy(x => x.Group)
             .Select(g => new ListGroupPermissionResponse
             {
-                GroupName = g.Key,
+                Name = g.Key,
                 Permissions = g.OrderBy(x => x.Code)
                     .Select(p => new ListPermissionResponse
                     {
                         Id = p.Id,
                         Code = p.Code,
-                        Name = p.Name,
                         CreatedAt = p.CreatedAt,
                     })
                     .ToList(),
@@ -39,21 +40,22 @@ public class ListPermissionHandler(
         for (int i = 0; i < permissionGroup.Count; i++)
         {
             var group = permissionGroup[i];
+            group.NameTranslation = translator.Translate(group.Name!);
+            group.Permissions?.ForEach(p =>
+                p.CodeTranslation = translator.Translate(p.Code! ?? "")
+            );
             Dictionary<string, PermissionResponse>? dbPermissions = group.Permissions?.ToDictionary(
                 p => p.Code!,
                 p => new PermissionResponse
                 {
                     Id = p.Id,
                     Code = p.Code!,
-                    Name = p.Name!,
                     CreatedAt = p.CreatedAt,
+                    CodeTranslation = p.CodeTranslation,
                 }
             );
             if (
-                permissionDefinitionContext.Groups.TryGetValue(
-                    group.GroupName!,
-                    out var groupDefinition
-                )
+                permissionDefinitionContext.Groups.TryGetValue(group.Name!, out var groupDefinition)
             )
             {
                 for (int j = 0; j < group.Permissions?.Count; j++)
@@ -73,7 +75,7 @@ public class ListPermissionHandler(
         return Result<IReadOnlyList<ListGroupPermissionResponse>>.Success(permissionGroup);
     }
 
-    private static ListPermissionResponse MapDefinitionToResponse(
+    private ListPermissionResponse MapDefinitionToResponse(
         PermissionDefinition? definitionRoot,
         Dictionary<string, PermissionResponse>? dbPermissions
     )
@@ -98,8 +100,7 @@ public class ListPermissionHandler(
                 Id = permission?.Id ?? Ulid.Empty,
                 CreatedAt = permission?.CreatedAt,
                 Code = permission?.Code,
-                Name = permission?.Name,
-                Description = permission?.Description,
+                CodeTranslation = translator.Translate(permission?.Code ?? ""),
                 Children = children,
             };
         }
