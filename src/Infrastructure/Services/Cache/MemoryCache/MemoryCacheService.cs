@@ -45,15 +45,16 @@ public class MemoryCacheService(
         );
     }
 
-    public bool HasKey(string key)
+    public Task<bool> HasKeyAsync(string key)
     {
-        return cache.TryGetValue(key, out _);
+        return Task.FromResult(cache.TryGetValue(key, out _));
     }
 
-    public void Remove(string key)
+    public async Task RemoveAsync(string key)
     {
         cache.Remove(key);
         logger.LogDebug("Redis KeyDelete {Key}", key);
+        await Task.CompletedTask;
     }
 
     private Task<T?> GetOrSetDefaultAsync<T>(string key, Func<Task<T>> task, CacheOptions options)

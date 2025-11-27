@@ -2540,7 +2540,6 @@
           "OpenTelemetry.Instrumentation.AspNetCore": "[1.12.0, )",
           "OpenTelemetry.Instrumentation.EntityFrameworkCore": "[1.12.0-beta.1, )",
           "OpenTelemetry.Instrumentation.Http": "[1.12.0, )",
-          "Scrutor": "[6.1.0, )",
           "Serilog.AspNetCore": "[9.0.0, )",
           "Serilog.Enrichers.Environment": "[3.0.1, )",
           "Serilog.Sinks.Seq": "[9.0.0, )",

@@ -18,6 +18,8 @@ public class AuthorizeHandler(IServiceProvider serviceProvider, ICurrentUser cur
     {
         using var scope = serviceProvider.CreateScope();
         IUserManager userManager = scope.ServiceProvider.GetRequiredService<IUserManager>();
+        IRolePermissionChecker rolePermissionChecker =
+            scope.ServiceProvider.GetRequiredService<IRolePermissionChecker>();
 
         Ulid? userId = currentUser.Id;
         if (userId == null)
@@ -25,6 +27,7 @@ public class AuthorizeHandler(IServiceProvider serviceProvider, ICurrentUser cur
             context.Fail(new AuthorizationFailureReason(this, "User is UnAuthenticated"));
             return;
         }
+
         User? user = await userManager.FindByIdAsync(userId.Value, false);
         if (user == null)
         {
@@ -56,23 +59,28 @@ public class AuthorizeHandler(IServiceProvider serviceProvider, ICurrentUser cur
         if (authorizeModel.Roles?.Count > 0 && authorizeModel.Permissions?.Count > 0)
         {
             bool isGrantedAccess =
-                await userManager.HasAnyPermissionAsync(user, authorizeModel.Permissions)
-                && await userManager.IsInAnyRoleAsync(user, authorizeModel.Roles);
+                await rolePermissionChecker.CheckAnyPermissionAsync(
+                    user.Id,
+                    authorizeModel.Permissions
+                ) && await rolePermissionChecker.CheckAnyRoleAsync(user.Id, authorizeModel.Roles);
             SuccessOrFailure(context, requirement, isGrantedAccess);
             return;
         }
 
         if (authorizeModel.Roles?.Count > 0)
         {
-            bool hasRole = await userManager.IsInAnyRoleAsync(user, authorizeModel.Roles);
+            bool hasRole = await rolePermissionChecker.CheckAnyRoleAsync(
+                user.Id,
+                authorizeModel.Roles
+            );
             SuccessOrFailure(context, requirement, hasRole);
             return;
         }
 
         if (authorizeModel.Permissions?.Count > 0)
         {
-            bool hasPermission = await userManager.HasAnyPermissionAsync(
-                user,
+            bool hasPermission = await rolePermissionChecker.CheckAnyPermissionAsync(
+                user.Id,
                 authorizeModel.Permissions
             );
             SuccessOrFailure(context, requirement, hasPermission);

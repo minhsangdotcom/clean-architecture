@@ -50,19 +50,6 @@ public class RedisCacheService(
         );
     }
 
-    public void Remove(string key)
-    {
-        bool isSuccess = redis.KeyDelete(key);
-        if (isSuccess)
-        {
-            logger.LogDebug("Redis KeyDelete {Key}", key);
-        }
-        else
-        {
-            logger.LogDebug("Redis KeyDelete {Key} failed", key);
-        }
-    }
-
     public async Task RemoveAsync(string key)
     {
         bool isSuccess = await redis.KeyDeleteAsync(key);
@@ -75,6 +62,11 @@ public class RedisCacheService(
         {
             logger.LogDebug("Redis KeyDelete {Key} failed", key);
         }
+    }
+
+    public async Task<bool> HasKeyAsync(string key)
+    {
+        return await redis.KeyExistsAsync(key);
     }
 
     private async Task<T?> GetOrSetDefaultAsync<T>(

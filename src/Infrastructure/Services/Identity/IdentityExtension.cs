@@ -9,6 +9,7 @@ public static class IdentityExtension
     {
         return services
             .AddScoped<IRoleManager, RoleManager>()
-            .AddScoped<IUserManager, UserManager>();
+            .AddScoped<IUserManager, UserManager>()
+            .AddScoped<IRolePermissionChecker, RolePermissionChecker>();
     }
 }

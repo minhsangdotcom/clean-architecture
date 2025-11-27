@@ -5,10 +5,8 @@ using Application.Common.Interfaces.Services.Identity;
 using Application.Contracts.ApiWrapper;
 using Application.Contracts.Constants;
 using Application.Contracts.Localization;
-using Application.Contracts.Messages;
 using Domain.Aggregates.Users;
 using Mediator;
-using Microsoft.Extensions.Localization;
 
 namespace Application.Features.Users.Queries.Profiles;
 

@@ -42,10 +42,10 @@ public class UpdateUserProfileEndpoint : IEndpoint
     {
         Ulid? userId = currentUser.Id;
         string key = $"{nameof(GetUserProfileEndpoint)}:{userId}";
-        bool isExisted = cacheService.HasKey(key);
+        bool isExisted = await cacheService.HasKeyAsync(key);
         if (isExisted)
         {
-            cacheService.Remove(key);
+            await cacheService.RemoveAsync(key);
         }
         var result = await sender.Send(request, cancellationToken);
         return result.ToResult();
