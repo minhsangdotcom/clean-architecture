@@ -8,6 +8,7 @@ using Application.Contracts.Permissions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Options;
+using Microsoft.OpenApi.Models;
 
 namespace Api.Extensions;
 
@@ -51,65 +52,74 @@ public static class LocalizationExtension
 
     public static void AddSynchronizedLocalizationEndpoint(this WebApplication application)
     {
-        application.MapGet(
-            "/api/localization/sync",
-            (
-                [FromServices] PermissionDefinitionContext permissionDefinitionContext,
-                [FromServices] IOptions<LocalizationSettings> options
-            ) =>
-            {
-                IEnumerable<Type> messageTypes = typeof(UserErrorMessages)
-                    .Assembly.GetTypes()
-                    .Where(t =>
-                        t.IsClass && t.GetCustomAttribute<ErrorMessageContainerAttribute>() != null
-                    );
-
-                foreach (Type type in messageTypes)
+        application
+            .MapGet(
+                "/api/localizations/sync",
+                (
+                    [FromServices] PermissionDefinitionContext permissionDefinitionContext,
+                    [FromServices] IOptions<LocalizationSettings> options
+                ) =>
                 {
-                    ErrorMessageLoader.LoadFromType(type);
-                }
-
-                List<string> errorMessages =
-                [
-                    .. ErrorMessageRegistry.Messages.Select(x => x.Value).Distinct(),
-                ];
-
-                string baseFolder = Path.Combine(Directory.GetCurrentDirectory(), "Resources");
-                string messageFolder = Path.Combine(baseFolder, "Messages");
-                Directory.CreateDirectory(messageFolder);
-
-                List<string> permissionKeys =
-                [
-                    .. permissionDefinitionContext.Groups.SelectMany(x =>
-                    {
-                        List<string> permissionCode = [x.Key];
-                        permissionCode.AddRange(
-                            x.Value.Permissions.Flatten().Select(x => x.Code).Distinct()
+                    IEnumerable<Type> messageTypes = typeof(UserErrorMessages)
+                        .Assembly.GetTypes()
+                        .Where(t =>
+                            t.IsClass
+                            && t.GetCustomAttribute<ErrorMessageContainerAttribute>() != null
                         );
-                        return permissionCode;
-                    }),
-                ];
-                string permissionFolder = Path.Combine(baseFolder, "Permissions");
-                Directory.CreateDirectory(permissionFolder);
 
-                string[] cultures = options.Value.SupportedCultures;
-                foreach (string culture in cultures)
-                {
-                    string messagePath = Path.Combine(
-                        messageFolder,
-                        $"{nameof(Messages)}.{culture}.json"
-                    );
-                    TranslationFileHelper.SyncTranslationFile(messagePath, errorMessages);
+                    foreach (Type type in messageTypes)
+                    {
+                        ErrorMessageLoader.LoadFromType(type);
+                    }
 
-                    string permissionPath = Path.Combine(
-                        permissionFolder,
-                        $"{nameof(Permissions)}.{culture}.json"
-                    );
-                    TranslationFileHelper.SyncTranslationFile(permissionPath, permissionKeys);
+                    List<string> errorMessages =
+                    [
+                        .. ErrorMessageRegistry.Messages.Select(x => x.Value).Distinct(),
+                    ];
+
+                    string baseFolder = Path.Combine(Directory.GetCurrentDirectory(), "Resources");
+                    string messageFolder = Path.Combine(baseFolder, "Messages");
+                    Directory.CreateDirectory(messageFolder);
+
+                    List<string> permissionKeys =
+                    [
+                        .. permissionDefinitionContext.Groups.SelectMany(x =>
+                        {
+                            List<string> permissionCode = [x.Key];
+                            permissionCode.AddRange(
+                                x.Value.Permissions.Flatten().Select(x => x.Code).Distinct()
+                            );
+                            return permissionCode;
+                        }),
+                    ];
+                    string permissionFolder = Path.Combine(baseFolder, "Permissions");
+                    Directory.CreateDirectory(permissionFolder);
+
+                    string[] cultures = options.Value.SupportedCultures;
+                    foreach (string culture in cultures)
+                    {
+                        string messagePath = Path.Combine(
+                            messageFolder,
+                            $"{nameof(Messages)}.{culture}.json"
+                        );
+                        TranslationFileHelper.SyncTranslationFile(messagePath, errorMessages);
+
+                        string permissionPath = Path.Combine(
+                            permissionFolder,
+                            $"{nameof(Permissions)}.{culture}.json"
+                        );
+                        TranslationFileHelper.SyncTranslationFile(permissionPath, permissionKeys);
+                    }
+
+                    return Results.Ok();
                 }
-
-                return Results.Ok();
-            }
-        );
+            )
+            .WithOpenApi(operation => new OpenApiOperation(operation)
+            {
+                Summary = "Synchronize localization resources ✨",
+                Description =
+                    "Synchronizes permissions and error messages with the localization JSON files by adding missing entries and removing obsolete ones.",
+                Tags = [new OpenApiTag() { Name = "Localizations" }],
+            });
     }
 }

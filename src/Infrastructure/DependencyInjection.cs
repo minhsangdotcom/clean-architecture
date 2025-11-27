@@ -73,7 +73,7 @@ public static class DependencyInjection
             .AddScoped<IHttpContextAccessorService, HttpContextAccessorService>()
             .AddJwt(configuration)
             .AddElasticSearch(configuration)
-            .AddIdentity()
+            .AddIdentity(configuration)
             .AddMail(configuration)
             .AddMemoryCaching(configuration)
             .AddDistributedCache(configuration);
