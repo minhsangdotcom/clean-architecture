@@ -78,7 +78,7 @@ public static class LocalizationExtension
                     ];
 
                     string baseFolder = Path.Combine(Directory.GetCurrentDirectory(), "Resources");
-                    string messageFolder = Path.Combine(baseFolder, "Messages");
+                    string messageFolder = Path.Combine(baseFolder, nameof(Messages));
                     Directory.CreateDirectory(messageFolder);
 
                     List<string> permissionKeys =
@@ -92,7 +92,7 @@ public static class LocalizationExtension
                             return permissionCode;
                         }),
                     ];
-                    string permissionFolder = Path.Combine(baseFolder, "Permissions");
+                    string permissionFolder = Path.Combine(baseFolder, nameof(Permissions));
                     Directory.CreateDirectory(permissionFolder);
 
                     string[] cultures = options.Value.SupportedCultures;
@@ -119,7 +119,7 @@ public static class LocalizationExtension
                 Summary = "Synchronize localization resources ✨",
                 Description =
                     "Synchronizes permissions and error messages with the localization JSON files by adding missing entries and removing obsolete ones.",
-                Tags = [new OpenApiTag() { Name = "Localizations" }],
+                Tags = [new OpenApiTag() { Name = "Localizations-endpoint" }],
             });
     }
 }
