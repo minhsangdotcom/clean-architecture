@@ -1,4 +1,5 @@
 using Application.Common.Interfaces.DbContexts;
+using Application.Common.Interfaces.Services.Cache;
 using Application.Common.Interfaces.Services.Identity;
 using Application.Contracts.Permissions;
 using Domain.Aggregates.Permissions;
@@ -13,7 +14,8 @@ public class UserManager(
     IRoleManager roleManager,
     IEfDbContext dbContext,
     PermissionDefinitionContext permissionDefinitionContext,
-    ILogger<UserManager> logger
+    ILogger<UserManager> logger,
+    IRolePermissionChecker rolePermissionChecker
 ) : IUserManager
 {
     private readonly DbSet<User> users = dbContext.Set<User>();
@@ -249,6 +251,17 @@ public class UserManager(
         CancellationToken cancellationToken = default
     )
     {
+        if (
+            await dbContext
+                .Set<UserRole>()
+                .Where(x => x.UserId == user.Id)
+                .Join(dbContext.Set<Role>(), ur => ur.UserId, r => r.Id, (ur, r) => r.Name)
+                .CountAsync(x => roleNames.Contains(x), cancellationToken) != roleNames.Count()
+        )
+        {
+            await rolePermissionChecker.InvalidateUserRolesAsync(user.Id);
+        }
+
         await dbContext
             .Set<UserRole>()
             .Where(ur => ur.UserId == user.Id)
@@ -347,6 +360,18 @@ public class UserManager(
         CancellationToken cancellationToken = default
     )
     {
+        List<string> codes = [.. permissions.Select(x => x.Code)];
+        if (
+            await dbContext
+                .Set<UserPermission>()
+                .Where(x => x.UserId == user.Id)
+                .Join(dbContext.Set<Permission>(), up => up.UserId, p => p.Id, (up, p) => p.Code)
+                .CountAsync(code => codes.Contains(code), cancellationToken) != codes.Count
+        )
+        {
+            await rolePermissionChecker.InvalidateUserPermissionsAsync(user.Id);
+        }
+
         await dbContext
             .Set<UserPermission>()
             .Where(up => up.UserId == user.Id)

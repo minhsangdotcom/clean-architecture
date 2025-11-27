@@ -8,7 +8,6 @@ using Application.Contracts.Localization;
 using Domain.Aggregates.Permissions;
 using Domain.Aggregates.Roles;
 using Mediator;
-using Microsoft.Extensions.Localization;
 
 namespace Application.Features.Roles.Commands.Update;
 

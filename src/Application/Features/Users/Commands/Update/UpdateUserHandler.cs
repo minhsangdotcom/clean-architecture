@@ -60,7 +60,7 @@ public class UpdateUserHandler(
             List<string> roles = await unitOfWork
                 .Repository<Role>()
                 .ListAsync(x => updateData.Roles!.Contains(x.Id), x => x.Name, cancellationToken);
-            await userManager.AddToRolesAsync(user, roles, cancellationToken);
+            await userManager.ReplaceRolesAsync(user, roles, cancellationToken);
 
             // add permissions
             if (updateData.Permissions?.Count > 0)
@@ -71,7 +71,7 @@ public class UpdateUserHandler(
                         x => updateData.Permissions.Contains(x.Id),
                         cancellationToken: cancellationToken
                     );
-                await userManager.AddPermissionsAsync(user, permissions, cancellationToken);
+                await userManager.ReplacePermissionsAsync(user, permissions, cancellationToken);
             }
             await unitOfWork.CommitAsync(cancellationToken);
         }

@@ -8,7 +8,11 @@ using Microsoft.Extensions.Logging;
 
 namespace Infrastructure.Services.Identity;
 
-public class RoleManager(IEfDbContext dbContext, ILogger<RoleManager> logger) : IRoleManager
+public class RoleManager(
+    IEfDbContext dbContext,
+    ILogger<RoleManager> logger,
+    IRolePermissionChecker rolePermissionChecker
+) : IRoleManager
 {
     private readonly DbSet<Role> roles = dbContext.Set<Role>();
 
@@ -194,6 +198,18 @@ public class RoleManager(IEfDbContext dbContext, ILogger<RoleManager> logger) : 
     )
     {
         List<Permission> list = [.. permissions];
+        List<string> codes = list.ConvertAll(x => x.Code);
+        if (
+            await dbContext
+                .Set<RolePermission>()
+                .Where(x => x.RoleId == role.Id)
+                .Join(dbContext.Set<Permission>(), rp => rp.RoleId, p => p.Id, (rp, p) => p.Code)
+                .CountAsync(x => codes.Contains(x), cancellationToken) != codes.Count
+        )
+        {
+            await rolePermissionChecker.InvalidateRolePermissionsAsync(role.Id);
+        }
+
         await dbContext
             .Set<RolePermission>()
             .Where(rp => rp.RoleId == role.Id)

@@ -9,4 +9,5 @@ public interface IRolePermissionChecker
     Task<bool> CheckAllRoleAsync(Ulid userId, IEnumerable<string> roleNames);
     Task InvalidateUserRolesAsync(Ulid userId);
     Task InvalidateRolePermissionsAsync(Ulid roleId);
+    Task InvalidateUserPermissionsAsync(Ulid userId);
 }

@@ -53,6 +53,12 @@ public class RolePermissionChecker(
         await cache.RemoveAsync(key);
     }
 
+    public async Task InvalidateUserPermissionsAsync(Ulid userId)
+    {
+        string key = $"permission:user:{userId}";
+        await cache.RemoveAsync(key);
+    }
+
     private async Task<IReadOnlyCollection<string>> GetUserPermissionsAsync(Ulid userId)
     {
         IReadOnlyCollection<Role> roles = await GetUserRolesCachedAsync(userId);
