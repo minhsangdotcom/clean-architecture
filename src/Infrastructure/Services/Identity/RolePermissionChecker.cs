@@ -5,6 +5,7 @@ using Application.Contracts.Permissions;
 using Domain.Aggregates.Roles;
 using Domain.Aggregates.Users;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using Wangkanai.Extensions;
 
 namespace Infrastructure.Services.Identity;
@@ -12,9 +13,12 @@ namespace Infrastructure.Services.Identity;
 public class RolePermissionChecker(
     IMemoryCacheService cache,
     IEfDbContext dbContext,
-    PermissionDefinitionContext permissionDefinitionContext
+    PermissionDefinitionContext permissionDefinitionContext,
+    IOptions<CacheSettings> options
 ) : IRolePermissionChecker
 {
+    private readonly CacheSettings cacheSettings = options.Value;
+
     public async Task<bool> CheckAnyPermissionAsync(Ulid userId, IEnumerable<string> permissions)
     {
         IReadOnlyCollection<string> existentPermissions = await GetUserPermissionsAsync(userId);
@@ -92,8 +96,8 @@ public class RolePermissionChecker(
                 },
                 new CacheOptions()
                 {
-                    ExpirationType = CacheExpirationType.Absolute,
-                    Expiration = TimeSpan.FromMinutes(30),
+                    ExpirationType = CacheExpirationType.Sliding,
+                    Expiration = TimeSpan.FromMinutes(cacheSettings.UserRoles.ExpirationMinutes),
                 }
             ) ?? [];
     }
@@ -113,8 +117,10 @@ public class RolePermissionChecker(
                 },
                 new CacheOptions()
                 {
-                    ExpirationType = CacheExpirationType.Absolute,
-                    Expiration = TimeSpan.FromMinutes(60),
+                    ExpirationType = CacheExpirationType.Sliding,
+                    Expiration = TimeSpan.FromMinutes(
+                        cacheSettings.RolePermissions.ExpirationMinutes
+                    ),
                 }
             ) ?? [];
     }
@@ -135,7 +141,9 @@ public class RolePermissionChecker(
                 new CacheOptions()
                 {
                     ExpirationType = CacheExpirationType.Absolute,
-                    Expiration = TimeSpan.FromMinutes(60),
+                    Expiration = TimeSpan.FromMinutes(
+                        cacheSettings.UserPermissions.ExpirationMinutes
+                    ),
                 }
             ) ?? [];
     }

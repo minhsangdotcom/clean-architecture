@@ -8,7 +8,7 @@ public class RedisDatabaseSettings
 
     public string? Password { get; set; }
 
-    public int DefaultCachingTimeInMinute { get; set; }
+    public int DefaultCacheExpirationInMinute { get; set; }
 
     public bool IsEnabled { get; set; }
 }

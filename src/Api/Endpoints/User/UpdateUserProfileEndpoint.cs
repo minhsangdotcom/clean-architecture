@@ -35,18 +35,9 @@ public class UpdateUserProfileEndpoint : IEndpoint
     > HandleAsync(
         [FromForm] UpdateUserProfileCommand request,
         [FromServices] ISender sender,
-        [FromServices] ICurrentUser currentUser,
-        [FromServices] IMemoryCacheService cacheService,
         CancellationToken cancellationToken = default
     )
     {
-        Ulid? userId = currentUser.Id;
-        string key = $"{nameof(GetUserProfileEndpoint)}:{userId}";
-        bool isExisted = await cacheService.HasKeyAsync(key);
-        if (isExisted)
-        {
-            await cacheService.RemoveAsync(key);
-        }
         var result = await sender.Send(request, cancellationToken);
         return result.ToResult();
     }

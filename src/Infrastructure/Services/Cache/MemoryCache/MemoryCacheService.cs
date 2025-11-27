@@ -7,11 +7,11 @@ namespace Infrastructure.Services.Cache.MemoryCache;
 
 public class MemoryCacheService(
     IMemoryCache cache,
-    IOptions<CacheSettings> options,
+    IOptions<MemoryCacheSettings> options,
     ILogger<MemoryCacheService> logger
 ) : IMemoryCacheService
 {
-    private readonly CacheSettings cacheSettings = options.Value;
+    private readonly MemoryCacheSettings cacheSettings = options.Value;
 
     public T? GetOrSet<T>(string key, Func<T> func, CacheOptions? options = null)
     {
@@ -22,7 +22,7 @@ public class MemoryCacheService(
                 ?? new CacheOptions()
                 {
                     ExpirationType = CacheExpirationType.Absolute,
-                    Expiration = TimeSpan.FromMinutes(cacheSettings.CachingExpirationInMinute),
+                    Expiration = TimeSpan.FromMinutes(cacheSettings.DefaultCacheExpirationInMinute),
                 }
         );
     }
@@ -40,7 +40,7 @@ public class MemoryCacheService(
                 ?? new CacheOptions()
                 {
                     ExpirationType = CacheExpirationType.Absolute,
-                    Expiration = TimeSpan.FromMinutes(cacheSettings.CachingExpirationInMinute),
+                    Expiration = TimeSpan.FromMinutes(cacheSettings.DefaultCacheExpirationInMinute),
                 }
         );
     }

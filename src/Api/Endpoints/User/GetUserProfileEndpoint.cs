@@ -30,23 +30,9 @@ public class GetUserProfileEndpoint : IEndpoint
 
     private async Task<
         Results<Ok<ApiResponse<GetUserProfileResponse>>, ProblemHttpResult>
-    > HandleAsync(
-        [FromServices] ISender sender,
-        [FromServices] ICurrentUser currentUser,
-        [FromServices] IMemoryCacheService cacheService,
-        CancellationToken cancellationToken = default
-    )
+    > HandleAsync([FromServices] ISender sender, CancellationToken cancellationToken = default)
     {
-        Ulid? userId = currentUser.Id;
-        var result = await cacheService.GetOrSetAsync(
-            $"{nameof(GetUserProfileEndpoint)}:{userId}",
-            () => sender.Send(new GetUserProfileQuery(), cancellationToken).AsTask(),
-            new CacheOptions()
-            {
-                ExpirationType = CacheExpirationType.Sliding,
-                Expiration = TimeSpan.FromMinutes(15),
-            }
-        );
+        var result = await sender.Send(new GetUserProfileQuery(), cancellationToken);
         return result!.ToResult();
     }
 }

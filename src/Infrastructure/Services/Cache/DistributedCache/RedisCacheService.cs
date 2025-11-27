@@ -24,7 +24,7 @@ public class RedisCacheService(
                 {
                     ExpirationType = CacheExpirationType.Absolute,
                     Expiration = TimeSpan.FromMinutes(
-                        redisDatabaseSettings.DefaultCachingTimeInMinute
+                        redisDatabaseSettings.DefaultCacheExpirationInMinute
                     ),
                 }
         );
@@ -44,7 +44,7 @@ public class RedisCacheService(
                 {
                     ExpirationType = CacheExpirationType.Absolute,
                     Expiration = TimeSpan.FromMinutes(
-                        redisDatabaseSettings.DefaultCachingTimeInMinute
+                        redisDatabaseSettings.DefaultCacheExpirationInMinute
                     ),
                 }
         );
@@ -110,7 +110,7 @@ public class RedisCacheService(
         {
             expiry =
                 options.Expiration
-                ?? TimeSpan.FromMinutes(redisDatabaseSettings.DefaultCachingTimeInMinute);
+                ?? TimeSpan.FromMinutes(redisDatabaseSettings.DefaultCacheExpirationInMinute);
         }
 
         await redis.StringSetAsync(key, json, expiry);
@@ -163,7 +163,7 @@ public class RedisCacheService(
         {
             expiry =
                 options.Expiration
-                ?? TimeSpan.FromMinutes(redisDatabaseSettings.DefaultCachingTimeInMinute);
+                ?? TimeSpan.FromMinutes(redisDatabaseSettings.DefaultCacheExpirationInMinute);
         }
 
         redis.StringSet(key, json, expiry);
