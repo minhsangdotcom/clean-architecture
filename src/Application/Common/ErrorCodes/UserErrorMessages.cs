@@ -224,6 +224,31 @@ public class UserErrorMessages
     public static string UserNotFound =>
         Messenger.Create<User>().WithError(MessageErrorType.Found).Negative().GetFullMessage();
 
+    [ErrorKey(nameof(UserOldPasswordRequired))]
+    public static string UserOldPasswordRequired =>
+        Messenger
+            .Create<ChangeUserPasswordCommand>(nameof(User))
+            .Property(x => x.OldPassword!)
+            .WithError(MessageErrorType.Required)
+            .GetFullMessage();
+
+    [ErrorKey(nameof(UserNewPasswordRequired))]
+    public static string UserNewPasswordRequired =>
+        Messenger
+            .Create<ChangeUserPasswordCommand>(nameof(User))
+            .Property(x => x.NewPassword!)
+            .WithError(MessageErrorType.Required)
+            .GetFullMessage();
+
+    [ErrorKey(nameof(UserNewPasswordNotStrong))]
+    public static string UserNewPasswordNotStrong =>
+        Messenger
+            .Create<ChangeUserPasswordCommand>(nameof(User))
+            .Property(x => x.NewPassword!)
+            .WithError(MessageErrorType.Strong)
+            .Negative()
+            .GetFullMessage();
+
     [ErrorKey(nameof(UserOldPasswordIncorrect))]
     public static string UserOldPasswordIncorrect =>
         Messenger

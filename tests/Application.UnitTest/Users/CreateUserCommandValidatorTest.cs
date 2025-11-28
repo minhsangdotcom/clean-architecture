@@ -1,14 +1,12 @@
 using System.Text.RegularExpressions;
+using Application.Common.Interfaces.Services.Localization;
 using Application.Contracts.ApiWrapper;
 using Application.Contracts.Messages;
 using Application.Features.Users.Commands.Create;
-using Application.UnitTest.Extensions;
-using AutoFixture;
 using Domain.Aggregates.Users;
 using Domain.Aggregates.Users.Enums;
 using FluentValidation;
 using FluentValidation.TestHelper;
-using Microsoft.Extensions.Localization;
 using Moq;
 
 namespace Application.UnitTest.Users;
@@ -17,17 +15,16 @@ public partial class CreateUserCommandValidatorTest
 {
     private readonly InlineValidator<CreateUserCommand> mockValidator;
 
-    private readonly Fixture fixture = new();
     private readonly CreateUserCommand? command = null;
     private readonly Ulid roleId;
-    private readonly Mock<IStringLocalizer<CreateUserCommandValidator>> stringLocalizer;
+    private readonly Mock<IMessageTranslatorService> translatorMock = new();
+    private readonly IMessageTranslatorService translator;
 
     public CreateUserCommandValidatorTest()
     {
         mockValidator = [];
         roleId = Ulid.Parse("01JS72XZJ6NFKFVWA9QM03RY5G");
-        stringLocalizer =
-            LocalizerMockHelper.CreateStringLocalizerMock<CreateUserCommandValidator>();
+        translator = translatorMock.Object;
     }
 
     [Theory]
@@ -45,7 +42,7 @@ public partial class CreateUserCommandValidatorTest
             .WithError(MessageErrorType.Required)
             .GetFullMessage();
 
-        ErrorReason expectedState = new(errorMessage, stringLocalizer.Object[errorMessage]);
+        ErrorReason expectedState = new(errorMessage, translator.Translate(errorMessage));
 
         mockValidator.RuleFor(x => x.FirstName).NotEmpty().WithState(_ => expectedState);
 
@@ -63,7 +60,6 @@ public partial class CreateUserCommandValidatorTest
     public async Task Validate_WhenInvalidLengthOfFirstName_ShouldReturnMaximumLengthFailure()
     {
         // arrange
-        command!.FirstName = new string([.. fixture.CreateMany<char>(257)]);
 
         string errorMessage = Messenger
             .Create<User>()
@@ -71,7 +67,7 @@ public partial class CreateUserCommandValidatorTest
             .WithError(MessageErrorType.TooLong)
             .GetFullMessage();
 
-        ErrorReason expectedState = new(errorMessage, stringLocalizer.Object[errorMessage]);
+        ErrorReason expectedState = new(errorMessage, translator.Translate(errorMessage));
 
         mockValidator.RuleFor(x => x.FirstName).MaximumLength(256).WithState(_ => expectedState);
 
@@ -100,7 +96,7 @@ public partial class CreateUserCommandValidatorTest
             .WithError(MessageErrorType.Required)
             .GetFullMessage();
 
-        ErrorReason expectedState = new(errorMessage, stringLocalizer.Object[errorMessage]);
+        ErrorReason expectedState = new(errorMessage, translator.Translate(errorMessage));
 
         mockValidator.RuleFor(x => x.LastName).NotEmpty().WithState(_ => expectedState);
 
@@ -118,7 +114,6 @@ public partial class CreateUserCommandValidatorTest
     public async Task Validate_WhenInvalidLengthOfLastName_ShouldReturnMaximumLengthFailure()
     {
         // arrange
-        command!.LastName = new string([.. fixture.CreateMany<char>(257)]);
 
         string errorMessage = Messenger
             .Create<User>()
@@ -126,7 +121,7 @@ public partial class CreateUserCommandValidatorTest
             .WithError(MessageErrorType.TooLong)
             .GetFullMessage();
 
-        ErrorReason expectedState = new(errorMessage, stringLocalizer.Object[errorMessage]);
+        ErrorReason expectedState = new(errorMessage, translator.Translate(errorMessage));
 
         mockValidator.RuleFor(x => x.LastName).MaximumLength(256).WithState(_ => expectedState);
 
@@ -155,7 +150,7 @@ public partial class CreateUserCommandValidatorTest
             .WithError(MessageErrorType.Required)
             .GetFullMessage();
 
-        ErrorReason expectedState = new(errorMessage, stringLocalizer.Object[errorMessage]);
+        ErrorReason expectedState = new(errorMessage, translator.Translate(errorMessage));
 
         mockValidator.RuleFor(x => x.Email).NotEmpty().WithState(_ => expectedState);
 
@@ -185,7 +180,7 @@ public partial class CreateUserCommandValidatorTest
             .WithError(MessageErrorType.Valid)
             .GetFullMessage();
 
-        ErrorReason expectedState = new(errorMessage, stringLocalizer.Object[errorMessage]);
+        ErrorReason expectedState = new(errorMessage, translator.Translate(errorMessage));
 
         mockValidator
             .RuleFor(x => x.Email)
@@ -219,7 +214,7 @@ public partial class CreateUserCommandValidatorTest
             .WithError(MessageErrorType.Existent)
             .GetFullMessage();
 
-        ErrorReason expectedState = new(errorMessage, stringLocalizer.Object[errorMessage]);
+        ErrorReason expectedState = new(errorMessage, translator.Translate(errorMessage));
 
         mockValidator
             .RuleFor(x => x.Email)
@@ -257,7 +252,7 @@ public partial class CreateUserCommandValidatorTest
             .WithError(MessageErrorType.Required)
             .GetFullMessage();
 
-        ErrorReason expectedState = new(errorMessage, stringLocalizer.Object[errorMessage]);
+        ErrorReason expectedState = new(errorMessage, translator.Translate(errorMessage));
 
         mockValidator.RuleFor(x => x.PhoneNumber).NotEmpty().WithState(_ => expectedState);
 
@@ -288,7 +283,7 @@ public partial class CreateUserCommandValidatorTest
             .WithError(MessageErrorType.Valid)
             .GetFullMessage();
 
-        ErrorReason expectedState = new(errorMessage, stringLocalizer.Object[errorMessage]);
+        ErrorReason expectedState = new(errorMessage, translator.Translate(errorMessage));
 
         mockValidator
             .RuleFor(x => x.PhoneNumber)
@@ -324,7 +319,7 @@ public partial class CreateUserCommandValidatorTest
             .WithError(MessageErrorType.Required)
             .GetFullMessage();
 
-        ErrorReason expectedState = new(errorMessage, stringLocalizer.Object[errorMessage]);
+        ErrorReason expectedState = new(errorMessage, translator.Translate(errorMessage));
 
         mockValidator.RuleFor(x => x.Username).NotEmpty().WithState(_ => expectedState);
 
@@ -354,7 +349,7 @@ public partial class CreateUserCommandValidatorTest
             .WithError(MessageErrorType.Valid)
             .GetFullMessage();
 
-        ErrorReason expectedState = new(errorMessage, stringLocalizer.Object[errorMessage]);
+        ErrorReason expectedState = new(errorMessage, translator.Translate(errorMessage));
 
         mockValidator
             .RuleFor(x => x.Username)
@@ -390,7 +385,7 @@ public partial class CreateUserCommandValidatorTest
             .WithError(MessageErrorType.Existent)
             .GetFullMessage();
 
-        ErrorReason expectedState = new(errorMessage, stringLocalizer.Object[errorMessage]);
+        ErrorReason expectedState = new(errorMessage, translator.Translate(errorMessage));
 
         mockValidator
             .RuleFor(x => x.Username)
@@ -429,7 +424,7 @@ public partial class CreateUserCommandValidatorTest
             .WithError(MessageErrorType.Required)
             .GetFullMessage();
 
-        ErrorReason expectedState = new(errorMessage, stringLocalizer.Object[errorMessage]);
+        ErrorReason expectedState = new(errorMessage, translator.Translate(errorMessage));
 
         mockValidator.RuleFor(x => x.Password).NotEmpty().WithState(_ => expectedState);
 
@@ -459,7 +454,7 @@ public partial class CreateUserCommandValidatorTest
             .WithError(MessageErrorType.Strong)
             .GetFullMessage();
 
-        ErrorReason expectedState = new(errorMessage, stringLocalizer.Object[errorMessage]);
+        ErrorReason expectedState = new(errorMessage, translator.Translate(errorMessage));
 
         mockValidator
             .RuleFor(x => x.Password)
@@ -499,7 +494,7 @@ public partial class CreateUserCommandValidatorTest
             .WithError(MessageErrorType.AmongTheAllowedOptions)
             .GetFullMessage();
 
-        ErrorReason expectedState = new(errorMessage, stringLocalizer.Object[errorMessage]);
+        ErrorReason expectedState = new(errorMessage, translator.Translate(errorMessage));
 
         mockValidator.RuleFor(x => x.Gender).IsInEnum().WithState(_ => expectedState);
 
@@ -526,7 +521,7 @@ public partial class CreateUserCommandValidatorTest
             .WithError(MessageErrorType.Required)
             .GetFullMessage();
 
-        ErrorReason expectedState = new(errorMessage, stringLocalizer.Object[errorMessage]);
+        ErrorReason expectedState = new(errorMessage, translator.Translate(errorMessage));
 
         mockValidator.RuleFor(x => x.Status).NotEmpty().WithState(_ => expectedState);
 
@@ -557,7 +552,7 @@ public partial class CreateUserCommandValidatorTest
             .WithError(MessageErrorType.AmongTheAllowedOptions)
             .GetFullMessage();
 
-        ErrorReason expectedState = new(errorMessage, stringLocalizer.Object[errorMessage]);
+        ErrorReason expectedState = new(errorMessage, translator.Translate(errorMessage));
 
         mockValidator.RuleFor(x => x.Status).IsInEnum().WithState(_ => expectedState);
 
@@ -584,7 +579,7 @@ public partial class CreateUserCommandValidatorTest
             .WithError(MessageErrorType.Required)
             .GetFullMessage();
 
-        ErrorReason expectedState = new(errorMessage, stringLocalizer.Object[errorMessage]);
+        ErrorReason expectedState = new(errorMessage, translator.Translate(errorMessage));
 
         mockValidator.RuleFor(x => x.Roles).NotEmpty().WithState(_ => expectedState);
 
@@ -611,7 +606,7 @@ public partial class CreateUserCommandValidatorTest
             .WithError(MessageErrorType.Unique)
             .GetFullMessage();
 
-        ErrorReason expectedState = new(errorMessage, stringLocalizer.Object[errorMessage]);
+        ErrorReason expectedState = new(errorMessage, translator.Translate(errorMessage));
 
         mockValidator
             .RuleFor(x => x.Roles)
@@ -642,7 +637,7 @@ public partial class CreateUserCommandValidatorTest
             .WithError(MessageErrorType.Found)
             .GetFullMessage();
 
-        ErrorReason expectedState = new(errorMessage, stringLocalizer.Object[errorMessage]);
+        ErrorReason expectedState = new(errorMessage, translator.Translate(errorMessage));
 
         mockValidator
             .RuleFor(x => x.Roles)

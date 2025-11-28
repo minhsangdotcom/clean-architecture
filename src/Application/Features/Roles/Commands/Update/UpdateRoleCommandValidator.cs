@@ -6,7 +6,7 @@ using FluentValidation;
 
 namespace Application.Features.Roles.Commands.Update;
 
-public class UpdateRoleCommandValidator : AbstractValidator<UpdateRoleRequest>
+public class UpdateRoleCommandValidator : AbstractValidator<UpdateRoleCommand>
 {
     public UpdateRoleCommandValidator(
         IEfUnitOfWork unitOfWork,
@@ -14,6 +14,7 @@ public class UpdateRoleCommandValidator : AbstractValidator<UpdateRoleRequest>
         IMessageTranslatorService translator
     )
     {
-        Include(new RoleValidator(unitOfWork, httpContextAccessorService, translator));
+        RuleFor(x => x.UpdateData)
+            .SetValidator(new RoleValidator(unitOfWork, httpContextAccessorService, translator));
     }
 }

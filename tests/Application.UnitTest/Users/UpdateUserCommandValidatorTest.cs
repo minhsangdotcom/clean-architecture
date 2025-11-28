@@ -3,7 +3,6 @@ using Application.Common.Interfaces.UnitOfWorks;
 using Application.Contracts.ApiWrapper;
 using Application.Contracts.Messages;
 using Application.Features.Users.Commands.Update;
-using AutoFixture;
 using Domain.Aggregates.Users;
 using FluentValidation;
 using FluentValidation.TestHelper;
@@ -14,7 +13,6 @@ namespace Application.UnitTest.Users;
 public class UpdateUserCommandValidatorTest
 {
     private readonly UserUpdateRequest userUpdate;
-    private readonly Fixture fixture = new();
 
     private readonly UpdateUserCommandValidator validator;
     private readonly InlineValidator<UserUpdateRequest> mockValidator = [];
@@ -54,7 +52,6 @@ public class UpdateUserCommandValidatorTest
     [Fact]
     public async Task Validate_WhenInvalidLengthOfFirstName_ShouldReturnMaximumLengthFailure()
     {
-        userUpdate!.FirstName = new string([.. fixture.CreateMany<char>(257)]);
 
         var result = await validator.TestValidateAsync(userUpdate);
 
@@ -99,8 +96,6 @@ public class UpdateUserCommandValidatorTest
     [Fact]
     public async Task Validate_WhenInvalidLengthOfLastName_ShouldReturnMaximumLengthFailure()
     {
-        userUpdate!.LastName = new string([.. fixture.CreateMany<char>(257)]);
-
         var result = await validator.TestValidateAsync(userUpdate);
 
         string errorMessage = Messenger

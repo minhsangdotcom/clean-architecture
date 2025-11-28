@@ -1,8 +1,7 @@
+using Application.Common.ErrorCodes;
 using Application.Common.Interfaces.Services.Localization;
 using Application.Contracts.ApiWrapper;
-using Application.Contracts.Messages;
 using Application.Features.Users.Commands.ChangePassword;
-using Domain.Aggregates.Users;
 using FluentValidation.TestHelper;
 using Moq;
 
@@ -14,7 +13,6 @@ public class ChangeUserPasswordCommandTest
         new() { OldPassword = "Admin@123", NewPassword = "Admin@456" };
 
     private readonly Mock<IMessageTranslatorService> translator = new();
-
     private readonly ChangeUserPasswordCommandValidator validator;
 
     public ChangeUserPasswordCommandTest()
@@ -25,25 +23,21 @@ public class ChangeUserPasswordCommandTest
     [Theory]
     [InlineData(null)]
     [InlineData("")]
-    public async Task Validate_WhenOldPasswordIsNullOrEmpty_ShouldReturnNullFailure(
-        string oldPassword
-    )
+    public async Task Should_HaveError_When_OldPasswordIsNullOrEmpty(string oldPassword)
     {
-        //arrage
+        //Arrange
         command.OldPassword = oldPassword;
+        translator.SetupTranslate(
+            UserErrorMessages.UserOldPasswordRequired,
+            SharedResource.TranslateText
+        );
 
         //act
         var result = await validator.TestValidateAsync(command);
 
         //assert
-        string errorMessage = Messenger
-            .Create<ChangeUserPasswordCommand>(nameof(User))
-            .Property(x => x.OldPassword!)
-            .Negative()
-            .WithError(MessageErrorType.Required)
-            .GetFullMessage();
-
-        ErrorReason expectedState = new(errorMessage, translator.Object.Translate(errorMessage));
+        ErrorReason expectedState =
+            new(UserErrorMessages.UserOldPasswordRequired, SharedResource.TranslateText);
         result
             .ShouldHaveValidationErrorFor(x => x.OldPassword)
             .WithCustomState(expectedState, new ErrorReasonComparer())
@@ -53,23 +47,21 @@ public class ChangeUserPasswordCommandTest
     [Theory]
     [InlineData(null)]
     [InlineData("")]
-    public async Task Validate_WhenNewPasswordNullOrEmpty_ShouldReturnNullFailure(string password)
+    public async Task Should_HaveError_When_NewPasswordIsNullOrEmpty(string password)
     {
-        //arrage
+        //Arrange
         command.NewPassword = password;
+        translator.SetupTranslate(
+            UserErrorMessages.UserNewPasswordRequired,
+            SharedResource.TranslateText
+        );
 
         //act
         var result = await validator.TestValidateAsync(command);
 
         //assert
-        string errorMessage = Messenger
-            .Create<ChangeUserPasswordCommand>(nameof(User))
-            .Property(x => x.NewPassword!)
-            .Negative()
-            .WithError(MessageErrorType.Required)
-            .GetFullMessage();
-
-        ErrorReason expectedState = new(errorMessage, translator.Object.Translate(errorMessage));
+        ErrorReason expectedState =
+            new(UserErrorMessages.UserNewPasswordRequired, SharedResource.TranslateText);
         result
             .ShouldHaveValidationErrorFor(x => x.NewPassword)
             .WithCustomState(expectedState, new ErrorReasonComparer())
@@ -80,23 +72,21 @@ public class ChangeUserPasswordCommandTest
     [InlineData("12345678")]
     [InlineData("admin@123")]
     [InlineData("admin0123")]
-    public async Task Validate_WhenNewPasswordNotStrong_ShouldReturnNullFailure(string password)
+    public async Task Should_HaveError_When_NewPasswordNotStrong(string password)
     {
-        //arrage
+        //arrange
         command.NewPassword = password;
+        translator.SetupTranslate(
+            UserErrorMessages.UserNewPasswordNotStrong,
+            SharedResource.TranslateText
+        );
 
         //act
         var result = await validator.TestValidateAsync(command);
 
         //assert
-        string errorMessage = Messenger
-            .Create<ChangeUserPasswordCommand>(nameof(User))
-            .Property(x => x.NewPassword!)
-            .Negative()
-            .WithError(MessageErrorType.Strong)
-            .GetFullMessage();
-
-        ErrorReason expectedState = new(errorMessage, translator.Object.Translate(errorMessage));
+        ErrorReason expectedState =
+            new(UserErrorMessages.UserNewPasswordNotStrong, SharedResource.TranslateText);
 
         result
             .ShouldHaveValidationErrorFor(x => x.NewPassword)

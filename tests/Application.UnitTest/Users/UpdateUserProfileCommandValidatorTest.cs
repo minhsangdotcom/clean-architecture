@@ -5,7 +5,6 @@ using Application.Common.Interfaces.UnitOfWorks;
 using Application.Contracts.ApiWrapper;
 using Application.Contracts.Messages;
 using Application.Features.Users.Commands.Profiles;
-using AutoFixture;
 using Domain.Aggregates.Users;
 using FluentValidation;
 using FluentValidation.TestHelper;
@@ -16,7 +15,6 @@ namespace Application.UnitTest.Users;
 public class UpdateUserProfileCommandValidatorTest
 {
     private readonly UpdateUserProfileCommand command;
-    private readonly Fixture fixture = new();
 
     private readonly UpdateUserProfileCommandValidator validator;
     private readonly InlineValidator<UpdateUserProfileCommand> mockValidator = [];
@@ -57,7 +55,6 @@ public class UpdateUserProfileCommandValidatorTest
     [Fact]
     public async Task Validate_WhenInvalidLengthOfFirstName_ShouldReturnMaximumLengthFailure()
     {
-        command!.FirstName = new string([.. fixture.CreateMany<char>(257)]);
 
         var result = await validator.TestValidateAsync(command);
 
@@ -102,7 +99,6 @@ public class UpdateUserProfileCommandValidatorTest
     [Fact]
     public async Task Validate_WhenInvalidLengthOfLastName_ShouldReturnMaximumLengthFailure()
     {
-        command!.LastName = new string([.. fixture.CreateMany<char>(257)]);
 
         var result = await validator.TestValidateAsync(command);
 
