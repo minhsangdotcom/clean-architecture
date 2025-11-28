@@ -66,14 +66,12 @@ public class UpdateUserHandlerTest(TestingFixture testingFixture) : IAsyncLifeti
     public async Task InitializeAsync()
     {
         await testingFixture.ResetAsync();
-        UserAddress address = await testingFixture.SeedingRegionsAsync();
-
         IFormFile file = FileHelper.GenerateIFormfile(
             Path.Combine(Directory.GetCurrentDirectory(), "Files", "avatar_cute_2.jpg")
         );
 
         updateUserCommand = UserMappingExtension.ToUpdateUserCommand(
-            await testingFixture.CreateManagerUserAsync(address, file)
+            await testingFixture.CreateManagerUserAsync(file)
         );
     }
 }

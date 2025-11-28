@@ -12,6 +12,7 @@ namespace Application.SubcutaneousTests.Users.Profie;
 public class UpdateUserProfileCommandHandlerTest(TestingFixture testingFixture) : IAsyncLifetime
 {
     private UpdateUserProfileCommand updateUserCommand = new();
+
     [Fact]
     private async Task UpdateProfile_WhenIdNotfound_ShouldReturnNotFoundResult()
     {
@@ -64,14 +65,13 @@ public class UpdateUserProfileCommandHandlerTest(TestingFixture testingFixture) 
     public async Task InitializeAsync()
     {
         await testingFixture.ResetAsync();
-        UserAddress address = await testingFixture.SeedingRegionsAsync();
 
         IFormFile file = FileHelper.GenerateIFormfile(
             Path.Combine(Directory.GetCurrentDirectory(), "Files", "avatar_cute_2.jpg")
         );
 
         updateUserCommand = UserMappingExtension.ToUpdateUserProfileCommand(
-            await testingFixture.CreateNormalUserAsync(address, file)
+            await testingFixture.CreateNormalUserAsync(file)
         );
     }
 }

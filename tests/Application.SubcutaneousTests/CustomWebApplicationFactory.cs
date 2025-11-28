@@ -1,5 +1,6 @@
 using System.Data.Common;
 using Application.Common.Interfaces.Services;
+using Application.Contracts.Permissions;
 using Infrastructure.Data;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
@@ -40,6 +41,15 @@ public class CustomWebApplicationFactory<TProgram>(
                 .AddTransient(provider =>
                     Mock.Of<ICurrentUser>(x => x.Id == TestingFixture.GetUserId())
                 );
+
+            services
+                .RemoveAll<PermissionDefinitionContext>()
+                .AddSingleton(_ =>
+                {
+                    PermissionDefinitionContext context = new();
+                    new SystemPermissionDefinitionProvider().Define(context);
+                    return context;
+                });
         });
         builder.UseEnvironment(environmentName);
     }

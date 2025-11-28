@@ -56,7 +56,6 @@ public class CreateUserHandlerTest(TestingFixture testingFixture) : IAsyncLifeti
     public async Task InitializeAsync()
     {
         await testingFixture.ResetAsync();
-        UserAddress address = await testingFixture.SeedingRegionsAsync();
         Role role = await testingFixture.CreateAdminRoleAsync();
         roleId = role.Id;
 

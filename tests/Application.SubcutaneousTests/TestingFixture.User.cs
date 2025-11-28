@@ -15,7 +15,7 @@ namespace Application.SubcutaneousTests;
 
 public partial class TestingFixture
 {
-    public async Task<UserAddress> SeedingRegionsAsync()
+    public async Task<AddressResult> SeedingRegionsAsync()
     {
         using var scope = factory!.Services.CreateScope();
         var provider = scope.ServiceProvider;
@@ -30,6 +30,7 @@ public partial class TestingFixture
             return GetDefaultAddress();
         }
 
+        // read from bin/
         string path = AppContext.BaseDirectory;
         string fullPath = Path.Combine(path, "Data", "Seeds");
 
@@ -53,17 +54,14 @@ public partial class TestingFixture
         await unitOfWork.Repository<Commune>().AddAsync(commune);
 
         await unitOfWork.SaveAsync();
-
         return new(province.Id, district.Id, commune.Id);
     }
 
     public async Task<User> CreateAdminUserAsync(
-        UserAddress? address = null,
         IFormFile? avatar = null,
         List<Ulid>? roleIds = null
     )
     {
-        address ??= GetDefaultAddress();
         Role role = await CreateAdminRoleAsync();
         List<Ulid> roles = roleIds ?? [];
         roles.Add(role.Id);
@@ -90,12 +88,10 @@ public partial class TestingFixture
     }
 
     public async Task<User> CreateManagerUserAsync(
-        UserAddress? address = null,
         IFormFile? avatar = null,
         List<Ulid>? roleIds = null
     )
     {
-        address ??= GetDefaultAddress();
         Role role = await CreateManagerRoleAsync();
         List<Ulid> roles = roleIds ?? [];
         roles.Add(role.Id);
@@ -121,12 +117,10 @@ public partial class TestingFixture
     }
 
     public async Task<User> CreateNormalUserAsync(
-        UserAddress? address = null,
         IFormFile? avatar = null,
         List<Ulid>? roleIds = null
     )
     {
-        address ??= GetDefaultAddress();
         Role role = await CreateNormalRoleAsync();
         List<Ulid> roles = roleIds ?? [];
         roles.Add(role.Id);
@@ -162,10 +156,17 @@ public partial class TestingFixture
     {
         using var scope = factory!.Services.CreateScope();
         IUserManager userManager = scope.ServiceProvider.GetRequiredService<IUserManager>();
+        return await userManager.FindByIdAsync(userId, false);
+    }
+
+    public async Task<User?> FindUserByIdInCludeChildrenAsync(Ulid userId)
+    {
+        using var scope = factory!.Services.CreateScope();
+        IUserManager userManager = scope.ServiceProvider.GetRequiredService<IUserManager>();
         return await userManager.FindByIdAsync(userId);
     }
 
-    private static UserAddress GetDefaultAddress() =>
+    private static AddressResult GetDefaultAddress() =>
         new(
             Ulid.Parse("01JRQHWS3RQR1N0J84EV1DQXR1"),
             Ulid.Parse("01JRQHWSNPR3Z8Z20GBSB22CSJ"),
@@ -176,9 +177,9 @@ public partial class TestingFixture
         where T : class
     {
         using FileStream json = File.OpenRead(path);
-        List<T>? datas = JsonSerializer.Deserialize<List<T>>(json);
-        return datas;
+        List<T>? data = JsonSerializer.Deserialize<List<T>>(json);
+        return data;
     }
 }
 
-public record UserAddress(Ulid ProvinceId, Ulid DistrictId, Ulid CommuneId);
+public record AddressResult(Ulid ProvinceId, Ulid DistrictId, Ulid CommuneId);

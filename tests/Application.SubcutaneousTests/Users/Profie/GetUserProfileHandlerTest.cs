@@ -1,6 +1,5 @@
 using Application.Contracts.Messages;
 using Application.Features.Users.Queries.Profiles;
-using Application.SubcutaneousTests.Extensions;
 using Domain.Aggregates.Users;
 using Shouldly;
 
@@ -29,9 +28,7 @@ public class GetUserProfileHandlerTest(TestingFixture testingFixture) : IAsyncLi
     {
         //arrage
         var regions = await testingFixture.SeedingRegionsAsync();
-        var user = await testingFixture.CreateNormalUserAsync(
-            new UserAddress(regions.ProvinceId, regions.DistrictId, regions.CommuneId)
-        );
+        var user = await testingFixture.CreateNormalUserAsync();
         //act
         var result = await testingFixture.SendAsync(new GetUserProfileQuery());
         //assert

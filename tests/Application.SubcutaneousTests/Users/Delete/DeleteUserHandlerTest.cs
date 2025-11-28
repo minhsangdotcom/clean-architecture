@@ -42,8 +42,7 @@ public class DeleteUserHandlerTest(TestingFixture testingFixture) : IAsyncLifeti
     public async Task InitializeAsync()
     {
         await testingFixture.ResetAsync();
-        UserAddress address = await testingFixture.SeedingRegionsAsync();
-        User user = await testingFixture.CreateNormalUserAsync(address);
+        User user = await testingFixture.CreateNormalUserAsync();
         id = user.Id;
     }
 }

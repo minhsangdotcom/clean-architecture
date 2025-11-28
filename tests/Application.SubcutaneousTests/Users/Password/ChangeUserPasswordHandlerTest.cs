@@ -2,6 +2,7 @@ using Application.Contracts.Messages;
 using Application.Features.Users.Commands.ChangePassword;
 using Application.SubcutaneousTests.Extensions;
 using Domain.Aggregates.Users;
+using Infrastructure.Constants;
 using Shouldly;
 
 namespace Application.SubcutaneousTests.Users.Password;
@@ -54,7 +55,7 @@ public class ChangeUserPasswordHandlerTest(TestingFixture testingFixture) : IAsy
         var result = await testingFixture.SendAsync(
             new ChangeUserPasswordCommand()
             {
-                OldPassword = TestingFixture.DEFAULT_USER_PASSWORD,
+                OldPassword = Credential.USER_DEFAULT_PASSWORD,
                 NewPassword = newPassowrd,
             }
         );
@@ -72,10 +73,7 @@ public class ChangeUserPasswordHandlerTest(TestingFixture testingFixture) : IAsy
     public async Task InitializeAsync()
     {
         await testingFixture.ResetAsync();
-        var regions = await testingFixture.SeedingRegionsAsync();
-        var user = await testingFixture.CreateNormalUserAsync(
-            new UserAddress(regions.ProvinceId, regions.DistrictId, regions.CommuneId)
-        );
+        var user = await testingFixture.CreateNormalUserAsync();
         id = user.Id;
     }
 }

@@ -1,6 +1,5 @@
 using Application.Contracts.Messages;
 using Application.Features.Users.Queries.Detail;
-using Application.SubcutaneousTests.Extensions;
 using Domain.Aggregates.Users;
 using Shouldly;
 
@@ -30,10 +29,7 @@ public class GetUserDetailHandlerTest(TestingFixture testingFixture) : IAsyncLif
     public async Task GetUser_ShouldSuccess()
     {
         //arrage
-        var regions = await testingFixture.SeedingRegionsAsync();
-        var user = await testingFixture.CreateNormalUserAsync(
-            new UserAddress(regions.ProvinceId, regions.DistrictId, regions.CommuneId)
-        );
+        var user = await testingFixture.CreateNormalUserAsync();
         //act
         var result = await testingFixture.SendAsync(new GetUserDetailQuery(user.Id.ToString()));
         //assert
