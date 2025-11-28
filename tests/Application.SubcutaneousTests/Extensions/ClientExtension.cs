@@ -2,7 +2,9 @@ using System.Collections;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Net.Mime;
+using System.Reflection;
 using System.Text;
+using Application.SubcutaneousTests.Dtos.Requests;
 using DotNetCoreExtension.Extensions;
 using DotNetCoreExtension.Extensions.Reflections;
 using Microsoft.AspNetCore.Http;
@@ -14,130 +16,160 @@ public static class ClientExtension
     public static async Task<T?> ToResponse<T>(this HttpResponseMessage responseMessage) =>
         await responseMessage.Content.ReadFromJsonAsync<T>();
 
-    public static async Task<HttpResponseMessage> CreateRequestAsync(
+    public static async Task<HttpResponseMessage> SendAsync(
         this HttpClient client,
-        string uriString,
-        HttpMethod method,
-        object payload,
-        string? contentType = null,
-        string? token = null
+        HttpTestRequest request
     )
     {
-        Uri uri = new(uriString);
-        HttpContent content =
-            contentType == "multipart/form-data"
-                ? CreateMultipartFormDataContent(payload)
-                : new StringContent(
-                    SerializerExtension.Serialize(payload).StringJson,
-                    Encoding.UTF8,
-                    contentType ?? "application/json"
-                );
+        ArgumentNullException.ThrowIfNull(client);
+
         using HttpRequestMessage httpRequest =
             new()
             {
-                Method = method,
-                RequestUri = uri,
-                Content = content,
+                Method = request.Method,
+                RequestUri = new Uri(request.Uri),
+                Content = CreateContent(request),
             };
-        if (!string.IsNullOrWhiteSpace(token))
+
+        // Add Bearer token per request (not globally on client)
+        if (!string.IsNullOrWhiteSpace(request.Token))
         {
-            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(
+            httpRequest.Headers.Authorization = new AuthenticationHeaderValue(
                 "Bearer",
-                token
+                request.Token
             );
         }
+
         return await client.SendAsync(httpRequest);
     }
 
-    public static MultipartFormDataContent CreateMultipartFormDataContent(object obj)
+    private static HttpContent CreateContent(HttpTestRequest req)
     {
-        var multipartContent = new MultipartFormDataContent();
-
-        foreach (var property in obj.GetType().GetProperties())
+        if (req.Payload == null)
         {
-            var propertyName = property.Name;
-            var propertyValue = property.GetValue(obj);
+            return new StringContent(string.Empty);
+        }
 
-            if (propertyValue == null)
+        if (req.ContentType == "multipart/form-data")
+        {
+            return CreateMultipartFormData(req.Payload);
+        }
+
+        // JSON or other structured type
+        string json = SerializerExtension.Serialize(req.Payload).StringJson;
+        return new StringContent(json, Encoding.UTF8, req.ContentType ?? "application/json");
+    }
+
+    private static MultipartFormDataContent CreateMultipartFormData(object payload)
+    {
+        MultipartFormDataContent content = [];
+        Type type = payload.GetType();
+
+        foreach (PropertyInfo prop in type.GetProperties())
+        {
+            string name = prop.Name;
+            object? value = prop.GetValue(payload);
+
+            if (value == null)
             {
                 continue;
             }
 
-            if (propertyValue is IFormFile formFile)
+            if (value is IFormFile formFile)
             {
-                var streamContent = new StreamContent(formFile.OpenReadStream());
-                streamContent.Headers.ContentType = MediaTypeHeaderValue.Parse(
-                    "multipart/form-data"
-                );
-                multipartContent.Add(streamContent, propertyName, formFile.FileName);
+                AddFile(content, name, formFile);
                 continue;
             }
 
             if (
-                propertyValue != null
-                && typeof(IEnumerable).IsAssignableFrom(property.PropertyType)
-                && property.PropertyType != typeof(string)
+                typeof(IEnumerable).IsAssignableFrom(prop.PropertyType)
+                && prop.PropertyType != typeof(string)
             )
             {
-                Type genericType = property.PropertyType.GetGenericArguments()[0];
-                IList list = (IList)propertyValue;
-                if (genericType.IsUserDefineType())
-                {
-                    foreach (var item in list)
-                    {
-                        var properties = item.GetType().GetProperties();
-                        for (int i = 0; i < properties.Length; i++)
-                        {
-                            var prop = properties[i];
-                            string name = prop.Name;
-                            object? value = prop.GetValue(item);
-
-                            if (value != null)
-                            {
-                                multipartContent.Add(
-                                    new StringContent(
-                                        value.ToString()!,
-                                        Encoding.UTF8,
-                                        MediaTypeNames.Text.Plain
-                                    ),
-                                    $"{propertyName}[{i}].{name}"
-                                );
-                            }
-                        }
-                    }
-                }
-                else
-                {
-                    for (int i = 0; i < list.Count; i++)
-                    {
-                        object? value = list[i];
-
-                        if (value != null)
-                        {
-                            multipartContent.Add(
-                                new StringContent(
-                                    value?.ToString()!,
-                                    Encoding.UTF8,
-                                    MediaTypeNames.Text.Plain
-                                ),
-                                $"{propertyName}[{i}]"
-                            );
-                        }
-                    }
-                }
+                var propertyType = prop.PropertyType.GetGenericArguments()[0];
+                AddEnumerable(content, propertyType, (IList)value);
                 continue;
             }
 
-            multipartContent.Add(
-                new StringContent(
-                    propertyValue!.ToString()!,
-                    Encoding.UTF8,
-                    MediaTypeNames.Text.Plain
-                ),
-                propertyName
+            content.Add(
+                new StringContent(value!.ToString()!, Encoding.UTF8, MediaTypeNames.Text.Plain),
+                name
             );
         }
 
-        return multipartContent;
+        return content;
+    }
+
+    private static void AddFile(MultipartFormDataContent content, string name, IFormFile file)
+    {
+        var stream = new StreamContent(file.OpenReadStream());
+        stream.Headers.ContentType = MediaTypeHeaderValue.Parse(
+            file.ContentType ?? "application/octet-stream"
+        );
+
+        content.Add(stream, name, file.FileName);
+    }
+
+    private static void AddEnumerable(MultipartFormDataContent content, Type type, IList list)
+    {
+        if (type.IsUserDefineType())
+        {
+            AddComplexObject(content, type.Name, list);
+        }
+        else
+        {
+            AddPrimitiveList(content, type.Name, list);
+        }
+    }
+
+    private static void AddComplexObject(
+        MultipartFormDataContent content,
+        string parentName,
+        IList list
+    )
+    {
+        for (int i = 0; i < list.Count; i++)
+        {
+            object? item = list[i];
+            if (item == null)
+            {
+                continue;
+            }
+            var properties = item.GetType().GetProperties();
+            foreach (var prop in properties)
+            {
+                string name = prop.Name;
+                object? value = prop.GetValue(item);
+                if (value == null)
+                {
+                    continue;
+                }
+                content.Add(
+                    new StringContent(value.ToString()!, Encoding.UTF8, MediaTypeNames.Text.Plain),
+                    $"{parentName}[{i}].{name}"
+                );
+            }
+        }
+    }
+
+    private static void AddPrimitiveList(
+        MultipartFormDataContent content,
+        string parentName,
+        IList list
+    )
+    {
+        for (int i = 0; i < list.Count; i++)
+        {
+            object? value = list[i];
+            if (value == null)
+            {
+                continue;
+            }
+
+            content.Add(
+                new StringContent(value.ToString()!, Encoding.UTF8, MediaTypeNames.Text.Plain),
+                $"{parentName}[{i}]"
+            );
+        }
     }
 }

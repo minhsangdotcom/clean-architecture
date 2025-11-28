@@ -34,7 +34,7 @@ public class PostgreSqlDatabase : IDatabase
         connectionString = configuration["DatabaseSettings:DatabaseConnection"];
     }
 
-    public async Task InitialiseAsync()
+    public async Task InitializeAsync()
     {
         connection = new NpgsqlConnection(connectionString);
 

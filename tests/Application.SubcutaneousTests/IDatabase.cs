@@ -4,7 +4,7 @@ namespace Application.SubcutaneousTests;
 
 public interface IDatabase
 {
-    Task InitialiseAsync();
+    Task InitializeAsync();
 
     DbConnection GetConnection();
 

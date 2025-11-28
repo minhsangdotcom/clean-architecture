@@ -7,6 +7,7 @@ using Domain.Aggregates.Regions;
 using Domain.Aggregates.Roles;
 using Domain.Aggregates.Users;
 using Domain.Aggregates.Users.Enums;
+using Infrastructure.Constants;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -73,7 +74,7 @@ public partial class TestingFixture
                 FirstName = "admin",
                 LastName = "super",
                 Username = "super.admin",
-                Password = DEFAULT_USER_PASSWORD,
+                Password = Credential.USER_DEFAULT_PASSWORD,
                 Email = "super.amdin@gmail.com",
                 DateOfBirth = new DateTime(1990, 1, 2),
                 PhoneNumber = "0925123321",
@@ -104,7 +105,7 @@ public partial class TestingFixture
                 FirstName = "Steave",
                 LastName = "Roger",
                 Username = "steave.Roger",
-                Password = DEFAULT_USER_PASSWORD,
+                Password = Credential.USER_DEFAULT_PASSWORD,
                 Email = "steave.roger@gmail.com",
                 DateOfBirth = new DateTime(1990, 1, 3),
                 PhoneNumber = "0925321321",
@@ -135,7 +136,7 @@ public partial class TestingFixture
                 FirstName = "Sang",
                 LastName = "Tran",
                 Username = "sang.tran",
-                Password = DEFAULT_USER_PASSWORD,
+                Password = Credential.USER_DEFAULT_PASSWORD,
                 Email = "sang.tran@gmail.com",
                 DateOfBirth = new DateTime(1990, 1, 4),
                 PhoneNumber = "0925123124",

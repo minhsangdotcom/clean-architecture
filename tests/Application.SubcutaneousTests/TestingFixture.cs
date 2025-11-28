@@ -9,10 +9,9 @@ public partial class TestingFixture : IAsyncLifetime
     private CustomWebApplicationFactory<Program>? factory;
     private readonly PostgreSqlDatabase database;
 
-    private const string BASE_URL = "http://localhost:8080/api/";
-    public const string DEFAULT_USER_PASSWORD = "Admin@123";
-    private HttpClient? Client;
+    private const string BASE_URL = "http://localhost:8080/api/v1";
 
+    private HttpClient? client;
     private static Ulid UserId;
 
     public TestingFixture()
@@ -28,15 +27,15 @@ public partial class TestingFixture : IAsyncLifetime
             await factory!.DisposeAsync();
         }
 
-        if (Client != null)
+        if (client != null)
         {
-            Client!.Dispose();
+            client!.Dispose();
         }
     }
 
     public async Task InitializeAsync()
     {
-        await database.InitialiseAsync();
+        await database.InitializeAsync();
         var connection = database.GetConnection();
         string environmentName = database.GetEnvironmentVariable();
         factory = new(connection, environmentName);
@@ -59,49 +58,13 @@ public partial class TestingFixture : IAsyncLifetime
         return await sender.Send(request);
     }
 
-    public async Task<HttpResponseMessage> MakeRequestAsync(
-        string uriString,
-        HttpMethod method,
-        object payload,
-        string? contentType = null
-    )
-    {
-        if (Client == null)
-        {
-            throw new Exception($"{nameof(Client)} is null");
-        }
-
-        var loginPayload = new { Username = "super.admin", Password = "Admin@123" };
-        HttpResponseMessage httpResponse = await Client.CreateRequestAsync(
-            $"{BASE_URL}users/login",
-            HttpMethod.Post,
-            loginPayload
-        );
-        var response = await httpResponse.ToResponse<Response<LoginResponse>>();
-
-        return await Client.CreateRequestAsync(
-            $"{BASE_URL}{uriString}",
-            method,
-            payload,
-            contentType,
-            response!.Results!.Token
-        );
-    }
-
     private void CreateClient()
     {
         factory.ThrowIfNull();
-        Client = factory!.CreateClient();
+        client = factory!.CreateClient();
     }
 
     public static Ulid GetUserId() => UserId;
 
     public static void RemoveUserId() => UserId = Ulid.Empty;
-}
-
-record LoginResponse(string Token, string Refresh);
-
-public class Response<T>
-{
-    public T? Results { get; set; }
 }
