@@ -49,7 +49,6 @@ public partial class UserValidator : AbstractValidator<UserUpsertCommand>
             ));
 
         RuleFor(x => x.PhoneNumber)
-            .Cascade(CascadeMode.Stop)
             .Must(x => x!.IsValidPhoneNumber())
             .When(x => !string.IsNullOrEmpty(x.PhoneNumber))
             .WithState(_ => new ErrorReason(
@@ -70,6 +69,7 @@ public partial class UserValidator : AbstractValidator<UserUpsertCommand>
             ));
 
         RuleFor(x => x.Roles)
+            .Cascade(CascadeMode.Stop)
             .NotEmpty()
             .WithState(_ => new ErrorReason(
                 UserErrorMessages.UserRolesRequired,
@@ -91,6 +91,7 @@ public partial class UserValidator : AbstractValidator<UserUpsertCommand>
             () =>
             {
                 RuleFor(r => r.Permissions)
+                    .Cascade(CascadeMode.Stop)
                     .Must((p, _) => p.Permissions!.Distinct().Count() == p.Permissions!.Count)
                     .WithState(_ => new ErrorReason(
                         UserErrorMessages.UserPermissionsNotUnique,

@@ -20,8 +20,6 @@ public sealed class UpdateRoleCommandValidatorTest
     private readonly InlineValidator<UpdateRoleCommand> inlineValidator;
     private UpdateRoleCommand command = null!;
 
-    private readonly Mock<IAsyncRepository<Role>> mockRoleRepo = new();
-    private readonly Mock<IAsyncRepository<Permission>> mockPermRepo = new();
     private readonly Mock<IEfUnitOfWork> unitOfWork = new();
 
     private readonly Mock<IHttpContextAccessorService> mockHttpContextAccessorService = new();
@@ -33,8 +31,11 @@ public sealed class UpdateRoleCommandValidatorTest
             .Setup(x => x.GetHttpMethod())
             .Returns(HttpMethod.Put.ToString());
 
-        unitOfWork.Setup(x => x.Repository<Role>()).Returns(mockRoleRepo.Object);
-        unitOfWork.Setup(x => x.Repository<Permission>()).Returns(mockPermRepo.Object);
+        Mock<IAsyncRepository<Role>> roleRepo = new();
+        Mock<IAsyncRepository<Permission>> permissionRepo = new();
+
+        unitOfWork.Setup(x => x.Repository<Role>()).Returns(roleRepo.Object);
+        unitOfWork.Setup(x => x.Repository<Permission>()).Returns(permissionRepo.Object);
 
         validator = new(
             unitOfWork.Object,
@@ -59,11 +60,13 @@ public sealed class UpdateRoleCommandValidatorTest
         command = faker.Generate();
     }
 
-    [Fact]
-    public async Task Should_HaveError_When_NameIsEmpty()
+    [Theory]
+    [InlineData(null)]
+    [InlineData("")]
+    public async Task Should_HaveError_When_NameIsNullOrEmpty(string? name)
     {
         //Arrange
-        command.UpdateData.Name = string.Empty;
+        command.UpdateData.Name = name;
         translator.SetupTranslate(RoleErrorMessages.RoleNameRequired, SharedResource.TranslateText);
 
         //Act

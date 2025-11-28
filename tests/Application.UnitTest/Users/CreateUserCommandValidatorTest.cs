@@ -1,8 +1,13 @@
-using System.Text.RegularExpressions;
+using System.Linq.Expressions;
+using Application.Common.ErrorCodes;
+using Application.Common.Interfaces.Repositories.EfCore;
 using Application.Common.Interfaces.Services.Localization;
+using Application.Common.Interfaces.UnitOfWorks;
 using Application.Contracts.ApiWrapper;
-using Application.Contracts.Messages;
 using Application.Features.Users.Commands.Create;
+using Bogus;
+using Domain.Aggregates.Permissions;
+using Domain.Aggregates.Roles;
 using Domain.Aggregates.Users;
 using Domain.Aggregates.Users.Enums;
 using FluentValidation;
@@ -13,686 +18,544 @@ namespace Application.UnitTest.Users;
 
 public partial class CreateUserCommandValidatorTest
 {
-    private readonly InlineValidator<CreateUserCommand> mockValidator;
+    private readonly CreateUserCommand command = null!;
+    private readonly InlineValidator<CreateUserCommand> inlineValidator;
+    private readonly CreateUserCommandValidator validator;
 
-    private readonly CreateUserCommand? command = null;
-    private readonly Ulid roleId;
-    private readonly Mock<IMessageTranslatorService> translatorMock = new();
-    private readonly IMessageTranslatorService translator;
+    private readonly Mock<IMessageTranslatorService> translator = new();
+    private readonly Mock<IEfUnitOfWork> unitOfWork = new();
+
+    private readonly Mock<IAsyncRepository<Role>> roleRepo = new();
+    private readonly Mock<IAsyncRepository<User>> userRepo = new();
+    private readonly Mock<IAsyncRepository<Permission>> permissionRepo = new();
 
     public CreateUserCommandValidatorTest()
     {
-        mockValidator = [];
-        roleId = Ulid.Parse("01JS72XZJ6NFKFVWA9QM03RY5G");
-        translator = translatorMock.Object;
+        unitOfWork.Setup(x => x.Repository<Role>()).Returns(roleRepo.Object);
+        unitOfWork.Setup(x => x.Repository<User>()).Returns(userRepo.Object);
+        unitOfWork.Setup(x => x.Repository<Permission>()).Returns(permissionRepo.Object);
+
+        validator = new(unitOfWork.Object, translator.Object)
+        {
+            RuleLevelCascadeMode = CascadeMode.Stop,
+        };
+        inlineValidator = [];
+
+        command = Default;
     }
+
+    // ----------------------------------------------------------------------
+    // LAST NAME RULES
+    // ----------------------------------------------------------------------
 
     [Theory]
-    [InlineData("")]
     [InlineData(null)]
-    public async Task Validate_WhenFirstNameNullOrEmpty_ShouldReturnNullFailure(string? firstName)
-    {
-        // arrange
-        command!.FirstName = firstName;
-
-        string errorMessage = Messenger
-            .Create<User>()
-            .Property(x => x.FirstName)
-            .Negative()
-            .WithError(MessageErrorType.Required)
-            .GetFullMessage();
-
-        ErrorReason expectedState = new(errorMessage, translator.Translate(errorMessage));
-
-        mockValidator.RuleFor(x => x.FirstName).NotEmpty().WithState(_ => expectedState);
-
-        // act
-        var result = await mockValidator.TestValidateAsync(command);
-
-        // assert
-        result
-            .ShouldHaveValidationErrorFor(x => x.FirstName)
-            .WithCustomState(expectedState, new ErrorReasonComparer())
-            .Only();
-    }
-
-    [Fact]
-    public async Task Validate_WhenInvalidLengthOfFirstName_ShouldReturnMaximumLengthFailure()
-    {
-        // arrange
-
-        string errorMessage = Messenger
-            .Create<User>()
-            .Property(x => x.FirstName)
-            .WithError(MessageErrorType.TooLong)
-            .GetFullMessage();
-
-        ErrorReason expectedState = new(errorMessage, translator.Translate(errorMessage));
-
-        mockValidator.RuleFor(x => x.FirstName).MaximumLength(256).WithState(_ => expectedState);
-
-        // act
-        var result = await mockValidator.TestValidateAsync(command);
-
-        // assert
-        result
-            .ShouldHaveValidationErrorFor(x => x.FirstName)
-            .WithCustomState(expectedState, new ErrorReasonComparer())
-            .Only();
-    }
-
-    [Theory]
     [InlineData("")]
-    [InlineData(null)]
-    public async Task Validate_WhenLastNameNullOrEmpty_ShouldReturnNullFailure(string? lastName)
+    public async Task Should_HaveError_When_LastNameIsNullOrEmpty(string? lastName)
     {
-        // arrange
-        command!.LastName = lastName;
+        // Arrange
+        command.LastName = lastName;
+        translator.SetupTranslate(
+            UserErrorMessages.UserLastNameRequired,
+            SharedResource.TranslateText
+        );
+        FakeRoleAndPermissionFound();
 
-        string errorMessage = Messenger
-            .Create<User>()
-            .Property(x => x.LastName)
-            .Negative()
-            .WithError(MessageErrorType.Required)
-            .GetFullMessage();
+        // Act
+        var result = await validator.TestValidateAsync(command);
 
-        ErrorReason expectedState = new(errorMessage, translator.Translate(errorMessage));
-
-        mockValidator.RuleFor(x => x.LastName).NotEmpty().WithState(_ => expectedState);
-
-        // act
-        var result = await mockValidator.TestValidateAsync(command);
-
-        // assert
+        // Assert
+        var expected = new ErrorReason(
+            UserErrorMessages.UserLastNameRequired,
+            SharedResource.TranslateText
+        );
         result
             .ShouldHaveValidationErrorFor(x => x.LastName)
-            .WithCustomState(expectedState, new ErrorReasonComparer())
+            .WithCustomState(expected, new ErrorReasonComparer())
             .Only();
     }
 
     [Fact]
-    public async Task Validate_WhenInvalidLengthOfLastName_ShouldReturnMaximumLengthFailure()
+    public async Task Should_HaveError_When_LastNameTooLong()
     {
-        // arrange
+        // Arrange
+        command.LastName = new string('X', 300);
+        translator.SetupTranslate(
+            UserErrorMessages.UserLastNameTooLong,
+            SharedResource.TranslateText
+        );
+        FakeRoleAndPermissionFound();
 
-        string errorMessage = Messenger
-            .Create<User>()
-            .Property(x => x.LastName)
-            .WithError(MessageErrorType.TooLong)
-            .GetFullMessage();
+        // Act
+        var result = await validator.TestValidateAsync(command);
 
-        ErrorReason expectedState = new(errorMessage, translator.Translate(errorMessage));
+        // Assert
+        var expected = new ErrorReason(
+            UserErrorMessages.UserLastNameTooLong,
+            SharedResource.TranslateText
+        );
 
-        mockValidator.RuleFor(x => x.LastName).MaximumLength(256).WithState(_ => expectedState);
-
-        // act
-        var result = await mockValidator.TestValidateAsync(command);
-
-        // assert
         result
             .ShouldHaveValidationErrorFor(x => x.LastName)
-            .WithCustomState(expectedState, new ErrorReasonComparer())
-            .Only();
-    }
-
-    [Theory]
-    [InlineData("")]
-    [InlineData(null)]
-    public async Task Validate_WhenEmailNullOrEmpty_ShouldReturnNullFailure(string? email)
-    {
-        // arrange
-        command!.Email = email;
-
-        string errorMessage = Messenger
-            .Create<User>()
-            .Property(x => x.Email)
-            .Negative()
-            .WithError(MessageErrorType.Required)
-            .GetFullMessage();
-
-        ErrorReason expectedState = new(errorMessage, translator.Translate(errorMessage));
-
-        mockValidator.RuleFor(x => x.Email).NotEmpty().WithState(_ => expectedState);
-
-        // act
-        var result = await mockValidator.TestValidateAsync(command);
-
-        // assert
-        result
-            .ShouldHaveValidationErrorFor(x => x.Email)
-            .WithCustomState(expectedState, new ErrorReasonComparer())
-            .Only();
-    }
-
-    [Theory]
-    [InlineData("admin@gmail")]
-    [InlineData("admingmail.com")]
-    [InlineData("@gmail.com")]
-    public async Task CreateUser_WhenEmailInvalidFormat_ShouldReturnInvalidFailure(string email)
-    {
-        // arrange
-        command!.Email = email;
-
-        string errorMessage = Messenger
-            .Create<User>()
-            .Property(x => x.Email)
-            .Negative()
-            .WithError(MessageErrorType.Valid)
-            .GetFullMessage();
-
-        ErrorReason expectedState = new(errorMessage, translator.Translate(errorMessage));
-
-        mockValidator
-            .RuleFor(x => x.Email)
-            .Must(x =>
-            {
-                Regex regex = EmailValidationRegex();
-                return regex.IsMatch(x!);
-            })
-            .WithState(_ => expectedState);
-
-        // act
-        var result = await mockValidator.TestValidateAsync(command);
-
-        // assert
-        result
-            .ShouldHaveValidationErrorFor(x => x.Email)
-            .WithCustomState(expectedState, new ErrorReasonComparer())
+            .WithCustomState(expected, new ErrorReasonComparer())
             .Only();
     }
 
     [Fact]
-    public async Task Validate_WhenEmailDuplicated_ShouldReturnExistFailure()
+    public async Task Should_Pass_When_LastNameIsValid()
     {
-        // arrange
-        const string existedEmail = "admin@gmail.com";
-        command!.Email = existedEmail;
+        //Arrange
+        command.LastName = "Nguyen";
 
-        string errorMessage = Messenger
-            .Create<User>()
-            .Property(x => x.Email)
-            .WithError(MessageErrorType.Existent)
-            .GetFullMessage();
-
-        ErrorReason expectedState = new(errorMessage, translator.Translate(errorMessage));
-
-        mockValidator
-            .RuleFor(x => x.Email)
-            .MustAsync(
-                (email, cancellationToken) =>
-                    IsEmailAvailableAsync(email!, existedEmail, cancellationToken)
-            )
-            .When(_ => true)
-            .WithState(_ => expectedState);
-
-        // act
-        var result = await mockValidator.TestValidateAsync(command);
-
-        // assert
-        result
-            .ShouldHaveValidationErrorFor(x => x.Email)
-            .WithCustomState(expectedState, new ErrorReasonComparer())
-            .Only();
+        //Act
+        var result = await validator.TestValidateAsync(command);
+        //Assert
+        result.ShouldNotHaveValidationErrorFor(x => x.LastName);
     }
 
+    // ----------------------------------------------------------------------
+    // FIRST NAME RULES
+    // ----------------------------------------------------------------------
+
     [Theory]
-    [InlineData("")]
     [InlineData(null)]
-    public async Task Validate_WhenPhoneNumberNullOrEmpty_ShouldReturNullFailure(
-        string? phoneNumber
-    )
+    [InlineData("")]
+    public async Task Should_HaveError_When_FirstNameIsNullOrEmpty(string? firstName)
     {
-        // arrange
-        command!.PhoneNumber = phoneNumber;
+        // Arrange
+        command.FirstName = firstName;
+        translator.SetupTranslate(
+            UserErrorMessages.UserFirstNameRequired,
+            SharedResource.TranslateText
+        );
+        FakeRoleAndPermissionFound();
 
-        string errorMessage = Messenger
-            .Create<User>()
-            .Property(x => x.PhoneNumber)
-            .Negative()
-            .WithError(MessageErrorType.Required)
-            .GetFullMessage();
+        //Act
+        var result = await validator.TestValidateAsync(command);
 
-        ErrorReason expectedState = new(errorMessage, translator.Translate(errorMessage));
-
-        mockValidator.RuleFor(x => x.PhoneNumber).NotEmpty().WithState(_ => expectedState);
-
-        // act
-        var result = await mockValidator.TestValidateAsync(command);
-
-        // assert
+        //Assert
+        var expected = new ErrorReason(
+            UserErrorMessages.UserFirstNameRequired,
+            SharedResource.TranslateText
+        );
         result
-            .ShouldHaveValidationErrorFor(x => x.PhoneNumber)
-            .WithCustomState(expectedState, new ErrorReasonComparer())
+            .ShouldHaveValidationErrorFor(x => x.FirstName)
+            .WithCustomState(expected, new ErrorReasonComparer())
             .Only();
     }
 
-    [Theory]
-    [InlineData("1234567890123456")]
-    [InlineData("+12345")]
-    public async Task Validate_WhenPhoneNumberInvalidFormat_ShouldReturnInvalidFailure(
-        string phoneNumber
-    )
+    [Fact]
+    public async Task Should_HaveError_When_FirstNameTooLong()
     {
-        // arrange
-        command!.PhoneNumber = phoneNumber;
+        //Arrange
+        command.FirstName = new string('X', 300);
+        translator.SetupTranslate(
+            UserErrorMessages.UserFirstNameTooLong,
+            SharedResource.TranslateText
+        );
+        FakeRoleAndPermissionFound();
 
-        string errorMessage = Messenger
-            .Create<User>()
-            .Property(x => x.PhoneNumber)
-            .Negative()
-            .WithError(MessageErrorType.Valid)
-            .GetFullMessage();
+        //Act
+        var result = await validator.TestValidateAsync(command);
 
-        ErrorReason expectedState = new(errorMessage, translator.Translate(errorMessage));
+        //Assert
+        var expected = new ErrorReason(
+            UserErrorMessages.UserFirstNameTooLong,
+            SharedResource.TranslateText
+        );
+        result
+            .ShouldHaveValidationErrorFor(x => x.FirstName)
+            .WithCustomState(expected, new ErrorReasonComparer())
+            .Only();
+    }
 
-        mockValidator
+    [Fact]
+    public async Task Should_Pass_When_FirstNameIsValid()
+    {
+        //Arrange
+        command.FirstName = "Minh";
+
+        //Act
+        var result = await validator.TestValidateAsync(command);
+
+        //Assert
+        result.ShouldNotHaveValidationErrorFor(x => x.FirstName);
+    }
+
+    // ----------------------------------------------------------------------
+    // PHONE NUMBER RULES
+    // ----------------------------------------------------------------------
+
+    [Fact]
+    public async Task Should_Pass_When_PhoneNumberIsNullOrEmpty()
+    {
+        //Arrange
+        command.PhoneNumber = null;
+
+        //Act
+        var result = await validator.TestValidateAsync(command);
+
+        //Assert
+        result.ShouldNotHaveValidationErrorFor(x => x.PhoneNumber);
+    }
+
+    [Theory]
+    [InlineData(null)]
+    [InlineData("")]
+    [InlineData("123")] // too short
+    [InlineData("123456")] // still too short
+    [InlineData("1234567890123456")] // too long
+    [InlineData("123 4567")] // space
+    [InlineData("123-4567")] // symbol
+    [InlineData("(123)4567")] // parentheses
+    [InlineData("abc12345")] // letters
+    [InlineData("+12345abcd")] // letters after +
+    [InlineData("++1234567")] // multiple +
+    [InlineData("123+4567")] // + not at beginning
+    public async Task Should_HaveError_When_PhoneNumberInvalid(string phoneNumber)
+    {
+        //Arrange
+        var expected = new ErrorReason(
+            UserErrorMessages.UserPhoneNumberInvalid,
+            SharedResource.TranslateText
+        );
+        translator.SetupTranslate(
+            UserErrorMessages.UserPhoneNumberInvalid,
+            SharedResource.TranslateText
+        );
+
+        inlineValidator
             .RuleFor(x => x.PhoneNumber)
-            .Must(x =>
-            {
-                Regex regex = PhoneValidationRegex();
-                return regex.IsMatch(x!);
-            })
-            .WithState(_ => expectedState);
+            .Must(x => false)
+            .When(x => true)
+            .WithState(_ => expected);
 
-        // act
-        var result = await mockValidator.TestValidateAsync(command);
+        command.PhoneNumber = phoneNumber;
 
-        // assert
+        //Act
+        var result = await inlineValidator.TestValidateAsync(command);
+
+        //Assert
         result
             .ShouldHaveValidationErrorFor(x => x.PhoneNumber)
-            .WithCustomState(expectedState, new ErrorReasonComparer())
-            .Only();
-    }
-
-    [Theory]
-    [InlineData("")]
-    [InlineData(null)]
-    public async Task Validate_WhenUsernameNullOrEmpty_ShouldReturnNullFailure(string? username)
-    {
-        // arrange
-        command!.Username = username;
-
-        string errorMessage = Messenger
-            .Create<CreateUserCommand>(nameof(User))
-            .Property(x => x.Username!)
-            .Negative()
-            .WithError(MessageErrorType.Required)
-            .GetFullMessage();
-
-        ErrorReason expectedState = new(errorMessage, translator.Translate(errorMessage));
-
-        mockValidator.RuleFor(x => x.Username).NotEmpty().WithState(_ => expectedState);
-
-        // act
-        var result = await mockValidator.TestValidateAsync(command);
-
-        // assert
-        result
-            .ShouldHaveValidationErrorFor(x => x.Username)
-            .WithCustomState(expectedState, new ErrorReasonComparer())
-            .Only();
-    }
-
-    [Theory]
-    [InlineData("admin-super")]
-    [InlineData("admin@super")]
-    [InlineData("admin123!")]
-    public async Task CreateUser_WhenInvalidUsername_ShouldReturnInValidFailure(string username)
-    {
-        // arrange
-        command!.Username = username;
-
-        string errorMessage = Messenger
-            .Create<CreateUserCommand>(nameof(User))
-            .Property(x => x.Username!)
-            .Negative()
-            .WithError(MessageErrorType.Valid)
-            .GetFullMessage();
-
-        ErrorReason expectedState = new(errorMessage, translator.Translate(errorMessage));
-
-        mockValidator
-            .RuleFor(x => x.Username)
-            .Must(
-                (_, x) =>
-                {
-                    Regex regex = UsernameValidationRegex();
-                    return regex.IsMatch(x!);
-                }
-            )
-            .WithState(_ => expectedState);
-
-        // act
-        var result = await mockValidator.TestValidateAsync(command);
-
-        // assert
-        result
-            .ShouldHaveValidationErrorFor(x => x.Username)
-            .WithCustomState(expectedState, new ErrorReasonComparer())
+            .WithCustomState(expected, new ErrorReasonComparer())
             .Only();
     }
 
     [Fact]
-    public async Task Validate_WhenUsernameDuplicated_ShouldReturnNotExistenceFailure()
+    public async Task Should_Pass_When_PhoneNumberValid()
     {
-        // arrange
-        string existedUserName = "admin";
-        command!.Username = existedUserName;
+        // Arrange
+        inlineValidator
+            .RuleFor(x => x.PhoneNumber)
+            .Must(x => true)
+            .When(x => !string.IsNullOrEmpty(x.PhoneNumber));
 
-        string errorMessage = Messenger
-            .Create<User>()
-            .Property(x => x.Username)
-            .WithError(MessageErrorType.Existent)
-            .GetFullMessage();
+        command.PhoneNumber = "0968123456";
 
-        ErrorReason expectedState = new(errorMessage, translator.Translate(errorMessage));
+        // Act
+        var result = await inlineValidator.TestValidateAsync(command);
 
-        mockValidator
-            .RuleFor(x => x.Username)
-            .MustAsync(
-                (username, cancellationToken) =>
-                    IsUsernameAvailableAsync(
-                        username!,
-                        existedUserName,
-                        cancellationToken: cancellationToken
-                    )
-            )
-            .WithState(_ => expectedState);
-
-        // act
-        var result = await mockValidator.TestValidateAsync(command);
-
-        // assert
-        result
-            .ShouldHaveValidationErrorFor(x => x.Username)
-            .WithCustomState(expectedState, new ErrorReasonComparer())
-            .Only();
+        // Assert
+        result.ShouldNotHaveValidationErrorFor(x => x.PhoneNumber);
     }
 
-    [Theory]
-    [InlineData("")]
-    [InlineData(null)]
-    public async Task Validate_WhenPasswordNullOrEmpty_ShouldReturnNullFailure(string? password)
-    {
-        // arrange
-        command!.Password = password;
-
-        string errorMessage = Messenger
-            .Create<CreateUserCommand>(nameof(User))
-            .Property(x => x.Password!)
-            .Negative()
-            .WithError(MessageErrorType.Required)
-            .GetFullMessage();
-
-        ErrorReason expectedState = new(errorMessage, translator.Translate(errorMessage));
-
-        mockValidator.RuleFor(x => x.Password).NotEmpty().WithState(_ => expectedState);
-
-        // act
-        var result = await mockValidator.TestValidateAsync(command);
-
-        // assert
-        result
-            .ShouldHaveValidationErrorFor(x => x.Password)
-            .WithCustomState(expectedState, new ErrorReasonComparer())
-            .Only();
-    }
+    // ----------------------------------------------------------------------
+    // STATUS RULES
+    // ----------------------------------------------------------------------
 
     [Theory]
-    [InlineData("admin@123")]
-    [InlineData("adminadmin")]
-    [InlineData("admin")]
-    public async Task Validate_WhenPasswordInvalid_ShouldReturnInvalidFailure(string password)
-    {
-        // arrange
-        command!.Password = password;
-
-        string errorMessage = Messenger
-            .Create<CreateUserCommand>(nameof(User))
-            .Property(x => x.Password!)
-            .Negative()
-            .WithError(MessageErrorType.Strong)
-            .GetFullMessage();
-
-        ErrorReason expectedState = new(errorMessage, translator.Translate(errorMessage));
-
-        mockValidator
-            .RuleFor(x => x.Password)
-            .Must(
-                (_, x) =>
-                {
-                    Regex regex = PassowordValidationRegex();
-                    return regex.IsMatch(x!);
-                }
-            )
-            .WithState(_ => expectedState);
-
-        // act
-        var result = await mockValidator.TestValidateAsync(command);
-
-        // assert
-        result
-            .ShouldHaveValidationErrorFor(x => x.Password)
-            .WithCustomState(expectedState, new ErrorReasonComparer())
-            .Only();
-    }
-
-    [Theory]
-    [InlineData(0)]
     [InlineData(4)]
-    public async Task Validate_WhenGenderInvalid_ShouldReturnNotAmongTheAllowedOptionsFailure(
-        int gender
-    )
+    [InlineData(3)]
+    public async Task Should_HaveError_When_StatusNotInEnum(int status)
     {
-        // arrange
-        command!.Gender = (Gender)gender;
+        // Arrange
+        command.Status = (UserStatus)status;
+        translator.SetupTranslate(
+            UserErrorMessages.UserStatusNotInEnum,
+            SharedResource.TranslateText
+        );
+        FakeRoleAndPermissionFound();
 
-        string errorMessage = Messenger
-            .Create<CreateUserCommand>(nameof(User))
-            .Property(x => x.Gender!)
-            .Negative()
-            .WithError(MessageErrorType.AmongTheAllowedOptions)
-            .GetFullMessage();
+        // Act
+        var result = await validator.TestValidateAsync(command);
 
-        ErrorReason expectedState = new(errorMessage, translator.Translate(errorMessage));
+        // Assert
+        var expected = new ErrorReason(
+            UserErrorMessages.UserStatusNotInEnum,
+            SharedResource.TranslateText
+        );
 
-        mockValidator.RuleFor(x => x.Gender).IsInEnum().WithState(_ => expectedState);
-
-        // act
-        var result = await mockValidator.TestValidateAsync(command);
-
-        // assert
         result
-            .ShouldHaveValidationErrorFor(x => x.Gender)
-            .WithCustomState(expectedState, new ErrorReasonComparer())
+            .ShouldHaveValidationErrorFor(x => x.Status)
+            .WithCustomState(expected, new ErrorReasonComparer())
             .Only();
     }
 
     [Fact]
-    public async Task CreateUser_WhenStatusNull_ShouldReturnNullFailure()
+    public async Task Should_Pass_When_StatusIsValidEnum()
     {
-        // arrange
-        command!.Status = 0;
+        // Arrange
+        command.Status = UserStatus.Active;
 
-        string errorMessage = Messenger
-            .Create<CreateUserCommand>(nameof(User))
-            .Property(x => x.Status!)
-            .Negative()
-            .WithError(MessageErrorType.Required)
-            .GetFullMessage();
+        // Act
+        var result = await validator.TestValidateAsync(command);
 
-        ErrorReason expectedState = new(errorMessage, translator.Translate(errorMessage));
-
-        mockValidator.RuleFor(x => x.Status).NotEmpty().WithState(_ => expectedState);
-
-        // act
-        var result = await mockValidator.TestValidateAsync(command);
-
-        // assert
-        result
-            .ShouldHaveValidationErrorFor(x => x.Status)
-            .WithCustomState(expectedState, new ErrorReasonComparer())
-            .Only();
+        // Assert
+        result.ShouldNotHaveValidationErrorFor(x => x.Status);
     }
+
+    // ----------------------------------------------------------------------
+    // ROLES RULES (DB)  → inlineValidator
+    // ----------------------------------------------------------------------
 
     [Theory]
-    [InlineData(0)]
-    [InlineData(3)]
-    public async Task Validate_WhenInvalidStatus_ShouldReturnNotAmongTheAllowedOptionsFailure(
-        int status
-    )
+    [InlineData(null)]
+    [InlineData(default(List<Ulid>))]
+    public async Task Should_HaveError_When_RolesNullOrEmpty(List<Ulid>? roles)
     {
-        // arrange
-        command!.Status = (UserStatus)status;
-
-        string errorMessage = Messenger
-            .Create<CreateUserCommand>(nameof(User))
-            .Property(x => x.Status!)
-            .Negative()
-            .WithError(MessageErrorType.AmongTheAllowedOptions)
-            .GetFullMessage();
-
-        ErrorReason expectedState = new(errorMessage, translator.Translate(errorMessage));
-
-        mockValidator.RuleFor(x => x.Status).IsInEnum().WithState(_ => expectedState);
-
-        // act
-        var result = await mockValidator.TestValidateAsync(command);
-
-        // assert
-        result
-            .ShouldHaveValidationErrorFor(x => x.Status)
-            .WithCustomState(expectedState, new ErrorReasonComparer())
-            .Only();
-    }
-
-    [Fact]
-    public async Task Validate_WhenRolesNull_ShouldReturnNullFailure()
-    {
-        // arrange
-        command!.Roles = null;
-
-        string errorMessage = Messenger
-            .Create<CreateUserCommand>(nameof(User))
-            .Property(x => x.Roles!)
-            .Negative()
-            .WithError(MessageErrorType.Required)
-            .GetFullMessage();
-
-        ErrorReason expectedState = new(errorMessage, translator.Translate(errorMessage));
-
-        mockValidator.RuleFor(x => x.Roles).NotEmpty().WithState(_ => expectedState);
-
-        // act
-        var result = await mockValidator.TestValidateAsync(command);
-
-        // assert
-        result
-            .ShouldHaveValidationErrorFor(x => x.Roles)
-            .WithCustomState(expectedState, new ErrorReasonComparer())
-            .Only();
-    }
-
-    [Fact]
-    public async Task Validate_WhenDuplicatedRole_ShouldReturnNotUniqueFailure()
-    {
-        // arrange
-        command!.Roles!.Add(roleId);
-
-        string errorMessage = Messenger
-            .Create<CreateUserCommand>(nameof(User))
-            .Property(x => x.Roles!)
-            .Negative()
-            .WithError(MessageErrorType.Unique)
-            .GetFullMessage();
-
-        ErrorReason expectedState = new(errorMessage, translator.Translate(errorMessage));
-
-        mockValidator
-            .RuleFor(x => x.Roles)
-            .Must(x => x!.Distinct().Count() == x!.Count)
-            .WithState(_ => expectedState);
-
-        // act
-        var result = await mockValidator.TestValidateAsync(command);
-
-        // assert
-        result
-            .ShouldHaveValidationErrorFor(x => x.Roles)
-            .WithCustomState(expectedState, new ErrorReasonComparer())
-            .Only();
-    }
-
-    [Fact]
-    public async Task Validate_WhenNotFoundRole_ShouldReturnNotFoundFailure()
-    {
-        // arrange
-        command!.Roles!.Add(Ulid.NewUlid());
-        List<Ulid> existedroles = [roleId, Ulid.NewUlid()];
-
-        string errorMessage = Messenger
-            .Create<CreateUserCommand>(nameof(User))
-            .Property(x => x.Roles!)
-            .Negative()
-            .WithError(MessageErrorType.Found)
-            .GetFullMessage();
-
-        ErrorReason expectedState = new(errorMessage, translator.Translate(errorMessage));
-
-        mockValidator
-            .RuleFor(x => x.Roles)
-            .MustAsync(
-                (roles, cancellationToken) =>
-                    IsRolesAvailableAsync(roles!, existedroles, cancellationToken)
+        // Arrange
+        command.Roles = roles;
+        translator.SetupTranslate(
+            UserErrorMessages.UserRolesRequired,
+            SharedResource.TranslateText
+        );
+        permissionRepo
+            .Setup(r =>
+                r.CountAsync(
+                    It.IsAny<Expression<Func<Permission, bool>>>(),
+                    It.IsAny<CancellationToken>()
+                )
             )
-            .WithState(_ => expectedState);
+            .ReturnsAsync(command.Permissions!.Count);
 
-        // act
-        var result = await mockValidator.TestValidateAsync(command);
+        // Act
+        var result = await validator.TestValidateAsync(command);
 
-        // assert
+        // Assert
+        var expected = new ErrorReason(
+            UserErrorMessages.UserRolesRequired,
+            SharedResource.TranslateText
+        );
+
         result
             .ShouldHaveValidationErrorFor(x => x.Roles)
-            .WithCustomState(expectedState, new ErrorReasonComparer())
+            .WithCustomState(expected, new ErrorReasonComparer())
             .Only();
     }
 
-    private static async Task<bool> IsEmailAvailableAsync(
-        string email,
-        string existedEmail,
-        CancellationToken cancellationToken = default
-    )
+    [Fact]
+    public async Task Should_HaveError_When_RolesNotUnique()
     {
-        return await Task.Run(() => email != existedEmail, cancellationToken);
+        // Arrange
+        Ulid id = Ulid.NewUlid();
+        command.Roles = [id, id];
+
+        translator.SetupTranslate(
+            UserErrorMessages.UserRolesNotUnique,
+            SharedResource.TranslateText
+        );
+        permissionRepo
+            .Setup(r =>
+                r.CountAsync(
+                    It.IsAny<Expression<Func<Permission, bool>>>(),
+                    It.IsAny<CancellationToken>()
+                )
+            )
+            .ReturnsAsync(command.Permissions!.Count);
+
+        // Act
+        var result = await validator.TestValidateAsync(command);
+
+        // Assert
+        var expected = new ErrorReason(
+            UserErrorMessages.UserRolesNotUnique,
+            SharedResource.TranslateText
+        );
+
+        result
+            .ShouldHaveValidationErrorFor(x => x.Roles)
+            .WithCustomState(expected, new ErrorReasonComparer())
+            .Only();
     }
 
-    private static async Task<bool> IsRolesAvailableAsync(
-        List<Ulid> roles,
-        List<Ulid> existedRoles,
-        CancellationToken cancellationToken = default
-    )
+    [Fact]
+    public async Task Should_HaveError_When_RolesNotFoundInDb()
     {
-        return await Task.Run(() => existedRoles.All(x => roles.Contains(x)), cancellationToken);
+        // Arrange
+        var expected = new ErrorReason(
+            UserErrorMessages.UserRolesNotFound,
+            SharedResource.TranslateText
+        );
+        translator.SetupTranslate(
+            UserErrorMessages.UserRolesNotFound,
+            SharedResource.TranslateText
+        );
+
+        inlineValidator
+            .RuleFor(x => x.Roles)
+            .MustAsync((ids, _) => Task.FromResult(false))
+            .When(_ => true)
+            .WithState(_ => expected);
+
+        command.Roles = [Ulid.NewUlid()];
+
+        // Act
+        var result = await inlineValidator.TestValidateAsync(command);
+
+        // Assert
+        result
+            .ShouldHaveValidationErrorFor(x => x.Roles)
+            .WithCustomState(expected, new ErrorReasonComparer())
+            .Only();
     }
 
-    private static async Task<bool> IsUsernameAvailableAsync(
-        string username,
-        string existedUsername,
-        CancellationToken cancellationToken
-    )
+    [Fact]
+    public async Task Should_Pass_When_RolesValid()
     {
-        return await Task.Run(() => username != existedUsername, cancellationToken);
+        // Arrange
+        inlineValidator
+            .RuleFor(x => x.Roles)
+            .MustAsync((ids, _) => Task.FromResult(true))
+            .When(_ => true);
+
+        command.Roles = [Ulid.NewUlid()];
+
+        // Act
+        var result = await inlineValidator.TestValidateAsync(command);
+
+        // Assert
+        result.ShouldNotHaveValidationErrorFor(x => x.Roles);
     }
 
-    [GeneratedRegex(@"^\+?\d{7,15}$")]
-    private static partial Regex PhoneValidationRegex();
+    // ----------------------------------------------------------------------
+    // PERMISSIONS RULES (optional, DB) → inlineValidator
+    // ----------------------------------------------------------------------
 
-    [GeneratedRegex(@"^[^\s@]+@[^\s@]+\.[^\s@]+$")]
-    private static partial Regex EmailValidationRegex();
+    [Theory]
+    [InlineData(null)]
+    [InlineData(default(List<Ulid>))]
+    public async Task Should_HaveError_When_PermissionsIsNull(List<Ulid>? permissionIds)
+    {
+        // Arrange
+        command.Permissions = permissionIds;
 
-    [GeneratedRegex(@"^[a-zA-Z0-9_.]+$")]
-    private static partial Regex UsernameValidationRegex();
+        // Act
+        var result = await validator.TestValidateAsync(command);
 
-    [GeneratedRegex(@"^((?=\S*?[A-Z])(?=\S*?[a-z])(?=\S*?[0-9]).{8,})\S$")]
-    private static partial Regex PassowordValidationRegex();
+        // Assert
+        result.ShouldNotHaveValidationErrorFor(x => x.Permissions);
+    }
+
+    [Fact]
+    public async Task Should_HaveError_When_PermissionsNotUnique()
+    {
+        // Arrange
+        Ulid id = Ulid.NewUlid();
+        command.Permissions = [id, id];
+
+        translator.SetupTranslate(
+            UserErrorMessages.UserPermissionsNotUnique,
+            SharedResource.TranslateText
+        );
+        FakeRoleAndPermissionFound();
+
+        // Act
+        var result = await validator.TestValidateAsync(command);
+
+        // Assert
+        var expected = new ErrorReason(
+            UserErrorMessages.UserPermissionsNotUnique,
+            SharedResource.TranslateText
+        );
+        result
+            .ShouldHaveValidationErrorFor(x => x.Permissions)
+            .WithCustomState(expected, new ErrorReasonComparer())
+            .Only();
+    }
+
+    [Fact]
+    public async Task Should_HaveError_When_PermissionsNotFoundInDb()
+    {
+        // Arrange
+        command.Permissions = [Ulid.NewUlid()];
+        var expected = new ErrorReason(
+            UserErrorMessages.UserPermissionsNotFound,
+            SharedResource.TranslateText
+        );
+        translator.SetupTranslate(
+            UserErrorMessages.UserPermissionsNotFound,
+            SharedResource.TranslateText
+        );
+
+        inlineValidator
+            .RuleFor(x => x.Permissions)
+            .MustAsync((p, _) => Task.FromResult(false))
+            .WithState(_ => expected);
+
+        command.Permissions = [Ulid.NewUlid()];
+
+        // Act
+        var result = await inlineValidator.TestValidateAsync(command);
+
+        // Assert
+        result
+            .ShouldHaveValidationErrorFor(x => x.Permissions)
+            .WithCustomState(expected, new ErrorReasonComparer())
+            .Only();
+    }
+
+    [Fact]
+    public async Task Should_Pass_When_PermissionsValid()
+    {
+        // Arrange
+        inlineValidator.RuleFor(x => x.Permissions).MustAsync((p, _) => Task.FromResult(true));
+
+        command.Permissions = [Ulid.NewUlid()];
+
+        // Act
+        var result = await inlineValidator.TestValidateAsync(command);
+
+        // Assert
+        result.ShouldNotHaveValidationErrorFor(x => x.Permissions);
+    }
+
+    private void FakeRoleAndPermissionFound()
+    {
+        roleRepo
+            .Setup(r =>
+                r.CountAsync(
+                    It.IsAny<Expression<Func<Role, bool>>>(),
+                    It.IsAny<CancellationToken>()
+                )
+            )
+            .ReturnsAsync(command.Roles!.Count);
+        permissionRepo
+            .Setup(r =>
+                r.CountAsync(
+                    It.IsAny<Expression<Func<Permission, bool>>>(),
+                    It.IsAny<CancellationToken>()
+                )
+            )
+            .ReturnsAsync(command.Permissions!.Count);
+    }
+
+    public static CreateUserCommand Default =>
+        new Faker<CreateUserCommand>()
+            .RuleFor(x => x.FirstName, f => f.Name.FirstName())
+            .RuleFor(x => x.LastName, f => f.Name.LastName())
+            .RuleFor(x => x.PhoneNumber, f => f.Phone.PhoneNumber("0#########"))
+            .RuleFor(x => x.DateOfBirth, f => f.Date.Past(30))
+            .RuleFor(x => x.Avatar, _ => null)
+            .RuleFor(x => x.Status, f => f.PickRandom<UserStatus>())
+            .RuleFor(x => x.Roles, f => new List<Ulid>() { Ulid.NewUlid() })
+            .RuleFor(x => x.Permissions, f => new List<Ulid>() { Ulid.NewUlid() })
+            .RuleFor(x => x.Username, f => f.Internet.UserName())
+            .RuleFor(x => x.Email, f => f.Internet.Email())
+            .RuleFor(x => x.Password, f => "Admin@123")
+            .RuleFor(
+                x => x.Gender,
+                f => f.PickRandom(new Gender?[] { Gender.Male, Gender.Female, null })
+            )
+            .Generate();
 }
