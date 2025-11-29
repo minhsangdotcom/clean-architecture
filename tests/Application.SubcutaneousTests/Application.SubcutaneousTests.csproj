@@ -30,6 +30,24 @@
       <Link>Templates\ForgotPassword.cshtml</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+
+    <None Include="..\..\src\Api\Resources\Messages\Messages.en.json">
+      <Link>\Resources\Messages\Messages.en.json</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="..\..\src\Api\Resources\Messages\Messages.vi.json">
+      <Link>\Resources\Messages\Messages.vi.json</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+
+    <None Include="..\..\src\Api\Resources\Permissions\Permissions.en.json">
+      <Link>\Resources\Permissions\Permissions.en.json</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="..\..\src\Api\Resources\Permissions\Permissions.vi.json">
+      <Link>\Resources\Permissions\Permissions.vi.json</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>
