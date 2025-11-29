@@ -23,9 +23,14 @@ public class UpdateUserProfileCommandValidatorTest
     public UpdateUserProfileCommandValidatorTest()
     {
         Mock<IEfUnitOfWork> unitOfWork = new();
-        Mock<IHttpContextAccessorService> mockHttpContextAccessorService = new();
+        Mock<IHttpContextAccessorService> httpContext = new();
         Mock<ICurrentUser> currentUserService = new();
-        validator = new(translator.Object);
+        validator = new(
+            unitOfWork.Object,
+            currentUserService.Object,
+            httpContext.Object,
+            translator.Object
+        );
     }
 
     [Theory]
@@ -55,7 +60,6 @@ public class UpdateUserProfileCommandValidatorTest
     [Fact]
     public async Task Validate_WhenInvalidLengthOfFirstName_ShouldReturnMaximumLengthFailure()
     {
-
         var result = await validator.TestValidateAsync(command);
 
         string errorMessage = Messenger
@@ -99,7 +103,6 @@ public class UpdateUserProfileCommandValidatorTest
     [Fact]
     public async Task Validate_WhenInvalidLengthOfLastName_ShouldReturnMaximumLengthFailure()
     {
-
         var result = await validator.TestValidateAsync(command);
 
         string errorMessage = Messenger

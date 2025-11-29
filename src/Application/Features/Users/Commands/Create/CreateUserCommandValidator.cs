@@ -1,7 +1,8 @@
 using Application.Common.ErrorCodes;
-using Application.Common.Extensions;
+using Application.Common.Interfaces.Services;
 using Application.Common.Interfaces.Services.Localization;
 using Application.Common.Interfaces.UnitOfWorks;
+using Application.Common.Validators;
 using Application.Contracts.ApiWrapper;
 using Application.SharedFeatures.Validators.Users;
 using Domain.Aggregates.Users;
@@ -9,24 +10,18 @@ using FluentValidation;
 
 namespace Application.Features.Users.Commands.Create;
 
-public class CreateUserCommandValidator : AbstractValidator<CreateUserCommand>
+public class CreateUserCommandValidator(
+    IEfUnitOfWork unitOfWork,
+    IMessageTranslatorService translator,
+    IHttpContextAccessorService contextAccessor
+) : FluentValidator<CreateUserCommand>(contextAccessor, translator)
 {
-    private readonly IEfUnitOfWork unitOfWork;
-    private readonly IMessageTranslatorService translator;
-
-    public CreateUserCommandValidator(
-        IEfUnitOfWork unitOfWork,
+    protected sealed override void ApplyRules(
+        IHttpContextAccessorService contextAccessor,
         IMessageTranslatorService translator
     )
     {
-        this.unitOfWork = unitOfWork;
-        this.translator = translator;
-        ApplyRules();
-    }
-
-    private void ApplyRules()
-    {
-        Include(new UserValidator(unitOfWork, translator)!);
+        Include(new UserValidator(unitOfWork, contextAccessor, translator));
         RuleFor(x => x.Username)
             .NotEmpty()
             .WithState(_ => new ErrorReason(
@@ -42,23 +37,6 @@ public class CreateUserCommandValidator : AbstractValidator<CreateUserCommand>
             .WithState(_ => new ErrorReason(
                 UserErrorMessages.UserUsernameExistent,
                 translator.Translate(UserErrorMessages.UserUsernameExistent)
-            ));
-
-        RuleFor(x => x.Email)
-            .NotEmpty()
-            .WithState(_ => new ErrorReason(
-                UserErrorMessages.UserEmailRequired,
-                translator.Translate(UserErrorMessages.UserEmailRequired)
-            ))
-            .Must(x => x!.IsValidEmail())
-            .WithState(_ => new ErrorReason(
-                UserErrorMessages.UserEmailInvalid,
-                translator.Translate(UserErrorMessages.UserEmailInvalid)
-            ))
-            .MustAsync((email, ct) => IsEmailAvailableAsync(email!, cancellationToken: ct))
-            .WithState(_ => new ErrorReason(
-                UserErrorMessages.UserEmailExistent,
-                translator.Translate(UserErrorMessages.UserEmailExistent)
             ));
 
         RuleFor(x => x.Password)
@@ -81,6 +59,8 @@ public class CreateUserCommandValidator : AbstractValidator<CreateUserCommand>
             ));
     }
 
+    protected sealed override void ApplyRules(IMessageTranslatorService translator) { }
+
     private async Task<bool> IsUsernameAvailableAsync(
         string username,
         Ulid? id = null,
@@ -90,18 +70,6 @@ public class CreateUserCommandValidator : AbstractValidator<CreateUserCommand>
             .Repository<User>()
             .AnyAsync(
                 x => (!id.HasValue && x.Username == username) || x.Username == username,
-                cancellationToken
-            );
-
-    private async Task<bool> IsEmailAvailableAsync(
-        string email,
-        Ulid? id = null,
-        CancellationToken cancellationToken = default
-    ) =>
-        !await unitOfWork
-            .Repository<User>()
-            .AnyAsync(
-                x => x.Email == email && (!id.HasValue || x.Id != id.Value),
                 cancellationToken
             );
 }

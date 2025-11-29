@@ -1,6 +1,7 @@
 using System.Linq.Expressions;
 using Application.Common.ErrorCodes;
 using Application.Common.Interfaces.Repositories.EfCore;
+using Application.Common.Interfaces.Services;
 using Application.Common.Interfaces.Services.Localization;
 using Application.Common.Interfaces.UnitOfWorks;
 using Application.Contracts.ApiWrapper;
@@ -12,6 +13,7 @@ using Domain.Aggregates.Users;
 using Domain.Aggregates.Users.Enums;
 using FluentValidation;
 using FluentValidation.TestHelper;
+using Microsoft.AspNetCore.Http;
 using Moq;
 
 namespace Application.UnitTest.Users;
@@ -35,10 +37,8 @@ public partial class CreateUserCommandValidatorTest
         unitOfWork.Setup(x => x.Repository<User>()).Returns(userRepo.Object);
         unitOfWork.Setup(x => x.Repository<Permission>()).Returns(permissionRepo.Object);
 
-        validator = new(unitOfWork.Object, translator.Object)
-        {
-            RuleLevelCascadeMode = CascadeMode.Stop,
-        };
+        Mock<IHttpContextAccessorService> httpContext = new();
+        validator = new(unitOfWork.Object, translator.Object, httpContext.Object);
         inlineValidator = [];
 
         command = Default;

@@ -1,15 +1,23 @@
 using Application.Common.ErrorCodes;
-using Application.Common.Extensions;
+using Application.Common.Interfaces.Services;
 using Application.Common.Interfaces.Services.Localization;
+using Application.Common.Interfaces.UnitOfWorks;
+using Application.Common.Validators;
 using Application.Contracts.ApiWrapper;
 using FluentValidation;
 
 namespace Application.Features.Users.Commands.Profiles;
 
-public class UpdateUserProfileCommandValidator : AbstractValidator<UpdateUserProfileCommand>
+public class UpdateUserProfileCommandValidator(
+    IEfUnitOfWork unitOfWork,
+    ICurrentUser currentUser,
+    IHttpContextAccessorService contextAccessorService,
+    IMessageTranslatorService translator
+) : FluentValidator<UpdateUserProfileCommand>(contextAccessorService, translator)
 {
-    public UpdateUserProfileCommandValidator(IMessageTranslatorService translator)
+    protected sealed override void ApplyRules(IMessageTranslatorService translator)
     {
+        Ulid id = currentUser.Id!.Value;
         RuleFor(x => x.LastName)
             .NotEmpty()
             .WithState(_ => new ErrorReason(
@@ -43,6 +51,23 @@ public class UpdateUserProfileCommandValidator : AbstractValidator<UpdateUserPro
                 translator.Translate(UserErrorMessages.UserPhoneNumberInvalid)
             ));
 
+        RuleFor(x => x.Email)
+            .NotEmpty()
+            .WithState(_ => new ErrorReason(
+                UserErrorMessages.UserEmailRequired,
+                translator.Translate(UserErrorMessages.UserEmailRequired)
+            ))
+            .Must(x => x!.IsValidEmail())
+            .WithState(_ => new ErrorReason(
+                UserErrorMessages.UserEmailInvalid,
+                translator.Translate(UserErrorMessages.UserEmailInvalid)
+            ))
+            .UserEmailAvailable(unitOfWork, id)
+            .WithState(_ => new ErrorReason(
+                UserErrorMessages.UserEmailExistent,
+                translator.Translate(UserErrorMessages.UserEmailExistent)
+            ));
+
         RuleFor(x => x.Gender)
             .IsInEnum()
             .WithState(_ => new ErrorReason(
@@ -50,4 +75,9 @@ public class UpdateUserProfileCommandValidator : AbstractValidator<UpdateUserPro
                 translator.Translate(UserErrorMessages.UserGenderNotInEnum)
             ));
     }
+
+    protected sealed override void ApplyRules(
+        IHttpContextAccessorService contextAccessor,
+        IMessageTranslatorService translator
+    ) { }
 }

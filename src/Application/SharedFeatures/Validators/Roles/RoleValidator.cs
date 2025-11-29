@@ -2,6 +2,7 @@ using Application.Common.ErrorCodes;
 using Application.Common.Interfaces.Services;
 using Application.Common.Interfaces.Services.Localization;
 using Application.Common.Interfaces.UnitOfWorks;
+using Application.Common.Validators;
 using Application.Contracts.ApiWrapper;
 using Application.SharedFeatures.Requests.Roles;
 using Domain.Aggregates.Permissions;
@@ -11,27 +12,18 @@ using FluentValidation;
 
 namespace Application.SharedFeatures.Validators.Roles;
 
-public class RoleValidator : AbstractValidator<RoleUpsertCommand>
+public class RoleValidator(
+    IEfUnitOfWork unitOfWork,
+    IHttpContextAccessorService httpContextAccessor,
+    IMessageTranslatorService translator
+) : FluentValidator<RoleUpsertCommand>(httpContextAccessor, translator)
 {
-    private readonly IEfUnitOfWork unitOfWork;
-    private readonly IHttpContextAccessorService httpContextAccessorService;
-    private readonly IMessageTranslatorService translator;
-
-    public RoleValidator(
-        IEfUnitOfWork unitOfWork,
-        IHttpContextAccessorService httpContextAccessorService,
+    protected sealed override void ApplyRules(
+        IHttpContextAccessorService httpContextAccessor,
         IMessageTranslatorService translator
     )
     {
-        this.unitOfWork = unitOfWork;
-        this.httpContextAccessorService = httpContextAccessorService;
-        this.translator = translator;
-        ApplyRules();
-    }
-
-    private void ApplyRules()
-    {
-        _ = Ulid.TryParse(httpContextAccessorService.GetId(), out Ulid id);
+        _ = Ulid.TryParse(httpContextAccessor.GetId(), out Ulid id);
 
         RuleFor(x => x.Name)
             .NotEmpty()
@@ -46,7 +38,7 @@ public class RoleValidator : AbstractValidator<RoleUpsertCommand>
             ))
             .MustAsync((name, ct) => IsNameAvailableAsync(name, cancellationToken: ct))
             .When(
-                _ => httpContextAccessorService.GetHttpMethod() == HttpMethod.Post.ToString(),
+                _ => httpContextAccessor.GetHttpMethod() == HttpMethod.Post.ToString(),
                 ApplyConditionTo.CurrentValidator
             )
             .WithState(_ => new ErrorReason(
@@ -55,7 +47,7 @@ public class RoleValidator : AbstractValidator<RoleUpsertCommand>
             ))
             .MustAsync((name, ct) => IsNameAvailableAsync(name, id, ct))
             .When(
-                _ => httpContextAccessorService.GetHttpMethod() == HttpMethod.Put.ToString(),
+                _ => httpContextAccessor.GetHttpMethod() == HttpMethod.Put.ToString(),
                 ApplyConditionTo.CurrentValidator
             )
             .WithState(_ => new ErrorReason(
@@ -88,6 +80,8 @@ public class RoleValidator : AbstractValidator<RoleUpsertCommand>
                 translator.Translate(RoleErrorMessages.RolePermissionsExistent)
             ));
     }
+
+    protected sealed override void ApplyRules(IMessageTranslatorService translator) { }
 
     private async Task<bool> IsNameAvailableAsync(
         string name,

@@ -1,14 +1,18 @@
 using Application.Common.ErrorCodes;
-using Application.Common.Extensions;
+using Application.Common.Interfaces.Services;
 using Application.Common.Interfaces.Services.Localization;
+using Application.Common.Validators;
 using Application.Contracts.ApiWrapper;
 using FluentValidation;
 
 namespace Application.Features.Users.Commands.ChangePassword;
 
-public class ChangeUserPasswordCommandValidator : AbstractValidator<ChangeUserPasswordCommand>
+public class ChangeUserPasswordCommandValidator(
+    IHttpContextAccessorService accessorService,
+    IMessageTranslatorService translator
+) : FluentValidator<ChangeUserPasswordCommand>(accessorService, translator)
 {
-    public ChangeUserPasswordCommandValidator(IMessageTranslatorService translator)
+    protected sealed override void ApplyRules(IMessageTranslatorService translator)
     {
         RuleFor(x => x.OldPassword)
             .NotEmpty()
@@ -30,4 +34,9 @@ public class ChangeUserPasswordCommandValidator : AbstractValidator<ChangeUserPa
                 translator.Translate(UserErrorMessages.UserNewPasswordNotStrong)
             ));
     }
+
+    protected sealed override void ApplyRules(
+        IHttpContextAccessorService contextAccessor,
+        IMessageTranslatorService translator
+    ) { }
 }

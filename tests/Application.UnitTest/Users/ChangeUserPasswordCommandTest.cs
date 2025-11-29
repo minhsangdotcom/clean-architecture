@@ -1,4 +1,5 @@
 using Application.Common.ErrorCodes;
+using Application.Common.Interfaces.Services;
 using Application.Common.Interfaces.Services.Localization;
 using Application.Contracts.ApiWrapper;
 using Application.Features.Users.Commands.ChangePassword;
@@ -17,7 +18,8 @@ public class ChangeUserPasswordCommandTest
 
     public ChangeUserPasswordCommandTest()
     {
-        validator = new ChangeUserPasswordCommandValidator(translator.Object);
+        Mock<IHttpContextAccessorService> httpContext = new();
+        validator = new ChangeUserPasswordCommandValidator(httpContext.Object, translator.Object);
     }
 
     [Theory]

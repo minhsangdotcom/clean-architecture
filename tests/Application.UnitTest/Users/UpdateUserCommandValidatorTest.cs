@@ -1,3 +1,4 @@
+using Application.Common.Interfaces.Services;
 using Application.Common.Interfaces.Services.Localization;
 using Application.Common.Interfaces.UnitOfWorks;
 using Application.Contracts.ApiWrapper;
@@ -22,7 +23,8 @@ public class UpdateUserCommandValidatorTest
     public UpdateUserCommandValidatorTest()
     {
         Mock<IEfUnitOfWork> unitOfWork = new();
-        validator = new(unitOfWork.Object, translator.Object);
+        Mock<IHttpContextAccessorService> httpContext = new();
+        validator = new(unitOfWork.Object, httpContext.Object, translator.Object);
     }
 
     [Theory]
@@ -52,7 +54,6 @@ public class UpdateUserCommandValidatorTest
     [Fact]
     public async Task Validate_WhenInvalidLengthOfFirstName_ShouldReturnMaximumLengthFailure()
     {
-
         var result = await validator.TestValidateAsync(userUpdate);
 
         string errorMessage = Messenger

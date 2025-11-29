@@ -13,6 +13,8 @@ public class UpdateUserProfileCommand : IRequest<Result<UpdateUserProfileRespons
 
     public string? PhoneNumber { get; set; }
 
+    public string? Email { get; set; }
+
     public DateTime? DateOfBirth { get; set; }
 
     public IFormFile? Avatar { get; set; }

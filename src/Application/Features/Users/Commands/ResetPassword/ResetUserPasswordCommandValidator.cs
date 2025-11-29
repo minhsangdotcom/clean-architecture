@@ -1,5 +1,6 @@
-using Application.Common.Extensions;
+using Application.Common.Interfaces.Services;
 using Application.Common.Interfaces.Services.Localization;
+using Application.Common.Validators;
 using Application.Contracts.ApiWrapper;
 using Application.Contracts.Messages;
 using Domain.Aggregates.Users;
@@ -7,9 +8,12 @@ using FluentValidation;
 
 namespace Application.Features.Users.Commands.ResetPassword;
 
-public class UpdateUserPasswordValidator : AbstractValidator<UpdateUserPassword>
+public class UpdateUserPasswordValidator(
+    IHttpContextAccessorService httpContextAccessor,
+    IMessageTranslatorService translator
+) : FluentValidator<UpdateUserPassword>(httpContextAccessor, translator)
 {
-    public UpdateUserPasswordValidator(IMessageTranslatorService translator)
+    protected sealed override void ApplyRules(IMessageTranslatorService translator)
     {
         RuleFor(x => x.Token)
             .NotEmpty()
@@ -51,4 +55,9 @@ public class UpdateUserPasswordValidator : AbstractValidator<UpdateUserPassword>
                 return new ErrorReason(errorMessage, translator.Translate(errorMessage));
             });
     }
+
+    protected sealed override void ApplyRules(
+        IHttpContextAccessorService contextAccessor,
+        IMessageTranslatorService translator
+    ) { }
 }

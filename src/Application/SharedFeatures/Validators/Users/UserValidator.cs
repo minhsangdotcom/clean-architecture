@@ -1,7 +1,8 @@
 using Application.Common.ErrorCodes;
-using Application.Common.Extensions;
+using Application.Common.Interfaces.Services;
 using Application.Common.Interfaces.Services.Localization;
 using Application.Common.Interfaces.UnitOfWorks;
+using Application.Common.Validators;
 using Application.Contracts.ApiWrapper;
 using Application.SharedFeatures.Requests.Users;
 using Domain.Aggregates.Permissions;
@@ -10,20 +11,18 @@ using FluentValidation;
 
 namespace Application.SharedFeatures.Validators.Users;
 
-public partial class UserValidator : AbstractValidator<UserUpsertCommand>
+public class UserValidator(
+    IEfUnitOfWork unitOfWork,
+    IHttpContextAccessorService httpContextAccessorService,
+    IMessageTranslatorService translator
+) : FluentValidator<UserUpsertCommand>(httpContextAccessorService, translator)
 {
-    private readonly IEfUnitOfWork unitOfWork;
-    private readonly IMessageTranslatorService translator;
-
-    public UserValidator(IEfUnitOfWork unitOfWork, IMessageTranslatorService translator)
+    protected override void ApplyRules(
+        IHttpContextAccessorService contextAccessor,
+        IMessageTranslatorService translator
+    )
     {
-        this.unitOfWork = unitOfWork;
-        this.translator = translator;
-        ApplyRules();
-    }
-
-    private void ApplyRules()
-    {
+        _ = Ulid.TryParse(contextAccessor.GetId(), out Ulid id);
         RuleFor(x => x.LastName)
             .NotEmpty()
             .WithState(_ => new ErrorReason(
@@ -54,6 +53,30 @@ public partial class UserValidator : AbstractValidator<UserUpsertCommand>
             .WithState(_ => new ErrorReason(
                 UserErrorMessages.UserPhoneNumberInvalid,
                 translator.Translate(UserErrorMessages.UserPhoneNumberInvalid)
+            ));
+
+        RuleFor(x => x.Email)
+            .NotEmpty()
+            .WithState(_ => new ErrorReason(
+                UserErrorMessages.UserEmailRequired,
+                translator.Translate(UserErrorMessages.UserEmailRequired)
+            ))
+            .Must(x => x!.IsValidEmail())
+            .WithState(_ => new ErrorReason(
+                UserErrorMessages.UserEmailInvalid,
+                translator.Translate(UserErrorMessages.UserEmailInvalid)
+            ))
+            .UserEmailAvailable(unitOfWork)
+            .When(_ => contextAccessor.GetHttpMethod() == HttpMethod.Post.ToString())
+            .WithState(_ => new ErrorReason(
+                UserErrorMessages.UserEmailExistent,
+                translator.Translate(UserErrorMessages.UserEmailExistent)
+            ))
+            .UserEmailAvailable(unitOfWork, id)
+            .When(_ => contextAccessor.GetHttpMethod() == HttpMethod.Put.ToString())
+            .WithState(_ => new ErrorReason(
+                UserErrorMessages.UserEmailExistent,
+                translator.Translate(UserErrorMessages.UserEmailExistent)
             ));
 
         RuleFor(x => x.Status)
@@ -105,6 +128,8 @@ public partial class UserValidator : AbstractValidator<UserUpsertCommand>
             }
         );
     }
+
+    protected override void ApplyRules(IMessageTranslatorService translator) { }
 
     private async Task<bool> IsRolesAvailableAsync(
         IEnumerable<Ulid> roles,
