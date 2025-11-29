@@ -18,10 +18,9 @@ public class ChangeUserPasswordCommandValidator(
             .WithTranslatedError(translator, UserErrorMessages.UserOldPasswordRequired);
 
         RuleFor(x => x.NewPassword)
-            .Cascade(CascadeMode.Stop)
             .NotEmpty()
             .WithTranslatedError(translator, UserErrorMessages.UserNewPasswordRequired)
-            .Must(x => x!.IsValidPassword())
+            .BeValidPassword()
             .WithTranslatedError(translator, UserErrorMessages.UserNewPasswordNotStrong);
     }
 

@@ -25,7 +25,7 @@ public class CreateUserCommandValidator(
         RuleFor(x => x.Username)
             .NotEmpty()
             .WithTranslatedError(translator, UserErrorMessages.UserUsernameRequired)
-            .Must((_, x) => x!.IsValidUsername())
+            .BeValidUsername()
             .WithTranslatedError(translator, UserErrorMessages.UserUsernameInvalid)
             .MustAsync((username, ct) => IsUsernameAvailableAsync(username!, cancellationToken: ct))
             .WithTranslatedError(translator, UserErrorMessages.UserUsernameExistent);
@@ -33,7 +33,7 @@ public class CreateUserCommandValidator(
         RuleFor(x => x.Password)
             .NotEmpty()
             .WithTranslatedError(translator, UserErrorMessages.UserPasswordRequired)
-            .Must((_, x) => x!.IsValidPassword())
+            .BeValidPassword()
             .WithTranslatedError(translator, UserErrorMessages.UserPasswordWeak);
 
         RuleFor(x => x.Gender)
@@ -46,13 +46,13 @@ public class CreateUserCommandValidator(
 
     private async Task<bool> IsUsernameAvailableAsync(
         string username,
-        Ulid? id = null,
+        Ulid? excludeId = null,
         CancellationToken cancellationToken = default
     ) =>
         !await unitOfWork
             .Repository<User>()
             .AnyAsync(
-                x => (!id.HasValue && x.Username == username) || x.Username == username,
+                x => x.Username == username && (!excludeId.HasValue || x.Id != excludeId),
                 cancellationToken
             );
 }

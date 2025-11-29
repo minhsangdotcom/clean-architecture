@@ -36,7 +36,7 @@ public class UserValidator(
             .WithTranslatedError(translator, UserErrorMessages.UserFirstNameTooLong);
 
         RuleFor(x => x.PhoneNumber)
-            .Must(x => x!.IsValidPhoneNumber())
+            .BeValidPhoneNumber()
             .When(x => !string.IsNullOrEmpty(x.PhoneNumber))
             .WithTranslatedError(translator, UserErrorMessages.UserPhoneNumberInvalid);
 
@@ -44,17 +44,17 @@ public class UserValidator(
             .Cascade(CascadeMode.Stop)
             .NotEmpty()
             .WithTranslatedError(translator, UserErrorMessages.UserEmailRequired)
-            .Must(x => x!.IsValidEmail())
+            .BeValidEmail()
             .WithTranslatedError(translator, UserErrorMessages.UserEmailInvalid)
             // POST
-            .UserEmailAvailable(unitOfWork)
+            .BeUniqueUserEmail(unitOfWork)
             .When(
                 _ => contextAccessor.GetHttpMethod() == HttpMethod.Post.ToString(),
                 ApplyConditionTo.CurrentValidator
             )
             .WithTranslatedError(translator, UserErrorMessages.UserEmailExistent)
             // PUT
-            .UserEmailAvailable(unitOfWork, id)
+            .BeUniqueUserEmail(unitOfWork, id)
             .When(
                 _ => contextAccessor.GetHttpMethod() == HttpMethod.Put.ToString(),
                 ApplyConditionTo.CurrentValidator
@@ -71,7 +71,7 @@ public class UserValidator(
             .Cascade(CascadeMode.Stop)
             .NotEmpty()
             .WithTranslatedError(translator, UserErrorMessages.UserRolesRequired)
-            .Must(x => x!.Distinct().Count() == x!.Count)
+            .ContainDistinctItems()
             .WithTranslatedError(translator, UserErrorMessages.UserRolesNotUnique)
             .MustAsync((roles, ct) => IsRolesAvailableAsync(roles!, ct))
             .WithTranslatedError(translator, UserErrorMessages.UserRolesNotFound);
@@ -82,7 +82,7 @@ public class UserValidator(
             {
                 RuleFor(r => r.Permissions)
                     .Cascade(CascadeMode.Stop)
-                    .Must((p, _) => p.Permissions!.Distinct().Count() == p.Permissions!.Count)
+                    .ContainDistinctItems()
                     .WithTranslatedError(translator, UserErrorMessages.UserPermissionsNotUnique)
                     .MustAsync((p, ct) => IsPermissionsAvailableAsync(p!, ct))
                     .WithTranslatedError(translator, UserErrorMessages.UserPermissionsNotFound);
@@ -93,17 +93,17 @@ public class UserValidator(
     protected override void ApplyRules(IMessageTranslatorService translator) { }
 
     private async Task<bool> IsRolesAvailableAsync(
-        IEnumerable<Ulid> roles,
+        List<Ulid> roles,
         CancellationToken cancellationToken = default
     ) =>
         await unitOfWork.Repository<Role>().CountAsync(x => roles.Contains(x.Id), cancellationToken)
-        == roles.Count();
+        == roles.Count;
 
     private async Task<bool> IsPermissionsAvailableAsync(
-        IEnumerable<Ulid> permissions,
+        List<Ulid> permissions,
         CancellationToken cancellationToken
     ) =>
         await unitOfWork
             .Repository<Permission>()
-            .CountAsync(x => permissions.Contains(x.Id), cancellationToken) == permissions.Count();
+            .CountAsync(x => permissions.Contains(x.Id), cancellationToken) == permissions.Count;
 }

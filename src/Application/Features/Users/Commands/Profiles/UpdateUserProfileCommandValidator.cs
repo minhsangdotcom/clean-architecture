@@ -30,7 +30,7 @@ public class UpdateUserProfileCommandValidator(
             .WithTranslatedError(translator, UserErrorMessages.UserFirstNameTooLong);
 
         RuleFor(x => x.PhoneNumber)
-            .Must(x => x!.IsValidPhoneNumber())
+            .BeValidPhoneNumber()
             .When(x => !string.IsNullOrEmpty(x.PhoneNumber))
             .WithTranslatedError(translator, UserErrorMessages.UserPhoneNumberInvalid);
 
@@ -38,9 +38,9 @@ public class UpdateUserProfileCommandValidator(
             .Cascade(CascadeMode.Stop)
             .NotEmpty()
             .WithTranslatedError(translator, UserErrorMessages.UserEmailRequired)
-            .Must(x => x!.IsValidEmail())
+            .BeValidEmail()
             .WithTranslatedError(translator, UserErrorMessages.UserEmailInvalid)
-            .UserEmailAvailable(unitOfWork, id)
+            .BeUniqueUserEmail(unitOfWork, id)
             .WithTranslatedError(translator, UserErrorMessages.UserEmailExistent);
 
         RuleFor(x => x.Gender)

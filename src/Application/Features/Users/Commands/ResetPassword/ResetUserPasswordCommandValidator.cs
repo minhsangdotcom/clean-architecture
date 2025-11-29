@@ -16,7 +16,7 @@ public class UpdateUserPasswordValidator(
         RuleFor(x => x.Email)
             .NotEmpty()
             .WithTranslatedError(translator, UserErrorMessages.UserEmailRequired)
-            .Must(x => x!.IsValidEmail())
+            .BeValidEmail()
             .WithTranslatedError(translator, UserErrorMessages.UserEmailInvalid);
 
         RuleFor(x => x.Token)
@@ -26,7 +26,7 @@ public class UpdateUserPasswordValidator(
         RuleFor(x => x.Password)
             .NotEmpty()
             .WithTranslatedError(translator, UserErrorMessages.UserPasswordRequired)
-            .Must(x => x!.IsValidPassword())
+            .BeValidPassword()
             .WithTranslatedError(translator, UserErrorMessages.UserNewPasswordNotStrong);
     }
 

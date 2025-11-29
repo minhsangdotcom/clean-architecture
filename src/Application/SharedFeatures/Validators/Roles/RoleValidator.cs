@@ -52,7 +52,7 @@ public class RoleValidator(
         RuleFor(x => x.PermissionIds)
             .NotEmpty()
             .WithTranslatedError(translator, RoleErrorMessages.RolePermissionsRequired)
-            .Must(x => x!.Distinct().Count() == x!.Count)
+            .ContainDistinctItems()
             .WithTranslatedError(translator, RoleErrorMessages.RolePermissionsUnique)
             .MustAsync((permissionIds, ct) => IsAllPermissionExistentAsync(permissionIds!, ct))
             .WithTranslatedError(translator, RoleErrorMessages.RolePermissionsExistent);
@@ -62,27 +62,22 @@ public class RoleValidator(
 
     private async Task<bool> IsNameAvailableAsync(
         string name,
-        Ulid? id = null,
+        Ulid? excludeId = null,
         CancellationToken cancellationToken = default
-    )
-    {
-        string caseName = name.ToScreamingSnakeCase();
-        return !await unitOfWork
+    ) =>
+        !await unitOfWork
             .Repository<Role>()
             .AnyAsync(
-                x => !id.HasValue && x.Name == caseName || x.Name == caseName,
+                x => x.Name == name && (!excludeId.HasValue || x.Id != excludeId),
                 cancellationToken
             );
-    }
 
     private async Task<bool> IsAllPermissionExistentAsync(
         List<Ulid> permissionIds,
         CancellationToken cancellationToken = default
-    )
-    {
-        return await unitOfWork
-                .Repository<Permission>()
-                .CountAsync(x => permissionIds.Contains(x.Id), cancellationToken)
-            == permissionIds.Count;
-    }
+    ) =>
+        await unitOfWork
+            .Repository<Permission>()
+            .CountAsync(x => permissionIds.Contains(x.Id), cancellationToken)
+        == permissionIds.Count;
 }
