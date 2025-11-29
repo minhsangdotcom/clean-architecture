@@ -84,7 +84,7 @@ public static class QueryParamRequestDocument
                                 {
                                     ["$eq"] = new OpenApiInteger(1),
                                 },
-                                ["dayofBirth"] = new OpenApiObject()
+                                ["dateOfBirth"] = new OpenApiObject()
                                 {
                                     ["$between"] = new OpenApiArray()
                                     {
