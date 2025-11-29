@@ -18,7 +18,7 @@ public class RequestUserPasswordResetNotificationHandler(IMailService mailServic
             new(domain)
             {
                 Query =
-                    $"token={Uri.EscapeDataString(notification.RawToken)}&id={notification.UserId}",
+                    $"token={Uri.EscapeDataString(notification.RawToken)}&email={notification.Email}",
             };
 
         string expiry = notification.Expiry.ToLocalTime().ToString("dd/MM/yyyy hh:mm:ss");

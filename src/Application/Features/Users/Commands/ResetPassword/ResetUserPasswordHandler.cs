@@ -4,12 +4,10 @@ using Application.Common.Interfaces.Services.Localization;
 using Application.Common.Interfaces.UnitOfWorks;
 using Application.Contracts.ApiWrapper;
 using Application.Contracts.Constants;
-using Application.Contracts.Messages;
 using Domain.Aggregates.Users;
 using Domain.Aggregates.Users.Enums;
 using Domain.Aggregates.Users.Specifications;
 using Mediator;
-using Microsoft.Extensions.Localization;
 
 namespace Application.Features.Users.Commands.ResetPassword;
 
@@ -26,7 +24,7 @@ public class ResetUserPasswordHandler(
         User? user = await unitOfWork
             .DynamicReadOnlyRepository<User>()
             .FindByConditionAsync(
-                new GetUserByIdIncludePasswordResetRequestSpecification(Ulid.Parse(command.UserId)),
+                new GetUserByEmailIncludePasswordResetRequestSpecification(command.Email!),
                 cancellationToken
             );
 
@@ -43,9 +41,8 @@ public class ResetUserPasswordHandler(
             );
         }
 
-        UpdateUserPassword? updateUserPassword = command.UpdateUserPassword;
         UserPasswordReset? resetPassword = user.PasswordResetRequests?.FirstOrDefault(x =>
-            x.Token == updateUserPassword!.Token
+            x.Token == command.Token
         );
 
         if (resetPassword == null)
@@ -63,35 +60,31 @@ public class ResetUserPasswordHandler(
 
         if (resetPassword.Expiry <= DateTimeOffset.UtcNow)
         {
-            string errorMessage = Messenger
-                .Create<UserPasswordReset>()
-                .Property(x => x.Token)
-                .WithError(MessageErrorType.Expired)
-                .GetFullMessage();
             return Result<string>.Failure(
                 new BadRequestError(
                     "Error has occurred with reset password token",
-                    new(errorMessage, translator.Translate(errorMessage))
+                    new(
+                        UserErrorMessages.UserPasswordResetTokenExpired,
+                        translator.Translate(UserErrorMessages.UserPasswordResetTokenExpired)
+                    )
                 )
             );
         }
 
         if (user.Status == UserStatus.Inactive)
         {
-            string errorMessage = Messenger
-                .Create<User>()
-                .WithError(MessageErrorType.Active)
-                .Negative()
-                .GetFullMessage();
             return Result<string>.Failure(
                 new BadRequestError(
                     "Error has occurred with current user",
-                    new(errorMessage, translator.Translate(errorMessage))
+                    new(
+                        UserErrorMessages.UserInactive,
+                        translator.Translate(UserErrorMessages.UserInactive)
+                    )
                 )
             );
         }
 
-        user.ChangePassword(HashPassword(updateUserPassword!.Password));
+        user.ChangePassword(HashPassword(command.Password));
 
         await unitOfWork.Repository<UserPasswordReset>().DeleteAsync(resetPassword);
         await unitOfWork.Repository<User>().UpdateAsync(user);

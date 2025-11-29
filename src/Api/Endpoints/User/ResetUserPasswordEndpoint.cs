@@ -15,7 +15,7 @@ public class ResetUserPasswordEndpoint : IEndpoint
 
     public void MapEndpoint(IEndpointRouteBuilder app)
     {
-        app.MapPut(Router.UserRoute.ResetPassword, HandleAsync)
+        app.MapPost(Router.UserRoute.ResetPassword, HandleAsync)
             .WithOpenApi(operation => new OpenApiOperation(operation)
             {
                 Summary = "Reset user password 🔄 🔑",
@@ -23,20 +23,16 @@ public class ResetUserPasswordEndpoint : IEndpoint
                     "Resets a user's password using a valid token from a password reset request.",
                 Tags = [new OpenApiTag() { Name = Router.UserRoute.Tags }],
             })
-            .WithRequestValidation<UpdateUserPassword>();
+            .WithRequestValidation<ResetUserPasswordCommand>();
     }
 
     private async Task<Results<NoContent, ProblemHttpResult>> HandleAsync(
-        [FromRoute] string id,
-        [FromBody] UpdateUserPassword request,
+        [FromBody] ResetUserPasswordCommand request,
         ISender sender,
         CancellationToken cancellationToken = default
     )
     {
-        var result = await sender.Send(
-            new ResetUserPasswordCommand { UserId = id, UpdateUserPassword = request },
-            cancellationToken
-        );
+        var result = await sender.Send(request, cancellationToken);
         return result.ToNoContentResult();
     }
 }

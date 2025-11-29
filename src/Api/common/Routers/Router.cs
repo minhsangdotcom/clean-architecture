@@ -14,7 +14,7 @@ public static class Router
         public const string Profile = $"{Users}/profile";
         public const string ChangePassword = $"{Users}/change-password";
         public const string RequestResetPassword = $"{Users}/request-reset-password";
-        public const string ResetPassword = $"{Users}/{{{RoutePath.Id}}}/reset-password";
+        public const string ResetPassword = $"{Users}/reset-password";
 
         public const string Login = $"{Users}/login";
         public const string RefreshToken = $"{Users}/refresh-token";
