@@ -43,10 +43,7 @@ public partial class CreateUserCommandValidatorTest
         command = Default;
     }
 
-    // ----------------------------------------------------------------------
-    // LAST NAME RULES
-    // ----------------------------------------------------------------------
-
+    #region LAST NAME RULES
     [Theory]
     [InlineData(null)]
     [InlineData("")]
@@ -111,11 +108,9 @@ public partial class CreateUserCommandValidatorTest
         //Assert
         result.ShouldNotHaveValidationErrorFor(x => x.LastName);
     }
+    #endregion
 
-    // ----------------------------------------------------------------------
-    // FIRST NAME RULES
-    // ----------------------------------------------------------------------
-
+    #region FIRST NAME RULES
     [Theory]
     [InlineData(null)]
     [InlineData("")]
@@ -180,11 +175,9 @@ public partial class CreateUserCommandValidatorTest
         //Assert
         result.ShouldNotHaveValidationErrorFor(x => x.FirstName);
     }
+    #endregion
 
-    // ----------------------------------------------------------------------
-    // PHONE NUMBER RULES
-    // ----------------------------------------------------------------------
-
+    #region PHONE NUMBER RULES
     [Fact]
     public async Task Should_Pass_When_PhoneNumberIsNullOrEmpty()
     {
@@ -258,10 +251,9 @@ public partial class CreateUserCommandValidatorTest
         // Assert
         result.ShouldNotHaveValidationErrorFor(x => x.PhoneNumber);
     }
+    #endregion
 
-    // ----------------------------------------------------------------------
-    // Email rule
-    // ----------------------------------------------------------------------
+    #region Email rule
     [Theory]
     [InlineData(null)]
     [InlineData("")]
@@ -377,11 +369,9 @@ public partial class CreateUserCommandValidatorTest
         // Assert
         result.ShouldNotHaveValidationErrorFor(x => x.Email);
     }
+    #endregion
 
-    // ----------------------------------------------------------------------
-    // STATUS RULES
-    // ----------------------------------------------------------------------
-
+    #region STATUS RULES
     [Theory]
     [InlineData(4)]
     [InlineData(3)]
@@ -422,11 +412,9 @@ public partial class CreateUserCommandValidatorTest
         // Assert
         result.ShouldNotHaveValidationErrorFor(x => x.Status);
     }
+    #endregion
 
-    // ----------------------------------------------------------------------
-    // ROLES RULES (DB)  → inlineValidator
-    // ----------------------------------------------------------------------
-
+    #region ROLES RULES
     [Theory]
     [InlineData(null)]
     [InlineData(default(List<Ulid>))]
@@ -545,11 +533,9 @@ public partial class CreateUserCommandValidatorTest
         // Assert
         result.ShouldNotHaveValidationErrorFor(x => x.Roles);
     }
+    #endregion
 
-    // ----------------------------------------------------------------------
-    // PERMISSIONS RULES (optional, DB) → inlineValidator
-    // ----------------------------------------------------------------------
-
+    #region PERMISSIONS RULES
     [Theory]
     [InlineData(null)]
     [InlineData(default(List<Ulid>))]
@@ -658,6 +644,7 @@ public partial class CreateUserCommandValidatorTest
             .ReturnsAsync(command.Permissions!.Count);
     }
 
+    #endregion
     public static CreateUserCommand Default =>
         new Faker<CreateUserCommand>()
             .RuleFor(x => x.FirstName, f => f.Name.FirstName())
@@ -670,7 +657,7 @@ public partial class CreateUserCommandValidatorTest
             .RuleFor(x => x.Permissions, f => [Ulid.NewUlid()])
             .RuleFor(x => x.Username, f => f.Internet.UserName())
             .RuleFor(x => x.Email, f => f.Internet.Email())
-            .RuleFor(x => x.Password, f => "Admin@123")
+            .RuleFor(x => x.Password, "Admin@123")
             .RuleFor(
                 x => x.Gender,
                 f => f.PickRandom(new Gender?[] { Gender.Male, Gender.Female, null })

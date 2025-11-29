@@ -6,7 +6,6 @@ using Application.Common.Interfaces.Services.Localization;
 using Application.Common.Interfaces.UnitOfWorks;
 using Application.Contracts.ApiWrapper;
 using Application.Features.Users.Commands.Update;
-using Application.SharedFeatures.Requests.Users;
 using Bogus;
 using Domain.Aggregates.Permissions;
 using Domain.Aggregates.Roles;
@@ -44,10 +43,7 @@ public class UpdateUserCommandValidatorTest
         command = Default();
     }
 
-    // ----------------------------------------------------------------------
-    // LAST NAME RULES
-    // ----------------------------------------------------------------------
-
+    #region LAST NAME RULES
     [Theory]
     [InlineData(null)]
     [InlineData("")]
@@ -112,11 +108,9 @@ public class UpdateUserCommandValidatorTest
         //Assert
         result.ShouldNotHaveValidationErrorFor(x => x.UpdateData.LastName);
     }
+    #endregion
 
-    // ----------------------------------------------------------------------
-    // FIRST NAME RULES
-    // ----------------------------------------------------------------------
-
+    #region FIRST NAME RULES
     [Theory]
     [InlineData(null)]
     [InlineData("")]
@@ -181,11 +175,9 @@ public class UpdateUserCommandValidatorTest
         //Assert
         result.ShouldNotHaveValidationErrorFor(x => x.UpdateData.FirstName);
     }
+    #endregion
 
-    // ----------------------------------------------------------------------
-    // PHONE NUMBER RULES
-    // ----------------------------------------------------------------------
-
+    #region PHONE NUMBER RULES
     [Fact]
     public async Task Should_Pass_When_PhoneNumberIsNullOrEmpty()
     {
@@ -259,10 +251,9 @@ public class UpdateUserCommandValidatorTest
         // Assert
         result.ShouldNotHaveValidationErrorFor(x => x.UpdateData.PhoneNumber);
     }
+    #endregion
 
-    // ----------------------------------------------------------------------
-    // Email rule
-    // ----------------------------------------------------------------------
+    #region Email rule
     [Theory]
     [InlineData(null)]
     [InlineData("")]
@@ -378,11 +369,9 @@ public class UpdateUserCommandValidatorTest
         // Assert
         result.ShouldNotHaveValidationErrorFor(x => x.UpdateData.Email);
     }
+    #endregion
 
-    // ----------------------------------------------------------------------
-    // STATUS RULES
-    // ----------------------------------------------------------------------
-
+    #region STATUS RULES
     [Theory]
     [InlineData(4)]
     [InlineData(3)]
@@ -423,11 +412,9 @@ public class UpdateUserCommandValidatorTest
         // Assert
         result.ShouldNotHaveValidationErrorFor(x => x.UpdateData.Status);
     }
+    #endregion
 
-    // ----------------------------------------------------------------------
-    // ROLES RULES (DB)  → inlineValidator
-    // ----------------------------------------------------------------------
-
+    #region ROLES RULES
     [Theory]
     [InlineData(null)]
     [InlineData(default(List<Ulid>))]
@@ -546,11 +533,9 @@ public class UpdateUserCommandValidatorTest
         // Assert
         result.ShouldNotHaveValidationErrorFor(x => x.UpdateData.Roles);
     }
+    #endregion
 
-    // ----------------------------------------------------------------------
-    // PERMISSIONS RULES (optional, DB) → inlineValidator
-    // ----------------------------------------------------------------------
-
+    #region PERMISSIONS RULES
     [Theory]
     [InlineData(null)]
     [InlineData(default(List<Ulid>))]
@@ -660,6 +645,7 @@ public class UpdateUserCommandValidatorTest
             )
             .ReturnsAsync(command.UpdateData.Permissions!.Count);
     }
+    #endregion
 
     private static UpdateUserCommand Default()
     {
