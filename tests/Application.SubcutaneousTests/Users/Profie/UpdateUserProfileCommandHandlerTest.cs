@@ -66,7 +66,7 @@ public class UpdateUserProfileCommandHandlerTest(TestingFixture testingFixture) 
     {
         await testingFixture.ResetAsync();
 
-        IFormFile file = FileHelper.GenerateIFormfile(
+        IFormFile file = FileHelper.GenerateIFormFile(
             Path.Combine(Directory.GetCurrentDirectory(), "Files", "avatar_cute_2.jpg")
         );
 

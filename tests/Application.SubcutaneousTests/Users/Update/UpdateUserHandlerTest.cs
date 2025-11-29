@@ -66,7 +66,7 @@ public class UpdateUserHandlerTest(TestingFixture testingFixture) : IAsyncLifeti
     public async Task InitializeAsync()
     {
         await testingFixture.ResetAsync();
-        IFormFile file = FileHelper.GenerateIFormfile(
+        IFormFile file = FileHelper.GenerateIFormFile(
             Path.Combine(Directory.GetCurrentDirectory(), "Files", "avatar_cute_2.jpg")
         );
 

@@ -59,7 +59,7 @@ public class CreateUserHandlerTest(TestingFixture testingFixture) : IAsyncLifeti
         Role role = await testingFixture.CreateAdminRoleAsync();
         roleId = role.Id;
 
-        IFormFile file = FileHelper.GenerateIFormfile(
+        IFormFile file = FileHelper.GenerateIFormFile(
             Path.Combine(Directory.GetCurrentDirectory(), "Files", "avatar_cute_2.jpg")
         );
         command = fixture
