@@ -16,7 +16,7 @@ public class UserValidator(
     IMessageTranslatorService translator
 ) : FluentValidator<UserUpsertCommand>(httpContextAccessorService, translator)
 {
-    protected override void ApplyRules(
+    protected sealed override void ApplyRules(
         IHttpContextAccessorService contextAccessor,
         IMessageTranslatorService translator
     )
