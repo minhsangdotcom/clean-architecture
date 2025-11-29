@@ -43,7 +43,6 @@ public class UpdateUserProfileCommandValidator(
             ));
 
         RuleFor(x => x.PhoneNumber)
-            .Cascade(CascadeMode.Stop)
             .Must(x => x!.IsValidPhoneNumber())
             .When(x => !string.IsNullOrEmpty(x.PhoneNumber))
             .WithState(_ => new ErrorReason(
@@ -52,6 +51,7 @@ public class UpdateUserProfileCommandValidator(
             ));
 
         RuleFor(x => x.Email)
+            .Cascade(CascadeMode.Stop)
             .NotEmpty()
             .WithState(_ => new ErrorReason(
                 UserErrorMessages.UserEmailRequired,
@@ -70,6 +70,7 @@ public class UpdateUserProfileCommandValidator(
 
         RuleFor(x => x.Gender)
             .IsInEnum()
+            .When(x => x.Gender != null, ApplyConditionTo.CurrentValidator)
             .WithState(_ => new ErrorReason(
                 UserErrorMessages.UserGenderNotInEnum,
                 translator.Translate(UserErrorMessages.UserGenderNotInEnum)

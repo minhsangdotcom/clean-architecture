@@ -53,6 +53,7 @@ public class CreateUserCommandValidator(
 
         RuleFor(x => x.Gender)
             .IsInEnum()
+            .When(x => x.Gender != null, ApplyConditionTo.CurrentValidator)
             .WithState(_ => new ErrorReason(
                 UserErrorMessages.UserGenderNotInEnum,
                 translator.Translate(UserErrorMessages.UserGenderNotInEnum)
