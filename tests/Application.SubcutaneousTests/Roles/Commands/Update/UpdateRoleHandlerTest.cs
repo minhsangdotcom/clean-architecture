@@ -4,18 +4,18 @@ namespace Application.SubcutaneousTests.Roles.Commands.Update;
 public class UpdateRoleHandlerTest(TestingFixture testingFixture) : IAsyncLifetime
 {
     [Fact]
-    public async Task UpdateRole_WhenIdNotFound_ShouldReturnNotFoundException() { }
+    public async Task UpdateRole_When_IdNotFound_ShouldReturnNotFoundError() { }
 
     [Fact]
-    public async Task UpdateRole_WhenNoRoleClaims_ShouldUpdateRole() { }
+    public async Task UpdateRole_When_NoDescription_ShouldUpdateRoleSuccessfully() { }
 
     [Fact]
-    public async Task UpdateRole_WhenNoDescription_ShouldUpdateRole() { }
+    public async Task UpdateRole_ShouldUpdateRoleSuccessfully() { }
 
-    [Fact]
-    public async Task UpdateRole_ShouldUpdateRole() { }
-
-    public async Task InitializeAsync() { }
+    public async Task InitializeAsync()
+    {
+        await testingFixture.ResetAsync();
+    }
 
     public async Task DisposeAsync() => await Task.CompletedTask;
 }

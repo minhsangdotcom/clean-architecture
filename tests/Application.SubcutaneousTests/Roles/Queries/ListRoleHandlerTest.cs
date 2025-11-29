@@ -7,7 +7,7 @@ namespace Application.SubcutaneousTests.Roles.Queries;
 public class ListRoleHandlerTest(TestingFixture testingFixture) : IAsyncLifetime
 {
     [Fact]
-    public async Task ListRole_WhenEmpty_ShouldReturnEmptyList()
+    public async Task ListRole_When_BeEmpty_ShouldReturnEmptyList()
     {
         var result = await testingFixture.SendAsync(new ListRoleQuery());
 

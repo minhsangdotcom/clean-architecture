@@ -1,7 +1,6 @@
 using Application.Contracts.ApiWrapper;
 using Application.Contracts.Messages;
 using Application.Features.Roles.Commands.Delete;
-using Application.SubcutaneousTests.Extensions;
 using Domain.Aggregates.Roles;
 using Shouldly;
 
@@ -13,7 +12,7 @@ public class DeleteRoleHandlerTest(TestingFixture testingFixture) : IAsyncLifeti
     private Ulid id;
 
     [Fact]
-    public async Task DeleteRole_WhenInvalidId_ShouldReturnNotFoundException()
+    public async Task DeleteRole_When_Id_Invalid_ShouldReturnNotFoundError()
     {
         string notFoundId = Guid.Empty.ToString();
 
@@ -30,7 +29,7 @@ public class DeleteRoleHandlerTest(TestingFixture testingFixture) : IAsyncLifeti
     }
 
     [Fact]
-    public async Task DeleteRole_WhenValidId_ShouldDeleteRole()
+    public async Task DeleteRole_When_IdValid_ShouldDeleteRoleSuccessfully()
     {
         var result = await testingFixture.SendAsync(new DeleteRoleCommand(id.ToString()));
         result.Error.ShouldBeNull();

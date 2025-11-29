@@ -9,7 +9,7 @@ namespace Application.SubcutaneousTests.Roles.Queries;
 public class GetRoleDetailHanlderTest(TestingFixture testingFixture) : IAsyncLifetime
 {
     [Fact]
-    public async Task GetRole_WhenIdNotFound_ShouldReturnNotFoundResult()
+    public async Task GetRole_WhenIdNotFound_ShouldReturnNotFoundError()
     {
         //arrage
         string Id = Ulid.Empty.ToString();
