@@ -16,9 +16,9 @@ public class JsonLocalizationLoader(
 
     public string? GetValue(string key, string culture)
     {
-        string cacheKey = $"locale_{culture}_{key}";
+        string cacheKey = $"locale-{culture}-{key}";
         return cache.GetOrSet(
-            key,
+            cacheKey,
             () =>
             {
                 return LoadKeyFromDisk(key, culture);

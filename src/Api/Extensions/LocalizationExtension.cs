@@ -22,8 +22,6 @@ public static class LocalizationExtension
         services.AddLocalization(options => options.ResourcesPath = "Resources");
 
         services.AddSingleton<IStringLocalizerFactory, JsonStringLocalizerFactory>();
-        // services.AddTransient<IStringLocalizer, JsonStringLocalizer>();
-        // services.AddSingleton<JsonLocalizationLoader>();
         services.AddTransient(option =>
         {
             var factory = option.GetRequiredService<IStringLocalizerFactory>();
