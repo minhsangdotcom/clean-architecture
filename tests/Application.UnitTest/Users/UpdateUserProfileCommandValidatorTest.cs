@@ -40,10 +40,7 @@ public class UpdateUserProfileCommandValidatorTest
         command = Default;
     }
 
-    // ----------------------------------------------------------------------
-    // LAST NAME RULES
-    // ----------------------------------------------------------------------
-
+    #region LAST NAME RULES
     [Theory]
     [InlineData(null)]
     [InlineData("")]
@@ -108,11 +105,9 @@ public class UpdateUserProfileCommandValidatorTest
         // Assert
         result.ShouldNotHaveValidationErrorFor(x => x.LastName);
     }
+    #endregion
 
-    // ----------------------------------------------------------------------
-    // FIRST NAME RULES
-    // ----------------------------------------------------------------------
-
+    #region FIRST NAME RULES
     [Theory]
     [InlineData(null)]
     [InlineData("")]
@@ -177,11 +172,9 @@ public class UpdateUserProfileCommandValidatorTest
         // Assert
         result.ShouldNotHaveValidationErrorFor(x => x.FirstName);
     }
+    #endregion
 
-    // ----------------------------------------------------------------------
-    // PHONE NUMBER RULES
-    // ----------------------------------------------------------------------
-
+    #region PHONE NUMBER RULES
     [Theory]
     [InlineData("123")]
     [InlineData("1234567890123456")]
@@ -224,11 +217,9 @@ public class UpdateUserProfileCommandValidatorTest
         // Assert
         result.ShouldNotHaveValidationErrorFor(x => x.PhoneNumber);
     }
+    #endregion
 
-    // ----------------------------------------------------------------------
-    // EMAIL RULES
-    // ----------------------------------------------------------------------
-
+    #region EMAIL RULES
     [Theory]
     [InlineData(null)]
     [InlineData("")]
@@ -331,11 +322,9 @@ public class UpdateUserProfileCommandValidatorTest
         // Assert
         result.ShouldNotHaveValidationErrorFor(x => x.Email);
     }
+    #endregion
 
-    // ----------------------------------------------------------------------
-    // GENDER RULES
-    // ----------------------------------------------------------------------
-
+    #region GENDER RULES
     [Theory]
     [InlineData(4)]
     [InlineData(5)]
@@ -376,7 +365,7 @@ public class UpdateUserProfileCommandValidatorTest
         // Assert
         result.ShouldNotHaveValidationErrorFor(x => x.Gender);
     }
-
+    #endregion
     public static Faker<UpdateUserProfileCommand> Default =>
         new Faker<UpdateUserProfileCommand>()
             .RuleFor(x => x.FirstName, f => f.Name.FirstName())
