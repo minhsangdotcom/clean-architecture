@@ -327,4 +327,16 @@ public class UserErrorMessages
     [ErrorKey(nameof(UserUnauthorized))]
     public static string UserUnauthorized =>
         Messenger.Create<User>().Message("user_unauthorized").GetFullMessage();
+
+    [ErrorKey(nameof(UserTokenExpired))]
+    public static string UserTokenExpired =>
+        Messenger
+            .Create<User>()
+            .Property("Token")
+            .WithError(MessageErrorType.Expired)
+            .GetFullMessage();
+
+    [ErrorKey(nameof(UserForbidden))]
+    public static string UserForbidden =>
+        Messenger.Create<User>().Message("user_forbidden").GetFullMessage();
 }

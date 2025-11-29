@@ -1,4 +1,5 @@
 using System.Text;
+using Application.Common.ErrorCodes;
 using Application.Common.Errors;
 using Application.Common.Interfaces.Services.Localization;
 using Application.Common.Interfaces.Services.Token;
@@ -7,7 +8,6 @@ using Domain.Aggregates.Users;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Localization;
 using Microsoft.IdentityModel.Tokens;
 
 namespace Infrastructure.Services.Token;
@@ -55,15 +55,8 @@ public static class TokenExtension
                         IMessageTranslatorService translator =
                             context.HttpContext.RequestServices.GetRequiredService<IMessageTranslatorService>();
 
-                        string unauthorizedMessage = Messenger
-                            .Create<User>()
-                            .Message("user_unauthorized")
-                            .GetFullMessage();
-                        string tokenExpiredMessage = Messenger
-                            .Create<User>()
-                            .Property("Token")
-                            .WithError(MessageErrorType.Expired)
-                            .GetFullMessage();
+                        string unauthorizedMessage = UserErrorMessages.UserUnauthorized;
+                        string tokenExpiredMessage = UserErrorMessages.UserTokenExpired;
 
                         UnauthorizedError unauthorizedError = isUnauthorized
                             ? new UnauthorizedError(
@@ -77,9 +70,7 @@ public static class TokenExtension
                         return context.UnauthorizedException(unauthorizedError);
                     },
                     OnForbidden = context =>
-                        context.ForbiddenException(
-                            Messenger.Create<User>().Message("user_forbidden").GetFullMessage()
-                        ),
+                        context.ForbiddenException(UserErrorMessages.UserForbidden),
                 };
             })
             .Services;
