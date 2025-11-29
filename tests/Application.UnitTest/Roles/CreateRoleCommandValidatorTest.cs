@@ -56,10 +56,12 @@ public class CreateRoleCommandValidatorTest
         command = faker.Generate();
     }
 
+    #region Name Validation
+
     [Theory]
     [InlineData(null)]
     [InlineData("")]
-    public async Task Should_HaveError_When_NameIsNullOrEmpty(string? name)
+    public async Task Validate_When_NameIsNullOrEmpty_Should_HaveError(string? name)
     {
         //Arrange
         command.Name = name;
@@ -79,7 +81,7 @@ public class CreateRoleCommandValidatorTest
     }
 
     [Fact]
-    public async Task Should_HaveError_When_NameTooLong()
+    public async Task Validate_When_NameTooLong_Should_HaveError()
     {
         command.Name = new string('X', 300);
         translator.SetupTranslate(RoleErrorMessages.RoleNameTooLong, SharedResource.TranslateText);
@@ -96,7 +98,7 @@ public class CreateRoleCommandValidatorTest
     }
 
     [Fact]
-    public async Task Should_HaveError_When_NameAlreadyExists()
+    public async Task Validate_When_NameAlreadyExists_Should_HaveError()
     {
         //Arrange
         command.Name = "Admin";
@@ -121,7 +123,7 @@ public class CreateRoleCommandValidatorTest
     }
 
     [Fact]
-    public async Task Should_Pass_When_NameIsUnique()
+    public async Task Validate_When_NameIsUnique_Should_Pass()
     {
         //Arrange
         command.Name = "Manager";
@@ -138,8 +140,13 @@ public class CreateRoleCommandValidatorTest
         result.ShouldNotHaveValidationErrorFor(x => x.Name);
     }
 
+    #endregion
+
+
+    #region Description Validation
+
     [Fact]
-    public async Task Should_HaveError_When_DescriptionTooLong()
+    public async Task Validate_When_DescriptionTooLong_Should_HaveError()
     {
         //Arrange
         command.Description = new string('D', 2000);
@@ -162,7 +169,7 @@ public class CreateRoleCommandValidatorTest
     }
 
     [Fact]
-    public async Task Should_Pass_When_DescriptionIsValid()
+    public async Task Validate_When_DescriptionIsValid_Should_Pass()
     {
         //Arrange
         command.Description = "Valid description";
@@ -174,8 +181,13 @@ public class CreateRoleCommandValidatorTest
         result.ShouldNotHaveValidationErrorFor(x => x.Description);
     }
 
+    #endregion
+
+
+    #region PermissionIds Validation
+
     [Fact]
-    public async Task Should_HaveError_When_PermissionsEmpty()
+    public async Task Validate_When_PermissionsEmpty_Should_HaveError()
     {
         //Arrange
         command.PermissionIds = [];
@@ -198,7 +210,7 @@ public class CreateRoleCommandValidatorTest
     }
 
     [Fact]
-    public async Task Should_HaveError_When_PermissionIdsNotUnique()
+    public async Task Validate_When_PermissionIdsNotUnique_Should_HaveError()
     {
         //Arrange
         var id = Ulid.NewUlid();
@@ -223,7 +235,7 @@ public class CreateRoleCommandValidatorTest
     }
 
     [Fact]
-    public async Task Should_HaveError_When_PermissionNotExistent()
+    public async Task Validate_When_PermissionNotExistent_Should_HaveError()
     {
         // Arrange
         var expected = new ErrorReason(
@@ -247,7 +259,7 @@ public class CreateRoleCommandValidatorTest
     }
 
     [Fact]
-    public async Task Should_Pass_When_AllPermissionIdsAreValid()
+    public async Task Validate_When_AllPermissionIdsAreValid_Should_Pass()
     {
         //Arrange
         inlineValidator
@@ -261,4 +273,6 @@ public class CreateRoleCommandValidatorTest
         //assert
         result.ShouldNotHaveValidationErrorFor(x => x.PermissionIds);
     }
+
+    #endregion
 }

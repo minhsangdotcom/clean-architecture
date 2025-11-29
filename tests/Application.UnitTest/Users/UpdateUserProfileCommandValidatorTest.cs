@@ -44,7 +44,7 @@ public class UpdateUserProfileCommandValidatorTest
     [Theory]
     [InlineData(null)]
     [InlineData("")]
-    public async Task Should_HaveError_When_LastNameIsNullOrEmpty(string? lastName)
+    public async Task Validate_When_LastNameIsNullOrEmpty_Should_HaveError(string? lastName)
     {
         // Arrange
         command.LastName = lastName;
@@ -69,7 +69,7 @@ public class UpdateUserProfileCommandValidatorTest
     }
 
     [Fact]
-    public async Task Should_HaveError_When_LastNameTooLong()
+    public async Task Validate_When_LastNameTooLong_Should_HaveError()
     {
         // Arrange
         command.LastName = new string('L', 300);
@@ -94,7 +94,7 @@ public class UpdateUserProfileCommandValidatorTest
     }
 
     [Fact]
-    public async Task Should_Pass_When_LastNameValid()
+    public async Task Validate_When_LastNameIsValid_Should_Pass()
     {
         // Arrange
         command.LastName = "Valid";
@@ -111,7 +111,7 @@ public class UpdateUserProfileCommandValidatorTest
     [Theory]
     [InlineData(null)]
     [InlineData("")]
-    public async Task Should_HaveError_When_FirstNameNullOrEmpty(string? firstName)
+    public async Task Validate_When_FirstNameIsNullOrEmpty_Should_HaveError(string? firstName)
     {
         // Arrange
         command.FirstName = firstName;
@@ -136,7 +136,7 @@ public class UpdateUserProfileCommandValidatorTest
     }
 
     [Fact]
-    public async Task Should_HaveError_When_FirstNameTooLong()
+    public async Task Validate_When_FirstNameTooLong_Should_HaveError()
     {
         // Arrange
         command.FirstName = new string('F', 300);
@@ -161,7 +161,7 @@ public class UpdateUserProfileCommandValidatorTest
     }
 
     [Fact]
-    public async Task Should_Pass_When_FirstNameValid()
+    public async Task Validate_When_FirstNameIsValid_Should_Pass()
     {
         // Arrange
         command.FirstName = "Valid";
@@ -180,7 +180,7 @@ public class UpdateUserProfileCommandValidatorTest
     [InlineData("1234567890123456")]
     [InlineData("abc123456")]
     [InlineData("123-456789")]
-    public async Task Should_HaveError_When_PhoneNumberInvalid(string phone)
+    public async Task Validate_When_PhoneNumberInvalid_Should_HaveError(string phone)
     {
         // Arrange
         command.PhoneNumber = phone;
@@ -206,7 +206,7 @@ public class UpdateUserProfileCommandValidatorTest
     }
 
     [Fact]
-    public async Task Should_Pass_When_PhoneNumberValid()
+    public async Task Validate_When_PhoneNumberValid_Should_Pass()
     {
         // Arrange
         command.PhoneNumber = "0968123456";
@@ -223,7 +223,7 @@ public class UpdateUserProfileCommandValidatorTest
     [Theory]
     [InlineData(null)]
     [InlineData("")]
-    public async Task Should_HaveError_When_EmailNullOrEmpty(string? email)
+    public async Task Validate_When_EmailIsNullOrEmpty_Should_HaveError(string? email)
     {
         // Arrange
         command.Email = email;
@@ -253,7 +253,7 @@ public class UpdateUserProfileCommandValidatorTest
     [InlineData("@domain.com")]
     [InlineData("user@@mail.com")]
     [InlineData("user@domain")]
-    public async Task Should_HaveError_When_EmailInvalid(string email)
+    public async Task Validate_When_EmailInvalid_Should_HaveError(string email)
     {
         // Arrange
         command.Email = email;
@@ -275,7 +275,7 @@ public class UpdateUserProfileCommandValidatorTest
     }
 
     [Fact]
-    public async Task Should_HaveError_When_EmailAlreadyExists()
+    public async Task Validate_When_EmailAlreadyExists_Should_HaveError()
     {
         // Arrange
         translator.SetupTranslate(
@@ -309,7 +309,7 @@ public class UpdateUserProfileCommandValidatorTest
     }
 
     [Fact]
-    public async Task Should_Pass_When_EmailValid()
+    public async Task Validate_When_EmailIsValid_Should_Pass()
     {
         // Arrange
         command.Email = "valid@mail.com";
@@ -328,7 +328,7 @@ public class UpdateUserProfileCommandValidatorTest
     [Theory]
     [InlineData(4)]
     [InlineData(5)]
-    public async Task Should_HaveError_When_GenderNotInEnum(int gender)
+    public async Task Validate_When_GenderNotInEnum_Should_HaveError(int gender)
     {
         // Arrange
         command.Gender = (Gender)gender;
@@ -354,7 +354,7 @@ public class UpdateUserProfileCommandValidatorTest
     }
 
     [Fact]
-    public async Task Should_Pass_When_GenderValid()
+    public async Task Validate_When_GenderIsValid_Should_Pass()
     {
         // Arrange
         command.Gender = Gender.Male;
@@ -366,6 +366,7 @@ public class UpdateUserProfileCommandValidatorTest
         result.ShouldNotHaveValidationErrorFor(x => x.Gender);
     }
     #endregion
+
     public static Faker<UpdateUserProfileCommand> Default =>
         new Faker<UpdateUserProfileCommand>()
             .RuleFor(x => x.FirstName, f => f.Name.FirstName())

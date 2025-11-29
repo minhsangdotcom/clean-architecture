@@ -25,7 +25,7 @@ public class ChangeUserPasswordCommandTest
     [Theory]
     [InlineData(null)]
     [InlineData("")]
-    public async Task Should_HaveError_When_OldPasswordIsNullOrEmpty(string oldPassword)
+    public async Task Validate_When_OldPasswordIsNullOrEmpty_Should_HaveError(string oldPassword)
     {
         //Arrange
         command.OldPassword = oldPassword;
@@ -49,7 +49,7 @@ public class ChangeUserPasswordCommandTest
     [Theory]
     [InlineData(null)]
     [InlineData("")]
-    public async Task Should_HaveError_When_NewPasswordIsNullOrEmpty(string password)
+    public async Task Validate_When_NewPasswordIsNullOrEmpty_Should_HaveError(string password)
     {
         //Arrange
         command.NewPassword = password;
@@ -74,7 +74,7 @@ public class ChangeUserPasswordCommandTest
     [InlineData("12345678")]
     [InlineData("admin@123")]
     [InlineData("admin0123")]
-    public async Task Should_HaveError_When_NewPasswordNotStrong(string password)
+    public async Task Validate_When_NewPasswordIsNotStrong_Should_HaveError(string password)
     {
         //arrange
         command.NewPassword = password;

@@ -47,7 +47,7 @@ public class UpdateUserCommandValidatorTest
     [Theory]
     [InlineData(null)]
     [InlineData("")]
-    public async Task Should_HaveError_When_LastNameIsNullOrEmpty(string? lastName)
+    public async Task Validate_When_LastNameIsNullOrEmpty_Should_HaveError(string? lastName)
     {
         // Arrange
         command.UpdateData.LastName = lastName;
@@ -72,7 +72,7 @@ public class UpdateUserCommandValidatorTest
     }
 
     [Fact]
-    public async Task Should_HaveError_When_LastNameTooLong()
+    public async Task Validate_When_LastNameTooLong_Should_HaveError()
     {
         // Arrange
         command.UpdateData.LastName = new string('X', 300);
@@ -98,13 +98,14 @@ public class UpdateUserCommandValidatorTest
     }
 
     [Fact]
-    public async Task Should_Pass_When_LastNameIsValid()
+    public async Task Validate_When_LastNameIsValid_Should_Pass()
     {
         //Arrange
         command.UpdateData.LastName = "Nguyen";
 
         //Act
         var result = await validator.TestValidateAsync(command);
+
         //Assert
         result.ShouldNotHaveValidationErrorFor(x => x.UpdateData.LastName);
     }
@@ -114,7 +115,7 @@ public class UpdateUserCommandValidatorTest
     [Theory]
     [InlineData(null)]
     [InlineData("")]
-    public async Task Should_HaveError_When_FirstNameIsNullOrEmpty(string? firstName)
+    public async Task Validate_When_FirstNameIsNullOrEmpty_Should_HaveError(string? firstName)
     {
         // Arrange
         command.UpdateData.FirstName = firstName;
@@ -139,7 +140,7 @@ public class UpdateUserCommandValidatorTest
     }
 
     [Fact]
-    public async Task Should_HaveError_When_FirstNameTooLong()
+    public async Task Validate_When_FirstNameTooLong_Should_HaveError()
     {
         //Arrange
         command.UpdateData.FirstName = new string('X', 300);
@@ -164,7 +165,7 @@ public class UpdateUserCommandValidatorTest
     }
 
     [Fact]
-    public async Task Should_Pass_When_FirstNameIsValid()
+    public async Task Validate_When_FirstNameIsValid_Should_Pass()
     {
         //Arrange
         command.UpdateData.FirstName = "Minh";
@@ -179,7 +180,7 @@ public class UpdateUserCommandValidatorTest
 
     #region PHONE NUMBER RULES
     [Fact]
-    public async Task Should_Pass_When_PhoneNumberIsNullOrEmpty()
+    public async Task Validate_When_PhoneNumberIsNullOrEmpty_Should_Pass()
     {
         //Arrange
         command.UpdateData.PhoneNumber = null;
@@ -194,17 +195,17 @@ public class UpdateUserCommandValidatorTest
     [Theory]
     [InlineData(null)]
     [InlineData("")]
-    [InlineData("123")] // too short
-    [InlineData("123456")] // still too short
-    [InlineData("1234567890123456")] // too long
-    [InlineData("123 4567")] // space
-    [InlineData("123-4567")] // symbol
-    [InlineData("(123)4567")] // parentheses
-    [InlineData("abc12345")] // letters
-    [InlineData("+12345abcd")] // letters after +
-    [InlineData("++1234567")] // multiple +
-    [InlineData("123+4567")] // + not at beginning
-    public async Task Should_HaveError_When_PhoneNumberInvalid(string phoneNumber)
+    [InlineData("123")]
+    [InlineData("123456")]
+    [InlineData("1234567890123456")]
+    [InlineData("123 4567")]
+    [InlineData("123-4567")]
+    [InlineData("(123)4567")]
+    [InlineData("abc12345")]
+    [InlineData("+12345abcd")]
+    [InlineData("++1234567")]
+    [InlineData("123+4567")]
+    public async Task Validate_When_PhoneNumberInvalid_Should_HaveError(string phoneNumber)
     {
         //Arrange
         var expected = new ErrorReason(
@@ -235,7 +236,7 @@ public class UpdateUserCommandValidatorTest
     }
 
     [Fact]
-    public async Task Should_Pass_When_PhoneNumberValid()
+    public async Task Validate_When_PhoneNumberIsValid_Should_Pass()
     {
         // Arrange
         inlineValidator
@@ -257,7 +258,7 @@ public class UpdateUserCommandValidatorTest
     [Theory]
     [InlineData(null)]
     [InlineData("")]
-    public async Task Should_HaveError_When_EmailIsNullOrEmpty(string? email)
+    public async Task Validate_When_EmailIsNullOrEmpty_Should_HaveError(string? email)
     {
         // Arrange
         command.UpdateData.Email = email;
@@ -288,7 +289,7 @@ public class UpdateUserCommandValidatorTest
     [InlineData("@domain.com")]
     [InlineData("user@domain")]
     [InlineData("user@@mail.com")]
-    public async Task Should_HaveError_When_EmailInvalid(string email)
+    public async Task Validate_When_EmailInvalid_Should_HaveError(string email)
     {
         // Arrange
         command.UpdateData.Email = email;
@@ -311,7 +312,7 @@ public class UpdateUserCommandValidatorTest
     }
 
     [Fact]
-    public async Task Should_HaveError_When_EmailAlreadyExists()
+    public async Task Validate_When_EmailAlreadyExists_Should_HaveError()
     {
         // Arrange
         inlineValidator
@@ -340,7 +341,7 @@ public class UpdateUserCommandValidatorTest
     }
 
     [Fact]
-    public async Task Should_Pass_When_EmailUnique()
+    public async Task Validate_When_EmailUnique_Should_Pass()
     {
         // Arrange
         inlineValidator
@@ -358,7 +359,7 @@ public class UpdateUserCommandValidatorTest
     }
 
     [Fact]
-    public async Task Should_Pass_When_EmailFormatValid()
+    public async Task Validate_When_EmailFormatValid_Should_Pass()
     {
         // Arrange
         command.UpdateData.Email = "valid.user@example.com";
@@ -375,7 +376,7 @@ public class UpdateUserCommandValidatorTest
     [Theory]
     [InlineData(4)]
     [InlineData(3)]
-    public async Task Should_HaveError_When_StatusNotInEnum(int status)
+    public async Task Validate_When_StatusNotInEnum_Should_HaveError(int status)
     {
         // Arrange
         command.UpdateData.Status = (UserStatus)status;
@@ -401,7 +402,7 @@ public class UpdateUserCommandValidatorTest
     }
 
     [Fact]
-    public async Task Should_Pass_When_StatusIsValidEnum()
+    public async Task Validate_When_StatusIsValidEnum_Should_Pass()
     {
         // Arrange
         command.UpdateData.Status = UserStatus.Active;
@@ -418,7 +419,7 @@ public class UpdateUserCommandValidatorTest
     [Theory]
     [InlineData(null)]
     [InlineData(default(List<Ulid>))]
-    public async Task Should_HaveError_When_RolesNullOrEmpty(List<Ulid>? roles)
+    public async Task Validate_When_RolesNullOrEmpty_Should_HaveError(List<Ulid>? roles)
     {
         // Arrange
         command.UpdateData.Roles = roles;
@@ -451,7 +452,7 @@ public class UpdateUserCommandValidatorTest
     }
 
     [Fact]
-    public async Task Should_HaveError_When_RolesNotUnique()
+    public async Task Validate_When_RolesNotUnique_Should_HaveError()
     {
         // Arrange
         Ulid id = Ulid.NewUlid();
@@ -486,7 +487,7 @@ public class UpdateUserCommandValidatorTest
     }
 
     [Fact]
-    public async Task Should_HaveError_When_RolesNotFoundInDb()
+    public async Task Validate_When_RolesNotFoundInDb_Should_HaveError()
     {
         // Arrange
         var expected = new ErrorReason(
@@ -517,7 +518,7 @@ public class UpdateUserCommandValidatorTest
     }
 
     [Fact]
-    public async Task Should_Pass_When_RolesValid()
+    public async Task Validate_When_RolesValid_Should_Pass()
     {
         // Arrange
         inlineValidator
@@ -539,7 +540,9 @@ public class UpdateUserCommandValidatorTest
     [Theory]
     [InlineData(null)]
     [InlineData(default(List<Ulid>))]
-    public async Task Should_HaveError_When_PermissionsIsNull(List<Ulid>? permissionIds)
+    public async Task Validate_When_PermissionsIsNullOrEmpty_Should_HaveError(
+        List<Ulid>? permissionIds
+    )
     {
         // Arrange
         command.UpdateData.Permissions = permissionIds;
@@ -552,7 +555,7 @@ public class UpdateUserCommandValidatorTest
     }
 
     [Fact]
-    public async Task Should_HaveError_When_PermissionsNotUnique()
+    public async Task Validate_When_PermissionsNotUnique_Should_HaveError()
     {
         // Arrange
         Ulid id = Ulid.NewUlid();
@@ -579,7 +582,23 @@ public class UpdateUserCommandValidatorTest
     }
 
     [Fact]
-    public async Task Should_HaveError_When_PermissionsNotFoundInDb()
+    public async Task Validate_When_PermissionsUnique_Should_Pass()
+    {
+        // Arrange
+        Ulid id = Ulid.NewUlid();
+        command.UpdateData.Permissions = [id];
+        inlineValidator.RuleFor(x => x.UpdateData.Permissions).Must((x, ct) => true);
+
+        // Act
+        var result = await inlineValidator.TestValidateAsync(command);
+
+        // Assert
+
+        result.ShouldNotHaveValidationErrorFor(x => x.UpdateData.Permissions);
+    }
+
+    [Fact]
+    public async Task Validate_When_PermissionsNotFoundInDb_Should_HaveError()
     {
         // Arrange
         command.UpdateData.Permissions = [Ulid.NewUlid()];
@@ -610,7 +629,7 @@ public class UpdateUserCommandValidatorTest
     }
 
     [Fact]
-    public async Task Should_Pass_When_PermissionsValid()
+    public async Task Validate_When_PermissionsValid_Should_Pass()
     {
         // Arrange
         inlineValidator
@@ -625,6 +644,7 @@ public class UpdateUserCommandValidatorTest
         // Assert
         result.ShouldNotHaveValidationErrorFor(x => x.UpdateData.Permissions);
     }
+    #endregion
 
     private void FakeRoleAndPermissionFound()
     {
@@ -645,7 +665,6 @@ public class UpdateUserCommandValidatorTest
             )
             .ReturnsAsync(command.UpdateData.Permissions!.Count);
     }
-    #endregion
 
     private static UpdateUserCommand Default()
     {
