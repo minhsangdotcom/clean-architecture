@@ -28,7 +28,6 @@
   "user_token_invalid": "Token không hợp lệ.",
   "user_token_not_identical_the-current-one": "Token không trùng khớp với token hiện tại.",
   "user_token_expired": "Token đã hết hạn.",
-
   "role_name_required": "Tên vai trò không được để trống.",
   "role_name_too-long": "Tên vai trò quá dài.",
   "role_name_existent": "Tên vai trò đã tồn tại.",
@@ -37,7 +36,6 @@
   "role_permissions_not_unique": "Quyền của vai trò trong danh sách không được trùng nhau.",
   "role_permissions_not_existent": "Một hoặc nhiều quyền không tồn tại.",
   "role_not_found": "Không tìm thấy vai trò.",
-
   "query-param_cursor_redundant": "Tham số 'cursor' dư thừa.",
   "query-param_filter_missing_array-index": "Bộ lọc thiếu chỉ mục mảng.",
   "query-param_filter_invalid_array-index": "Bộ lọc có chỉ mục mảng không hợp lệ.",
@@ -48,5 +46,10 @@
   "query-param_filter-value_not_datetime": "Giá trị bộ lọc phải là ngày giờ hợp lệ.",
   "query-param_filter-value_not_ulid": "Giá trị bộ lọc phải là ULID hợp lệ.",
   "query-param_filter_invalid_between-operator": "Toán tử 'between' không hợp lệ.",
-  "query-param_filter-element_not_unique": "Các phần tử bộ lọc không được trùng nhau."
+  "query-param_filter-element_not_unique": "Các phần tử bộ lọc không được trùng nhau.",
+  "user_old-password_required": "Mật khẩu cũ không được bỏ trống.",
+  "user_new-password_required": "Mật khẩu mới không được bỏ trống.",
+  "user_new-password_weak": "Mật khẩu mới không bảo mật.",
+  "user-password-reset_token_not_required": "Token đặt lại mật khẩu không được bỏ trống.",
+  "user-password-reset_token_expired": "Token đặt lại mật khẩu đã hết hạn."
 }

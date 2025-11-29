@@ -283,7 +283,7 @@ public class UserErrorMessages
     [ErrorKey(nameof(UserRefreshTokenInvalid))]
     public static string UserRefreshTokenInvalid =>
         Messenger
-            .Create<UserRefreshToken>(nameof(User))
+            .Create<UserRefreshToken>()
             .Property(x => x.Token!)
             .WithError(MessageErrorType.Valid)
             .Negative()
@@ -292,7 +292,7 @@ public class UserErrorMessages
     [ErrorKey(nameof(UserRefreshTokenIdentical))]
     public static string UserRefreshTokenIdentical =>
         Messenger
-            .Create<UserRefreshToken>(nameof(User))
+            .Create<UserRefreshToken>()
             .Property(x => x.Token!)
             .Negative()
             .WithError(MessageErrorType.Identical)
@@ -302,7 +302,7 @@ public class UserErrorMessages
     [ErrorKey(nameof(UserRefreshTokenExpired))]
     public static string UserRefreshTokenExpired =>
         Messenger
-            .Create<UserRefreshToken>(nameof(User))
+            .Create<UserRefreshToken>()
             .Property(x => x.Token!)
             .WithError(MessageErrorType.Expired)
             .GetFullMessage();
@@ -323,4 +323,8 @@ public class UserErrorMessages
             .Property(x => x.Token)
             .WithError(MessageErrorType.Expired)
             .GetFullMessage();
+
+    [ErrorKey(nameof(UserUnauthorized))]
+    public static string UserUnauthorized =>
+        Messenger.Create<User>().Message("user_unauthorized").GetFullMessage();
 }

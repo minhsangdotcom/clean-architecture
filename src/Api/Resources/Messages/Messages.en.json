@@ -28,7 +28,6 @@
   "user_token_invalid": "Token is invalid.",
   "user_token_not_identical_the-current-one": "Token does not match the current one.",
   "user_token_expired": "Token has expired.",
-
   "role_name_required": "Role name is required.",
   "role_name_too-long": "Role name is too long.",
   "role_name_existent": "Role name already exists.",
@@ -37,7 +36,6 @@
   "role_permissions_not_unique": "Permissions must be unique.",
   "role_permissions_not_existent": "One or more permissions do not exist.",
   "role_not_found": "Role not found.",
-
   "query-param_cursor_redundant": "The 'cursor' parameter is redundant.",
   "query-param_filter_missing_array-index": "The filter is missing an array index.",
   "query-param_filter_invalid_array-index": "The filter has an invalid array index.",
@@ -48,5 +46,10 @@
   "query-param_filter-value_not_datetime": "Filter value must be a valid date and time.",
   "query-param_filter-value_not_ulid": "Filter value must be a valid ULID.",
   "query-param_filter_invalid_between-operator": "The 'between' operator is invalid.",
-  "query-param_filter-element_not_unique": "Filter elements must be unique."
+  "query-param_filter-element_not_unique": "Filter elements must be unique.",
+  "user_old-password_required": "Old password is required.",
+  "user_new-password_required": "New password is required.",
+  "user_new-password_weak": "New password is too weak.",
+  "user-password-reset_token_not_required": "Reset password token is required.",
+  "user-password-reset_token_expired": "Reset password token has expired."
 }
