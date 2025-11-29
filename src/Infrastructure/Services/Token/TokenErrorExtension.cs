@@ -1,4 +1,5 @@
 using Application.Common.Errors;
+using Application.Common.Interfaces.Services.Localization;
 using Application.Contracts.Messages;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Http;
@@ -17,11 +18,11 @@ public static class TokenErrorExtension
     {
         IProblemDetailsService problemDetailsService =
             httpContext.HttpContext.RequestServices.GetRequiredService<IProblemDetailsService>();
-        IStringLocalizer stringLocalizer =
-            httpContext.HttpContext.RequestServices.GetRequiredService<IStringLocalizer>();
+        IMessageTranslatorService translator =
+            httpContext.HttpContext.RequestServices.GetRequiredService<IMessageTranslatorService>();
 
         ForbiddenError forbiddenError =
-            new(Message.FORBIDDEN, new(errorMessage, stringLocalizer[errorMessage]));
+            new(Message.FORBIDDEN, new(errorMessage, translator.Translate(errorMessage)));
 
         int statusCode = forbiddenError.Status;
         httpContext.Response.StatusCode = statusCode;

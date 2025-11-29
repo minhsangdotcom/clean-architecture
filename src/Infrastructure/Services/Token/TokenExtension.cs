@@ -1,5 +1,6 @@
 using System.Text;
 using Application.Common.Errors;
+using Application.Common.Interfaces.Services.Localization;
 using Application.Common.Interfaces.Services.Token;
 using Application.Contracts.Messages;
 using Domain.Aggregates.Users;
@@ -51,8 +52,8 @@ public static class TokenExtension
                     {
                         context.HandleResponse();
                         bool isUnauthorized = !context.Response.HasStarted;
-                        IStringLocalizer stringLocalizer =
-                            context.HttpContext.RequestServices.GetRequiredService<IStringLocalizer>();
+                        IMessageTranslatorService translator =
+                            context.HttpContext.RequestServices.GetRequiredService<IMessageTranslatorService>();
 
                         string unauthorizedMessage = Messenger
                             .Create<User>()
@@ -67,11 +68,11 @@ public static class TokenExtension
                         UnauthorizedError unauthorizedError = isUnauthorized
                             ? new UnauthorizedError(
                                 Message.UNAUTHORIZED,
-                                new(unauthorizedMessage, stringLocalizer[unauthorizedMessage])
+                                new(unauthorizedMessage, translator.Translate(unauthorizedMessage))
                             )
                             : new UnauthorizedError(
                                 Message.TOKEN_EXPIRED,
-                                new(tokenExpiredMessage, stringLocalizer[tokenExpiredMessage])
+                                new(tokenExpiredMessage, translator.Translate(tokenExpiredMessage))
                             );
                         return context.UnauthorizedException(unauthorizedError);
                     },
