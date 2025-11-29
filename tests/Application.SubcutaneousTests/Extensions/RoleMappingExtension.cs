@@ -10,7 +10,7 @@ public static class RoleMappingExtension
         return new()
         {
             RoleId = role.Id.ToString(),
-            UpdateData = new UpdateRoleRequest()
+            UpdateData = new RoleUpdateData()
             {
                 Name = role.Name,
                 Description = role.Description,

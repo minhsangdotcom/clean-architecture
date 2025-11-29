@@ -48,7 +48,7 @@ public sealed class UpdateRoleCommandValidatorTest
 
     private void ResetCommand()
     {
-        var updateDataFaker = new Faker<UpdateRoleRequest>()
+        var updateDataFaker = new Faker<RoleUpdateData>()
             .RuleFor(x => x.Name, f => f.Commerce.Department())
             .RuleFor(x => x.Description, f => f.Lorem.Sentence(8))
             .RuleFor(x => x.PermissionIds, f => [Ulid.NewUlid(), Ulid.NewUlid(), Ulid.NewUlid()]);

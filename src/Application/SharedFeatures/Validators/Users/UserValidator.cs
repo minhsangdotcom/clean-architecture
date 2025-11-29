@@ -56,6 +56,7 @@ public class UserValidator(
             ));
 
         RuleFor(x => x.Email)
+            .Cascade(CascadeMode.Stop)
             .NotEmpty()
             .WithState(_ => new ErrorReason(
                 UserErrorMessages.UserEmailRequired,
@@ -67,13 +68,19 @@ public class UserValidator(
                 translator.Translate(UserErrorMessages.UserEmailInvalid)
             ))
             .UserEmailAvailable(unitOfWork)
-            .When(_ => contextAccessor.GetHttpMethod() == HttpMethod.Post.ToString())
+            .When(
+                _ => contextAccessor.GetHttpMethod() == HttpMethod.Post.ToString(),
+                ApplyConditionTo.CurrentValidator
+            )
             .WithState(_ => new ErrorReason(
                 UserErrorMessages.UserEmailExistent,
                 translator.Translate(UserErrorMessages.UserEmailExistent)
             ))
             .UserEmailAvailable(unitOfWork, id)
-            .When(_ => contextAccessor.GetHttpMethod() == HttpMethod.Put.ToString())
+            .When(
+                _ => contextAccessor.GetHttpMethod() == HttpMethod.Put.ToString(),
+                ApplyConditionTo.CurrentValidator
+            )
             .WithState(_ => new ErrorReason(
                 UserErrorMessages.UserEmailExistent,
                 translator.Translate(UserErrorMessages.UserEmailExistent)

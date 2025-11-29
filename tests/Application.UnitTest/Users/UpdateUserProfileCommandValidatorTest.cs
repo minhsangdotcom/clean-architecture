@@ -14,7 +14,7 @@ namespace Application.UnitTest.Users;
 
 public class UpdateUserProfileCommandValidatorTest
 {
-    private readonly UpdateUserProfileCommand command;
+    private readonly UpdateUserProfileCommand command = null!;
 
     private readonly UpdateUserProfileCommandValidator validator;
     private readonly InlineValidator<UpdateUserProfileCommand> mockValidator = [];

@@ -13,7 +13,6 @@ using Domain.Aggregates.Users;
 using Domain.Aggregates.Users.Enums;
 using FluentValidation;
 using FluentValidation.TestHelper;
-using Microsoft.AspNetCore.Http;
 using Moq;
 
 namespace Application.UnitTest.Users;
@@ -258,6 +257,125 @@ public partial class CreateUserCommandValidatorTest
 
         // Assert
         result.ShouldNotHaveValidationErrorFor(x => x.PhoneNumber);
+    }
+
+    // ----------------------------------------------------------------------
+    // Email rule
+    // ----------------------------------------------------------------------
+    [Theory]
+    [InlineData(null)]
+    [InlineData("")]
+    public async Task Should_HaveError_When_EmailIsNullOrEmpty(string? email)
+    {
+        // Arrange
+        command.Email = email;
+        translator.SetupTranslate(
+            UserErrorMessages.UserEmailRequired,
+            SharedResource.TranslateText
+        );
+        FakeRoleAndPermissionFound();
+
+        // Act
+        var result = await validator.TestValidateAsync(command);
+
+        // Assert
+        var expected = new ErrorReason(
+            UserErrorMessages.UserEmailRequired,
+            SharedResource.TranslateText
+        );
+
+        result
+            .ShouldHaveValidationErrorFor(x => x.Email)
+            .WithCustomState(expected, new ErrorReasonComparer())
+            .Only();
+    }
+
+    [Theory]
+    [InlineData("abc")]
+    [InlineData("user@")]
+    [InlineData("@domain.com")]
+    [InlineData("user@domain")]
+    [InlineData("user@@mail.com")]
+    public async Task Should_HaveError_When_EmailInvalid(string email)
+    {
+        // Arrange
+        command.Email = email;
+        translator.SetupTranslate(UserErrorMessages.UserEmailInvalid, SharedResource.TranslateText);
+        FakeRoleAndPermissionFound();
+
+        // Act
+        var result = await validator.TestValidateAsync(command);
+
+        // Assert
+        var expected = new ErrorReason(
+            UserErrorMessages.UserEmailInvalid,
+            SharedResource.TranslateText
+        );
+
+        result
+            .ShouldHaveValidationErrorFor(x => x.Email)
+            .WithCustomState(expected, new ErrorReasonComparer())
+            .Only();
+    }
+
+    [Fact]
+    public async Task Should_HaveError_When_EmailAlreadyExists()
+    {
+        // Arrange
+        inlineValidator
+            .RuleFor(x => x.Email)
+            .MustAsync((email, _) => Task.FromResult(false))
+            .WithState(_ => new ErrorReason(
+                UserErrorMessages.UserEmailExistent,
+                SharedResource.TranslateText
+            ));
+
+        command.Email = "test@example.com";
+
+        // Act
+        var result = await inlineValidator.TestValidateAsync(command);
+
+        // Assert
+        var expected = new ErrorReason(
+            UserErrorMessages.UserEmailExistent,
+            SharedResource.TranslateText
+        );
+
+        result
+            .ShouldHaveValidationErrorFor(x => x.Email)
+            .WithCustomState(expected, new ErrorReasonComparer())
+            .Only();
+    }
+
+    [Fact]
+    public async Task Should_Pass_When_EmailUnique()
+    {
+        // Arrange
+        inlineValidator
+            .RuleFor(x => x.Email)
+            .MustAsync((email, _) => Task.FromResult(true))
+            .When(_ => true);
+
+        command.Email = "unique@example.com";
+
+        // Act
+        var result = await inlineValidator.TestValidateAsync(command);
+
+        // Assert
+        result.ShouldNotHaveValidationErrorFor(x => x.Email);
+    }
+
+    [Fact]
+    public async Task Should_Pass_When_EmailFormatValid()
+    {
+        // Arrange
+        command.Email = "valid.user@example.com";
+
+        // Act
+        var result = await validator.TestValidateAsync(command);
+
+        // Assert
+        result.ShouldNotHaveValidationErrorFor(x => x.Email);
     }
 
     // ----------------------------------------------------------------------
@@ -548,8 +666,8 @@ public partial class CreateUserCommandValidatorTest
             .RuleFor(x => x.DateOfBirth, f => f.Date.Past(30))
             .RuleFor(x => x.Avatar, _ => null)
             .RuleFor(x => x.Status, f => f.PickRandom<UserStatus>())
-            .RuleFor(x => x.Roles, f => new List<Ulid>() { Ulid.NewUlid() })
-            .RuleFor(x => x.Permissions, f => new List<Ulid>() { Ulid.NewUlid() })
+            .RuleFor(x => x.Roles, f => [Ulid.NewUlid()])
+            .RuleFor(x => x.Permissions, f => [Ulid.NewUlid()])
             .RuleFor(x => x.Username, f => f.Internet.UserName())
             .RuleFor(x => x.Email, f => f.Internet.Email())
             .RuleFor(x => x.Password, f => "Admin@123")

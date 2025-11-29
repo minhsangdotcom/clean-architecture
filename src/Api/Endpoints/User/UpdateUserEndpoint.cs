@@ -24,7 +24,7 @@ public class UpdateUserEndpoint : IEndpoint
                 Description = "Updates the information of an existing user identified by their ID.",
                 Tags = [new OpenApiTag() { Name = Router.UserRoute.Tags }],
             })
-            .WithRequestValidation<UserUpdateRequest>()
+            .WithRequestValidation<UserUpdateData>()
             .Authorize(
                 permissions: PermissionGenerator.Generate(
                     PermissionResource.User,
@@ -36,7 +36,7 @@ public class UpdateUserEndpoint : IEndpoint
 
     private async Task<Results<Ok<ApiResponse<UpdateUserResponse>>, ProblemHttpResult>> HandleAsync(
         [FromRoute] string id,
-        [FromForm] UserUpdateRequest request,
+        [FromForm] UserUpdateData request,
         [FromServices] ISender sender,
         CancellationToken cancellationToken = default
     )

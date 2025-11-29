@@ -10,7 +10,7 @@ public static class UserMappingExtension
         new()
         {
             UserId = user.Id.ToString(),
-            UpdateData = new UserUpdateRequest()
+            UpdateData = new UserUpdateData()
             {
                 FirstName = user.FirstName,
                 LastName = user.LastName,

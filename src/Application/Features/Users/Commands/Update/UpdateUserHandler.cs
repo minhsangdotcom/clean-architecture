@@ -42,7 +42,7 @@ public class UpdateUserHandler(
                 )
             );
         }
-        UserUpdateRequest updateData = command.UpdateData;
+        UserUpdateData updateData = command.UpdateData;
 
         IFormFile? avatar = updateData.Avatar;
         string? oldAvatar = user.Avatar;

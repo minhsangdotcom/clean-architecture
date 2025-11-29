@@ -24,7 +24,7 @@ public class UpdateRoleEndpoint : IEndpoint
                 Description = "Updates a role’s name and its permissions using permission IDs.",
                 Tags = [new OpenApiTag() { Name = Router.RoleRoute.Tags }],
             })
-            .WithRequestValidation<UpdateRoleRequest>()
+            .WithRequestValidation<RoleUpdateData>()
             .Authorize(
                 permissions: PermissionGenerator.Generate(
                     PermissionResource.Role,
@@ -35,7 +35,7 @@ public class UpdateRoleEndpoint : IEndpoint
 
     private async Task<Results<Ok<ApiResponse<UpdateRoleResponse>>, ProblemHttpResult>> HandleAsync(
         [FromRoute] string id,
-        [FromBody] UpdateRoleRequest request,
+        [FromBody] RoleUpdateData request,
         [FromServices] ISender sender,
         CancellationToken cancellationToken = default
     )

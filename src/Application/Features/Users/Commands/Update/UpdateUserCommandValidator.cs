@@ -10,14 +10,15 @@ public class UpdateUserCommandValidator(
     IEfUnitOfWork unitOfWork,
     IHttpContextAccessorService contextAccessor,
     IMessageTranslatorService translator
-) : FluentValidator<UserUpdateRequest>(contextAccessor, translator)
+) : FluentValidator<UpdateUserCommand>(contextAccessor, translator)
 {
     protected sealed override void ApplyRules(
         IHttpContextAccessorService contextAccessor,
         IMessageTranslatorService translator
     )
     {
-        Include(new UserValidator(unitOfWork, contextAccessor, translator));
+        RuleFor(x => x.UpdateData)
+            .SetValidator(new UserValidator(unitOfWork, contextAccessor, translator));
     }
 
     protected override void ApplyRules(IMessageTranslatorService translator) { }

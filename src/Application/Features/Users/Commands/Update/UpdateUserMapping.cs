@@ -4,7 +4,7 @@ namespace Application.Features.Users.Commands.Update;
 
 public static class UpdateUserMapping
 {
-    public static User FromUpdateUser(this User user, UserUpdateRequest update)
+    public static User FromUpdateUser(this User user, UserUpdateData update)
     {
         return user.Update(
             update.FirstName!,

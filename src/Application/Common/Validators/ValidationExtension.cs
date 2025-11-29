@@ -45,7 +45,7 @@ public static partial class ValidationExtension
     [GeneratedRegex(@"^((?=\S*?[A-Z])(?=\S*?[a-z])(?=\S*?[0-9]).{8,})\S$")]
     private static partial Regex PasswordValidationRegex();
 
-    [GeneratedRegex(@"^[^\s@]+@[^\s@]+\.[^\s@]+$")]
+    [GeneratedRegex(@"^[^@\s]+@[^@\s]+\.[^@\s]+$")]
     private static partial Regex EmailValidationRegex();
 
     [GeneratedRegex(@"^\+?\d{7,15}$")]
