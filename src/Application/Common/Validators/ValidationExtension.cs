@@ -1,5 +1,7 @@
 ﻿using System.Text.RegularExpressions;
+using Application.Common.Interfaces.Services.Localization;
 using Application.Common.Interfaces.UnitOfWorks;
+using Application.Contracts.ApiWrapper;
 using Domain.Aggregates.Users;
 using FluentValidation;
 
@@ -26,6 +28,15 @@ public static partial class ValidationExtension
                 return !exists;
             }
         );
+    }
+
+    public static IRuleBuilderOptions<T, TProperty> WithTranslatedError<T, TProperty>(
+        this IRuleBuilderOptions<T, TProperty> rule,
+        IMessageTranslatorService translator,
+        string key
+    )
+    {
+        return rule.WithState(_ => new ErrorReason(key, translator.Translate(key)));
     }
 
     public static bool IsValidUsername(this string username) =>

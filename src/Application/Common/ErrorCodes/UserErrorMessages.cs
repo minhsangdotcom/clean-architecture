@@ -306,4 +306,21 @@ public class UserErrorMessages
             .Property(x => x.Token!)
             .WithError(MessageErrorType.Expired)
             .GetFullMessage();
+
+    [ErrorKey(nameof(UserPasswordResetTokenRequired))]
+    public static string UserPasswordResetTokenRequired =>
+        Messenger
+            .Create<UserPasswordReset>()
+            .Property(x => x.Token)
+            .WithError(MessageErrorType.Required)
+            .Negative()
+            .GetFullMessage();
+
+    [ErrorKey(nameof(UserPasswordResetTokenExpired))]
+    public static string UserPasswordResetTokenExpired =>
+        Messenger
+            .Create<UserPasswordReset>()
+            .Property(x => x.Token)
+            .WithError(MessageErrorType.Expired)
+            .GetFullMessage();
 }

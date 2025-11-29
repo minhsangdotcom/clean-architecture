@@ -3,7 +3,6 @@ using Application.Common.Interfaces.Services;
 using Application.Common.Interfaces.Services.Localization;
 using Application.Common.Interfaces.UnitOfWorks;
 using Application.Common.Validators;
-using Application.Contracts.ApiWrapper;
 using Application.SharedFeatures.Validators.Users;
 using Domain.Aggregates.Users;
 using FluentValidation;
@@ -22,42 +21,25 @@ public class CreateUserCommandValidator(
     )
     {
         Include(new UserValidator(unitOfWork, contextAccessor, translator));
+
         RuleFor(x => x.Username)
             .NotEmpty()
-            .WithState(_ => new ErrorReason(
-                UserErrorMessages.UserUsernameRequired,
-                translator.Translate(UserErrorMessages.UserUsernameRequired)
-            ))
+            .WithTranslatedError(translator, UserErrorMessages.UserUsernameRequired)
             .Must((_, x) => x!.IsValidUsername())
-            .WithState(_ => new ErrorReason(
-                UserErrorMessages.UserUsernameInvalid,
-                translator.Translate(UserErrorMessages.UserUsernameInvalid)
-            ))
+            .WithTranslatedError(translator, UserErrorMessages.UserUsernameInvalid)
             .MustAsync((username, ct) => IsUsernameAvailableAsync(username!, cancellationToken: ct))
-            .WithState(_ => new ErrorReason(
-                UserErrorMessages.UserUsernameExistent,
-                translator.Translate(UserErrorMessages.UserUsernameExistent)
-            ));
+            .WithTranslatedError(translator, UserErrorMessages.UserUsernameExistent);
 
         RuleFor(x => x.Password)
             .NotEmpty()
-            .WithState(_ => new ErrorReason(
-                UserErrorMessages.UserPasswordRequired,
-                translator.Translate(UserErrorMessages.UserPasswordRequired)
-            ))
+            .WithTranslatedError(translator, UserErrorMessages.UserPasswordRequired)
             .Must((_, x) => x!.IsValidPassword())
-            .WithState(_ => new ErrorReason(
-                UserErrorMessages.UserPasswordWeak,
-                translator.Translate(UserErrorMessages.UserPasswordWeak)
-            ));
+            .WithTranslatedError(translator, UserErrorMessages.UserPasswordWeak);
 
         RuleFor(x => x.Gender)
             .IsInEnum()
             .When(x => x.Gender != null, ApplyConditionTo.CurrentValidator)
-            .WithState(_ => new ErrorReason(
-                UserErrorMessages.UserGenderNotInEnum,
-                translator.Translate(UserErrorMessages.UserGenderNotInEnum)
-            ));
+            .WithTranslatedError(translator, UserErrorMessages.UserGenderNotInEnum);
     }
 
     protected sealed override void ApplyRules(IMessageTranslatorService translator) { }

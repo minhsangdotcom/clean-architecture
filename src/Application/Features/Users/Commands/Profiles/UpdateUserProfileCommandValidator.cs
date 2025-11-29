@@ -3,7 +3,6 @@ using Application.Common.Interfaces.Services;
 using Application.Common.Interfaces.Services.Localization;
 using Application.Common.Interfaces.UnitOfWorks;
 using Application.Common.Validators;
-using Application.Contracts.ApiWrapper;
 using FluentValidation;
 
 namespace Application.Features.Users.Commands.Profiles;
@@ -20,61 +19,34 @@ public class UpdateUserProfileCommandValidator(
         Ulid id = currentUser.Id!.Value;
         RuleFor(x => x.LastName)
             .NotEmpty()
-            .WithState(_ => new ErrorReason(
-                UserErrorMessages.UserLastNameRequired,
-                translator.Translate(UserErrorMessages.UserLastNameRequired)
-            ))
+            .WithTranslatedError(translator, UserErrorMessages.UserLastNameRequired)
             .MaximumLength(256)
-            .WithState(_ => new ErrorReason(
-                UserErrorMessages.UserLastNameTooLong,
-                translator.Translate(UserErrorMessages.UserLastNameTooLong)
-            ));
+            .WithTranslatedError(translator, UserErrorMessages.UserLastNameTooLong);
 
         RuleFor(x => x.FirstName)
             .NotEmpty()
-            .WithState(_ => new ErrorReason(
-                UserErrorMessages.UserFirstNameRequired,
-                translator.Translate(UserErrorMessages.UserFirstNameRequired)
-            ))
+            .WithTranslatedError(translator, UserErrorMessages.UserFirstNameRequired)
             .MaximumLength(256)
-            .WithState(_ => new ErrorReason(
-                UserErrorMessages.UserFirstNameTooLong,
-                translator.Translate(UserErrorMessages.UserFirstNameTooLong)
-            ));
+            .WithTranslatedError(translator, UserErrorMessages.UserFirstNameTooLong);
 
         RuleFor(x => x.PhoneNumber)
             .Must(x => x!.IsValidPhoneNumber())
             .When(x => !string.IsNullOrEmpty(x.PhoneNumber))
-            .WithState(_ => new ErrorReason(
-                UserErrorMessages.UserPhoneNumberInvalid,
-                translator.Translate(UserErrorMessages.UserPhoneNumberInvalid)
-            ));
+            .WithTranslatedError(translator, UserErrorMessages.UserPhoneNumberInvalid);
 
         RuleFor(x => x.Email)
             .Cascade(CascadeMode.Stop)
             .NotEmpty()
-            .WithState(_ => new ErrorReason(
-                UserErrorMessages.UserEmailRequired,
-                translator.Translate(UserErrorMessages.UserEmailRequired)
-            ))
+            .WithTranslatedError(translator, UserErrorMessages.UserEmailRequired)
             .Must(x => x!.IsValidEmail())
-            .WithState(_ => new ErrorReason(
-                UserErrorMessages.UserEmailInvalid,
-                translator.Translate(UserErrorMessages.UserEmailInvalid)
-            ))
+            .WithTranslatedError(translator, UserErrorMessages.UserEmailInvalid)
             .UserEmailAvailable(unitOfWork, id)
-            .WithState(_ => new ErrorReason(
-                UserErrorMessages.UserEmailExistent,
-                translator.Translate(UserErrorMessages.UserEmailExistent)
-            ));
+            .WithTranslatedError(translator, UserErrorMessages.UserEmailExistent);
 
         RuleFor(x => x.Gender)
             .IsInEnum()
             .When(x => x.Gender != null, ApplyConditionTo.CurrentValidator)
-            .WithState(_ => new ErrorReason(
-                UserErrorMessages.UserGenderNotInEnum,
-                translator.Translate(UserErrorMessages.UserGenderNotInEnum)
-            ));
+            .WithTranslatedError(translator, UserErrorMessages.UserGenderNotInEnum);
     }
 
     protected sealed override void ApplyRules(

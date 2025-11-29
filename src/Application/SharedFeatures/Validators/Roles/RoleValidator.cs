@@ -3,7 +3,6 @@ using Application.Common.Interfaces.Services;
 using Application.Common.Interfaces.Services.Localization;
 using Application.Common.Interfaces.UnitOfWorks;
 using Application.Common.Validators;
-using Application.Contracts.ApiWrapper;
 using Application.SharedFeatures.Requests.Roles;
 using Domain.Aggregates.Permissions;
 using Domain.Aggregates.Roles;
@@ -27,58 +26,36 @@ public class RoleValidator(
 
         RuleFor(x => x.Name)
             .NotEmpty()
-            .WithState(_ => new ErrorReason(
-                RoleErrorMessages.RoleNameRequired,
-                translator.Translate(RoleErrorMessages.RoleNameRequired)
-            ))
+            .WithTranslatedError(translator, RoleErrorMessages.RoleNameRequired)
             .MaximumLength(256)
-            .WithState(_ => new ErrorReason(
-                RoleErrorMessages.RoleNameTooLong,
-                translator.Translate(RoleErrorMessages.RoleNameTooLong)
-            ))
+            .WithTranslatedError(translator, RoleErrorMessages.RoleNameTooLong)
+            // Create
             .MustAsync((name, ct) => IsNameAvailableAsync(name, cancellationToken: ct))
             .When(
                 _ => httpContextAccessor.GetHttpMethod() == HttpMethod.Post.ToString(),
                 ApplyConditionTo.CurrentValidator
             )
-            .WithState(_ => new ErrorReason(
-                RoleErrorMessages.RoleNameExistent,
-                translator.Translate(RoleErrorMessages.RoleNameExistent)
-            ))
+            .WithTranslatedError(translator, RoleErrorMessages.RoleNameExistent)
+            // Update
             .MustAsync((name, ct) => IsNameAvailableAsync(name, id, ct))
             .When(
                 _ => httpContextAccessor.GetHttpMethod() == HttpMethod.Put.ToString(),
                 ApplyConditionTo.CurrentValidator
             )
-            .WithState(_ => new ErrorReason(
-                RoleErrorMessages.RoleNameExistent,
-                translator.Translate(RoleErrorMessages.RoleNameExistent)
-            ));
+            .WithTranslatedError(translator, RoleErrorMessages.RoleNameExistent);
 
         RuleFor(x => x.Description)
             .MaximumLength(1000)
             .When(x => !string.IsNullOrWhiteSpace(x.Description), ApplyConditionTo.CurrentValidator)
-            .WithState(_ => new ErrorReason(
-                RoleErrorMessages.RoleDescriptionTooLong,
-                translator.Translate(RoleErrorMessages.RoleDescriptionTooLong)
-            ));
+            .WithTranslatedError(translator, RoleErrorMessages.RoleDescriptionTooLong);
 
         RuleFor(x => x.PermissionIds)
             .NotEmpty()
-            .WithState(_ => new ErrorReason(
-                RoleErrorMessages.RolePermissionsRequired,
-                translator.Translate(RoleErrorMessages.RolePermissionsRequired)
-            ))
+            .WithTranslatedError(translator, RoleErrorMessages.RolePermissionsRequired)
             .Must(x => x!.Distinct().Count() == x!.Count)
-            .WithState(_ => new ErrorReason(
-                RoleErrorMessages.RolePermissionsUnique,
-                translator.Translate(RoleErrorMessages.RolePermissionsUnique)
-            ))
+            .WithTranslatedError(translator, RoleErrorMessages.RolePermissionsUnique)
             .MustAsync((permissionIds, ct) => IsAllPermissionExistentAsync(permissionIds!, ct))
-            .WithState(_ => new ErrorReason(
-                RoleErrorMessages.RolePermissionsExistent,
-                translator.Translate(RoleErrorMessages.RolePermissionsExistent)
-            ));
+            .WithTranslatedError(translator, RoleErrorMessages.RolePermissionsExistent);
     }
 
     protected sealed override void ApplyRules(IMessageTranslatorService translator) { }

@@ -48,11 +48,6 @@ public class RequestUserPasswordResetHandler(
 
         if (user.Status == UserStatus.Inactive)
         {
-            string errorMessage = Messenger
-                .Create<User>()
-                .WithError(MessageErrorType.Active)
-                .Negative()
-                .GetFullMessage();
             return Result<string>.Failure(
                 new BadRequestError(
                     "Error has occurred with the current user",
@@ -87,7 +82,7 @@ public class RequestUserPasswordResetHandler(
 
         string forgotPasswordUrl = configuration.GetValue<string>("ForgotPasswordUrl")!;
         RequestUserPasswordResetNotification notification =
-            new(user.Email, token, user.Id, expiredTime, forgotPasswordUrl);
+            new(user.Email, token, expiredTime, forgotPasswordUrl);
 
         await publisher.Publish(notification, cancellationToken);
         return Result<string>.Success();

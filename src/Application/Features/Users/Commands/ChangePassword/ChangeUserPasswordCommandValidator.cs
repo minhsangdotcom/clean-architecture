@@ -2,7 +2,6 @@ using Application.Common.ErrorCodes;
 using Application.Common.Interfaces.Services;
 using Application.Common.Interfaces.Services.Localization;
 using Application.Common.Validators;
-using Application.Contracts.ApiWrapper;
 using FluentValidation;
 
 namespace Application.Features.Users.Commands.ChangePassword;
@@ -16,23 +15,14 @@ public class ChangeUserPasswordCommandValidator(
     {
         RuleFor(x => x.OldPassword)
             .NotEmpty()
-            .WithState(state => new ErrorReason(
-                UserErrorMessages.UserOldPasswordRequired,
-                translator.Translate(UserErrorMessages.UserOldPasswordRequired)
-            ));
+            .WithTranslatedError(translator, UserErrorMessages.UserOldPasswordRequired);
 
         RuleFor(x => x.NewPassword)
             .Cascade(CascadeMode.Stop)
             .NotEmpty()
-            .WithState(state => new ErrorReason(
-                UserErrorMessages.UserNewPasswordRequired,
-                translator.Translate(UserErrorMessages.UserNewPasswordRequired)
-            ))
+            .WithTranslatedError(translator, UserErrorMessages.UserNewPasswordRequired)
             .Must(x => x!.IsValidPassword())
-            .WithState(state => new ErrorReason(
-                UserErrorMessages.UserNewPasswordNotStrong,
-                translator.Translate(UserErrorMessages.UserNewPasswordNotStrong)
-            ));
+            .WithTranslatedError(translator, UserErrorMessages.UserNewPasswordNotStrong);
     }
 
     protected sealed override void ApplyRules(
