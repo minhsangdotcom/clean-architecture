@@ -94,7 +94,7 @@ public partial class TestingFixture
         factory.ThrowIfNull();
         Result<CreateRoleResponse> result = await SendAsync(role);
         CreateRoleResponse response = result.Value!;
-        return (await FindRoleByIdIncludeChildren(response.Id))!;
+        return (await FindRoleByIdAsync(response.Id))!;
     }
 }
 

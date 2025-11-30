@@ -1,8 +1,10 @@
 using Application.Contracts.ApiWrapper;
 using Application.Features.Users.Commands.Create;
 using Application.SubcutaneousTests.Extensions;
-using AutoFixture;
+using Domain.Aggregates.Permissions;
 using Domain.Aggregates.Roles;
+using Domain.Aggregates.Users;
+using Domain.Aggregates.Users.Enums;
 using Microsoft.AspNetCore.Http;
 using Shouldly;
 
@@ -11,41 +13,34 @@ namespace Application.SubcutaneousTests.Users.Create;
 [Collection(nameof(TestingCollectionFixture))]
 public class CreateUserHandlerTest(TestingFixture testingFixture) : IAsyncLifetime
 {
-    private readonly Fixture fixture = new();
-    private Ulid roleId;
-    private CreateUserCommand command = new();
+    private CreateUserCommand command = null!;
 
     [Fact]
-    private async Task CreateUser_ShouldCreateSuccess()
+    public async Task CreateUser_ShouldCreateSuccess()
     {
-        //arrage
-        command.DateOfBirth = null;
-        command.Avatar = null;
-        command.Gender = null;
-
-        //act
+        //Act
         Result<CreateUserResponse> result = await testingFixture.SendAsync(command);
 
         result.IsSuccess.ShouldBeTrue();
         result.Error.ShouldBeNull();
 
-        var response = result.Value!;
-        var user = await testingFixture.FindUserByIdAsync(response.Id);
+        CreateUserResponse response = result.Value!;
+        User? user = await testingFixture.FindUserByIdInCludeChildrenAsync(response.Id);
         user.ShouldNotBeNull();
 
-        user!.ShouldSatisfyAllConditions(
-            () => user.Id.ShouldBe(response.Id),
-            () => user.FirstName.ShouldBe(response.FirstName),
-            () => user.LastName.ShouldBe(response.LastName),
-            () => user.Username.ShouldBe(response.Username),
-            () => user.Email.ShouldBe(response.Email),
-            () => user.PhoneNumber.ShouldBe(response.PhoneNumber),
-            () => user.DateOfBirth.ShouldBe(response.DayOfBirth),
-            () => user.Gender.ShouldBe(response.Gender),
-            () => user.Avatar.ShouldBe(response.Avatar),
-            () => user.Status.ShouldBe(response.Status),
-            () => user.Roles?.Select(x => x.RoleId).ShouldBe(response.Roles?.Select(x => x.Id))
-        );
+        user.Username.ShouldBe(command.Username);
+        user.FirstName.ShouldBe(command.FirstName);
+        user.LastName.ShouldBe(command.LastName);
+        user.Email.ShouldBe(command.Email);
+        user.PhoneNumber.ShouldBe(command.PhoneNumber);
+        user.Gender.ShouldBe(command.Gender);
+        user.Status.ShouldBe(command.Status);
+
+        user.DateOfBirth.ShouldBe(command.DateOfBirth!.Value);
+        user.Roles.Select(x => x.RoleId).ShouldBe(command.Roles);
+        user.Permissions.Select(x => x.PermissionId).ShouldBe(command.Permissions);
+
+        user.Avatar?.ShouldNotBeNull();
     }
 
     public async Task DisposeAsync()
@@ -56,19 +51,29 @@ public class CreateUserHandlerTest(TestingFixture testingFixture) : IAsyncLifeti
     public async Task InitializeAsync()
     {
         await testingFixture.ResetAsync();
+        List<Permission> permissions = await testingFixture.SeedingPermissionAsync();
         Role role = await testingFixture.CreateAdminRoleAsync();
-        roleId = role.Id;
 
         IFormFile file = FileHelper.GenerateIFormFile(
             Path.Combine(Directory.GetCurrentDirectory(), "Files", "avatar_cute_2.jpg")
         );
-        command = fixture
-            .Build<CreateUserCommand>()
-            .With(x => x.Avatar, file)
-            .With(x => x.Roles, [roleId])
-            .With(x => x.Email, "admin@gmail.com")
-            .With(x => x.PhoneNumber, "0123456789")
-            .With(x => x.Username, "admin.super")
-            .Create();
+        command = new()
+        {
+            Username = "john.doe",
+            Password = "StrongPassword123!",
+            Gender = Gender.Male,
+
+            FirstName = "John",
+            LastName = "Doe",
+            PhoneNumber = "+84901234567",
+            Email = "john.doe@example.com",
+            DateOfBirth = new DateTime(1995, 5, 21),
+
+            Avatar = file,
+            Status = UserStatus.Active,
+
+            Roles = [role.Id],
+            Permissions = [.. permissions.Take(2).Select(x => x.Id)],
+        };
     }
 }

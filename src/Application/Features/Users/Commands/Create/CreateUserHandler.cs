@@ -40,7 +40,7 @@ public class CreateUserHandler(
             await userManager.AddToRolesAsync(user, roles, cancellationToken);
 
             // add permissions
-            if (command.Permissions?.Count != 0)
+            if (command.Permissions?.Count > 0)
             {
                 List<Permission> permissions = await unitOfWork
                     .Repository<Permission>()

@@ -1,3 +1,4 @@
+using Application.Common.Interfaces.DbContexts;
 using Application.Contracts.Permissions;
 using Application.SubcutaneousTests.Extensions;
 using Domain.Aggregates.Permissions;
@@ -12,12 +13,12 @@ namespace Application.SubcutaneousTests;
 
 public partial class TestingFixture
 {
-    public async Task SeedingPermissionAsync()
+    public async Task<List<Permission>> SeedingPermissionAsync()
     {
         factory.ThrowIfNull();
         using var scope = factory!.Services.CreateScope();
         var context = scope.ServiceProvider.GetRequiredService<PermissionDefinitionContext>();
-        var dbContext = scope.ServiceProvider.GetRequiredService<DbContext>();
+        var dbContext = scope.ServiceProvider.GetRequiredService<IEfDbContext>();
         IReadOnlyDictionary<string, PermissionGroupDefinition> groups = context.Groups;
         List<GroupedPermissionDefinition> groupedPermissions =
         [
@@ -41,5 +42,6 @@ public partial class TestingFixture
         ];
         await dbContext.Set<Permission>().AddRangeAsync(permissions);
         await dbContext.SaveChangesAsync();
+        return permissions;
     }
 }
