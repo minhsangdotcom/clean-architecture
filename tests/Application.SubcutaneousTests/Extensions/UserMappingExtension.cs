@@ -16,8 +16,11 @@ public static class UserMappingExtension
                 LastName = user.LastName,
                 DateOfBirth = user.DateOfBirth,
                 PhoneNumber = user.PhoneNumber,
+                Email = user.Email,
+                Status = user.Status,
 
                 Roles = [.. user.Roles!.Select(x => x.RoleId)],
+                Permissions = [.. user.Permissions.Select(x => x.PermissionId)],
             },
         };
 
@@ -28,5 +31,6 @@ public static class UserMappingExtension
             LastName = user.LastName,
             DateOfBirth = user.DateOfBirth,
             PhoneNumber = user.PhoneNumber,
+            Email = user.Email,
         };
 }

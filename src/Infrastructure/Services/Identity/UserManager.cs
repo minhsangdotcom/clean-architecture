@@ -39,6 +39,7 @@ public class UserManager(
         }
         return await query
             .AsSplitQuery()
+            .AsNoTracking()
             .FirstOrDefaultAsync(x => x.Id == userId, cancellationToken);
     }
 
@@ -254,27 +255,26 @@ public class UserManager(
         if (
             await dbContext
                 .Set<UserRole>()
+                .AsNoTracking()
                 .Where(x => x.UserId == user.Id)
-                .Join(dbContext.Set<Role>(), ur => ur.UserId, r => r.Id, (ur, r) => r.Name)
+                .Select(x => x.Role!.Name)
                 .CountAsync(x => roleNames.Contains(x), cancellationToken) != roleNames.Count()
         )
         {
             await rolePermissionChecker.InvalidateUserRolesAsync(user.Id);
         }
 
-        await dbContext
-            .Set<UserRole>()
-            .Where(ur => ur.UserId == user.Id)
-            .ExecuteDeleteAsync(cancellationToken);
+        dbContext.Set<UserRole>().RemoveRange(user.Roles);
+        var roleIds = await dbContext
+            .Set<Role>()
+            .Where(r => roleNames.Contains(r.Name))
+            .Select(r => r.Id)
+            .ToListAsync(cancellationToken);
 
         await dbContext
             .Set<UserRole>()
             .AddRangeAsync(
-                roleNames.Select(rn => new UserRole
-                {
-                    UserId = user.Id,
-                    RoleId = dbContext.Set<Role>().First(r => r.Name == rn).Id,
-                }),
+                roleIds.Select(id => new UserRole { UserId = user.Id, RoleId = id }),
                 cancellationToken
             );
         await dbContext.SaveChangesAsync(cancellationToken);
@@ -364,29 +364,26 @@ public class UserManager(
         if (
             await dbContext
                 .Set<UserPermission>()
+                .AsNoTracking()
                 .Where(x => x.UserId == user.Id)
-                .Join(dbContext.Set<Permission>(), up => up.UserId, p => p.Id, (up, p) => p.Code)
+                .Select(x => x.Permission!.Code)
                 .CountAsync(code => codes.Contains(code), cancellationToken) != codes.Count
         )
         {
             await rolePermissionChecker.InvalidateUserPermissionsAsync(user.Id);
         }
 
-        await dbContext
-            .Set<UserPermission>()
-            .Where(up => up.UserId == user.Id)
-            .ExecuteDeleteAsync(cancellationToken);
+        dbContext.Set<UserPermission>().RemoveRange(user.Permissions);
+        List<UserPermission> userPermissions =
+        [
+            .. permissions.Select(p => new UserPermission
+            {
+                UserId = user.Id,
+                PermissionId = p.Id,
+            }),
+        ];
 
-        await dbContext
-            .Set<UserPermission>()
-            .AddRangeAsync(
-                permissions.Select(p => new UserPermission
-                {
-                    UserId = user.Id,
-                    PermissionId = p.Id,
-                }),
-                cancellationToken
-            );
+        await dbContext.Set<UserPermission>().AddRangeAsync(userPermissions, cancellationToken);
         await dbContext.SaveChangesAsync(cancellationToken);
     }
 

@@ -59,7 +59,8 @@ public partial class TestingFixture
 
     public async Task<User> CreateAdminUserAsync(
         IFormFile? avatar = null,
-        List<Ulid>? roleIds = null
+        List<Ulid>? roleIds = null,
+        List<Ulid>? permissionId = null
     )
     {
         Role role = await CreateAdminRoleAsync();
@@ -78,6 +79,7 @@ public partial class TestingFixture
                 PhoneNumber = "0925123321",
                 Gender = Gender.Male,
                 Roles = roles,
+                Permissions = permissionId,
                 Status = UserStatus.Active,
                 Avatar = avatar,
             };
@@ -89,7 +91,8 @@ public partial class TestingFixture
 
     public async Task<User> CreateManagerUserAsync(
         IFormFile? avatar = null,
-        List<Ulid>? roleIds = null
+        List<Ulid>? roleIds = null,
+        List<Ulid>? permissionId = null
     )
     {
         Role role = await CreateManagerRoleAsync();
@@ -107,6 +110,7 @@ public partial class TestingFixture
                 PhoneNumber = "0925321321",
                 Gender = Gender.Male,
                 Roles = roles,
+                Permissions = permissionId,
                 Status = UserStatus.Active,
                 Avatar = avatar,
             };
@@ -118,7 +122,8 @@ public partial class TestingFixture
 
     public async Task<User> CreateNormalUserAsync(
         IFormFile? avatar = null,
-        List<Ulid>? roleIds = null
+        List<Ulid>? roleIds = null,
+        List<Ulid>? permissionId = null
     )
     {
         Role role = await CreateNormalRoleAsync();
@@ -136,6 +141,7 @@ public partial class TestingFixture
                 PhoneNumber = "0925123124",
                 Gender = Gender.Male,
                 Roles = roles,
+                Permissions = permissionId,
                 Status = UserStatus.Active,
                 Avatar = avatar,
             };
@@ -149,7 +155,7 @@ public partial class TestingFixture
     {
         Result<CreateUserResponse> result = await SendAsync(command);
         CreateUserResponse createUserResponse = result.Value!;
-        return (await FindUserByIdAsync(createUserResponse.Id))!;
+        return (await FindUserByIdInCludeChildrenAsync(createUserResponse.Id))!;
     }
 
     public async Task<User?> FindUserByIdAsync(Ulid userId)

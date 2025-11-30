@@ -93,30 +93,34 @@ public class User : AggregateRoot
     public User Update(
         string firstName,
         string lastName,
+        string email,
         string? phoneNumber,
         DateTime? dateOfBirth
     )
     {
-        PhoneNumber = phoneNumber ?? PhoneNumber;
-        DateOfBirth = dateOfBirth ?? DateOfBirth;
-        FirstName = firstName ?? FirstName;
-        LastName = lastName ?? LastName;
+        PhoneNumber = phoneNumber;
+        DateOfBirth = dateOfBirth;
+        Email = email;
+        FirstName = firstName;
+        LastName = lastName;
         return this;
     }
 
     public User UpdateProfile(
-        string? firstName,
-        string? lastName,
+        string firstName,
+        string lastName,
+        string email,
         Gender? gender = null,
         string? phoneNumber = null,
         DateTime? dateOfBirth = null
     )
     {
-        PhoneNumber = phoneNumber ?? PhoneNumber;
-        DateOfBirth = dateOfBirth ?? DateOfBirth;
-        FirstName = firstName ?? FirstName;
-        LastName = lastName ?? LastName;
-        Gender = gender ?? Gender;
+        PhoneNumber = phoneNumber;
+        DateOfBirth = dateOfBirth;
+        Email = email;
+        FirstName = firstName;
+        LastName = lastName;
+        Gender = gender;
 
         return this;
     }

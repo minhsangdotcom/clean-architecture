@@ -21,7 +21,7 @@ public partial class TestingFixture
         return await roleManager.FindByIdAsync(id, false);
     }
 
-    public async Task<Role?> FindRoleByIdIncludeChildren(Ulid id)
+    public async Task<Role?> FindRoleByIdIncludeChildrenAsync(Ulid id)
     {
         factory.ThrowIfNull();
         using var scope = factory!.Services.CreateScope();
@@ -94,7 +94,7 @@ public partial class TestingFixture
         factory.ThrowIfNull();
         Result<CreateRoleResponse> result = await SendAsync(role);
         CreateRoleResponse response = result.Value!;
-        return (await FindRoleByIdAsync(response.Id))!;
+        return (await FindRoleByIdIncludeChildrenAsync(response.Id))!;
     }
 }
 

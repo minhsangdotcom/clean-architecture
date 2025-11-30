@@ -7,7 +7,7 @@ public static class FileHelper
     public static IFormFile GenerateIFormFile(string filePath)
     {
         byte[] fileBytes = File.ReadAllBytes(filePath);
-        using MemoryStream memoryStream = new(fileBytes);
+        MemoryStream memoryStream = new(fileBytes);
         IFormFile formFile = new FormFile(
             memoryStream,
             0,

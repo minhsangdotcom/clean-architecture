@@ -1,6 +1,7 @@
 using Application.Common.ErrorCodes;
 using Application.Common.Errors;
 using Application.Common.Interfaces.Services.Identity;
+using Application.Common.Interfaces.Services.Localization;
 using Application.Common.Interfaces.Services.Storage;
 using Application.Common.Interfaces.UnitOfWorks;
 using Application.Contracts.ApiWrapper;
@@ -10,7 +11,6 @@ using Domain.Aggregates.Roles;
 using Domain.Aggregates.Users;
 using Mediator;
 using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Localization;
 
 namespace Application.Features.Users.Commands.Update;
 
@@ -18,7 +18,7 @@ public class UpdateUserHandler(
     IUserManager userManager,
     IEfUnitOfWork unitOfWork,
     IMediaStorageService<User> storageService,
-    IStringLocalizer<UpdateUserHandler> stringLocalizer
+    IMessageTranslatorService translator
 ) : IRequestHandler<UpdateUserCommand, Result<UpdateUserResponse>>
 {
     public async ValueTask<Result<UpdateUserResponse>> Handle(
@@ -37,7 +37,7 @@ public class UpdateUserHandler(
                     TitleMessage.RESOURCE_NOT_FOUND,
                     new(
                         UserErrorMessages.UserNotFound,
-                        stringLocalizer[UserErrorMessages.UserNotFound]
+                        translator.Translate(UserErrorMessages.UserNotFound)
                     )
                 )
             );
@@ -84,6 +84,10 @@ public class UpdateUserHandler(
         }
         // delete old avatar after updating Successfully
         await storageService.DeleteAsync(oldAvatar);
-        return Result<UpdateUserResponse>.Success(user.ToUpdateUserResponse());
+        var response = await userManager.FindByIdAsync(
+            user.Id,
+            cancellationToken: cancellationToken
+        );
+        return Result<UpdateUserResponse>.Success(response!.ToUpdateUserResponse());
     }
 }

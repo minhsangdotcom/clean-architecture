@@ -9,6 +9,7 @@ public static class UpdateUserProfileMapping
         return user.UpdateProfile(
             command.FirstName!,
             command.LastName!,
+            command.Email!,
             command.Gender,
             command.PhoneNumber,
             command.DateOfBirth

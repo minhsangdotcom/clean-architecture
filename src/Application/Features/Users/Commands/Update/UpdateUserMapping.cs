@@ -9,6 +9,7 @@ public static class UpdateUserMapping
         return user.Update(
             update.FirstName!,
             update.LastName!,
+            update.Email!,
             update.PhoneNumber,
             update.DateOfBirth
         );
