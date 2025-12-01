@@ -4,7 +4,6 @@ using Application.Common.Interfaces.Services.Localization;
 using Application.Common.Interfaces.UnitOfWorks;
 using Application.Contracts.ApiWrapper;
 using Application.Contracts.Constants;
-using Application.Contracts.Messages;
 using Domain.Aggregates.Users;
 using Domain.Aggregates.Users.Enums;
 using Domain.Aggregates.Users.Specifications;
@@ -29,7 +28,7 @@ public class RequestUserPasswordResetHandler(
         User? user = await unitOfWork
             .DynamicReadOnlyRepository<User>()
             .FindByConditionAsync(
-                new GetUserByEmailIncludePasswordResetRequestSpecification(command.Email),
+                new GetUserByEmailIncludePasswordResetRequestSpecification(command.Email!),
                 cancellationToken
             );
 

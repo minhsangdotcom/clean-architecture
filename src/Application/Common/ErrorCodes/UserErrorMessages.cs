@@ -1,6 +1,7 @@
 using Application.Contracts.ErrorCodes;
 using Application.Contracts.Messages;
 using Application.Features.Users.Commands.ChangePassword;
+using Application.Features.Users.Commands.ResetPassword;
 using Application.SharedFeatures.Requests.Users;
 using Domain.Aggregates.Users;
 
