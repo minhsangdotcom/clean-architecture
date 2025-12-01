@@ -2,7 +2,6 @@ using Application.Common.Interfaces.DbContexts;
 using Application.Common.Interfaces.Services.Identity;
 using Domain.Aggregates.Permissions;
 using Domain.Aggregates.Roles;
-using DotNetCoreExtension.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
@@ -87,10 +86,7 @@ public class RoleManager(
 
     public async Task<IReadOnlyList<Role>> GetAllAsync(
         CancellationToken cancellationToken = default
-    )
-    {
-        return await roles.ToListAsync(cancellationToken);
-    }
+    ) => await roles.AsNoTracking().ToListAsync(cancellationToken);
 
     #endregion
 
@@ -98,15 +94,13 @@ public class RoleManager(
     public async Task<IReadOnlyList<Permission>> GetPermissionsAsync(
         Role role,
         CancellationToken cancellationToken = default
-    )
-    {
-        return await dbContext
+    ) =>
+        await dbContext
             .Set<RolePermission>()
             .Where(rp => rp.RoleId == role.Id)
             .Select(x => x.Permission!)
             .AsNoTracking()
             .ToListAsync(cancellationToken);
-    }
 
     public Task<bool> HasAnyPermissionAsync(
         Role role,
@@ -118,7 +112,7 @@ public class RoleManager(
         return dbContext
             .Set<RolePermission>()
             .Where(rp => rp.RoleId == role.Id)
-            .Join(dbContext.Set<Permission>(), rp => rp.PermissionId, p => p.Id, (rp, p) => p.Code)
+            .Select(x => x.Permission!.Code)
             .AnyAsync(p => codes.Contains(p), cancellationToken);
     }
 
@@ -132,12 +126,7 @@ public class RoleManager(
         return await dbContext
                 .Set<RolePermission>()
                 .Where(rp => rp.RoleId == role.Id)
-                .Join(
-                    dbContext.Set<Permission>(),
-                    rp => rp.PermissionId,
-                    p => p.Id,
-                    (rp, p) => p.Code
-                )
+                .Select(x => x.Permission!.Code)
                 .CountAsync(p => codes.Contains(p), cancellationToken) == codes.Count;
     }
     #endregion
@@ -168,27 +157,10 @@ public class RoleManager(
     {
         List<Permission> list = [.. permissions];
         List<Ulid> ids = list.ConvertAll(p => p.Id);
-        if (
-            await dbContext
-                .Set<RolePermission>()
-                .CountAsync(
-                    rp => rp.RoleId == role.Id && ids.Contains(rp.PermissionId),
-                    cancellationToken
-                ) != list.Count
-        )
-        {
-            throw new ArgumentException(
-                "One or more permissions are not assigned to the role.",
-                nameof(permissions)
-            );
-        }
-
         await dbContext
             .Set<RolePermission>()
             .Where(rp => rp.RoleId == role.Id && ids.Contains(rp.PermissionId))
             .ExecuteDeleteAsync(cancellationToken);
-
-        await dbContext.SaveChangesAsync(cancellationToken);
     }
 
     public async Task ReplacePermissionAsync(
@@ -199,22 +171,21 @@ public class RoleManager(
     {
         List<Permission> list = [.. permissions];
         List<string> codes = list.ConvertAll(x => x.Code);
+        List<string> currentPermissions = await dbContext
+            .Set<RolePermission>()
+            .Where(x => x.RoleId == role.Id)
+            .Select(x => x.Permission!.Code)
+            .ToListAsync(cancellationToken);
+
         if (
-            await dbContext
-                .Set<RolePermission>()
-                .Where(x => x.RoleId == role.Id)
-                .Join(dbContext.Set<Permission>(), rp => rp.RoleId, p => p.Id, (rp, p) => p.Code)
-                .CountAsync(x => codes.Contains(x), cancellationToken) != codes.Count
+            codes.Exists(code => !currentPermissions.Contains(code))
+            || currentPermissions.Exists(p => !codes.Contains(p))
         )
         {
             await rolePermissionChecker.InvalidateRolePermissionsAsync(role.Id);
         }
 
-        await dbContext
-            .Set<RolePermission>()
-            .Where(rp => rp.RoleId == role.Id)
-            .ExecuteDeleteAsync(cancellationToken);
-
+        dbContext.Set<RolePermission>().RemoveRange(role.Permissions);
         await dbContext
             .Set<RolePermission>()
             .AddRangeAsync(
@@ -241,18 +212,16 @@ public class RoleManager(
     public async Task<bool> RoleExistsAsync(
         string roleName,
         CancellationToken cancellationToken = default
-    )
-    {
-        return await roles.AnyAsync(r => r.Name == roleName, cancellationToken);
-    }
+    ) => await roles.AnyAsync(r => r.Name == roleName, cancellationToken);
 
     public async Task<bool> AllRolesExistAsync(
         IEnumerable<string> roleNames,
         CancellationToken cancellationToken = default
     )
     {
-        return await roles.CountAsync(r => roleNames.Contains(r.Name), cancellationToken)
-            == roleNames.Count();
+        List<string> names = [.. roleNames];
+        return await roles.CountAsync(r => names.Contains(r.Name), cancellationToken)
+            == names.Count;
     }
     #endregion
 }

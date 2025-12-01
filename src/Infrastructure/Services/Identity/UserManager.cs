@@ -39,7 +39,6 @@ public class UserManager(
         }
         return await query
             .AsSplitQuery()
-            .AsNoTracking()
             .FirstOrDefaultAsync(x => x.Id == userId, cancellationToken);
     }
 
@@ -85,32 +84,24 @@ public class UserManager(
             .FirstOrDefaultAsync(x => x.Email == email, cancellationToken);
     }
 
-    public async Task<IList<Role>> GetRolesAsync(User user, CancellationToken cancellationToken)
-    {
-        IList<Role> roles = await dbContext
+    public async Task<IList<Role>> GetRolesAsync(User user, CancellationToken cancellationToken) =>
+        await dbContext
             .Set<UserRole>()
             .Where(ur => ur.UserId == user.Id)
             .Select(r => r.Role!)
             .AsNoTracking()
             .ToListAsync(cancellationToken);
 
-        return roles;
-    }
-
     public async Task<IList<Permission>> GetPermissionsAsync(
         User user,
         CancellationToken cancellationToken
-    )
-    {
-        IList<Permission> permissions = await dbContext
+    ) =>
+        await dbContext
             .Set<UserPermission>()
             .Where(up => up.UserId == user.Id)
             .Select(p => p.Permission!)
             .AsNoTracking()
             .ToListAsync(cancellationToken);
-
-        return permissions;
-    }
     #endregion
 
     #region CreateUpdateDelete
@@ -152,15 +143,13 @@ public class UserManager(
         User user,
         IEnumerable<string> roleNames,
         CancellationToken cancellationToken
-    )
-    {
-        return await dbContext
+    ) =>
+        await dbContext
             .Set<UserRole>()
             .AnyAsync(
                 ur => ur.UserId == user.Id && roleNames.Contains(ur.Role!.Name),
                 cancellationToken
             );
-    }
 
     public async Task<bool> IsInAllRolesAsync(
         User user,
@@ -168,13 +157,13 @@ public class UserManager(
         CancellationToken cancellationToken
     )
     {
-        List<string> roleNameList = [.. roleNames];
+        List<string> requiredRoles = [.. roleNames];
         return await dbContext
                 .Set<UserRole>()
-                .CountAsync(
-                    ur => ur.UserId == user.Id && roleNameList.Contains(ur.Role!.Name),
-                    cancellationToken
-                ) == roleNameList.Count;
+                .Where(x => x.UserId == user.Id)
+                .Select(x => x.Role!.Name)
+                .CountAsync(name => requiredRoles.Contains(name), cancellationToken)
+            == requiredRoles.Count;
     }
     #endregion
 
@@ -185,28 +174,39 @@ public class UserManager(
         CancellationToken cancellationToken
     )
     {
-        if (roleNames.Distinct().Count() != roleNames.Count())
+        List<string> names = [.. roleNames];
+        if (names.Distinct().Count() != names.Count)
         {
             throw new ArgumentException("Duplicate roles found in the input list.");
         }
 
-        List<Role> roles = await dbContext
+        List<Ulid> roleIds = await dbContext
             .Set<Role>()
-            .Where(r => roleNames.Contains(r.Name))
+            .Where(r => names.Contains(r.Name))
+            .Select(x => x.Id)
             .ToListAsync(cancellationToken);
 
-        if (roles.Count != roleNames.Count())
+        if (roleIds.Count != names.Count)
         {
-            var foundRoleNames = roles.ConvertAll(r => r.Name);
-            var notFoundRoleNames = roleNames.Except(foundRoleNames);
-            throw new ArgumentException(
-                $"Roles '{string.Join(", ", notFoundRoleNames)}' do not exist."
-            );
+            throw new ArgumentException($"One or more role in list of roles do not exist.");
         }
+
+        if (
+            await dbContext
+                .Set<UserRole>()
+                .AnyAsync(
+                    ur => ur.UserId == user.Id && roleIds.Contains(ur.RoleId),
+                    cancellationToken
+                )
+        )
+        {
+            throw new ArgumentException("One or more roles are already assigned to the user.");
+        }
+
         await dbContext
             .Set<UserRole>()
             .AddRangeAsync(
-                roles.Select(r => new UserRole { UserId = user.Id, RoleId = r.Id }),
+                roleIds.ConvertAll(id => new UserRole { UserId = user.Id, RoleId = id }),
                 cancellationToken
             );
         await dbContext.SaveChangesAsync(cancellationToken);
@@ -218,32 +218,36 @@ public class UserManager(
         CancellationToken cancellationToken
     )
     {
-        if (roleNames.Distinct().Count() != roleNames.Count())
+        List<string> names = [.. roleNames];
+        if (names.Distinct().Count() != names.Count)
         {
             throw new ArgumentException("Duplicate roles found in the input list.");
         }
 
-        if (!await roleManager.AllRolesExistAsync(roleNames, cancellationToken))
+        List<Ulid> roleIds = await dbContext
+            .Set<Role>()
+            .Where(r => names.Contains(r.Name))
+            .Select(x => x.Id)
+            .ToListAsync(cancellationToken);
+
+        if (roleIds.Count != names.Count)
         {
             throw new ArgumentException("One or more roles do not exist.");
         }
-
-        if (
-            await dbContext
-                .Set<UserRole>()
-                .Where(ur => ur.UserId == user.Id)
-                .Join(dbContext.Set<Role>(), ur => ur.RoleId, r => r.Id, (ur, r) => r.Name)
-                .CountAsync(rn => roleNames.Contains(rn), cancellationToken) != roleNames.Count()
-        )
+        List<Ulid> currentRoleIds = await dbContext
+            .Set<UserRole>()
+            .Where(ur => ur.UserId == user.Id && roleIds.Contains(ur.RoleId))
+            .Select(x => x.RoleId)
+            .ToListAsync(cancellationToken);
+        if (roleIds.Exists(id => !currentRoleIds.Contains(id)))
         {
             throw new ArgumentException("One or more roles are not assigned to the user.");
         }
 
         await dbContext
             .Set<UserRole>()
-            .Where(ur => ur.UserId == user.Id && roleNames.Contains(ur.Role!.Name))
+            .Where(ur => ur.UserId == user.Id && currentRoleIds.Contains(ur.RoleId))
             .ExecuteDeleteAsync(cancellationToken);
-        await dbContext.SaveChangesAsync(cancellationToken);
     }
 
     public async Task ReplaceRolesAsync(
@@ -252,20 +256,24 @@ public class UserManager(
         CancellationToken cancellationToken = default
     )
     {
+        List<string> names = [.. roleNames];
+        List<string> currentRoles = await dbContext
+            .Set<UserRole>()
+            .Where(ur => ur.UserId == user.Id)
+            .Select(r => r.Role!.Name)
+            .ToListAsync(cancellationToken: cancellationToken);
+
+        // check whether roles of user have changed, if have, remove cache key for using cache purpose
         if (
-            await dbContext
-                .Set<UserRole>()
-                .AsNoTracking()
-                .Where(x => x.UserId == user.Id)
-                .Select(x => x.Role!.Name)
-                .CountAsync(x => roleNames.Contains(x), cancellationToken) != roleNames.Count()
+            names.Exists(name => !currentRoles.Contains(name))
+            || currentRoles.Exists(r => !names.Contains(r))
         )
         {
             await rolePermissionChecker.InvalidateUserRolesAsync(user.Id);
         }
-
+        // user.Roles must be included before calling this
         dbContext.Set<UserRole>().RemoveRange(user.Roles);
-        var roleIds = await dbContext
+        List<Ulid> roleIds = await dbContext
             .Set<Role>()
             .Where(r => roleNames.Contains(r.Name))
             .Select(r => r.Id)
@@ -351,7 +359,6 @@ public class UserManager(
             .Set<UserPermission>()
             .Where(up => up.UserId == user.Id && ids.Contains(up.PermissionId))
             .ExecuteDeleteAsync(cancellationToken);
-        await dbContext.SaveChangesAsync(cancellationToken);
     }
 
     public async Task ReplacePermissionsAsync(
@@ -361,18 +368,22 @@ public class UserManager(
     )
     {
         List<string> codes = [.. permissions.Select(x => x.Code)];
+        List<string> currentPermissions = await dbContext
+            .Set<UserPermission>()
+            .Where(x => x.UserId == user.Id)
+            .Select(x => x.Permission!.Code)
+            .ToListAsync(cancellationToken);
+
+        // check whether permissions of user have changed, if have, remove cache key for using cache purpose
         if (
-            await dbContext
-                .Set<UserPermission>()
-                .AsNoTracking()
-                .Where(x => x.UserId == user.Id)
-                .Select(x => x.Permission!.Code)
-                .CountAsync(code => codes.Contains(code), cancellationToken) != codes.Count
+            codes.Exists(code => !currentPermissions.Contains(code))
+            || currentPermissions.Exists(p => !codes.Contains(p))
         )
         {
             await rolePermissionChecker.InvalidateUserPermissionsAsync(user.Id);
         }
 
+        //Always include
         dbContext.Set<UserPermission>().RemoveRange(user.Permissions);
         List<UserPermission> userPermissions =
         [
