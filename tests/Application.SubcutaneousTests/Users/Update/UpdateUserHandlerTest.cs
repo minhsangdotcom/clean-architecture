@@ -11,7 +11,7 @@ namespace Application.SubcutaneousTests.Users.Update;
 public class UpdateUserHandlerTest(TestingFixture testingFixture) : IAsyncLifetime
 {
     private UpdateUserCommand command = new();
-    private List<Ulid> additionalPermission = [];
+    private readonly List<Ulid> additionalPermission = [];
 
     [Fact]
     public async Task UpdateUser_WhenIdNotfound_ShouldReturnNotFoundResult()

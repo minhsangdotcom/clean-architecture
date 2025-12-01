@@ -1,7 +1,6 @@
+using Application.Common.ErrorCodes;
 using Application.Contracts.ApiWrapper;
-using Application.Contracts.Messages;
 using Application.Features.Users.Commands.Delete;
-using Application.SubcutaneousTests.Extensions;
 using Domain.Aggregates.Users;
 using Shouldly;
 
@@ -10,28 +9,28 @@ namespace Application.SubcutaneousTests.Users.Delete;
 [Collection(nameof(TestingCollectionFixture))]
 public class DeleteUserHandlerTest(TestingFixture testingFixture) : IAsyncLifetime
 {
-    private Ulid? id;
-
     [Fact]
-    private async Task DeleteUser_WhenIdNotfound_ShouldThrowNotFoundException()
+    public async Task DeleteUser_WhenIdNotfound_ShouldThrowNotFoundException()
     {
+        //Act
         Result<string> result = await testingFixture.SendAsync(
-            new DeleteUserCommand(Guid.Empty.ToString())
+            new DeleteUserCommand(Ulid.Empty.ToString())
         );
-        var expectedMessage = Messenger
-            .Create<User>()
-            .WithError(MessageErrorType.Found)
-            .Negative()
-            .GetFullMessage();
+
+        //Assert
+        var expected = UserErrorMessages.UserNotFound;
         result.Error.ShouldNotBeNull();
         result.Error.Status.ShouldBe(404);
+        result.Error.ErrorMessage!.Value.Text.ShouldBe(expected);
     }
 
     [Fact]
-    private async Task DeleteUser_WhenIdNotfound_ShouldDeleteSuccess()
+    public async Task DeleteUser_WhenIdNotfound_ShouldDeleteSuccess()
     {
-        var result = await testingFixture.SendAsync(new DeleteUserCommand(id!.Value.ToString()));
+        User user = await testingFixture.CreateNormalUserAsync();
+        var result = await testingFixture.SendAsync(new DeleteUserCommand(user.Id.ToString()));
         result.Error.ShouldBeNull();
+        result.IsSuccess.ShouldBeTrue();
     }
 
     public async Task DisposeAsync()
@@ -42,7 +41,5 @@ public class DeleteUserHandlerTest(TestingFixture testingFixture) : IAsyncLifeti
     public async Task InitializeAsync()
     {
         await testingFixture.ResetAsync();
-        User user = await testingFixture.CreateNormalUserAsync();
-        id = user.Id;
     }
 }
