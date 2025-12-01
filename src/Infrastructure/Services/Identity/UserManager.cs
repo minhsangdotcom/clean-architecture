@@ -11,7 +11,6 @@ using Microsoft.Extensions.Logging;
 namespace Infrastructure.Services.Identity;
 
 public class UserManager(
-    IRoleManager roleManager,
     IEfDbContext dbContext,
     PermissionDefinitionContext permissionDefinitionContext,
     ILogger<UserManager> logger,

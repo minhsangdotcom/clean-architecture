@@ -11,6 +11,7 @@ namespace Application.SubcutaneousTests.Users.Update;
 public class UpdateUserHandlerTest(TestingFixture testingFixture) : IAsyncLifetime
 {
     private UpdateUserCommand command = new();
+    private List<Ulid> additionalPermission = [];
 
     [Fact]
     public async Task UpdateUser_WhenIdNotfound_ShouldReturnNotFoundResult()
@@ -39,6 +40,7 @@ public class UpdateUserHandlerTest(TestingFixture testingFixture) : IAsyncLifeti
         updateData.Roles!.RemoveAt(0);
         updateData.Roles.Add(role.Id);
         updateData.Permissions!.RemoveAt(1);
+        updateData.Permissions.Add(additionalPermission[^1]);
 
         //act
         Result<UpdateUserResponse> result = await testingFixture.SendAsync(command);
@@ -69,12 +71,14 @@ public class UpdateUserHandlerTest(TestingFixture testingFixture) : IAsyncLifeti
     {
         await testingFixture.ResetAsync();
         var permissions = await testingFixture.SeedingPermissionAsync();
+        additionalPermission.AddRange(permissions.Select(p => p.Id));
+
         IFormFile file = FileHelper.GenerateIFormFile(
             Path.Combine(Directory.GetCurrentDirectory(), "Files", "avatar_cute_2.jpg")
         );
         var user = await testingFixture.CreateManagerUserAsync(
             file,
-            permissionId: [.. permissions.Take(2).Select(x => x.Id)]
+            permissionId: [.. additionalPermission.Take(2)]
         );
         command = UserMappingExtension.ToUpdateUserCommand(user);
     }
