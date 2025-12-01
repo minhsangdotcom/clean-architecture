@@ -40,7 +40,7 @@ public class CreateUserHandlerTest(TestingFixture testingFixture) : IAsyncLifeti
         user.Roles.Select(x => x.RoleId).ShouldBe(command.Roles);
         user.Permissions.Select(x => x.PermissionId).ShouldBe(command.Permissions);
 
-        user.Avatar?.ShouldNotBeNull();
+        user.Avatar.ShouldNotBeNull();
     }
 
     public async Task DisposeAsync()
