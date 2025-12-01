@@ -1,12 +1,12 @@
+using Application.Common.ErrorCodes;
 using Application.Contracts.ApiWrapper;
-using Application.Contracts.Messages;
 using Application.Features.Users.Commands.Profiles;
 using Application.SubcutaneousTests.Extensions;
 using Domain.Aggregates.Users;
 using Microsoft.AspNetCore.Http;
 using Shouldly;
 
-namespace Application.SubcutaneousTests.Users.Profie;
+namespace Application.SubcutaneousTests.Users.Profile;
 
 [Collection(nameof(TestingCollectionFixture))]
 public class UpdateUserProfileCommandHandlerTest(TestingFixture testingFixture) : IAsyncLifetime
@@ -14,26 +14,23 @@ public class UpdateUserProfileCommandHandlerTest(TestingFixture testingFixture) 
     private UpdateUserProfileCommand updateUserCommand = new();
 
     [Fact]
-    private async Task UpdateProfile_WhenIdNotfound_ShouldReturnNotFoundResult()
+    public async Task UpdateProfile_When_IdNotfound_ShouldReturnNotFoundError()
     {
         TestingFixture.RemoveUserId();
         Result<UpdateUserProfileResponse> result = await testingFixture.SendAsync(
             updateUserCommand
         );
-        var expectedMessage = Messenger
-            .Create<User>()
-            .WithError(MessageErrorType.Found)
-            .Negative()
-            .GetFullMessage();
-
+        var expectedMessage = UserErrorMessages.UserNotFound;
+        result.IsSuccess.ShouldBeFalse();
         result.Error.ShouldNotBeNull();
         result.Error.Status.ShouldBe(404);
+        result.Error.ErrorMessage!.Value.Text.ShouldBe(expectedMessage);
     }
 
     [Fact]
-    private async Task UpdateProfile_ShouldUpdateSuccess()
+    public async Task UpdateProfile_ShouldUpdateSuccess()
     {
-        //arrage
+        //Arrange
         updateUserCommand.DateOfBirth = null;
         updateUserCommand.Avatar = null;
         //act
@@ -43,12 +40,13 @@ public class UpdateUserProfileCommandHandlerTest(TestingFixture testingFixture) 
 
         result.IsSuccess.ShouldBeTrue();
         result.Error.ShouldBeNull();
+        result.Value.ShouldNotBeNull();
 
-        var response = result.Value!;
-        var user = await testingFixture.FindUserByIdAsync(response.Id);
+        UpdateUserProfileResponse response = result.Value;
+        User? user = await testingFixture.FindUserByIdAsync(response.Id);
         user.ShouldNotBeNull();
 
-        user!.ShouldSatisfyAllConditions(
+        user.ShouldSatisfyAllConditions(
             () => user.Id.ShouldBe(response.Id),
             () => user.FirstName.ShouldBe(response.FirstName),
             () => user.LastName.ShouldBe(response.LastName),
