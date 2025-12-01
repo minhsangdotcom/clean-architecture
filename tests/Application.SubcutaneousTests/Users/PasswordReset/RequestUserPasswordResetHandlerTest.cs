@@ -11,7 +11,7 @@ public class RequestUserPasswordResetHandlerTest(TestingFixture testingFixture) 
     private Ulid userId = Ulid.Empty;
 
     [Fact]
-    public async Task ResetPassword_When_UserNotFound_ShouldReturnNotFoundError()
+    public async Task RequestResetPassword_When_UserNotFound_ShouldReturnNotFoundError()
     {
         //Arrange
         command.Email = "abc@gmail.com";
@@ -27,7 +27,7 @@ public class RequestUserPasswordResetHandlerTest(TestingFixture testingFixture) 
     }
 
     [Fact]
-    public async Task ResetPassword_When_UserInActive_ShouldReturnError()
+    public async Task RequestResetPassword_When_UserInActive_ShouldReturnError()
     {
         //Arrange
         await testingFixture.DeactivateUserAsync(userId);
@@ -42,12 +42,25 @@ public class RequestUserPasswordResetHandlerTest(TestingFixture testingFixture) 
         result.Error.ErrorMessage!.Value.Text.ShouldBe(UserErrorMessages.UserInactive);
     }
 
+    [Fact]
+    public async Task RequestResetPassword_ShouldBeSuccess()
+    {
+        //Act
+        var result = await testingFixture.SendAsync(command);
+
+        //Assert
+        var token = await testingFixture.GetPasswordResetTokenAsync(userId);
+
+        result.IsFailure.ShouldBeFalse();
+        result.Error.ShouldBeNull();
+        result.IsSuccess.ShouldBeTrue();
+        token.ShouldNotBeNullOrEmpty();
+    }
+
     public async Task DisposeAsync() => await Task.CompletedTask;
 
     public async Task InitializeAsync()
     {
-        await testingFixture.ResetAsync();
-
         await testingFixture.ResetAsync();
         _ = await testingFixture.SeedingPermissionAsync();
         var user = await testingFixture.CreateNormalUserAsync();

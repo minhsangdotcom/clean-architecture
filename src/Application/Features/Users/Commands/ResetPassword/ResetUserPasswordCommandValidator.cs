@@ -6,7 +6,7 @@ using FluentValidation;
 
 namespace Application.Features.Users.Commands.ResetPassword;
 
-public class UpdateUserPasswordValidator(
+public class ResetUserPasswordCommandValidator(
     IHttpContextAccessorService httpContextAccessor,
     IMessageTranslatorService translator
 ) : FluentValidator<ResetUserPasswordCommand>(httpContextAccessor, translator)

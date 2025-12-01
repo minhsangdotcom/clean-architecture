@@ -197,6 +197,24 @@ public partial class TestingFixture
         await dbContext.Set<UserRefreshToken>().Where(x => x.UserId == userId).ExecuteDeleteAsync();
     }
 
+    public async Task<string> GetPasswordResetTokenAsync(Ulid userId)
+    {
+        using var scope = factory!.Services.CreateScope();
+        IUserManager userManager = scope.ServiceProvider.GetRequiredService<IUserManager>();
+        IEfDbContext dbContext = scope.ServiceProvider.GetRequiredService<IEfDbContext>();
+
+        var userPasswordReset = await dbContext
+            .Set<UserPasswordReset>()
+            .FirstOrDefaultAsync(x => x.UserId == userId);
+
+        if (userPasswordReset == null)
+        {
+            return string.Empty;
+        }
+
+        return userPasswordReset.Token;
+    }
+
     private static AddressResult GetDefaultAddress() =>
         new(
             Ulid.Parse("01JRQHWS3RQR1N0J84EV1DQXR1"),
