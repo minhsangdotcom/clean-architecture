@@ -423,16 +423,8 @@ public class UserManager(
             .AsNoTracking()
             .ToListAsync(cancellationToken);
 
-        return
-        [
-            .. permissionDefinitionContext.Groups.SelectMany(x =>
-                x.Value.Permissions.FindAll(p =>
-                        rolePermissions.Concat(directPermissions).Contains(p.Code)
-                    )
-                    .Flatten()
-                    .DistinctBy(p => p.Code)
-                    .Select(p => p.Code)
-            ),
-        ];
+        return permissionDefinitionContext.GetNestedPermissions(
+            rolePermissions.Concat(directPermissions)
+        );
     }
 }

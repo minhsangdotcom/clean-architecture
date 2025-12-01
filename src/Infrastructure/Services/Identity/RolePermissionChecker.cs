@@ -22,26 +22,30 @@ public class RolePermissionChecker(
     public async Task<bool> CheckAnyPermissionAsync(Ulid userId, IEnumerable<string> permissions)
     {
         IReadOnlyCollection<string> existentPermissions = await GetUserPermissionsAsync(userId);
-        List<string> allPermissions = GetNestedPermissions(existentPermissions);
+        List<string> allPermissions = permissionDefinitionContext.GetNestedPermissions(
+            existentPermissions
+        );
         return allPermissions.Any(x => permissions.Contains(x));
     }
 
     public async Task<bool> CheckAllPermissionAsync(Ulid userId, IEnumerable<string> permissions)
     {
         IReadOnlyCollection<string> existentPermissions = await GetUserPermissionsAsync(userId);
-        List<string> allPermissions = GetNestedPermissions(existentPermissions);
+        List<string> allPermissions = permissionDefinitionContext.GetNestedPermissions(
+            existentPermissions
+        );
         return allPermissions.Count(x => permissions.Contains(x)) == permissions.Count();
     }
 
     public async Task<bool> CheckAnyRoleAsync(Ulid userId, IEnumerable<string> roleNames)
     {
-        IReadOnlyCollection<Role> roles = await GetUserRolesCachedAsync(userId);
+        IReadOnlyCollection<RoleResult> roles = await GetUserRolesCachedAsync(userId);
         return roles.Any(x => roleNames.Contains(x.Name));
     }
 
     public async Task<bool> CheckAllRoleAsync(Ulid userId, IEnumerable<string> roleNames)
     {
-        IReadOnlyCollection<Role> roles = await GetUserRolesCachedAsync(userId);
+        IReadOnlyCollection<RoleResult> roles = await GetUserRolesCachedAsync(userId);
         return roles.Count(x => roleNames.Contains(x.Name)) == roleNames.Count();
     }
 
@@ -65,7 +69,7 @@ public class RolePermissionChecker(
 
     private async Task<IReadOnlyCollection<string>> GetUserPermissionsAsync(Ulid userId)
     {
-        IReadOnlyCollection<Role> roles = await GetUserRolesCachedAsync(userId);
+        IReadOnlyCollection<RoleResult> roles = await GetUserRolesCachedAsync(userId);
         List<Ulid> roleIds = [.. roles.Select(x => x.Id)];
 
         HashSet<string> merged = [];
@@ -81,7 +85,7 @@ public class RolePermissionChecker(
         return merged;
     }
 
-    private async Task<IReadOnlyCollection<Role>> GetUserRolesCachedAsync(Ulid userId)
+    private async Task<IReadOnlyCollection<RoleResult>> GetUserRolesCachedAsync(Ulid userId)
     {
         string key = $"role:user:{userId}";
         return await cache.GetOrSetAsync(
@@ -91,7 +95,7 @@ public class RolePermissionChecker(
                     return dbContext
                         .Set<UserRole>()
                         .Where(x => x.UserId == userId)
-                        .Select(x => x.Role!)
+                        .Select(x => new RoleResult(x.RoleId, x.Role!.Name))
                         .ToListAsync();
                 },
                 new CacheOptions()
@@ -146,18 +150,5 @@ public class RolePermissionChecker(
                     ),
                 }
             ) ?? [];
-    }
-
-    private List<string> GetNestedPermissions(IEnumerable<string> existentPermissions)
-    {
-        return
-        [
-            .. permissionDefinitionContext.Groups.SelectMany(x =>
-                x.Value.Permissions.FindAll(p => existentPermissions.Contains(p.Code))
-                    .Flatten()
-                    .DistinctBy(p => p.Code)
-                    .Select(p => p.Code)
-            ),
-        ];
     }
 }
