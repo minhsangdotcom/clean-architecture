@@ -190,14 +190,7 @@ public class UserManager(
             throw new ArgumentException($"One or more role in list of roles do not exist.");
         }
 
-        if (
-            await dbContext
-                .Set<UserRole>()
-                .AnyAsync(
-                    ur => ur.UserId == user.Id && roleIds.Contains(ur.RoleId),
-                    cancellationToken
-                )
-        )
+        if (await IsInAnyRoleAsync(user, roleNames, cancellationToken))
         {
             throw new ArgumentException("One or more roles are already assigned to the user.");
         }
@@ -245,7 +238,7 @@ public class UserManager(
 
         await dbContext
             .Set<UserRole>()
-            .Where(ur => ur.UserId == user.Id && currentRoleIds.Contains(ur.RoleId))
+            .Where(ur => ur.UserId == user.Id && roleIds.Contains(ur.RoleId))
             .ExecuteDeleteAsync(cancellationToken);
     }
 
