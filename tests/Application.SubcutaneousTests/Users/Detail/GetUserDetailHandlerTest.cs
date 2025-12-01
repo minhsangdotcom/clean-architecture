@@ -1,6 +1,5 @@
-using Application.Contracts.Messages;
+using Application.Common.ErrorCodes;
 using Application.Features.Users.Queries.Detail;
-using Domain.Aggregates.Users;
 using Shouldly;
 
 namespace Application.SubcutaneousTests.Users.Detail;
@@ -9,43 +8,43 @@ namespace Application.SubcutaneousTests.Users.Detail;
 public class GetUserDetailHandlerTest(TestingFixture testingFixture) : IAsyncLifetime
 {
     [Fact]
-    public async Task GetUser_WhenIdNotFound_ShouldReturnNotFoundResult()
+    public async Task GetUser_When_IdNotFound_ShouldReturnNotFoundError()
     {
-        //arrage
+        //Arrange
         string Id = Ulid.Empty.ToString();
-        //act
+        //Act
         var result = await testingFixture.SendAsync(new GetUserDetailQuery(Id));
         //assert
-        var expectedMessage = Messenger
-            .Create<User>()
-            .WithError(MessageErrorType.Found)
-            .Negative()
-            .GetFullMessage();
-        result.IsSuccess.ShouldBeFalse();
+        var expected = UserErrorMessages.UserNotFound;
         result.Error.ShouldNotBeNull();
+        result.Error.Status.ShouldBe(404);
+        result.Error.ErrorMessage!.Value.Text.ShouldBe(expected);
     }
 
     [Fact]
     public async Task GetUser_ShouldSuccess()
     {
-        //arrage
+        // Arrange
         var user = await testingFixture.CreateNormalUserAsync();
-        //act
+        // Act
         var result = await testingFixture.SendAsync(new GetUserDetailQuery(user.Id.ToString()));
-        //assert
+        // Assert
         result.IsSuccess.ShouldBeTrue();
         result.Error.ShouldBeNull();
 
-        result.Value?.ShouldSatisfyAllConditions(
-            () => user.Id.ShouldBe(user.Id),
-            () => user.FirstName.ShouldBe(user.FirstName),
-            () => user.LastName.ShouldBe(user.LastName),
-            () => user.Username.ShouldBe(user.Username),
-            () => user.Email.ShouldBe(user.Email),
-            () => user.PhoneNumber.ShouldBe(user.PhoneNumber),
-            () => user.Gender.ShouldBe(user.Gender),
-            () => user.Status.ShouldBe(user.Status)
-        );
+        GetUserDetailResponse response = result.Value!;
+
+        user.Username.ShouldBe(response.Username);
+        user.FirstName.ShouldBe(response.FirstName);
+        user.LastName.ShouldBe(response.LastName);
+        user.Email.ShouldBe(response.Email);
+        user.PhoneNumber.ShouldBe(response.PhoneNumber);
+        user.Gender.ShouldBe(response.Gender);
+        user.Status.ShouldBe(response.Status);
+        user.DateOfBirth.ShouldBe(response.DateOfBirth!.Value);
+        user.Roles.Select(x => x.RoleId).ShouldBe(response.Roles?.Select(x => x.Id));
+        user.Permissions.Select(x => x.PermissionId)
+            .ShouldBe(response.Permissions?.Select(x => x.Id));
     }
 
     public async Task DisposeAsync() => await Task.CompletedTask;

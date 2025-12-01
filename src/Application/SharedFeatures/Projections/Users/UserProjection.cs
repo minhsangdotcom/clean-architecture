@@ -17,7 +17,7 @@ public class UserProjection : AuditableEntityResponse
 
     public string? PhoneNumber { get; set; }
 
-    public DateTime? DayOfBirth { get; set; }
+    public DateTime? DateOfBirth { get; set; }
 
     public Gender? Gender { get; set; }
 
@@ -39,7 +39,7 @@ public class UserProjection : AuditableEntityResponse
         Username = user.Username;
         Email = user.Email;
         PhoneNumber = user.PhoneNumber;
-        DayOfBirth = user.DateOfBirth;
+        DateOfBirth = user.DateOfBirth;
         Gender = user.Gender;
         Avatar = user.Avatar;
         Status = user.Status;

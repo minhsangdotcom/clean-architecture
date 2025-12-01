@@ -1,7 +1,5 @@
-using Application.Contracts.Messages;
+using Application.Common.ErrorCodes;
 using Application.Features.Users.Commands.ChangePassword;
-using Application.SubcutaneousTests.Extensions;
-using Domain.Aggregates.Users;
 using Infrastructure.Constants;
 using Shouldly;
 
@@ -13,50 +11,44 @@ public class ChangeUserPasswordHandlerTest(TestingFixture testingFixture) : IAsy
     private Ulid id;
 
     [Fact]
-    public async Task ChangePassword_WhenUserNotFound_ShouldReturnNotFoundResult()
+    public async Task ChangePassword_WhenUserNotFound_ShouldReturnNotFoundError()
     {
-        //arrage
+        //Arrange
         TestingFixture.RemoveUserId();
         //act
         var result = await testingFixture.SendAsync(new ChangeUserPasswordCommand());
         //assert
-        var expectedMessage = Messenger
-            .Create<User>()
-            .WithError(MessageErrorType.Found)
-            .Negative()
-            .GetFullMessage();
-        result.IsSuccess.ShouldBeFalse();
+        var expected = UserErrorMessages.UserNotFound;
         result.Error.ShouldNotBeNull();
+        result.Error.Status.ShouldBe(404);
+        result.Error.ErrorMessage!.Value.Text.ShouldBe(expected);
     }
 
     [Fact]
-    public async Task ChangePassword_WhenOldPasswordInCorrect_ShouldReturnInCorrectPasswordResult()
+    public async Task ChangePassword_When_OldPasswordInCorrect_ShouldReturnInCorrectPasswordError()
     {
         //act
         var result = await testingFixture.SendAsync(
             new ChangeUserPasswordCommand() { OldPassword = "Admin@423", NewPassword = "Admin@456" }
         );
         //assert
-        var expectedMessage = Messenger
-            .Create<ChangeUserPasswordCommand>(nameof(User))
-            .Property(x => x.OldPassword!)
-            .WithError(MessageErrorType.Correct)
-            .Negative()
-            .GetFullMessage();
+        var expected = UserErrorMessages.UserOldPasswordIncorrect;
         result.IsSuccess.ShouldBeFalse();
         result.Error.ShouldNotBeNull();
+        result.Error.Status.ShouldBe(400);
+        result.Error.ErrorMessage!.Value.Text.ShouldBe(expected);
     }
 
     [Fact]
     public async Task ChangePassword_ShouldSuccess()
     {
-        string newPassowrd = "Admin@456";
+        string newPassword = "Admin@456";
         //act
         var result = await testingFixture.SendAsync(
             new ChangeUserPasswordCommand()
             {
                 OldPassword = Credential.USER_DEFAULT_PASSWORD,
-                NewPassword = newPassowrd,
+                NewPassword = newPassword,
             }
         );
         //assert
@@ -65,7 +57,7 @@ public class ChangeUserPasswordHandlerTest(TestingFixture testingFixture) : IAsy
 
         var user = await testingFixture.FindUserByIdAsync(id);
         user.ShouldNotBeNull();
-        BCrypt.Net.BCrypt.Verify(newPassowrd, user.Password).ShouldBeTrue();
+        BCrypt.Net.BCrypt.Verify(newPassword, user.Password).ShouldBeTrue();
     }
 
     public async Task DisposeAsync() => await Task.CompletedTask;

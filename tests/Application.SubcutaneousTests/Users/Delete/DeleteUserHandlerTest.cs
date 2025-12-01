@@ -10,7 +10,7 @@ namespace Application.SubcutaneousTests.Users.Delete;
 public class DeleteUserHandlerTest(TestingFixture testingFixture) : IAsyncLifetime
 {
     [Fact]
-    public async Task DeleteUser_WhenIdNotfound_ShouldThrowNotFoundException()
+    public async Task DeleteUser_When_IdNotfound_ShouldReturnNotFoundError()
     {
         //Act
         Result<string> result = await testingFixture.SendAsync(
@@ -25,7 +25,7 @@ public class DeleteUserHandlerTest(TestingFixture testingFixture) : IAsyncLifeti
     }
 
     [Fact]
-    public async Task DeleteUser_WhenIdNotfound_ShouldDeleteSuccess()
+    public async Task DeleteUser_ShouldDeleteSuccess()
     {
         User user = await testingFixture.CreateNormalUserAsync();
         var result = await testingFixture.SendAsync(new DeleteUserCommand(user.Id.ToString()));

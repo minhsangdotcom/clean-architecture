@@ -19,7 +19,7 @@ public static class ListUserMapping
             Username = user.Username,
             Email = user.Email,
             PhoneNumber = user.PhoneNumber,
-            DayOfBirth = user.DateOfBirth,
+            DateOfBirth = user.DateOfBirth,
             Gender = user.Gender,
             Avatar = user.Avatar,
             Status = user.Status,
