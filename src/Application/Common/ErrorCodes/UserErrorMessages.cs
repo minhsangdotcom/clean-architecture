@@ -289,8 +289,8 @@ public class UserErrorMessages
             .Negative()
             .GetFullMessage();
 
-    [ErrorKey(nameof(UserRefreshTokenIdentical))]
-    public static string UserRefreshTokenIdentical =>
+    [ErrorKey(nameof(UserRefreshTokenNotIdentical))]
+    public static string UserRefreshTokenNotIdentical =>
         Messenger
             .Create<UserRefreshToken>()
             .Property(x => x.Token!)
@@ -339,4 +339,21 @@ public class UserErrorMessages
     [ErrorKey(nameof(UserForbidden))]
     public static string UserForbidden =>
         Messenger.Create<User>().Message("user_forbidden").GetFullMessage();
+
+    [ErrorKey(nameof(UserRefreshTokenNotExistents))]
+    public static string UserRefreshTokenNotExistents =>
+        Messenger
+            .Create<UserRefreshToken>()
+            .WithError(MessageErrorType.Existent)
+            .Negative()
+            .GetFullMessage();
+
+    [ErrorKey(nameof(UserRefreshTokenTokenRequired))]
+    public static string UserRefreshTokenTokenRequired =>
+        Messenger
+            .Create<UserRefreshToken>()
+            .Property(x => x.Token)
+            .WithError(MessageErrorType.Existent)
+            .Negative()
+            .GetFullMessage();
 }

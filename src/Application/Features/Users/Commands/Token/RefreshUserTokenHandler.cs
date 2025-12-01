@@ -69,8 +69,8 @@ public class RefreshUserTokenHandler(
                 new UnauthorizedError(
                     TitleMessage.REFRESH_TOKEN_ERROR,
                     new(
-                        UserErrorMessages.UserRefreshTokenIdentical,
-                        translator.Translate(UserErrorMessages.UserRefreshTokenIdentical)
+                        UserErrorMessages.UserRefreshTokenNotExistents,
+                        translator.Translate(UserErrorMessages.UserRefreshTokenNotExistents)
                     )
                 )
             );
@@ -88,8 +88,8 @@ public class RefreshUserTokenHandler(
                 new UnauthorizedError(
                     TitleMessage.REFRESH_TOKEN_ERROR,
                     new(
-                        UserErrorMessages.UserRefreshTokenIdentical,
-                        translator.Translate(UserErrorMessages.UserRefreshTokenIdentical)
+                        UserErrorMessages.UserRefreshTokenNotIdentical,
+                        translator.Translate(UserErrorMessages.UserRefreshTokenNotIdentical)
                     )
                 )
             );
@@ -98,7 +98,7 @@ public class RefreshUserTokenHandler(
         if (validRefreshToken.ExpiredTime <= DateTimeOffset.UtcNow)
         {
             return Result<RefreshUserTokenResponse>.Failure(
-                new BadRequestError(
+                new UnauthorizedError(
                     "Error has occurred with refresh token",
                     new(
                         UserErrorMessages.UserRefreshTokenExpired,
@@ -111,7 +111,7 @@ public class RefreshUserTokenHandler(
         if (validRefreshToken.User?.Status == UserStatus.Inactive)
         {
             return Result<RefreshUserTokenResponse>.Failure(
-                new BadRequestError(
+                new UnauthorizedError(
                     "Error has occurred with the current user",
                     new(
                         UserErrorMessages.UserInactive,

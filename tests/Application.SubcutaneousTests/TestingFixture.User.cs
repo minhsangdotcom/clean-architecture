@@ -1,4 +1,5 @@
 using System.Text.Json;
+using Application.Common.Interfaces.DbContexts;
 using Application.Common.Interfaces.Services.Identity;
 using Application.Common.Interfaces.UnitOfWorks;
 using Application.Contracts.ApiWrapper;
@@ -9,6 +10,7 @@ using Domain.Aggregates.Users;
 using Domain.Aggregates.Users.Enums;
 using Infrastructure.Constants;
 using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Application.SubcutaneousTests;
@@ -170,6 +172,29 @@ public partial class TestingFixture
         using var scope = factory!.Services.CreateScope();
         IUserManager userManager = scope.ServiceProvider.GetRequiredService<IUserManager>();
         return await userManager.FindByIdAsync(userId);
+    }
+
+    public async Task DeactivateUserAsync(Ulid userId)
+    {
+        using var scope = factory!.Services.CreateScope();
+        IUserManager userManager = scope.ServiceProvider.GetRequiredService<IUserManager>();
+        User? user = await userManager.FindByIdAsync(userId, false);
+
+        if (user == null)
+        {
+            return;
+        }
+        user.Deactivate();
+        await userManager.UpdateAsync(user);
+    }
+
+    public async Task ClearRefreshTokenAsync(Ulid userId)
+    {
+        using var scope = factory!.Services.CreateScope();
+        IUserManager userManager = scope.ServiceProvider.GetRequiredService<IUserManager>();
+        IEfDbContext dbContext = scope.ServiceProvider.GetRequiredService<IEfDbContext>();
+
+        await dbContext.Set<UserRefreshToken>().Where(x => x.UserId == userId).ExecuteDeleteAsync();
     }
 
     private static AddressResult GetDefaultAddress() =>
