@@ -1,5 +1,5 @@
 using Application.Common.ErrorCodes;
-using Application.Common.Interfaces.Services;
+using Application.Common.Interfaces.Services.Accessors;
 using Application.Common.Interfaces.Services.Localization;
 using Application.Common.Validators;
 using FluentValidation;
@@ -7,9 +7,9 @@ using FluentValidation;
 namespace Application.Features.Users.Commands.ResetPassword;
 
 public class ResetUserPasswordCommandValidator(
-    IHttpContextAccessorService httpContextAccessor,
+    IRequestContextProvider contextProvider,
     IMessageTranslatorService translator
-) : FluentValidator<ResetUserPasswordCommand>(httpContextAccessor, translator)
+) : FluentValidator<ResetUserPasswordCommand>(contextProvider, translator)
 {
     protected sealed override void ApplyRules(IMessageTranslatorService translator)
     {
@@ -31,7 +31,7 @@ public class ResetUserPasswordCommandValidator(
     }
 
     protected sealed override void ApplyRules(
-        IHttpContextAccessorService contextAccessor,
+        IRequestContextProvider contextProvider,
         IMessageTranslatorService translator
     ) { }
 }

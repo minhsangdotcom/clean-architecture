@@ -1,5 +1,5 @@
 using Application.Common.ErrorCodes;
-using Application.Common.Interfaces.Services;
+using Application.Common.Interfaces.Services.Accessors;
 using Application.Common.Interfaces.Services.Localization;
 using Application.Contracts.ApiWrapper;
 using Application.Features.Users.Commands.Token;
@@ -13,12 +13,12 @@ public class RefreshUserTokenCommandValidatorTest
     private readonly Mock<IMessageTranslatorService> translator = new();
     private readonly RefreshUserTokenCommandValidator validator;
 
-    private RefreshUserTokenCommand command = new() { RefreshToken = "valid_refresh_token_123" };
+    private readonly RefreshUserTokenCommand command = new() { RefreshToken = "valid_refresh_token_123" };
 
     public RefreshUserTokenCommandValidatorTest()
     {
-        Mock<IHttpContextAccessorService> context = new();
-        validator = new RefreshUserTokenCommandValidator(context.Object, translator.Object);
+        Mock<IRequestContextProvider> contextProvider = new();
+        validator = new RefreshUserTokenCommandValidator(contextProvider.Object, translator.Object);
     }
 
     [Theory]

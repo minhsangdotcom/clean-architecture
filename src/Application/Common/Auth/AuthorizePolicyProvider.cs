@@ -1,4 +1,4 @@
-using Application.Common.Interfaces.Services;
+using Application.Common.Interfaces.Services.Accessors;
 using Application.Common.Security;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Options;

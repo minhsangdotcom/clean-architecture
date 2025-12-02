@@ -1,12 +1,11 @@
 using System.Security.Claims;
-using Application.Common.Interfaces.Services;
+using Application.Common.Interfaces.Services.Accessors;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Http;
 
-namespace Infrastructure.Services;
+namespace Api.Services.Accessors;
 
-public class CurrentUserService(IHttpContextAccessor httpContextAccessor) : ICurrentUser
+public class CurrentUser(IHttpContextAccessor httpContextAccessor) : ICurrentUser
 {
     public Ulid? Id => GetId(ClaimTypes.NameIdentifier);
 

@@ -1,4 +1,4 @@
-using Application.Common.Interfaces.Services;
+using Application.Common.Interfaces.Services.Accessors;
 using Mediator;
 using Microsoft.Extensions.Logging;
 

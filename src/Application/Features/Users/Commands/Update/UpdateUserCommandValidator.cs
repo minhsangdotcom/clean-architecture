@@ -1,4 +1,4 @@
-using Application.Common.Interfaces.Services;
+using Application.Common.Interfaces.Services.Accessors;
 using Application.Common.Interfaces.Services.Localization;
 using Application.Common.Interfaces.UnitOfWorks;
 using Application.Common.Validators;
@@ -8,17 +8,17 @@ namespace Application.Features.Users.Commands.Update;
 
 public class UpdateUserCommandValidator(
     IEfUnitOfWork unitOfWork,
-    IHttpContextAccessorService contextAccessor,
+    IRequestContextProvider contextProvider,
     IMessageTranslatorService translator
-) : FluentValidator<UpdateUserCommand>(contextAccessor, translator)
+) : FluentValidator<UpdateUserCommand>(contextProvider, translator)
 {
     protected sealed override void ApplyRules(
-        IHttpContextAccessorService contextAccessor,
+        IRequestContextProvider contextProvider,
         IMessageTranslatorService translator
     )
     {
         RuleFor(x => x.UpdateData)
-            .SetValidator(new UserValidator(unitOfWork, contextAccessor, translator));
+            .SetValidator(new UserValidator(unitOfWork, contextProvider, translator));
     }
 
     protected override void ApplyRules(IMessageTranslatorService translator) { }

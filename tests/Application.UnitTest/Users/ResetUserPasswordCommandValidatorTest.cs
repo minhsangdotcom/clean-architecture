@@ -1,5 +1,5 @@
 using Application.Common.ErrorCodes;
-using Application.Common.Interfaces.Services;
+using Application.Common.Interfaces.Services.Accessors;
 using Application.Common.Interfaces.Services.Localization;
 using Application.Contracts.ApiWrapper;
 using Application.Features.Users.Commands.ResetPassword;
@@ -11,7 +11,7 @@ namespace Application.UnitTest.Users;
 public class ResetUserPasswordCommandValidatorTest
 {
     private readonly Mock<IMessageTranslatorService> translator = new();
-    private readonly Mock<IHttpContextAccessorService> httpContext = new();
+    private readonly Mock<IRequestContextProvider> contextProvider = new();
     private readonly ResetUserPasswordCommand command =
         new()
         {
@@ -24,7 +24,7 @@ public class ResetUserPasswordCommandValidatorTest
 
     public ResetUserPasswordCommandValidatorTest()
     {
-        validator = new ResetUserPasswordCommandValidator(httpContext.Object, translator.Object);
+        validator = new ResetUserPasswordCommandValidator(contextProvider.Object, translator.Object);
     }
 
     // ----------------------------

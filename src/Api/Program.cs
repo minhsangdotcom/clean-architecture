@@ -5,8 +5,10 @@ using Api.common.Routers;
 using Api.Converters;
 using Api.Extensions;
 using Api.Middlewares;
+using Api.Services.Accessors;
 using Api.Settings;
 using Application;
+using Application.Common.Interfaces.Services.Accessors;
 using Cysharp.Serialization.Json;
 using HealthChecks.UI.Client;
 using Infrastructure;
@@ -43,6 +45,10 @@ builder.AddSerilog();
 services.AddHealthChecks();
 services.AddDatabaseHealthCheck(configuration);
 services.AddLocalizationConfigurations(configuration);
+services.AddHttpContextAccessor();
+
+// I set it Singleton because it's called inside many singleton service, but if u want, set it for Scoped for the standard.
+services.AddSingleton<ICurrentUser, CurrentUser>();
 
 List<CorsProfileSettings> corsProfiles =
     configuration.GetSection(nameof(CorsProfileSettings)).Get<List<CorsProfileSettings>>()

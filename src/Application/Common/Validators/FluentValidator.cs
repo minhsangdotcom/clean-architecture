@@ -1,4 +1,4 @@
-using Application.Common.Interfaces.Services;
+using Application.Common.Interfaces.Services.Accessors;
 using Application.Common.Interfaces.Services.Localization;
 using FluentValidation;
 
@@ -7,16 +7,16 @@ namespace Application.Common.Validators;
 public abstract class FluentValidator<T> : AbstractValidator<T>
 {
     public FluentValidator(
-        IHttpContextAccessorService contextAccessor,
+        IRequestContextProvider contextProvider,
         IMessageTranslatorService translator
     )
     {
-        ApplyRules(contextAccessor, translator);
+        ApplyRules(contextProvider, translator);
         ApplyRules(translator);
     }
 
     protected abstract void ApplyRules(
-        IHttpContextAccessorService contextAccessor,
+        IRequestContextProvider contextProvider,
         IMessageTranslatorService translator
     );
 

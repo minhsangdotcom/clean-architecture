@@ -1,5 +1,5 @@
 using Application.Common.ErrorCodes;
-using Application.Common.Interfaces.Services;
+using Application.Common.Interfaces.Services.Accessors;
 using Application.Common.Interfaces.Services.Localization;
 using Application.Common.Interfaces.UnitOfWorks;
 using Application.Common.Validators;
@@ -10,9 +10,9 @@ namespace Application.Features.Users.Commands.Profiles;
 public class UpdateUserProfileCommandValidator(
     IEfUnitOfWork unitOfWork,
     ICurrentUser currentUser,
-    IHttpContextAccessorService contextAccessorService,
+    IRequestContextProvider contextProvider,
     IMessageTranslatorService translator
-) : FluentValidator<UpdateUserProfileCommand>(contextAccessorService, translator)
+) : FluentValidator<UpdateUserProfileCommand>(contextProvider, translator)
 {
     protected sealed override void ApplyRules(IMessageTranslatorService translator)
     {
@@ -50,7 +50,7 @@ public class UpdateUserProfileCommandValidator(
     }
 
     protected sealed override void ApplyRules(
-        IHttpContextAccessorService contextAccessor,
+        IRequestContextProvider contextProvider,
         IMessageTranslatorService translator
     ) { }
 }

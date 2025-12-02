@@ -1,10 +1,8 @@
 using Application.Common.Interfaces.DbContexts;
-using Application.Common.Interfaces.Services;
 using Application.Common.Interfaces.UnitOfWorks;
 using Infrastructure.Data;
 using Infrastructure.Data.Interceptors;
 using Infrastructure.Data.Settings;
-using Infrastructure.Services;
 using Infrastructure.Services.Aws;
 using Infrastructure.Services.Cache.DistributedCache;
 using Infrastructure.Services.Cache.MemoryCache;
@@ -68,9 +66,6 @@ public static class DependencyInjection
 
         services
             .AddAmazonS3(configuration)
-            .AddHttpContextAccessor()
-            .AddSingleton<ICurrentUser, CurrentUserService>()
-            .AddScoped<IHttpContextAccessorService, HttpContextAccessorService>()
             .AddJwt(configuration)
             .AddElasticSearch(configuration)
             .AddIdentity(configuration)

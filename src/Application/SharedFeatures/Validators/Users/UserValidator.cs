@@ -1,5 +1,5 @@
 using Application.Common.ErrorCodes;
-using Application.Common.Interfaces.Services;
+using Application.Common.Interfaces.Services.Accessors;
 using Application.Common.Interfaces.Services.Localization;
 using Application.Common.Interfaces.UnitOfWorks;
 using Application.Common.Validators;
@@ -12,16 +12,16 @@ namespace Application.SharedFeatures.Validators.Users;
 
 public class UserValidator(
     IEfUnitOfWork unitOfWork,
-    IHttpContextAccessorService httpContextAccessorService,
+    IRequestContextProvider contextProvider,
     IMessageTranslatorService translator
-) : FluentValidator<UserUpsertCommand>(httpContextAccessorService, translator)
+) : FluentValidator<UserUpsertCommand>(contextProvider, translator)
 {
     protected sealed override void ApplyRules(
-        IHttpContextAccessorService contextAccessor,
+        IRequestContextProvider contextProvider,
         IMessageTranslatorService translator
     )
     {
-        _ = Ulid.TryParse(contextAccessor.GetId(), out Ulid id);
+        _ = Ulid.TryParse(contextProvider.GetId(), out Ulid id);
 
         RuleFor(x => x.LastName)
             .NotEmpty()
@@ -49,14 +49,14 @@ public class UserValidator(
             // POST
             .BeUniqueUserEmail(unitOfWork)
             .When(
-                _ => contextAccessor.GetHttpMethod() == HttpMethod.Post.ToString(),
+                _ => contextProvider.GetHttpMethod() == HttpMethod.Post.ToString(),
                 ApplyConditionTo.CurrentValidator
             )
             .WithTranslatedError(translator, UserErrorMessages.UserEmailExistent)
             // PUT
             .BeUniqueUserEmail(unitOfWork, id)
             .When(
-                _ => contextAccessor.GetHttpMethod() == HttpMethod.Put.ToString(),
+                _ => contextProvider.GetHttpMethod() == HttpMethod.Put.ToString(),
                 ApplyConditionTo.CurrentValidator
             )
             .WithTranslatedError(translator, UserErrorMessages.UserEmailExistent);

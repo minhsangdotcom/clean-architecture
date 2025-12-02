@@ -1,4 +1,4 @@
-using Application.Common.Interfaces.Services;
+using Application.Common.Interfaces.Services.Accessors;
 using Application.Common.Interfaces.Services.Identity;
 using Domain.Aggregates.Users;
 using Domain.Aggregates.Users.Enums;

@@ -1,28 +1,27 @@
 using Application.Common.ErrorCodes;
-using Application.Common.Interfaces.Services;
+using Application.Common.Interfaces.Services.Accessors;
 using Application.Common.Interfaces.Services.Localization;
 using Application.Common.Interfaces.UnitOfWorks;
 using Application.Common.Validators;
 using Application.SharedFeatures.Requests.Roles;
 using Domain.Aggregates.Permissions;
 using Domain.Aggregates.Roles;
-using DotNetCoreExtension.Extensions;
 using FluentValidation;
 
 namespace Application.SharedFeatures.Validators.Roles;
 
 public class RoleValidator(
     IEfUnitOfWork unitOfWork,
-    IHttpContextAccessorService httpContextAccessor,
+    IRequestContextProvider contextProvider,
     IMessageTranslatorService translator
-) : FluentValidator<RoleUpsertCommand>(httpContextAccessor, translator)
+) : FluentValidator<RoleUpsertCommand>(contextProvider, translator)
 {
     protected sealed override void ApplyRules(
-        IHttpContextAccessorService httpContextAccessor,
+        IRequestContextProvider contextProvider,
         IMessageTranslatorService translator
     )
     {
-        _ = Ulid.TryParse(httpContextAccessor.GetId(), out Ulid id);
+        _ = Ulid.TryParse(contextProvider.GetId(), out Ulid id);
 
         RuleFor(x => x.Name)
             .NotEmpty()
@@ -32,14 +31,14 @@ public class RoleValidator(
             // Create
             .MustAsync((name, ct) => IsNameAvailableAsync(name, cancellationToken: ct))
             .When(
-                _ => httpContextAccessor.GetHttpMethod() == HttpMethod.Post.ToString(),
+                _ => contextProvider.GetHttpMethod() == HttpMethod.Post.ToString(),
                 ApplyConditionTo.CurrentValidator
             )
             .WithTranslatedError(translator, RoleErrorMessages.RoleNameExistent)
             // Update
             .MustAsync((name, ct) => IsNameAvailableAsync(name, id, ct))
             .When(
-                _ => httpContextAccessor.GetHttpMethod() == HttpMethod.Put.ToString(),
+                _ => contextProvider.GetHttpMethod() == HttpMethod.Put.ToString(),
                 ApplyConditionTo.CurrentValidator
             )
             .WithTranslatedError(translator, RoleErrorMessages.RoleNameExistent);

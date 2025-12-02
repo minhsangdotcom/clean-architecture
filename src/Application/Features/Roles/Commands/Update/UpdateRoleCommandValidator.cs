@@ -1,4 +1,4 @@
-using Application.Common.Interfaces.Services;
+using Application.Common.Interfaces.Services.Accessors;
 using Application.Common.Interfaces.Services.Localization;
 using Application.Common.Interfaces.UnitOfWorks;
 using Application.Common.Validators;
@@ -8,17 +8,17 @@ namespace Application.Features.Roles.Commands.Update;
 
 public class UpdateRoleCommandValidator(
     IEfUnitOfWork unitOfWork,
-    IHttpContextAccessorService contextAccessor,
+    IRequestContextProvider contextProvider,
     IMessageTranslatorService translator
-) : FluentValidator<UpdateRoleCommand>(contextAccessor, translator)
+) : FluentValidator<UpdateRoleCommand>(contextProvider, translator)
 {
     protected sealed override void ApplyRules(
-        IHttpContextAccessorService contextAccessor,
+        IRequestContextProvider contextProvider,
         IMessageTranslatorService translator
     )
     {
         RuleFor(x => x.UpdateData)
-            .SetValidator(new RoleValidator(unitOfWork, contextAccessor, translator));
+            .SetValidator(new RoleValidator(unitOfWork, contextProvider, translator));
     }
 
     protected override void ApplyRules(IMessageTranslatorService translator) { }

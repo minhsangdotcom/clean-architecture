@@ -1,5 +1,5 @@
 using Application.Common.ErrorCodes;
-using Application.Common.Interfaces.Services;
+using Application.Common.Interfaces.Services.Accessors;
 using Application.Common.Interfaces.Services.Localization;
 using Application.Common.Validators;
 using FluentValidation;
@@ -7,9 +7,9 @@ using FluentValidation;
 namespace Application.Features.Users.Commands.ChangePassword;
 
 public class ChangeUserPasswordCommandValidator(
-    IHttpContextAccessorService accessorService,
+    IRequestContextProvider contextProvider,
     IMessageTranslatorService translator
-) : FluentValidator<ChangeUserPasswordCommand>(accessorService, translator)
+) : FluentValidator<ChangeUserPasswordCommand>(contextProvider, translator)
 {
     protected sealed override void ApplyRules(IMessageTranslatorService translator)
     {
@@ -25,7 +25,7 @@ public class ChangeUserPasswordCommandValidator(
     }
 
     protected sealed override void ApplyRules(
-        IHttpContextAccessorService contextAccessor,
+        IRequestContextProvider contextProvider,
         IMessageTranslatorService translator
     ) { }
 }

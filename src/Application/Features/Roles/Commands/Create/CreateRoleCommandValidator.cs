@@ -1,4 +1,4 @@
-using Application.Common.Interfaces.Services;
+using Application.Common.Interfaces.Services.Accessors;
 using Application.Common.Interfaces.Services.Localization;
 using Application.Common.Interfaces.UnitOfWorks;
 using Application.Common.Validators;
@@ -8,16 +8,16 @@ namespace Application.Features.Roles.Commands.Create;
 
 public class CreateRoleCommandValidator(
     IEfUnitOfWork unitOfWork,
-    IHttpContextAccessorService httpContextAccessorService,
+    IRequestContextProvider contextProvider,
     IMessageTranslatorService translator
-) : FluentValidator<CreateRoleCommand>(httpContextAccessorService, translator)
+) : FluentValidator<CreateRoleCommand>(contextProvider, translator)
 {
     protected sealed override void ApplyRules(
-        IHttpContextAccessorService contextAccessor,
+        IRequestContextProvider contextProvider,
         IMessageTranslatorService translator
     )
     {
-        Include(new RoleValidator(unitOfWork, contextAccessor, translator));
+        Include(new RoleValidator(unitOfWork, contextProvider, translator));
     }
 
     protected override void ApplyRules(IMessageTranslatorService translator) { }

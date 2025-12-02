@@ -1,5 +1,5 @@
 using System.Data.Common;
-using Application.Common.Interfaces.Services;
+using Application.Common.Interfaces.Services.Accessors;
 using Application.Contracts.Permissions;
 using Infrastructure.Data;
 using Microsoft.AspNetCore.Hosting;

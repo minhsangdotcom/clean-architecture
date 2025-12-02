@@ -1,7 +1,7 @@
 using System.Linq.Expressions;
 using Application.Common.ErrorCodes;
 using Application.Common.Interfaces.Repositories.EfCore;
-using Application.Common.Interfaces.Services;
+using Application.Common.Interfaces.Services.Accessors;
 using Application.Common.Interfaces.Services.Localization;
 using Application.Common.Interfaces.UnitOfWorks;
 using Application.Contracts.ApiWrapper;
@@ -36,8 +36,8 @@ public partial class CreateUserCommandValidatorTest
         unitOfWork.Setup(x => x.Repository<User>()).Returns(userRepo.Object);
         unitOfWork.Setup(x => x.Repository<Permission>()).Returns(permissionRepo.Object);
 
-        Mock<IHttpContextAccessorService> httpContext = new();
-        validator = new(unitOfWork.Object, translator.Object, httpContext.Object);
+        Mock<IRequestContextProvider> contextProvider = new();
+        validator = new(unitOfWork.Object, translator.Object, contextProvider.Object);
         inlineValidator = [];
 
         command = Default;

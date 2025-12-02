@@ -1,6 +1,6 @@
 using Application.Common.ErrorCodes;
 using Application.Common.Interfaces.Repositories.EfCore;
-using Application.Common.Interfaces.Services;
+using Application.Common.Interfaces.Services.Accessors;
 using Application.Common.Interfaces.Services.Localization;
 using Application.Common.Interfaces.UnitOfWorks;
 using Application.Contracts.ApiWrapper;
@@ -28,13 +28,13 @@ public class UpdateUserProfileCommandValidatorTest
         Mock<IEfUnitOfWork> unitOfWork = new();
         unitOfWork.Setup(x => x.Repository<User>()).Returns(userRepo.Object);
 
-        Mock<IHttpContextAccessorService> httpContext = new();
-        Mock<ICurrentUser> currentUserService = new();
-        currentUserService.Setup(x => x.Id).Returns(Ulid.NewUlid());
+        Mock<IRequestContextProvider> contextProvider = new();
+        Mock<ICurrentUser> currentUser = new();
+        currentUser.Setup(x => x.Id).Returns(Ulid.NewUlid());
         validator = new(
             unitOfWork.Object,
-            currentUserService.Object,
-            httpContext.Object,
+            currentUser.Object,
+            contextProvider.Object,
             translator.Object
         );
         command = Default;

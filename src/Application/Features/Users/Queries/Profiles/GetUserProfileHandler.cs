@@ -1,6 +1,6 @@
 using Application.Common.ErrorCodes;
 using Application.Common.Errors;
-using Application.Common.Interfaces.Services;
+using Application.Common.Interfaces.Services.Accessors;
 using Application.Common.Interfaces.Services.Identity;
 using Application.Common.Interfaces.Services.Localization;
 using Application.Contracts.ApiWrapper;

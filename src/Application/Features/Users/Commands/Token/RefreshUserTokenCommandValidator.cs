@@ -1,5 +1,5 @@
 using Application.Common.ErrorCodes;
-using Application.Common.Interfaces.Services;
+using Application.Common.Interfaces.Services.Accessors;
 using Application.Common.Interfaces.Services.Localization;
 using Application.Common.Validators;
 using FluentValidation;
@@ -7,9 +7,9 @@ using FluentValidation;
 namespace Application.Features.Users.Commands.Token;
 
 public class RefreshUserTokenCommandValidator(
-    IHttpContextAccessorService contextAccessor,
+    IRequestContextProvider contextProvider,
     IMessageTranslatorService messageTranslator
-) : FluentValidator<RefreshUserTokenCommand>(contextAccessor, messageTranslator)
+) : FluentValidator<RefreshUserTokenCommand>(contextProvider, messageTranslator)
 {
     protected sealed override void ApplyRules(IMessageTranslatorService translator)
     {
@@ -19,7 +19,7 @@ public class RefreshUserTokenCommandValidator(
     }
 
     protected override void ApplyRules(
-        IHttpContextAccessorService contextAccessor,
+        IRequestContextProvider contextProvider,
         IMessageTranslatorService translator
     ) { }
 }

@@ -1,6 +1,6 @@
 using Application.Common.ErrorCodes;
 using Application.Common.Interfaces.Repositories.EfCore;
-using Application.Common.Interfaces.Services;
+using Application.Common.Interfaces.Services.Accessors;
 using Application.Common.Interfaces.Services.Localization;
 using Application.Common.Interfaces.UnitOfWorks;
 using Application.Contracts.ApiWrapper;
@@ -22,12 +22,12 @@ public sealed class UpdateRoleCommandValidatorTest
 
     private readonly Mock<IEfUnitOfWork> unitOfWork = new();
 
-    private readonly Mock<IHttpContextAccessorService> mockHttpContextAccessorService = new();
+    private readonly Mock<IRequestContextProvider> contextProvider = new();
     private readonly Mock<IMessageTranslatorService> translator = new();
 
     public UpdateRoleCommandValidatorTest()
     {
-        mockHttpContextAccessorService
+        contextProvider
             .Setup(x => x.GetHttpMethod())
             .Returns(HttpMethod.Put.ToString());
 
@@ -39,7 +39,7 @@ public sealed class UpdateRoleCommandValidatorTest
 
         validator = new(
             unitOfWork.Object,
-            mockHttpContextAccessorService.Object,
+            contextProvider.Object,
             translator.Object
         );
         inlineValidator = [];

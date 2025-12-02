@@ -1,5 +1,5 @@
 using Application.Common.ErrorCodes;
-using Application.Common.Interfaces.Services;
+using Application.Common.Interfaces.Services.Accessors;
 using Application.Common.Interfaces.Services.Localization;
 using Application.Contracts.ApiWrapper;
 using Application.Features.Users.Commands.RequestPasswordReset;
@@ -17,8 +17,8 @@ public class RequestUserPasswordResetCommandValidatorTest
 
     public RequestUserPasswordResetCommandValidatorTest()
     {
-        Mock<IHttpContextAccessorService> context = new();
-        validator = new RequestUserPasswordResetCommandValidator(context.Object, translator.Object);
+        Mock<IRequestContextProvider> contextProvider = new();
+        validator = new RequestUserPasswordResetCommandValidator(contextProvider.Object, translator.Object);
     }
 
     [Theory]

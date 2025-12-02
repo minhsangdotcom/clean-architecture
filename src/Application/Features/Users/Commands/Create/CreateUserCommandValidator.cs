@@ -1,5 +1,5 @@
 using Application.Common.ErrorCodes;
-using Application.Common.Interfaces.Services;
+using Application.Common.Interfaces.Services.Accessors;
 using Application.Common.Interfaces.Services.Localization;
 using Application.Common.Interfaces.UnitOfWorks;
 using Application.Common.Validators;
@@ -12,15 +12,15 @@ namespace Application.Features.Users.Commands.Create;
 public class CreateUserCommandValidator(
     IEfUnitOfWork unitOfWork,
     IMessageTranslatorService translator,
-    IHttpContextAccessorService contextAccessor
-) : FluentValidator<CreateUserCommand>(contextAccessor, translator)
+    IRequestContextProvider contextProvider
+) : FluentValidator<CreateUserCommand>(contextProvider, translator)
 {
     protected sealed override void ApplyRules(
-        IHttpContextAccessorService contextAccessor,
+        IRequestContextProvider contextProvider,
         IMessageTranslatorService translator
     )
     {
-        Include(new UserValidator(unitOfWork, contextAccessor, translator));
+        Include(new UserValidator(unitOfWork, contextProvider, translator));
 
         RuleFor(x => x.Username)
             .NotEmpty()
