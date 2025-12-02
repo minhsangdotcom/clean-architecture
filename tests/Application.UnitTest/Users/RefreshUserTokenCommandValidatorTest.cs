@@ -13,7 +13,8 @@ public class RefreshUserTokenCommandValidatorTest
     private readonly Mock<IMessageTranslatorService> translator = new();
     private readonly RefreshUserTokenCommandValidator validator;
 
-    private readonly RefreshUserTokenCommand command = new() { RefreshToken = "valid_refresh_token_123" };
+    private readonly RefreshUserTokenCommand command =
+        new() { RefreshToken = "valid_refresh_token_123" };
 
     public RefreshUserTokenCommandValidatorTest()
     {

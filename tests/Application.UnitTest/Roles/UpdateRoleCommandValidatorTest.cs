@@ -27,9 +27,7 @@ public sealed class UpdateRoleCommandValidatorTest
 
     public UpdateRoleCommandValidatorTest()
     {
-        contextProvider
-            .Setup(x => x.GetHttpMethod())
-            .Returns(HttpMethod.Put.ToString());
+        contextProvider.Setup(x => x.GetHttpMethod()).Returns(HttpMethod.Put.ToString());
 
         Mock<IAsyncRepository<Role>> roleRepo = new();
         Mock<IAsyncRepository<Permission>> permissionRepo = new();
@@ -37,11 +35,7 @@ public sealed class UpdateRoleCommandValidatorTest
         unitOfWork.Setup(x => x.Repository<Role>()).Returns(roleRepo.Object);
         unitOfWork.Setup(x => x.Repository<Permission>()).Returns(permissionRepo.Object);
 
-        validator = new(
-            unitOfWork.Object,
-            contextProvider.Object,
-            translator.Object
-        );
+        validator = new(unitOfWork.Object, contextProvider.Object, translator.Object);
         inlineValidator = [];
         ResetCommand();
     }

@@ -18,7 +18,10 @@ public class RequestUserPasswordResetCommandValidatorTest
     public RequestUserPasswordResetCommandValidatorTest()
     {
         Mock<IRequestContextProvider> contextProvider = new();
-        validator = new RequestUserPasswordResetCommandValidator(contextProvider.Object, translator.Object);
+        validator = new RequestUserPasswordResetCommandValidator(
+            contextProvider.Object,
+            translator.Object
+        );
     }
 
     [Theory]

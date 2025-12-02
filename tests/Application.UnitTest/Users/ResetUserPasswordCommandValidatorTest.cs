@@ -24,7 +24,10 @@ public class ResetUserPasswordCommandValidatorTest
 
     public ResetUserPasswordCommandValidatorTest()
     {
-        validator = new ResetUserPasswordCommandValidator(contextProvider.Object, translator.Object);
+        validator = new ResetUserPasswordCommandValidator(
+            contextProvider.Object,
+            translator.Object
+        );
     }
 
     // ----------------------------
