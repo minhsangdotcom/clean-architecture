@@ -47,10 +47,9 @@ services.AddLocalizationConfigurations(configuration);
 List<CorsProfileSettings> corsProfiles =
     configuration.GetSection(nameof(CorsProfileSettings)).Get<List<CorsProfileSettings>>()
     ?? [new CorsProfileSettings()];
+
 services.AddCors(options =>
-{
-    foreach (CorsProfileSettings profile in corsProfiles)
-    {
+    corsProfiles.ForEach(profile =>
         options.AddPolicy(
             profile.Name!,
             policy =>
@@ -61,14 +60,14 @@ services.AddCors(options =>
                     .AllowAnyHeader()
                     .AllowCredentials();
             }
-        );
-    }
-});
+        )
+    )
+);
 #endregion
 
 #region layers dependencies
 services.AddInfrastructureDependencies(configuration);
-services.AddApplicationDependencies();
+services.AddApplicationDependencies(configuration);
 #endregion
 
 try
@@ -110,21 +109,18 @@ try
         });
         app.AddLog(Log.Logger, routeRefix, healthCheckPath);
     }
-
-    foreach (var profile in corsProfiles)
+    string defaultCulture =
+        configuration.GetSection("LocalizationSettings:DefaultCulture").Get<string>() ?? "vi";
+    var requestLocalizationOptions = new RequestLocalizationOptions
     {
-        app.UseCors(profile.Name!);
-    }
+        DefaultRequestCulture = new RequestCulture(new CultureInfo(defaultCulture)),
+    };
 
+    corsProfiles.ForEach(profile => app.UseCors(profile.Name));
     app.UseExceptionHandler();
     app.UseStatusCodePages();
     app.UseStaticFiles();
-    app.UseRequestLocalization(
-        new RequestLocalizationOptions
-        {
-            DefaultRequestCulture = new RequestCulture(new CultureInfo("en-US")),
-        }
-    );
+    app.UseRequestLocalization(requestLocalizationOptions);
     app.UseDetection();
     app.UseAuthentication();
     app.UseAuthorization();

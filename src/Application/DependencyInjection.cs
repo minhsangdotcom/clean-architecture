@@ -2,16 +2,21 @@ using System.Reflection;
 using Application.Common.Auth;
 using Application.Common.Behaviors;
 using Application.Contracts.Permissions;
+using Application.Features.Users.Commands.RequestPasswordReset;
 using FluentValidation;
 using Mediator;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Application;
 
 public static class DependencyInjection
 {
-    public static IServiceCollection AddApplicationDependencies(this IServiceCollection services)
+    public static IServiceCollection AddApplicationDependencies(
+        this IServiceCollection services,
+        IConfiguration configuration
+    )
     {
         Assembly currentAssembly = Assembly.GetExecutingAssembly();
 
@@ -31,6 +36,9 @@ public static class DependencyInjection
                 PermissionDefinitionContext context = new();
                 new SystemPermissionDefinitionProvider().Define(context);
                 return context;
-            });
+            })
+            .AddOptions<ForgotPasswordSettings>()
+            .Bind(configuration.GetSection(nameof(ForgotPasswordSettings)))
+            .Services;
     }
 }

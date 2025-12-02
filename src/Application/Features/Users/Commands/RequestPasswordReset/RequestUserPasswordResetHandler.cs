@@ -1,25 +1,30 @@
 using Application.Common.ErrorCodes;
 using Application.Common.Errors;
 using Application.Common.Interfaces.Services.Localization;
+using Application.Common.Interfaces.Services.Mail;
 using Application.Common.Interfaces.UnitOfWorks;
 using Application.Contracts.ApiWrapper;
 using Application.Contracts.Constants;
+using Application.Contracts.Dtos.Models;
+using Application.Contracts.Dtos.Requests;
 using Domain.Aggregates.Users;
 using Domain.Aggregates.Users.Enums;
 using Domain.Aggregates.Users.Specifications;
 using DotNetCoreExtension.Extensions;
 using Mediator;
-using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
 
 namespace Application.Features.Users.Commands.RequestPasswordReset;
 
 public class RequestUserPasswordResetHandler(
     IEfUnitOfWork unitOfWork,
-    IPublisher publisher,
-    IConfiguration configuration,
+    IMailService mailService,
+    IOptions<ForgotPasswordSettings> options,
     IMessageTranslatorService translator
 ) : IRequestHandler<RequestUserPasswordResetCommand, Result<string>>
 {
+    private readonly ForgotPasswordSettings forgotPasswordSettings = options.Value;
+
     public async ValueTask<Result<string>> Handle(
         RequestUserPasswordResetCommand command,
         CancellationToken cancellationToken
@@ -60,30 +65,45 @@ public class RequestUserPasswordResetHandler(
 
         string token = StringExtension.GenerateRandomString(40);
         DateTimeOffset expiredTime = DateTimeOffset.UtcNow.AddHours(
-            configuration.GetValue<double>("ForgotPasswordExpiredTimeInHour")
+            forgotPasswordSettings.ExpiredTimeInHour
         );
+
+        UserPasswordReset userPasswordReset =
+            new()
+            {
+                Token = token,
+                UserId = user.Id,
+                Expiry = expiredTime,
+            };
 
         await unitOfWork
             .Repository<UserPasswordReset>()
             .DeleteRangeAsync(user.PasswordResetRequests);
         await unitOfWork
             .Repository<UserPasswordReset>()
-            .AddAsync(
-                new()
-                {
-                    Token = token,
-                    UserId = user.Id,
-                    Expiry = expiredTime,
-                },
-                cancellationToken
-            );
+            .AddAsync(userPasswordReset, cancellationToken);
         await unitOfWork.SaveAsync(cancellationToken);
 
-        string forgotPasswordUrl = configuration.GetValue<string>("ForgotPasswordUrl")!;
-        RequestUserPasswordResetNotification notification =
-            new(user.Email, token, expiredTime, forgotPasswordUrl);
+        UriBuilder linkBuilder =
+            new(forgotPasswordSettings.Uri)
+            {
+                Query = $"token={Uri.EscapeDataString(userPasswordReset.Token)}&email={user.Email}",
+            };
 
-        await publisher.Publish(notification, cancellationToken);
+        string expiry = userPasswordReset.Expiry.ToLocalTime().ToString("dd/MM/yyyy hh:mm:ss");
+        MailTemplateData mail =
+            new()
+            {
+                DisplayName = "The Template password Reset",
+                Subject = "Reset password",
+                To = [user.Email],
+                Template = new(
+                    "ForgotPassword",
+                    new ResetPasswordModel() { ResetLink = linkBuilder.ToString(), Expiry = expiry }
+                ),
+            };
+
+        await mailService.SendWithTemplateAsync(mail);
         return Result<string>.Success();
     }
 }
