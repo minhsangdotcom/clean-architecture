@@ -46,6 +46,7 @@ services.AddHealthChecks();
 services.AddDatabaseHealthCheck(configuration);
 services.AddLocalizationConfigurations(configuration);
 services.AddHttpContextAccessor();
+services.AddScoped<IRequestContextProvider, RequestContextProvider>();
 
 // I set it Singleton because it's called inside many singleton service, but if u want, set it for Scoped for the standard.
 services.AddSingleton<ICurrentUser, CurrentUser>();

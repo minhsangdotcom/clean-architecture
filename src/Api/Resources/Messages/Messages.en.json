@@ -54,5 +54,7 @@
   "user_new-password_required": "New password is required.",
   "user_new-password_weak": "New password is too weak.",
   "user-password-reset_token_not_required": "Reset password token is required.",
-  "user-password-reset_token_expired": "Reset password token has expired."
+  "user-password-reset_token_expired": "Reset password token has expired.",
+  "user-refresh-token_not_existent": "Refresh token doesn't exist",
+  "user-refresh-token_token_required": "Refresh token is required"
 }

@@ -354,7 +354,6 @@ public class UserErrorMessages
         Messenger
             .Create<UserRefreshToken>()
             .Property(x => x.Token)
-            .WithError(MessageErrorType.Existent)
-            .Negative()
+            .WithError(MessageErrorType.Required)
             .GetFullMessage();
 }

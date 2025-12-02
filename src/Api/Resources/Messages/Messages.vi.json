@@ -54,5 +54,7 @@
   "user_new-password_required": "Mật khẩu mới không được bỏ trống.",
   "user_new-password_weak": "Mật khẩu mới không bảo mật.",
   "user-password-reset_token_not_required": "Token đặt lại mật khẩu không được bỏ trống.",
-  "user-password-reset_token_expired": "Token đặt lại mật khẩu đã hết hạn."
+  "user-password-reset_token_expired": "Token đặt lại mật khẩu đã hết hạn.",
+  "user-refresh-token_not_existent": "Refresh token không tồn tại",
+  "user-refresh-token_token_required": "Refresh token không được bỏ trống"
 }
