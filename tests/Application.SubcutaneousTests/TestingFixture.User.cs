@@ -59,6 +59,85 @@ public partial class TestingFixture
         return new(province.Id, district.Id, commune.Id);
     }
 
+    public async Task<List<User>> SeedingUsersAsync(int count, string? overrideFirstName = null)
+    {
+        using var scope = factory!.Services.CreateScope();
+        IEfDbContext dbContext = scope.ServiceProvider.GetRequiredService<IEfDbContext>();
+
+        List<User> users = [];
+        for (int i = 0; i < count; i++)
+        {
+            var (first, last) = GetRandomName();
+            string firstName = !string.IsNullOrWhiteSpace(overrideFirstName)
+                ? overrideFirstName
+                : first;
+            User user =
+                new(
+                    firstName: firstName,
+                    lastName: last,
+                    username: $"{firstName.ToLower()}.{last.ToLower()}{i}",
+                    password: Credential.USER_DEFAULT_PASSWORD,
+                    email: $"{firstName.ToLower()}.{last.ToLower()}{i}@gmail.com",
+                    phoneNumber: $"41572890{i:D3}",
+                    dateOfBirth: new DateTime(2005, 10, 1),
+                    gender: Gender.Male
+                );
+
+            users.Add(user);
+        }
+
+        await dbContext.Set<User>().AddRangeAsync(users);
+        await dbContext.SaveChangesAsync();
+        return users;
+    }
+
+    private static readonly Random _rand = new();
+
+    public static (string FirstName, string LastName) GetRandomName()
+    {
+        string[] FirstNames =
+        [
+            "Zayden",
+            "Liam",
+            "Noah",
+            "Oliver",
+            "Elijah",
+            "James",
+            "Aiden",
+            "Lucas",
+            "Mason",
+            "Ethan",
+            "Jacob",
+            "Logan",
+            "Michael",
+            "Daniel",
+            "Henry",
+        ];
+
+        string[] LastNames =
+        [
+            "Cruz",
+            "Smith",
+            "Johnson",
+            "Williams",
+            "Brown",
+            "Jones",
+            "Garcia",
+            "Miller",
+            "Davis",
+            "Rodriguez",
+            "Martinez",
+            "Hernandez",
+            "Lopez",
+            "Gonzalez",
+            "Wilson",
+        ];
+        string first = FirstNames[_rand.Next(FirstNames.Length)];
+        string last = LastNames[_rand.Next(LastNames.Length)];
+
+        return (first, last);
+    }
+
     public async Task<User> CreateAdminUserAsync(
         IFormFile? avatar = null,
         List<Ulid>? roleIds = null,

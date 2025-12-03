@@ -1,5 +1,7 @@
 using Application.SubcutaneousTests.Extensions;
 using Mediator;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Application.SubcutaneousTests;
@@ -62,6 +64,23 @@ public partial class TestingFixture : IAsyncLifetime
     {
         factory.ThrowIfNull();
         client = factory!.CreateClient();
+    }
+
+    public HttpContext SetHttpContextQuery(string rawQuery)
+    {
+        factory.ThrowIfNull();
+        var context = new DefaultHttpContext();
+
+        var parsed = QueryHelpers.ParseQuery(rawQuery);
+        context.Request.Query = new QueryCollection(parsed);
+
+        factory.ThrowIfNull();
+        using var scope = factory!.Services.CreateScope();
+        var accessor = scope.ServiceProvider.GetRequiredService<IHttpContextAccessor>();
+        context.RequestServices = scope.ServiceProvider;
+        accessor.HttpContext = context;
+
+        return context;
     }
 
     public static Ulid GetUserId() => UserId;
