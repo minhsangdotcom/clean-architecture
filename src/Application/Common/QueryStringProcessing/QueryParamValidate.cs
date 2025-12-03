@@ -253,22 +253,19 @@ public static partial class QueryParamValidate
         {
             QueryResult query = queries[i];
 
-            // if it's $and,$or,$in and $between then they must have an index after like $or[0], $in[1]
+            // Array operator $in, $between and Logical operator $and, $or must have index right after them
+            // ex: [status][$in][0],[status][$between][0],[$and][0],[$or][0]
+            // or [status][$in][1],[status][$between][1],[$and][1],[$or][1]
             if (!ValidateArrayOperator(query.CleanKey))
             {
                 return new(Error: QueryParamRequestErrorMessages.QueryParamFilterArrayIndexMissing);
             }
 
-            /// check if the index of array operator has to start with 0 like $and[0][firstName]
+            // Array operator $in, $between and Logical operator $and, $or, their index must go with 0
+            // ex: [status][$in][0],[status][$between][0],[$and][0],[$or][0]
             if (i == 0 && !ValidateArrayOperatorInvalidIndex(query.CleanKey))
             {
                 return new(Error: QueryParamRequestErrorMessages.QueryParamFilterArrayIndexInvalid);
-            }
-
-            // lack of operator
-            if (!ValidateLackOfOperator(query.CleanKey))
-            {
-                return new(Error: QueryParamRequestErrorMessages.QueryParamFilterOperatorMissing);
             }
 
             // if the last element is logical operator ($and, $or) it's wrong like filter[$and][0]
@@ -278,14 +275,29 @@ public static partial class QueryParamValidate
                 return new(Error: QueryParamRequestErrorMessages.QueryParamFilterElementMissing);
             }
 
-            List<string> properties = query.CleanKey.FindAll(x =>
-                string.Compare(x, "$or", StringComparison.OrdinalIgnoreCase) != 0
-                && string.Compare(x, "$and", StringComparison.OrdinalIgnoreCase) != 0
-                && !x.IsDigit()
-                && !validOperators.Contains(x.ToLower())
-            );
+            // lack of operator
+            // ex: [name]=john,[name][0] = join
+            if (!ValidateLackOfOperator(query.CleanKey))
+            {
+                return new(Error: QueryParamRequestErrorMessages.QueryParamFilterOperatorMissing);
+            }
 
             // lack of property
+            //ex:
+            //[$eq]
+            //[$and][0[$or][0][$eq]
+            //[$and][0][$contains]
+            //[$or][0][$contains]
+            //[$in][0]
+            List<string> properties =
+            [
+                .. query.CleanKey.Where(x =>
+                    string.Compare(x, "$or", StringComparison.OrdinalIgnoreCase) != 0
+                    && string.Compare(x, "$and", StringComparison.OrdinalIgnoreCase) != 0
+                    && !x.IsDigit()
+                    && !validOperators.Contains(x.ToLower())
+                ),
+            ];
             if (properties.Count == 0)
             {
                 return new(Error: QueryParamRequestErrorMessages.QueryParamFilterPropertyMissing);
@@ -464,7 +476,7 @@ public static partial class QueryParamValidate
             }
         }
 
-        if (input[^1] == validOperators.Last() || input[^1] == "$in")
+        if (input[^1] == "$between" || input[^1] == "$in")
         {
             return false;
         }
@@ -500,7 +512,14 @@ public static partial class QueryParamValidate
             }
         }
 
-        if (input[^1] == validOperators.Last() || input[^1] == "$in")
+        if (
+            input.Count > 2
+            && (
+                input[^2] == "$between"
+                || input[^2] == "$in"
+                    && (!long.TryParse(input[^1], out long last) || last != 0 || last != 0)
+            )
+        )
         {
             return false;
         }
@@ -510,26 +529,38 @@ public static partial class QueryParamValidate
 
     private static bool ValidateLackOfOperator(List<string> input)
     {
-        Stack<string> inputs = new(input);
+        //[name]
+        //[abc]
+        //[0]
+        //[ABC][0]
+        //[name][$eq]
+        if (input.Count == 0 || input.Count == 1)
+        {
+            return false;
+        }
+        Stack<string> stackInput = new(input);
 
-        string last = inputs.Pop();
-        string preLast = inputs.Pop();
-
-        if (arrayOperators.Contains(preLast.ToLower()))
+        string last = stackInput.Pop();
+        if (validOperators.Contains(last.ToLower()))
         {
             return true;
         }
-
-        return validOperators.Contains(last.ToLower());
+        if (last.IsDigit() && arrayOperators.Contains(stackInput.Pop().ToLower()))
+        {
+            return true;
+        }
+        return false;
     }
 
     private static bool LackOfElementInArrayOperator(List<string> input)
     {
-        Stack<string> inputs = new(input);
-        string last = inputs.Pop();
-        string preLast = inputs.Pop();
+        //[$and][0]
+        if (input[0] == "$and" || input[0] == "$or" && input.Count > 2)
+        {
+            return true;
+        }
 
-        return logicalOperators.Contains(preLast.ToLower()) && last.IsDigit();
+        return false;
     }
 
     // Array of valid operators
