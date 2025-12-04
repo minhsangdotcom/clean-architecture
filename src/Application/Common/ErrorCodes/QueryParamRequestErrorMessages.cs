@@ -10,6 +10,17 @@ public class QueryParamRequestErrorMessages
     // ---------------------------------------------------------
     // Before and After cannot both be provided
     // ---------------------------------------------------------
+    [ErrorKey(nameof(QueryParamFilterValueIsRequired))]
+    public static string QueryParamFilterValueIsRequired =>
+        Messenger
+            .Create<QueryParamRequest>("QueryParam")
+            .Property("FilterValue")
+            .WithError(MessageErrorType.Required)
+            .GetFullMessage();
+
+    // ---------------------------------------------------------
+    // Before and After cannot both be provided
+    // ---------------------------------------------------------
     [ErrorKey(nameof(QueryParamBeforeAfterRedundant))]
     public static string QueryParamBeforeAfterRedundant =>
         Messenger
@@ -53,18 +64,6 @@ public class QueryParamRequestErrorMessages
             .Property(x => x.Filter!)
             .WithError(MessageErrorType.Missing)
             .ToObject("Operator")
-            .GetFullMessage();
-
-    // ---------------------------------------------------------
-    // Missing element inside logical operator
-    // ---------------------------------------------------------
-    [ErrorKey(nameof(QueryParamFilterElementMissing))]
-    public static string QueryParamFilterElementMissing =>
-        Messenger
-            .Create<QueryParamRequest>("QueryParam")
-            .Property(x => x.Filter!)
-            .WithError(MessageErrorType.Missing)
-            .ToObject("Element")
             .GetFullMessage();
 
     // ---------------------------------------------------------
