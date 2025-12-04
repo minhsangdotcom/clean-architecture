@@ -59,6 +59,8 @@ public partial class TestingFixture
         return new(province.Id, district.Id, commune.Id);
     }
 
+    private static readonly Random _rand = new();
+
     public async Task<List<User>> SeedingUsersAsync(int count, string? overrideFirstName = null)
     {
         using var scope = factory!.Services.CreateScope();
@@ -91,7 +93,72 @@ public partial class TestingFixture
         return users;
     }
 
-    private static readonly Random _rand = new();
+    public async Task<List<User>> SeedingUserForFilterTesting()
+    {
+        using var scope = factory!.Services.CreateScope();
+        IEfDbContext dbContext = scope.ServiceProvider.GetRequiredService<IEfDbContext>();
+
+        List<User> users = [];
+
+        // 1️⃣ John Doe - should match
+        var johnDoe = new User(
+            firstName: "John",
+            lastName: "Doe",
+            username: "john.doe",
+            password: Credential.USER_DEFAULT_PASSWORD,
+            email: "john.doe@example.com",
+            phoneNumber: "0900000001",
+            dateOfBirth: new DateTime(1995, 5, 21),
+            gender: Gender.Male
+        );
+        users.Add(johnDoe);
+
+        // 2️⃣ John Smith - should match
+        var johnSmith = new User(
+            firstName: "John",
+            lastName: "Smith",
+            username: "john.smith",
+            password: Credential.USER_DEFAULT_PASSWORD,
+            email: "john.smith@company.com",
+            phoneNumber: "0900000002",
+            dateOfBirth: new DateTime(1996, 3, 10),
+            gender: Gender.Male
+        );
+        users.Add(johnSmith);
+
+        // 3️⃣ Alice Wong - inactive (should NOT match)
+        var aliceWong = new User(
+            firstName: "Alice",
+            lastName: "Wong",
+            username: "alice.wong",
+            password: Credential.USER_DEFAULT_PASSWORD,
+            email: "alice.wong@example.com",
+            phoneNumber: "0900000003",
+            dateOfBirth: new DateTime(1990, 1, 1),
+            gender: Gender.Female
+        );
+        aliceWong.Deactivate();
+        users.Add(aliceWong);
+
+        // 4️⃣ Bob Lee - active but outside DOB range (optional)
+        var bobLee = new User(
+            firstName: "Bob",
+            lastName: "Lee",
+            username: "bob.lee",
+            password: Credential.USER_DEFAULT_PASSWORD,
+            email: "bob.lee@example.com",
+            phoneNumber: "0900000004",
+            dateOfBirth: new DateTime(2005, 1, 1),
+            gender: Gender.Male
+        );
+        users.Add(bobLee);
+
+        // Save all
+        await dbContext.Set<User>().AddRangeAsync(users);
+        await dbContext.SaveChangesAsync();
+
+        return users;
+    }
 
     public static (string FirstName, string LastName) GetRandomName()
     {

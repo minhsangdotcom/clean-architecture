@@ -44,7 +44,7 @@ public class ListUserHandlerTest(TestingFixture testingFixture) : IAsyncLifetime
         }
 
         response.Paging.ShouldNotBeNull();
-        response.Paging!.PageSize.ShouldBe(10); // wrong
+        response.Paging!.PageSize.ShouldBe(10);
         response.Paging.TotalPage.ShouldBe(1);
         response.Paging.HasNextPage!.Value.ShouldBeFalse();
         response.Paging.HasPreviousPage!.Value.ShouldBeFalse();
@@ -90,10 +90,9 @@ public class ListUserHandlerTest(TestingFixture testingFixture) : IAsyncLifetime
     }
 
     [Fact]
-    public async Task ListUsers_When_Paginate_CursorPagination_Should_Return_Correct_Page()
+    public async Task ListUsers_When_Paginate_CursorPagination_GoBackAndForth_Should_Return_Correct_Page()
     {
         // Arrange
-        // Create 6 users → two pages of 3
         _ = await testingFixture.SeedingUsersAsync(6);
 
         // ===== FIRST PAGE =====
@@ -102,13 +101,13 @@ public class ListUserHandlerTest(TestingFixture testingFixture) : IAsyncLifetime
 
         var result1 = await testingFixture.SendAsync(query1);
         result1.IsSuccess.ShouldBeTrue();
+        result1.Value.ShouldNotBeNull();
 
         var paging1 = result1.Value!.Paging!;
         paging1.PageSize.ShouldBe(3);
 
-        // cursor to next page should exist
         paging1.After.ShouldNotBeNull();
-        paging1.Before.ShouldBeNull(); // first page → no previous cursor
+        paging1.Before.ShouldBeNull();
 
         var rawCursor = paging1.After!;
         var encodedCursor = Uri.EscapeDataString(rawCursor);
@@ -119,12 +118,29 @@ public class ListUserHandlerTest(TestingFixture testingFixture) : IAsyncLifetime
 
         var result2 = await testingFixture.SendAsync(query2);
         result2.IsSuccess.ShouldBeTrue();
+        result2.Value.ShouldNotBeNull();
 
         var paging2 = result2.Value!.Paging!;
         paging2.PageSize.ShouldBe(3);
 
-        paging2.Before.ShouldNotBeNull(); // there IS a previous cursor now
-        paging2.After.ShouldBeNull(); // no more pages → this is last page
+        paging2.Before.ShouldNotBeNull();
+        paging2.After.ShouldBeNull();
+
+        // ===== FIRST PAGE =====
+        var http3 = testingFixture.SetHttpContextQuery(
+            $"?pageSize=3&before={Uri.EscapeDataString(paging2.Before)}"
+        );
+        var query3 = await ListUserQuery.BindAsync(http3);
+
+        var result3 = await testingFixture.SendAsync(query3);
+
+        result3.IsSuccess.ShouldBeTrue();
+        result3.Value.ShouldNotBeNull();
+        var paging3 = result3.Value.Paging!;
+        paging3.PageSize.ShouldBe(3);
+
+        paging3.Before.ShouldBeNull();
+        paging3.After.ShouldNotBeNull();
     }
 
     [Fact]
@@ -184,7 +200,7 @@ public class ListUserHandlerTest(TestingFixture testingFixture) : IAsyncLifetime
     {
         await testingFixture.ResetAsync();
 
-        // All users same FirstName → must use Id tie-breaker
+        // All users same FirstName → must use tie-breaker
         await testingFixture.SeedingUsersAsync(10, "John");
 
         var http1 = testingFixture.SetHttpContextQuery("?pageSize=4&sort=FirstName:asc");
@@ -204,8 +220,7 @@ public class ListUserHandlerTest(TestingFixture testingFixture) : IAsyncLifetime
         r2.Value.ShouldNotBeNull();
         r2.Value.Data.ShouldNotBeNull();
 
-        // Combined must be EXACT order by ID
-        var all = r1.Value!.Data!.Concat(r2.Value!.Data!).ToList();
+        var all = r1.Value.Data!.Concat(r2.Value!.Data!).ToList();
         all.ShouldBe(all.OrderBy(x => x.Id));
     }
 
@@ -294,6 +309,70 @@ public class ListUserHandlerTest(TestingFixture testingFixture) : IAsyncLifetime
         r.Value!.Data.ShouldBeEmpty();
         r.Value!.Paging!.After.ShouldBeNull();
         r.Value!.Paging!.Before.ShouldBeNull();
+    }
+
+    [Fact]
+    public async Task ListUsers_When_PageSizeLargerThanTotalItems_ShouldNotBreak()
+    {
+        _ = await testingFixture.SeedingUsersAsync(3);
+
+        var http = testingFixture.SetHttpContextQuery("?pageSize=1000");
+        var r = await testingFixture.SendAsync(await ListUserQuery.BindAsync(http));
+        r.Value.ShouldNotBeNull();
+        r.Value.Data.ShouldNotBeNull();
+        r.Value.Data.Count().ShouldBe(3);
+        r.Value.Paging!.After.ShouldBeNull();
+        r.Value!.Paging!.Before.ShouldBeNull();
+    }
+
+    [Fact]
+    public async Task ListUsers_WithComplexFilter_Should_Return_Correct_Results()
+    {
+        // ARRANGE
+        // Seed users
+        // John Doe  → Active → inside date range
+        // John Smith → Active → inside date range
+        // Alice Wong → Inactive → should NOT match
+        // Bob Lee → Active → outside date range → should NOT match
+        await testingFixture.SeedingUserForFilterTesting();
+
+        // Build complex filter:
+        // ?filter[DateOfBirth][$gte]=1995-01-01
+        // &filter[DateOfBirth][$lte]=1997-01-01
+        // &filter[Status][$eq]=1
+        // &filter[Email][$contains]=john
+        // &sort=FirstName:asc
+        var http = testingFixture.SetHttpContextQuery(
+            "?filter[DateOfBirth][$gte]=1995-01-01"
+                + "&filter[DateOfBirth][$lte]=1997-01-01"
+                + "&filter[Status][$eq]=1"
+                + "&filter[Email][$contains]=john"
+                + "&sort=FirstName:asc, LastName:asc"
+                + "&pageSize=20"
+        );
+
+        var query = await ListUserQuery.BindAsync(http);
+
+        // ACT
+        var result = await testingFixture.SendAsync(query);
+
+        //ASSERT
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.ShouldNotBeNull();
+        result.Value.Data.ShouldNotBeNull();
+        var data = result.Value!.Data!.ToList();
+        data.ShouldNotBeNull();
+        // Should match ONLY the two Johns
+        data.Count.ShouldBe(2);
+        data.ShouldAllBe(x =>
+            x.Status == UserStatus.Active
+            && x.Email!.Contains("john", StringComparison.OrdinalIgnoreCase)
+            && x.DateOfBirth >= new DateTime(1995, 1, 1)
+            && x.DateOfBirth <= new DateTime(1997, 1, 1)
+        );
+
+        // Assert sorting correctness
+        data.ShouldBe(data.OrderBy(x => x.FirstName).ThenBy(x => x.LastName));
     }
 
     public Task DisposeAsync() => Task.CompletedTask;
