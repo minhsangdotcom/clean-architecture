@@ -1,5 +1,5 @@
+using Application.Common.ErrorCodes;
 using Application.Contracts.ApiWrapper;
-using Application.Contracts.Messages;
 using Application.Features.Roles.Commands.Delete;
 using Domain.Aggregates.Roles;
 using Shouldly;
@@ -9,29 +9,33 @@ namespace Application.SubcutaneousTests.Roles.Commands.Delete;
 [Collection(nameof(TestingCollectionFixture))]
 public class DeleteRoleHandlerTest(TestingFixture testingFixture) : IAsyncLifetime
 {
-    private Ulid id;
-
     [Fact]
     public async Task DeleteRole_When_Id_Invalid_ShouldReturnNotFoundError()
     {
-        string notFoundId = Guid.Empty.ToString();
+        //Arrange
+        string notFoundId = Ulid.Empty.ToString();
 
+        //Act
         Result<string> result = await testingFixture.SendAsync(new DeleteRoleCommand(notFoundId));
 
-        var expectedMessage = Messenger
-            .Create<Role>()
-            .WithError(MessageErrorType.Found)
-            .Negative()
-            .GetFullMessage();
-
+        //Assert
+        var expectedMessage = RoleErrorMessages.RoleNotFound;
         result.Error.ShouldNotBeNull();
         result.Error.Status.ShouldBe(404);
+        result.Error.ErrorMessage!.Value.Text.ShouldBe(expectedMessage);
     }
 
     [Fact]
     public async Task DeleteRole_When_IdValid_ShouldDeleteRoleSuccessfully()
     {
-        var result = await testingFixture.SendAsync(new DeleteRoleCommand(id.ToString()));
+        //Arrange
+        _ = await testingFixture.SeedingPermissionAsync();
+        Role role = await testingFixture.CreateNormalRoleAsync();
+        //Act
+        var result = await testingFixture.SendAsync(new DeleteRoleCommand(role.Id.ToString()));
+
+        //Assert
+        result.IsSuccess.ShouldBeTrue();
         result.Error.ShouldBeNull();
     }
 
@@ -40,7 +44,5 @@ public class DeleteRoleHandlerTest(TestingFixture testingFixture) : IAsyncLifeti
     public async Task InitializeAsync()
     {
         await testingFixture.ResetAsync();
-        Role role = await testingFixture.CreateAdminRoleAsync();
-        id = role.Id;
     }
 }

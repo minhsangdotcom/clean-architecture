@@ -1,43 +1,46 @@
-using Application.Contracts.Messages;
+using Application.Common.ErrorCodes;
 using Application.Features.Roles.Queries.Detail;
-using Domain.Aggregates.Roles;
 using Shouldly;
 
 namespace Application.SubcutaneousTests.Roles.Queries;
 
 [Collection(nameof(TestingCollectionFixture))]
-public class GetRoleDetailHanlderTest(TestingFixture testingFixture) : IAsyncLifetime
+public class GetRoleDetailHandlerTest(TestingFixture testingFixture) : IAsyncLifetime
 {
     [Fact]
     public async Task GetRole_WhenIdNotFound_ShouldReturnNotFoundError()
     {
-        //arrage
+        //Arrange
         string Id = Ulid.Empty.ToString();
         //act
         var result = await testingFixture.SendAsync(new GetRoleDetailQuery(Id));
         //assert
-        var expectedMessage = Messenger
-            .Create<Role>()
-            .WithError(MessageErrorType.Found)
-            .Negative()
-            .GetFullMessage();
+        var expectedMessage = RoleErrorMessages.RoleNotFound;
         result.IsSuccess.ShouldBeFalse();
         result.Error.ShouldNotBeNull();
+        result.Error.ErrorMessage!.Value.Text.ShouldBe(expectedMessage);
     }
 
     [Fact]
     public async Task GetRole_ShouldSuccess()
     {
-        //arrage
+        //Arrange
+        _ = await testingFixture.SeedingPermissionAsync();
         var role = await testingFixture.CreateNormalRoleAsync();
-        //act
+
+        //Act
         var result = await testingFixture.SendAsync(new GetRoleDetailQuery(role.Id.ToString()));
-        //assert
+        //Assert
         result.IsSuccess.ShouldBeTrue();
         result.Error.ShouldBeNull();
+        result.Value.ShouldNotBeNull();
 
-        result.Value?.Id.ShouldBe(role.Id);
-        result.Value?.Name.ShouldBe(role.Name);
+        result.Value.Id.ShouldBe(role.Id);
+        result.Value.Name.ShouldBe(role.Name);
+
+        result
+            .Value.Permissions!.Select(x => x.Id)
+            .ShouldBe([.. role.Permissions.Select(x => x.PermissionId)], ignoreOrder: true);
     }
 
     public async Task DisposeAsync() => await Task.CompletedTask;
