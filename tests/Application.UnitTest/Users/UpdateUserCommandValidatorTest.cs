@@ -205,7 +205,7 @@ public class UpdateUserCommandValidatorTest
     [InlineData("+12345abcd")]
     [InlineData("++1234567")]
     [InlineData("123+4567")]
-    public async Task Validate_When_PhoneNumberInvalid_Should_HaveError(string phoneNumber)
+    public async Task Validate_When_PhoneNumberInvalid_Should_HaveError(string? phoneNumber)
     {
         //Arrange
         var expected = new ErrorReason(

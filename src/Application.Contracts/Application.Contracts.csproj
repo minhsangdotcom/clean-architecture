@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
@@ -10,9 +10,8 @@
   <ItemGroup>
     <PackageReference Include="CaseConverter" Version="2.0.1" />
     <PackageReference Include="Microsoft.AspNetCore.Http" Version="2.3.0" />
-    <PackageReference Include="Microsoft.AspNetCore.Mvc.Core" Version="2.3.0" />
     <PackageReference Include="minhsangdotcom.TheTemplate.SharedKernel" Version="2.0.0" />
-    <PackageReference Include="TranMinhSang.AspNetCore.Extensions" Version="1.0.0" />
+    <PackageReference Include="TranMinhSang.AspNetCore.Extensions" Version="1.0.1" />
   </ItemGroup>
 
 </Project>
