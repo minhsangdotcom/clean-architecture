@@ -23,7 +23,7 @@ public class ChangeUserPasswordEnpoint : IEndpoint
                     "Allows an authenticated user to change their current password by providing the old and new password.",
                 Tags = [new OpenApiTag() { Name = Router.UserRoute.Tags }],
             })
-            .Authorize();
+            .MustHaveAuthorization();
     }
 
     private async Task<Results<NoContent, ProblemHttpResult>> HandleAsync(

@@ -23,7 +23,7 @@ public class DeleteRoleEndpoint : IEndpoint
                 Description = "Deletes a role by its ID along with its permissions.",
                 Tags = [new OpenApiTag() { Name = Router.RoleRoute.Tags }],
             })
-            .Authorize(
+            .MustHaveAuthorization(
                 permissions: PermissionGenerator.Generate(
                     PermissionResource.Role,
                     PermissionAction.Delete

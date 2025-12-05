@@ -25,7 +25,7 @@ public class UpdateRoleEndpoint : IEndpoint
                 Tags = [new OpenApiTag() { Name = Router.RoleRoute.Tags }],
             })
             .WithRequestValidation<RoleUpdateData>()
-            .Authorize(
+            .MustHaveAuthorization(
                 permissions: PermissionGenerator.Generate(
                     PermissionResource.Role,
                     PermissionAction.Update

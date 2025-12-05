@@ -25,7 +25,7 @@ public class GetRoleDetailEndpoint : IEndpoint
                 Description = "Retrieves a role’s details, including its name and permission IDs.",
                 Tags = [new OpenApiTag() { Name = Router.RoleRoute.Tags }],
             })
-            .Authorize(
+            .MustHaveAuthorization(
                 permissions: PermissionGenerator.Generate(
                     PermissionResource.Role,
                     PermissionAction.Detail

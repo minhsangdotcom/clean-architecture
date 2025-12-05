@@ -72,7 +72,7 @@ public static class RequiredAuthorizationBuilder
 
     // authorize with string pattern roles or permissions, roles and permissions
     // permissions:"user.create,user.list"
-    public static TBuilder Authorize<TBuilder>(
+    public static TBuilder MustHaveAuthorization<TBuilder>(
         this TBuilder builder,
         string? roles = null,
         string? permissions = null

@@ -25,7 +25,7 @@ public class GetUserDetailEndpoint : IEndpoint
                 Description = "Retrieves detailed information of a user based on their unique ID.",
                 Tags = [new OpenApiTag() { Name = Router.UserRoute.Tags }],
             })
-            .Authorize(
+            .MustHaveAuthorization(
                 permissions: PermissionGenerator.Generate(
                     PermissionResource.User,
                     PermissionAction.Detail
