@@ -34,7 +34,9 @@ public class UserManager(
                 .Include(x => x.Permissions)
                 .ThenInclude(x => x.Permission)
                 .Include(x => x.Roles)
-                .ThenInclude(x => x.Role);
+                .ThenInclude(x => x.Role!)
+                .ThenInclude(x => x.Permissions)
+                .ThenInclude(x => x.Permission);
         }
         return await query
             .AsSplitQuery()
@@ -55,7 +57,9 @@ public class UserManager(
                 .Include(x => x.Permissions)
                 .ThenInclude(x => x.Permission)
                 .Include(x => x.Roles)
-                .ThenInclude(x => x.Role);
+                .ThenInclude(x => x.Role!)
+                .ThenInclude(x => x.Permissions)
+                .ThenInclude(x => x.Permission);
         }
         return await query
             .AsSplitQuery()
@@ -76,7 +80,9 @@ public class UserManager(
                 .Include(x => x.Permissions)
                 .ThenInclude(x => x.Permission)
                 .Include(x => x.Roles)
-                .ThenInclude(x => x.Role);
+                .ThenInclude(x => x.Role!)
+                .ThenInclude(x => x.Permissions)
+                .ThenInclude(x => x.Permission);
         }
         return await query
             .AsSplitQuery()

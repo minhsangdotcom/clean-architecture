@@ -18,6 +18,7 @@ public class PermissionProjection : AuditableEntityResponse
         Id = permission.Id;
         Code = permission.Code;
         Name = permission.Name;
+        Group = permission.Group;
         Description = permission.Description;
         CreatedAt = permission.CreatedAt;
         UpdatedAt = permission.UpdatedAt;
