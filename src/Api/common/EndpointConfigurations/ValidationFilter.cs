@@ -1,5 +1,6 @@
 using Application.Common.Errors;
 using Application.Contracts.ApiWrapper;
+using Application.Contracts.Constants;
 using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
 
@@ -32,9 +33,10 @@ public class ValidationFilter<TRequest>(IValidator<TRequest> validator) : IEndpo
                     Status = failure.Status,
                     Title = failure.Title,
                     Type = failure.Type,
+                    Detail = failure.Detail,
                     Extensions = new Dictionary<string, object?>()
                     {
-                        { "invalidParams", failure.InvalidParams },
+                        { ProblemDetailCustomField.InvalidParams, failure.InvalidParams },
                     },
                 }
             );

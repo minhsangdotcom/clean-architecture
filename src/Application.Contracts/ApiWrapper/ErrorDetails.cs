@@ -8,7 +8,7 @@ public abstract class ErrorDetails
     public string? Title { get; set; }
     public string? Type { get; set; }
 
-    public string? Detail { get; set; }
+    public virtual string? Detail { get; protected set; }
     public List<InvalidParam>? InvalidParams { get; set; }
     public LocalizedTextResult? ErrorMessage { get; set; }
 
@@ -17,9 +17,10 @@ public abstract class ErrorDetails
         Title = title;
         Status = status ?? StatusCodes.Status500InternalServerError;
         Detail = detail;
-        Type = type ?? "InternalException";
+        Type = type;
     }
 
+    // just for validation 400 error
     protected ErrorDetails(
         string title,
         List<InvalidParam> invalidParams,
@@ -30,7 +31,7 @@ public abstract class ErrorDetails
         Title = title;
         Status = status ?? StatusCodes.Status500InternalServerError;
         InvalidParams = invalidParams;
-        Type = type ?? "InternalException";
+        Type = type;
     }
 
     protected ErrorDetails(
@@ -43,6 +44,6 @@ public abstract class ErrorDetails
         Title = title;
         Status = status ?? StatusCodes.Status500InternalServerError;
         ErrorMessage = errorMessage;
-        Type = type ?? "InternalException";
+        Type = type;
     }
 }

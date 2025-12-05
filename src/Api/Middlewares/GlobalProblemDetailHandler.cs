@@ -34,9 +34,10 @@ public class GlobalProblemDetailHandler(
             new()
             {
                 Status = code,
-                Title = "An Error has occurred",
+                Title = "Internal Server Error",
                 Detail = exception.Message,
-                Type = exception.GetType().Name,
+                Type =
+                    "https://datatracker.ietf.org/doc/html/rfc9110#name-500-internal-server-error",
             };
 
         return await problemDetailsService.TryWriteAsync(

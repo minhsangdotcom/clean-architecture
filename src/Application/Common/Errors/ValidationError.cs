@@ -19,6 +19,10 @@ public class ValidationError(List<ValidationFailure> invalidParams)
                     ],
                 }),
         ],
-        nameof(ValidationError),
+        "https://datatracker.ietf.org/doc/html/rfc9110#name-400-bad-request",
         StatusCodes.Status400BadRequest
-    );
+    )
+{
+    public sealed override string? Detail { get; protected set; } =
+        "One or more validation errors occurred.";
+}

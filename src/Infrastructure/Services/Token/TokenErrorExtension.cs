@@ -1,5 +1,6 @@
 using Application.Common.Errors;
 using Application.Common.Interfaces.Services.Localization;
+using Application.Contracts.Constants;
 using Application.Contracts.Messages;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Http;
@@ -33,9 +34,10 @@ public static class TokenErrorExtension
                 Title = forbiddenError.Title,
                 Type = forbiddenError.Type,
                 Status = forbiddenError.Status,
+                Detail = forbiddenError.Detail,
                 Extensions = new Dictionary<string, object?>()
                 {
-                    { "errorDetails", forbiddenError.ErrorMessage },
+                    { ProblemDetailCustomField.Message, forbiddenError.ErrorMessage },
                 },
             };
 
@@ -60,10 +62,11 @@ public static class TokenErrorExtension
             {
                 Title = unauthorizedError.Title,
                 Type = unauthorizedError.Type,
+                Detail = unauthorizedError.Detail,
                 Status = unauthorizedError.Status,
                 Extensions = new Dictionary<string, object?>()
                 {
-                    { "errorDetails", unauthorizedError.ErrorMessage },
+                    { ProblemDetailCustomField.Message, unauthorizedError.ErrorMessage },
                 },
             };
 
