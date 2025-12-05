@@ -9,7 +9,7 @@ namespace Application.SubcutaneousTests;
 public partial class TestingFixture : IAsyncLifetime
 {
     private CustomWebApplicationFactory<Program>? factory;
-    private readonly PostgreSqlDatabase database;
+    private readonly PostgreSqlDatabase database = null!;
 
     private const string BASE_URL = "http://localhost:8080/api/v1";
 
@@ -18,7 +18,7 @@ public partial class TestingFixture : IAsyncLifetime
 
     public TestingFixture()
     {
-        database = new();
+        database = new PostgreSqlDatabase();
     }
 
     public async Task DisposeAsync()

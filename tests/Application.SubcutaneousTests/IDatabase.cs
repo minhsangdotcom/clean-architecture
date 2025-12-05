@@ -9,6 +9,7 @@ public interface IDatabase
     DbConnection GetConnection();
 
     string GetConnectionString();
+    string GetEnvironmentVariable();
 
     Task ResetAsync();
 
