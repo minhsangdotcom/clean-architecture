@@ -100,7 +100,7 @@ public class AsyncRepository<T>(IEfDbContext dbContext) : IAsyncRepository<T>
 
     public async Task ExecuteUpdateAsync(
         Expression<Func<T, bool>>? criteria,
-        Expression<Func<SetPropertyCalls<T>, SetPropertyCalls<T>>> updateExpression
+        Action<UpdateSettersBuilder<T>> updateExpression
     )
     {
         IQueryable<T> query = dbContext.Set<T>();

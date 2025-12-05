@@ -65,7 +65,7 @@ public interface IAsyncRepository<T> : IRepository<T>
 
     Task ExecuteUpdateAsync(
         Expression<Func<T, bool>>? criteria,
-        Expression<Func<SetPropertyCalls<T>, SetPropertyCalls<T>>> updateExpression
+        Action<UpdateSettersBuilder<T>> updateExpression
     );
 
     Task DeleteAsync(T entity);
