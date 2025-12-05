@@ -42,11 +42,9 @@ public static partial class QueryParamValidator
         ];
 
         int length = queries.Count;
-
         for (int i = 0; i < length; i++)
         {
             QueryResult query = queries[i];
-
             if (string.IsNullOrWhiteSpace(query.Value))
             {
                 return new(Error: QueryParamRequestErrorMessages.QueryParamFilterValueIsRequired);
@@ -75,12 +73,6 @@ public static partial class QueryParamValidator
             }
 
             // lack of property
-            //ex:
-            //[$eq]
-            //[$and][0[$or][0][$eq]
-            //[$and][0][$contains]
-            //[$or][0][$contains]
-            //[$in][0]
             List<string> properties =
             [
                 .. query.CleanKey.Where(x =>
@@ -220,9 +212,8 @@ public static partial class QueryParamValidator
     /// </summary>
     /// <param name="type"></param>
     /// <returns></returns>
-    private static bool IsNumericType(Type type)
-    {
-        return Type.GetTypeCode(type) switch
+    private static bool IsNumericType(Type type) =>
+        Type.GetTypeCode(type) switch
         {
             TypeCode.Byte
             or TypeCode.SByte
@@ -237,7 +228,6 @@ public static partial class QueryParamValidator
             or TypeCode.Single => true,
             _ => false,
         };
-    }
 
     private static bool ValidateArrayAndLogicalOperator(List<string> input)
     {
@@ -292,11 +282,6 @@ public static partial class QueryParamValidator
 
     private static bool ValidateLackOfOperator(List<string> input)
     {
-        //[name]
-        //[abc]
-        //[0]
-        //[ABC][0]
-        //[name][$eq]
         if (input.Count == 0 || input.Count == 1)
         {
             return false;
@@ -315,7 +300,6 @@ public static partial class QueryParamValidator
         return false;
     }
 
-    // Array of valid operators
     private static readonly string[] validOperators =
     [
         "$eq",
@@ -338,6 +322,5 @@ public static partial class QueryParamValidator
     ];
 
     private static readonly string[] arrayOperators = ["$in", "$between"];
-
     private static readonly string[] logicalOperators = ["$and", "$or"];
 }
