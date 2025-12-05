@@ -2,7 +2,7 @@ using Application.Common.ErrorCodes;
 using Application.Features.Users.Queries.Detail;
 using Shouldly;
 
-namespace Application.SubcutaneousTests.Users.Detail;
+namespace Application.SubcutaneousTests.Users.Queries;
 
 [Collection(nameof(TestingCollectionFixture))]
 public class GetUserDetailHandlerTest(TestingFixture testingFixture) : IAsyncLifetime

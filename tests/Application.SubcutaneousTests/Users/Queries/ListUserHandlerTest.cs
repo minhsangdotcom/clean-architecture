@@ -3,7 +3,7 @@ using Domain.Aggregates.Users;
 using Domain.Aggregates.Users.Enums;
 using Shouldly;
 
-namespace Application.SubcutaneousTests.Users.List;
+namespace Application.SubcutaneousTests.Users.Queries;
 
 [Collection(nameof(TestingCollectionFixture))]
 public class ListUserHandlerTest(TestingFixture testingFixture) : IAsyncLifetime

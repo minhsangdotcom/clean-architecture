@@ -6,7 +6,7 @@ using Domain.Aggregates.Users;
 using Microsoft.AspNetCore.Http;
 using Shouldly;
 
-namespace Application.SubcutaneousTests.Users.Profile;
+namespace Application.SubcutaneousTests.Users.Commands;
 
 [Collection(nameof(TestingCollectionFixture))]
 public class UpdateUserProfileCommandHandlerTest(TestingFixture testingFixture) : IAsyncLifetime

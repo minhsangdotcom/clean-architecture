@@ -2,7 +2,7 @@ using Application.Features.Roles.Commands.Create;
 using Domain.Aggregates.Roles;
 using Shouldly;
 
-namespace Application.SubcutaneousTests.Roles.Commands.Create;
+namespace Application.SubcutaneousTests.Roles.Commands;
 
 [Collection(nameof(TestingCollectionFixture))]
 public class CreateRoleHandlerTest(TestingFixture testingFixture) : IAsyncLifetime

@@ -3,7 +3,7 @@ using Application.Features.Users.Commands.Login;
 using Infrastructure.Constants;
 using Shouldly;
 
-namespace Application.SubcutaneousTests.Users.Login;
+namespace Application.SubcutaneousTests.Users.Commands;
 
 [Collection(nameof(TestingCollectionFixture))]
 public class LoginUserHandlerTest(TestingFixture testingFixture) : IAsyncLifetime

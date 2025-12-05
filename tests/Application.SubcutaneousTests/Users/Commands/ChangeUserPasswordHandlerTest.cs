@@ -3,7 +3,7 @@ using Application.Features.Users.Commands.ChangePassword;
 using Infrastructure.Constants;
 using Shouldly;
 
-namespace Application.SubcutaneousTests.Users.Password;
+namespace Application.SubcutaneousTests.Users.Commands;
 
 [Collection(nameof(TestingCollectionFixture))]
 public class ChangeUserPasswordHandlerTest(TestingFixture testingFixture) : IAsyncLifetime

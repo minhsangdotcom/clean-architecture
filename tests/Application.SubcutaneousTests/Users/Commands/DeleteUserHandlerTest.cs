@@ -4,7 +4,7 @@ using Application.Features.Users.Commands.Delete;
 using Domain.Aggregates.Users;
 using Shouldly;
 
-namespace Application.SubcutaneousTests.Users.Delete;
+namespace Application.SubcutaneousTests.Users.Commands;
 
 [Collection(nameof(TestingCollectionFixture))]
 public class DeleteUserHandlerTest(TestingFixture testingFixture) : IAsyncLifetime

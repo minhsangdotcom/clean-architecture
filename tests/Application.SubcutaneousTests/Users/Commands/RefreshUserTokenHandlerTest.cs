@@ -5,7 +5,7 @@ using Application.Features.Users.Commands.Token;
 using Infrastructure.Constants;
 using Shouldly;
 
-namespace Application.SubcutaneousTests.Users.Token;
+namespace Application.SubcutaneousTests.Users.Commands;
 
 [Collection(nameof(TestingCollectionFixture))]
 public class RefreshUserTokenHandlerTest(TestingFixture testingFixture) : IAsyncLifetime

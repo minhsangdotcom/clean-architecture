@@ -8,7 +8,7 @@ using Domain.Aggregates.Users.Enums;
 using Microsoft.AspNetCore.Http;
 using Shouldly;
 
-namespace Application.SubcutaneousTests.Users.Create;
+namespace Application.SubcutaneousTests.Users.Commands;
 
 [Collection(nameof(TestingCollectionFixture))]
 public class CreateUserHandlerTest(TestingFixture testingFixture) : IAsyncLifetime

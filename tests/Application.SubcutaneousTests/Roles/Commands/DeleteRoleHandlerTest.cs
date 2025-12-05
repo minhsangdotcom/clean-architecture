@@ -4,7 +4,7 @@ using Application.Features.Roles.Commands.Delete;
 using Domain.Aggregates.Roles;
 using Shouldly;
 
-namespace Application.SubcutaneousTests.Roles.Commands.Delete;
+namespace Application.SubcutaneousTests.Roles.Commands;
 
 [Collection(nameof(TestingCollectionFixture))]
 public class DeleteRoleHandlerTest(TestingFixture testingFixture) : IAsyncLifetime

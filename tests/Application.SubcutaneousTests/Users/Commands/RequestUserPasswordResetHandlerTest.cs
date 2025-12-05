@@ -2,7 +2,7 @@ using Application.Common.ErrorCodes;
 using Application.Features.Users.Commands.RequestPasswordReset;
 using Shouldly;
 
-namespace Application.SubcutaneousTests.Users.PasswordReset;
+namespace Application.SubcutaneousTests.Users.Commands;
 
 [Collection(nameof(TestingCollectionFixture))]
 public class RequestUserPasswordResetHandlerTest(TestingFixture testingFixture) : IAsyncLifetime

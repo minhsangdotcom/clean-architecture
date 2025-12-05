@@ -5,7 +5,7 @@ using Application.SubcutaneousTests.Extensions;
 using Microsoft.AspNetCore.Http;
 using Shouldly;
 
-namespace Application.SubcutaneousTests.Users.Update;
+namespace Application.SubcutaneousTests.Users.Commands;
 
 [Collection(nameof(TestingCollectionFixture))]
 public class UpdateUserHandlerTest(TestingFixture testingFixture) : IAsyncLifetime

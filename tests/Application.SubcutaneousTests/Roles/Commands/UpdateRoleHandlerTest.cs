@@ -3,7 +3,7 @@ using Application.Contracts.Permissions;
 using Application.Features.Roles.Commands.Update;
 using Shouldly;
 
-namespace Application.SubcutaneousTests.Roles.Commands.Update;
+namespace Application.SubcutaneousTests.Roles.Commands;
 
 [Collection(nameof(TestingCollectionFixture))]
 public class UpdateRoleHandlerTest(TestingFixture testingFixture) : IAsyncLifetime
