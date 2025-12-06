@@ -9,7 +9,6 @@ using Application.SharedFeatures.Projections.Regions;
 using Mediator;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.OpenApi.Models;
 
 namespace Api.Endpoints.Regions;
 
@@ -20,13 +19,16 @@ public class ListDistrictEndpoint : IEndpoint
     public void MapEndpoint(IEndpointRouteBuilder app)
     {
         app.MapGet(Router.RegionRoute.Districts, HandleAsync)
-            .WithOpenApi(operation => new OpenApiOperation(operation)
-            {
-                Summary = "Get list of districts 🗺️ 🇻🇳",
-                Description = "Retrieves a list of districts in Vietnam.",
-                Tags = [new OpenApiTag() { Name = Router.RegionRoute.Tags }],
-                Parameters = operation.AddDocs(),
-            });
+            .WithTags(Router.RegionRoute.Tags)
+            .AddOpenApiOperationTransformer(
+                (operation, context, _) =>
+                {
+                    operation.Summary = "Get list of districts 🗺️ 🇻🇳";
+                    operation.Description = "Retrieves a list of districts in Vietnam.";
+                    operation.Parameters = operation.AddDocs();
+                    return Task.CompletedTask;
+                }
+            );
     }
 
     private async Task<

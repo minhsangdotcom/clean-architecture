@@ -7,7 +7,6 @@ using Application.Features.Roles.Queries.List;
 using Mediator;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.OpenApi.Models;
 using static Application.Contracts.Permissions.PermissionNames;
 
 namespace Api.Endpoints.Roles;
@@ -19,13 +18,16 @@ public class ListRoleEndpoint : IEndpoint
     public void MapEndpoint(IEndpointRouteBuilder app)
     {
         app.MapGet(Router.RoleRoute.Roles, HandleAsync)
-            .WithOpenApi(operation => new OpenApiOperation(operation)
-            {
-                Summary = "Get list of roles 📋",
-                Description = "Retrieves all roles with their basic information.",
-                Tags = [new OpenApiTag() { Name = Router.RoleRoute.Tags }],
-                Parameters = operation.AddDocs(),
-            })
+            .WithTags(Router.RoleRoute.Tags)
+            .AddOpenApiOperationTransformer(
+                (operation, context, _) =>
+                {
+                    operation.Summary = "Get list of roles 📋";
+                    operation.Description = "Retrieves all roles with their basic information.";
+                    operation.Parameters = operation.AddDocs();
+                    return Task.CompletedTask;
+                }
+            )
             .MustHaveAuthorization(
                 permissions: PermissionGenerator.Generate(
                     PermissionResource.Role,

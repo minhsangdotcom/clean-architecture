@@ -8,7 +8,7 @@ using Application.Contracts.Permissions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Options;
-using Microsoft.OpenApi.Models;
+using Microsoft.OpenApi;
 
 namespace Api.Extensions;
 
@@ -112,12 +112,18 @@ public static class LocalizationExtension
                     return Results.Ok();
                 }
             )
-            .WithOpenApi(operation => new OpenApiOperation(operation)
-            {
-                Summary = "Synchronize localization resources ✨",
-                Description =
-                    "Synchronizes permissions and error messages with the localization JSON files by adding missing entries and removing obsolete ones.",
-                Tags = [new OpenApiTag() { Name = "Localizations-endpoint" }],
-            });
+            .AddOpenApiOperationTransformer(
+                (operation, _, _) =>
+                {
+                    operation.Summary = "Synchronize localization resources ✨";
+                    operation.Description =
+                        "Synchronizes permissions and error messages with the localization JSON files by adding missing entries and removing obsolete ones.";
+                    operation.Tags = new HashSet<OpenApiTagReference>()
+                    {
+                        new("Localizations-endpoint"),
+                    };
+                    return Task.CompletedTask;
+                }
+            );
     }
 }

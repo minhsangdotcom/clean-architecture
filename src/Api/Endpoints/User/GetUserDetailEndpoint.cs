@@ -6,7 +6,6 @@ using Application.Features.Users.Queries.Detail;
 using Mediator;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.OpenApi.Models;
 using static Application.Contracts.Permissions.PermissionNames;
 
 namespace Api.Endpoints.User;
@@ -19,12 +18,16 @@ public class GetUserDetailEndpoint : IEndpoint
     {
         app.MapGet(Router.UserRoute.GetUpdateDelete, HandleAsync)
             .WithName(Router.UserRoute.GetRouteName)
-            .WithOpenApi(operation => new OpenApiOperation(operation)
-            {
-                Summary = "Get user by ID 🧾",
-                Description = "Retrieves detailed information of a user based on their unique ID.",
-                Tags = [new OpenApiTag() { Name = Router.UserRoute.Tags }],
-            })
+            .WithTags(Router.UserRoute.Tags)
+            .AddOpenApiOperationTransformer(
+                (operation, context, _) =>
+                {
+                    operation.Summary = "Get user by ID 🧾";
+                    operation.Description =
+                        "Retrieves detailed information of a user based on their unique ID.";
+                    return Task.CompletedTask;
+                }
+            )
             .MustHaveAuthorization(
                 permissions: PermissionGenerator.Generate(
                     PermissionResource.User,

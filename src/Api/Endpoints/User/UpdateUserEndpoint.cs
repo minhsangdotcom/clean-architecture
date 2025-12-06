@@ -6,7 +6,6 @@ using Application.Features.Users.Commands.Update;
 using Mediator;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.OpenApi.Models;
 using static Application.Contracts.Permissions.PermissionNames;
 
 namespace Api.Endpoints.User;
@@ -18,12 +17,16 @@ public class UpdateUserEndpoint : IEndpoint
     public void MapEndpoint(IEndpointRouteBuilder app)
     {
         app.MapPut(Router.UserRoute.GetUpdateDelete, HandleAsync)
-            .WithOpenApi(operation => new OpenApiOperation(operation)
-            {
-                Summary = " Update user ✏️ 🧑‍💻",
-                Description = "Updates the information of an existing user identified by their ID.",
-                Tags = [new OpenApiTag() { Name = Router.UserRoute.Tags }],
-            })
+            .WithTags(Router.UserRoute.Tags)
+            .AddOpenApiOperationTransformer(
+                (operation, context, _) =>
+                {
+                    operation.Summary = " Update user ✏️ 🧑‍💻";
+                    operation.Description =
+                        "Updates the information of an existing user identified by their ID.";
+                    return Task.CompletedTask;
+                }
+            )
             .WithRequestValidation<UserUpdateData>()
             .MustHaveAuthorization(
                 permissions: PermissionGenerator.Generate(

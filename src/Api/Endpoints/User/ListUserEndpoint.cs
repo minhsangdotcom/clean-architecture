@@ -8,7 +8,6 @@ using Application.Features.Users.Queries.List;
 using Mediator;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.OpenApi.Models;
 using static Application.Contracts.Permissions.PermissionNames;
 
 namespace Api.Endpoints.User;
@@ -20,13 +19,17 @@ public class ListUserEndpoint : IEndpoint
     public void MapEndpoint(IEndpointRouteBuilder app)
     {
         app.MapGet(Router.UserRoute.Users, HandleAsync)
-            .WithOpenApi(operation => new OpenApiOperation(operation)
-            {
-                Summary = "Get list of user 📄",
-                Description = "Retrieves a list of all registered users in the system.",
-                Tags = [new OpenApiTag() { Name = Router.UserRoute.Tags }],
-                Parameters = operation.AddDocs(),
-            })
+            .WithTags(Router.UserRoute.Tags)
+            .AddOpenApiOperationTransformer(
+                (operation, context, _) =>
+                {
+                    operation.Summary = "Get list of user 📄";
+                    operation.Description =
+                        "Retrieves a list of all registered users in the system.";
+                    operation.Parameters = operation.AddDocs();
+                    return Task.CompletedTask;
+                }
+            )
             .MustHaveAuthorization(
                 permissions: PermissionGenerator.Generate(
                     PermissionResource.User,

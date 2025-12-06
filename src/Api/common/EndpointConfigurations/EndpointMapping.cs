@@ -24,8 +24,9 @@ public static class EndpointMapping
         EndpointVersion apiVersion
     )
     {
+        int version = (int)apiVersion;
         ApiVersionSet apiVersionSet = app.NewApiVersionSet()
-            .HasApiVersion(new ApiVersion((int)apiVersion))
+            .HasApiVersion(new ApiVersion(version))
             .ReportApiVersions()
             .Build();
 
@@ -36,12 +37,11 @@ public static class EndpointMapping
                 .Where(endpoint => endpoint.Version == apiVersion),
         ];
 
-        RouteGroupBuilder routeGroupBuilder = app.MapGroup(
-                $"/{RoutePath.prefix}" + "v{version:apiVersion}/"
-            )
-            .WithApiVersionSet(apiVersionSet);
+        RouteGroupBuilder v1 = app.MapGroup($"/{RoutePath.prefix}" + "v{version:apiVersion}/")
+            .WithApiVersionSet(apiVersionSet)
+            .MapToApiVersion(version);
 
-        endpoints.ForEach(endpoint => endpoint.MapEndpoint(routeGroupBuilder));
+        endpoints.ForEach(endpoint => endpoint.MapEndpoint(v1));
         return app;
     }
 }

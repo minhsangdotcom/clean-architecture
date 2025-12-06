@@ -5,24 +5,26 @@ using Application.Features.Users.Commands.ChangePassword;
 using Mediator;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.OpenApi.Models;
 
 namespace Api.Endpoints.User;
 
-public class ChangeUserPasswordEnpoint : IEndpoint
+public class ChangeUserPasswordEndpoint : IEndpoint
 {
     public EndpointVersion Version => EndpointVersion.One;
 
     public void MapEndpoint(IEndpointRouteBuilder app)
     {
         app.MapPut(Router.UserRoute.ChangePassword, HandleAsync)
-            .WithOpenApi(operation => new OpenApiOperation(operation)
-            {
-                Summary = "Change user password 🔑",
-                Description =
-                    "Allows an authenticated user to change their current password by providing the old and new password.",
-                Tags = [new OpenApiTag() { Name = Router.UserRoute.Tags }],
-            })
+            .WithTags(Router.UserRoute.Tags)
+            .AddOpenApiOperationTransformer(
+                (operation, context, _) =>
+                {
+                    operation.Summary = "Change user password 🔑";
+                    operation.Description =
+                        "Allows an authenticated user to change their current password by providing the old and new password.";
+                    return Task.CompletedTask;
+                }
+            )
             .MustHaveAuthorization();
     }
 

@@ -10,7 +10,6 @@ using Api.Settings;
 using Application;
 using Application.Common.Interfaces.Services.Accessors;
 using Cysharp.Serialization.Json;
-using HealthChecks.UI.Client;
 using Infrastructure;
 using Infrastructure.Data;
 using Infrastructure.Data.Seeds;
@@ -36,14 +35,13 @@ services.ConfigureHttpJsonOptions(options =>
     options.SerializerOptions.Converters.Add(new UlidJsonConverter());
 });
 
+builder.AddSerilog();
 services.AddAuthorization();
 services.AddErrorDetails();
-services.AddSwagger(configuration);
+services.AddOpenApiConfiguration(configuration);
 services.AddApiVersion();
 services.AddOpenTelemetryTracing(configuration);
-builder.AddSerilog();
-services.AddHealthChecks();
-services.AddDatabaseHealthCheck(configuration);
+services.AddHealthCheck(configuration);
 services.AddLocalizationConfigurations(configuration);
 services.AddHttpContextAccessor();
 services.AddScoped<IRequestContextProvider, RequestContextProvider>();
@@ -82,10 +80,34 @@ try
     Log.Logger.Information("Application is starting....");
     var app = builder.Build();
 
-    string healthCheckPath = configuration.GetSection("HealthCheckPath").Get<string>() ?? "/health";
+    string healthCheckPath =
+        builder.Configuration.GetValue<string>("HealthCheckSettings:Path") ?? "/health";
     app.MapHealthChecks(
         healthCheckPath,
-        new HealthCheckOptions { ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse }
+        new HealthCheckOptions
+        {
+            AllowCachingResponses = false,
+            ResponseWriter = async (context, report) =>
+            {
+                context.Response.ContentType = "application/json";
+
+                var result = new
+                {
+                    status = report.Status.ToString(),
+                    totalDuration = report.TotalDuration.ToString(),
+                    entries = report.Entries.Select(x => new
+                    {
+                        key = x.Key,
+                        status = x.Value.Status.ToString(),
+                        description = x.Value.Description,
+                        duration = x.Value.Duration.ToString(),
+                        data = x.Value.Data,
+                    }),
+                };
+
+                await context.Response.WriteAsJsonAsync(result);
+            },
+        }
     );
 
     bool isDevelopment = app.Environment.IsDevelopment();
@@ -102,19 +124,16 @@ try
         await DbInitializer.InitializeAsync(serviceProvider);
     }
     #endregion
-
-    string routeRefix = configuration.GetSection("SwaggerRoutePrefix").Get<string>() ?? "docs";
     if (isDevelopment)
     {
-        app.UseSwagger();
+        app.MapOpenApi("openapi/{documentName}.json");
         app.UseSwaggerUI(configs =>
         {
-            configs.SwaggerEndpoint("/swagger/v1/swagger.json", "The Template API V1");
-            configs.RoutePrefix = routeRefix;
+            configs.SwaggerEndpoint("/openapi/v1.json", $"API v1");
             configs.ConfigObject.PersistAuthorization = true;
             configs.DocExpansion(DocExpansion.None);
         });
-        app.AddLog(Log.Logger, routeRefix, healthCheckPath);
+        app.AddLog(Log.Logger, "swagger", healthCheckPath);
     }
     string defaultCulture =
         configuration.GetSection("LocalizationSettings:DefaultCulture").Get<string>() ?? "vi";

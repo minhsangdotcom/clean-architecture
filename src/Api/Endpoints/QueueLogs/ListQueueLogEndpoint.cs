@@ -8,7 +8,6 @@ using Application.Features.QueueLogs.Queries;
 using Mediator;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.OpenApi.Models;
 using static Application.Contracts.Permissions.PermissionNames;
 
 namespace Api.Endpoints.QueueLogs;
@@ -20,13 +19,16 @@ public class ListQueueLogEndpoint : IEndpoint
     public void MapEndpoint(IEndpointRouteBuilder app)
     {
         app.MapGet(Router.QueueLogRoute.QueueLogs, HandleAsync)
-            .WithOpenApi(operation => new OpenApiOperation(operation)
-            {
-                Summary = "Get list of Queue logging 📄",
-                Description = "Retrieves a list of all logs of queue.",
-                Tags = [new OpenApiTag() { Name = Router.QueueLogRoute.Tags }],
-                Parameters = operation.AddDocs(),
-            })
+            .WithTags(Router.QueueLogRoute.Tags)
+            .AddOpenApiOperationTransformer(
+                (operation, context, _) =>
+                {
+                    operation.Summary = "Get list of Queue logging 📄";
+                    operation.Description = "Retrieves a list of all logs of queue.";
+                    operation.Parameters = operation.AddDocs();
+                    return Task.CompletedTask;
+                }
+            )
             .MustHaveAuthorization(
                 permissions: PermissionGenerator.Generate(
                     PermissionResource.QueueLog,

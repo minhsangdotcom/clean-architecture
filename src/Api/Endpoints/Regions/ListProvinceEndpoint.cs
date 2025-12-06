@@ -9,7 +9,6 @@ using Application.SharedFeatures.Projections.Regions;
 using Mediator;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.OpenApi.Models;
 
 namespace Api.Endpoints.Regions;
 
@@ -20,13 +19,16 @@ public class ListProvinceEndpoint : IEndpoint
     public void MapEndpoint(IEndpointRouteBuilder app)
     {
         app.MapGet(Router.RegionRoute.Provinces, HandleAsync)
-            .WithOpenApi(operation => new OpenApiOperation(operation)
-            {
-                Summary = "Get list of provinces 🗺️ 🇻🇳",
-                Description = "Retrieves a list of provinces in Vietnam.",
-                Tags = [new OpenApiTag() { Name = Router.RegionRoute.Tags }],
-                Parameters = operation.AddDocs(),
-            });
+            .WithTags(Router.RegionRoute.Tags)
+            .AddOpenApiOperationTransformer(
+                (operation, context, _) =>
+                {
+                    operation.Summary = "Get list of provinces 🗺️ 🇻🇳";
+                    operation.Description = "Retrieves a list of provinces in Vietnam.";
+                    operation.Parameters = operation.AddDocs();
+                    return Task.CompletedTask;
+                }
+            );
     }
 
     private async Task<

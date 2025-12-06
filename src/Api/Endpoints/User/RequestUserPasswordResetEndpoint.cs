@@ -5,7 +5,6 @@ using Application.Features.Users.Commands.RequestPasswordReset;
 using Mediator;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.OpenApi.Models;
 
 namespace Api.Endpoints.User;
 
@@ -16,13 +15,16 @@ public class RequestUserPasswordResetEndpoint : IEndpoint
     public void MapEndpoint(IEndpointRouteBuilder app)
     {
         app.MapPost(Router.UserRoute.RequestResetPassword, HandleAsync)
-            .WithOpenApi(operation => new OpenApiOperation(operation)
-            {
-                Summary = "Request password reset 📧",
-                Description =
-                    "Sends a reset password email to the user based on their email address.",
-                Tags = [new OpenApiTag() { Name = Router.UserRoute.Tags }],
-            });
+            .WithTags(Router.UserRoute.Tags)
+            .AddOpenApiOperationTransformer(
+                (operation, context, _) =>
+                {
+                    operation.Summary = "Request password reset 📧";
+                    operation.Description =
+                        "Sends a reset password email to the user based on their email address.";
+                    return Task.CompletedTask;
+                }
+            );
     }
 
     private async Task<Results<NoContent, ProblemHttpResult>> HandleAsync(

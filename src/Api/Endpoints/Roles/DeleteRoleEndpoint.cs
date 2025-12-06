@@ -5,7 +5,6 @@ using Application.Features.Roles.Commands.Delete;
 using Mediator;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.OpenApi.Models;
 using static Application.Contracts.Permissions.PermissionNames;
 
 namespace Api.Endpoints.Roles;
@@ -17,12 +16,15 @@ public class DeleteRoleEndpoint : IEndpoint
     public void MapEndpoint(IEndpointRouteBuilder app)
     {
         app.MapDelete(Router.RoleRoute.GetUpdateDelete, HandleAsync)
-            .WithOpenApi(operation => new OpenApiOperation(operation)
-            {
-                Summary = " Delete role 🗑️",
-                Description = "Deletes a role by its ID along with its permissions.",
-                Tags = [new OpenApiTag() { Name = Router.RoleRoute.Tags }],
-            })
+            .WithTags(Router.RoleRoute.Tags)
+            .AddOpenApiOperationTransformer(
+                (operation, context, _) =>
+                {
+                    operation.Summary = " Delete role 🗑️";
+                    operation.Description = "Deletes a role by its ID along with its permissions.";
+                    return Task.CompletedTask;
+                }
+            )
             .MustHaveAuthorization(
                 permissions: PermissionGenerator.Generate(
                     PermissionResource.Role,

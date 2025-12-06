@@ -7,7 +7,6 @@ using Application.Features.Permissions;
 using Mediator;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.OpenApi.Models;
 
 namespace Api.Endpoints.Permissions;
 
@@ -18,13 +17,16 @@ public class ListPermissionEndpoint : IEndpoint
     public void MapEndpoint(IEndpointRouteBuilder app)
     {
         app.MapGet(Router.PermissionRoute.Permissions, HandleAsync)
-            .WithOpenApi(operation => new OpenApiOperation(operation)
-            {
-                Summary = "Get list of Permissions in Application 📄",
-                Description = "Retrieves a list of permissions in Application.",
-                Tags = [new OpenApiTag() { Name = Router.PermissionRoute.Tags }],
-                Parameters = operation.AddDocs(),
-            });
+            .WithTags(Router.PermissionRoute.Tags)
+            .AddOpenApiOperationTransformer(
+                (operation, context, _) =>
+                {
+                    operation.Summary = "Get list of Permissions in Application 📄";
+                    operation.Description = "Retrieves a list of permissions in Application.";
+                    operation.Parameters = operation.AddDocs();
+                    return Task.CompletedTask;
+                }
+            );
     }
 
     private async Task<

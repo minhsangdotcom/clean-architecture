@@ -1,100 +1,115 @@
-using Microsoft.OpenApi.Any;
-using Microsoft.OpenApi.Models;
+using System.Text.Json.Nodes;
+using Microsoft.OpenApi;
 
 namespace Api.common.Documents;
 
 public static class QueryParamRequestDocument
 {
-    public static IList<OpenApiParameter> AddDocs(this OpenApiOperation _)
+    public static IList<IOpenApiParameter> AddDocs(this OpenApiOperation _)
     {
         return
         [
-            new()
+            // page
+            new OpenApiParameter()
             {
                 Name = "page",
                 In = ParameterLocation.Query,
                 Required = false,
-                Schema = new() { Type = "integer", Default = new OpenApiInteger(1) },
+                Schema = new OpenApiSchema
+                {
+                    Type = JsonSchemaType.Integer,
+                    Default = JsonValue.Create(1),
+                },
             },
-            new()
+            // pageSize
+            new OpenApiParameter()
             {
                 Name = "pageSize",
                 In = ParameterLocation.Query,
                 Required = false,
-                Schema = new() { Type = "integer", Default = new OpenApiInteger(100) },
+                Schema = new OpenApiSchema
+                {
+                    Type = JsonSchemaType.Integer,
+                    Default = JsonValue.Create(100),
+                },
             },
-            new()
+            // before
+            new OpenApiParameter()
             {
                 Name = "before",
                 In = ParameterLocation.Query,
-                Schema = new()
+                Schema = new OpenApiSchema
                 {
-                    Type = "string",
+                    Type = JsonSchemaType.String,
                     Description = "The cursor for the previous move",
                 },
             },
-            new()
+            // after
+            new OpenApiParameter()
             {
                 Name = "after",
                 In = ParameterLocation.Query,
-                Schema = new() { Type = "string", Description = "The cursor for the next move" },
+                Schema = new OpenApiSchema
+                {
+                    Type = JsonSchemaType.String,
+                    Description = "The cursor for the next move",
+                },
             },
-            new()
+            // keyword
+            new OpenApiParameter()
             {
                 Name = "keyword",
                 In = ParameterLocation.Query,
-                Schema = new() { Type = "string" },
+                Schema = new OpenApiSchema { Type = JsonSchemaType.String },
             },
-            new()
+            // targets[]
+            new OpenApiParameter()
             {
                 Name = "targets",
                 In = ParameterLocation.Query,
-                Schema = new()
+                Schema = new OpenApiSchema
                 {
-                    Type = "array",
-                    Items = new() { Type = "string" },
+                    Type = JsonSchemaType.Array,
+                    Items = new OpenApiSchema { Type = JsonSchemaType.String },
                 },
             },
-            new()
+            // sort
+            new OpenApiParameter()
             {
                 Name = "sort",
                 In = ParameterLocation.Query,
-                Schema = new()
+                Schema = new OpenApiSchema
                 {
-                    Type = "string",
-                    Example = new OpenApiString("createdAt:desc, id"),
+                    Type = JsonSchemaType.String,
+                    Example = JsonValue.Create("createdAt:desc,id"),
                 },
             },
-            new()
+            // filter (complex example)
+            new OpenApiParameter()
             {
                 Name = "filter",
                 In = ParameterLocation.Query,
-                Schema = new()
+                Schema = new OpenApiSchema
                 {
-                    Type = "object",
+                    Type = JsonSchemaType.Object,
                     AdditionalPropertiesAllowed = true,
                     Description =
                         "query string like : filter[$and][0][gender][$eq]=1&filter[$and][1][dayOfBirth][$between][0]=2002-10-01&filter[$and][1][dayOfBirth][$between][1]=2005-10-01",
-                    Example = new OpenApiObject(
-                        new()
+                    Example = new JsonObject
+                    {
+                        ["$and"] = new JsonObject
                         {
-                            ["$and"] = new OpenApiObject()
+                            ["gender"] = new JsonObject { ["$eq"] = JsonValue.Create(1) },
+                            ["dateOfBirth"] = new JsonObject
                             {
-                                ["gender"] = new OpenApiObject()
+                                ["$between"] = new JsonArray
                                 {
-                                    ["$eq"] = new OpenApiInteger(1),
-                                },
-                                ["dateOfBirth"] = new OpenApiObject()
-                                {
-                                    ["$between"] = new OpenApiArray()
-                                    {
-                                        new OpenApiDate(new DateTime(2002, 10, 1)),
-                                        new OpenApiDate(new DateTime(2005, 10, 1)),
-                                    },
+                                    JsonValue.Create("2002-10-01"),
+                                    JsonValue.Create("2005-10-01"),
                                 },
                             },
-                        }
-                    ),
+                        },
+                    },
                 },
             },
         ];

@@ -5,7 +5,6 @@ using Application.Features.Users.Commands.Delete;
 using Mediator;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.OpenApi.Models;
 using static Application.Contracts.Permissions.PermissionNames;
 
 namespace Api.Endpoints.User;
@@ -17,12 +16,16 @@ public class DeleteUserEndpoint : IEndpoint
     public void MapEndpoint(IEndpointRouteBuilder app)
     {
         app.MapDelete(Router.UserRoute.GetUpdateDelete, HandleAsync)
-            .WithOpenApi(operation => new OpenApiOperation(operation)
-            {
-                Summary = "Delete user 🗑️",
-                Description = "Deletes an existing user identified by their unique ID.",
-                Tags = [new OpenApiTag() { Name = Router.UserRoute.Tags }],
-            })
+            .WithTags(Router.UserRoute.Tags)
+            .AddOpenApiOperationTransformer(
+                (operation, context, _) =>
+                {
+                    operation.Summary = "Delete user 🗑️";
+                    operation.Description =
+                        "Deletes an existing user identified by their unique ID.";
+                    return Task.CompletedTask;
+                }
+            )
             .MustHaveAuthorization(
                 permissions: PermissionGenerator.Generate(
                     PermissionResource.User,

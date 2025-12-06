@@ -6,7 +6,6 @@ using Application.Features.Roles.Commands.Update;
 using Mediator;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.OpenApi.Models;
 using static Application.Contracts.Permissions.PermissionNames;
 
 namespace Api.Endpoints.Roles;
@@ -18,12 +17,16 @@ public class UpdateRoleEndpoint : IEndpoint
     public void MapEndpoint(IEndpointRouteBuilder app)
     {
         app.MapPut(Router.RoleRoute.GetUpdateDelete, HandleAsync)
-            .WithOpenApi(operation => new OpenApiOperation(operation)
-            {
-                Summary = "Update role 📝",
-                Description = "Updates a role’s name and its permissions using permission IDs.",
-                Tags = [new OpenApiTag() { Name = Router.RoleRoute.Tags }],
-            })
+            .WithTags(Router.RoleRoute.Tags)
+            .AddOpenApiOperationTransformer(
+                (operation, context, _) =>
+                {
+                    operation.Summary = "Update role 📝";
+                    operation.Description =
+                        "Updates a role’s name and its permissions using permission IDs.";
+                    return Task.CompletedTask;
+                }
+            )
             .WithRequestValidation<RoleUpdateData>()
             .MustHaveAuthorization(
                 permissions: PermissionGenerator.Generate(
