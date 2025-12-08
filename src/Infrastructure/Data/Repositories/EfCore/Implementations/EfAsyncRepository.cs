@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Query;
 
 namespace Infrastructure.Data.Repositories.EfCore.Implementations;
 
-public class AsyncRepository<T>(IEfDbContext dbContext) : IAsyncRepository<T>
+public class EfAsyncRepository<T>(IEfDbContext dbContext) : IEfAsyncRepository<T>
     where T : class
 {
     #region Read

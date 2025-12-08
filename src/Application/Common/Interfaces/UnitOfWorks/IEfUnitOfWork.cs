@@ -7,7 +7,7 @@ public interface IEfUnitOfWork : IUnitOfWork
 {
     public DbTransaction? CurrentTransaction { get; protected set; }
 
-    IAsyncRepository<TEntity> Repository<TEntity>()
+    IEfAsyncRepository<TEntity> Repository<TEntity>()
         where TEntity : class;
 
     /// <summary>
@@ -16,7 +16,7 @@ public interface IEfUnitOfWork : IUnitOfWork
     /// <typeparam name="TEntity">Entity type</typeparam>
     /// <param name="isCached">Do cache or not</param>
     /// <returns></returns>
-    IDynamicSpecificationRepository<TEntity> DynamicReadOnlyRepository<TEntity>(
+    IEfDynamicSpecificationRepository<TEntity> DynamicReadOnlyRepository<TEntity>(
         bool isCached = false
     )
         where TEntity : class;
@@ -27,7 +27,7 @@ public interface IEfUnitOfWork : IUnitOfWork
     /// <typeparam name="TEntity">Entity type</typeparam>
     /// <param name="isCached">Do cache or not</param>
     /// <returns></returns>
-    ISpecificationRepository<TEntity> ReadOnlyRepository<TEntity>(bool isCached = false)
+    IEfSpecificationRepository<TEntity> ReadOnlyRepository<TEntity>(bool isCached = false)
         where TEntity : class;
 
     int ExecuteSqlCommand(string sql, params object[] parameters);

@@ -29,8 +29,8 @@ public class CreateRoleCommandValidatorTest
     {
         contextProvider.Setup(x => x.GetHttpMethod()).Returns(HttpMethod.Post.ToString());
 
-        Mock<IAsyncRepository<Role>> roleRepo = new();
-        Mock<IAsyncRepository<Permission>> permissionRepo = new();
+        Mock<IEfAsyncRepository<Role>> roleRepo = new();
+        Mock<IEfAsyncRepository<Permission>> permissionRepo = new();
 
         unitOfWork.Setup(x => x.Repository<Role>()).Returns(roleRepo.Object);
         unitOfWork.Setup(x => x.Repository<Permission>()).Returns(permissionRepo.Object);

@@ -1,6 +1,7 @@
 using Application.Common.Interfaces.UnitOfWorks;
 using Infrastructure.Data;
 using Infrastructure.Data.Interceptors;
+using Infrastructure.Data.Repositories;
 using Infrastructure.Data.Settings;
 using Infrastructure.Services.Aws;
 using Infrastructure.Services.Cache.DistributedCache;
@@ -70,7 +71,8 @@ public static class DependencyInjection
             .AddIdentity(configuration)
             .AddMail(configuration)
             .AddMemoryCaching(configuration)
-            .AddDistributedCache(configuration);
+            .AddDistributedCache(configuration)
+            .AddRepositories();
 
         return services;
     }

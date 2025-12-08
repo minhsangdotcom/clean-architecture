@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore.ChangeTracking;
 
 namespace Infrastructure.Data.Repositories.EfCore.Implementations;
 
-public class MemoryRepository<T>(IEfDbContext dbContext) : IMemoryRepository<T>
+public class EfMemoryRepository<T>(IEfDbContext dbContext) : IEfMemoryRepository<T>
     where T : class
 {
     #region Read

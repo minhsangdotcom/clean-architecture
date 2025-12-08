@@ -7,7 +7,7 @@ using SpecificationEFCore.Evaluators;
 
 namespace Infrastructure.Data.Repositories.EfCore.Implementations;
 
-public class SpecificationRepository<T>(IEfDbContext dbContext) : ISpecificationRepository<T>
+public class EfSpecificationRepository<T>(IEfDbContext dbContext) : IEfSpecificationRepository<T>
     where T : class
 {
     public async Task<TResult?> FindByConditionAsync<TResult>(

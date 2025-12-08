@@ -22,11 +22,11 @@ public class UnitOfWork(
 
     private bool disposed = false;
 
-    public IAsyncRepository<TEntity> Repository<TEntity>()
+    public IEfAsyncRepository<TEntity> Repository<TEntity>()
         where TEntity : class
     {
         string key = GetKey(typeof(TEntity).FullName!, nameof(Repository));
-        Type repositoryType = typeof(AsyncRepository<>);
+        Type repositoryType = typeof(EfAsyncRepository<>);
         object? repositoryInstance = CreateInstance<TEntity>(repositoryType, dbContext);
 
         if (!repositories.TryGetValue(key, out object? value))
@@ -35,16 +35,16 @@ public class UnitOfWork(
             repositories.Add(key, value);
         }
 
-        return (IAsyncRepository<TEntity>)value!;
+        return (IEfAsyncRepository<TEntity>)value!;
     }
 
-    public IDynamicSpecificationRepository<TEntity> DynamicReadOnlyRepository<TEntity>(
+    public IEfDynamicSpecificationRepository<TEntity> DynamicReadOnlyRepository<TEntity>(
         bool isCached = false
     )
         where TEntity : class
     {
         string key = GetKey(typeof(TEntity).FullName!, nameof(DynamicReadOnlyRepository), isCached);
-        Type repositoryType = typeof(DynamicSpecificationRepository<>);
+        Type repositoryType = typeof(EfDynamicSpecificationRepository<>);
         object? repositoryInstance = CreateInstance<TEntity>(repositoryType, dbContext);
 
         if (!repositories.TryGetValue(key, out object? value))
@@ -60,14 +60,14 @@ public class UnitOfWork(
             repositories.Add(key, value);
         }
 
-        return (IDynamicSpecificationRepository<TEntity>)value!;
+        return (IEfDynamicSpecificationRepository<TEntity>)value!;
     }
 
-    public ISpecificationRepository<TEntity> ReadOnlyRepository<TEntity>(bool isCached = false)
+    public IEfSpecificationRepository<TEntity> ReadOnlyRepository<TEntity>(bool isCached = false)
         where TEntity : class
     {
         string key = GetKey(typeof(TEntity).FullName!, nameof(ReadOnlyRepository), isCached);
-        Type repositoryType = typeof(SpecificationRepository<>);
+        Type repositoryType = typeof(EfSpecificationRepository<>);
         object? repositoryInstance = CreateInstance<TEntity>(repositoryType, dbContext);
 
         if (!repositories.TryGetValue(key, out object? value))
@@ -83,7 +83,7 @@ public class UnitOfWork(
             repositories.Add(key, value);
         }
 
-        return (ISpecificationRepository<TEntity>)value!;
+        return (IEfSpecificationRepository<TEntity>)value!;
     }
 
     public async Task BeginTransactionAsync(CancellationToken cancellationToken = default)

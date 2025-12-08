@@ -1,11 +1,13 @@
 using Application.Common.Interfaces.Services.Localization;
 using Application.Contracts.ApiWrapper;
 using Application.Contracts.Permissions;
+using Domain.Aggregates.Permissions;
 using Mediator;
 
 namespace Application.Features.Permissions;
 
 public class ListPermissionHandler(
+    IPermissionRepository permissionRepository,
     PermissionDefinitionContext permissionDefinitionContext,
     IPermissionTranslatorService translator
 ) : IRequestHandler<ListPermissionQuery, Result<IReadOnlyList<ListGroupPermissionResponse>>>
@@ -15,61 +17,62 @@ public class ListPermissionHandler(
         CancellationToken cancellationToken
     )
     {
-        // var permissionGroup = dbContext
-        //     .Query<Permission>()
-        //     .OrderBy(x => x.Group)
-        //     .GroupBy(x => x.Group)
-        //     .Select(g => new ListGroupPermissionResponse
-        //     {
-        //         Name = g.Key,
-        //         Permissions = g.OrderBy(x => x.Code)
-        //             .Select(p => new ListPermissionResponse
-        //             {
-        //                 Id = p.Id,
-        //                 Code = p.Code,
-        //                 CreatedAt = p.CreatedAt,
-        //             })
-        //             .ToList(),
-        //     })
-        //     .ToList();
+        List<IGrouping<string?, Permission>> groupPermission =
+            await permissionRepository.ListAsync();
 
-        // for (int i = 0; i < permissionGroup.Count; i++)
-        // {
-        //     var group = permissionGroup[i];
-        //     group.NameTranslation = translator.Translate(group.Name!);
-        //     group.Permissions?.ForEach(p =>
-        //         p.CodeTranslation = translator.Translate(p.Code! ?? "")
-        //     );
-        //     Dictionary<string, PermissionResponse>? dbPermissions = group.Permissions?.ToDictionary(
-        //         p => p.Code!,
-        //         p => new PermissionResponse
-        //         {
-        //             Id = p.Id,
-        //             Code = p.Code!,
-        //             CreatedAt = p.CreatedAt,
-        //             CodeTranslation = p.CodeTranslation,
-        //         }
-        //     );
-        //     if (
-        //         permissionDefinitionContext.Groups.TryGetValue(group.Name!, out var groupDefinition)
-        //     )
-        //     {
-        //         for (int j = 0; j < group.Permissions?.Count; j++)
-        //         {
-        //             PermissionDefinition? definition = groupDefinition.Permissions.Find(p =>
-        //                 p.Code == group.Permissions[j].Code
-        //             );
-        //             ListPermissionResponse mapped = MapDefinitionToResponse(
-        //                 definition,
-        //                 dbPermissions
-        //             );
-        //             group.Permissions[j].Children = mapped.Children ?? [];
-        //         }
-        //     }
-        // }
+        var permissionGroup = groupPermission
+            .Select(g => new ListGroupPermissionResponse
+            {
+                Name = g.Key,
+                Permissions =
+                [
+                    .. g.OrderBy(x => x.Code)
+                        .Select(p => new ListPermissionResponse
+                        {
+                            Id = p.Id,
+                            Code = p.Code,
+                            CreatedAt = p.CreatedAt,
+                        }),
+                ],
+            })
+            .ToList();
 
-        // return Result<IReadOnlyList<ListGroupPermissionResponse>>.Success(permissionGroup);
-        return Result<IReadOnlyList<ListGroupPermissionResponse>>.Success([]);
+        for (int i = 0; i < permissionGroup.Count; i++)
+        {
+            ListGroupPermissionResponse group = permissionGroup[i];
+            group.NameTranslation = translator.Translate(group.Name!);
+            group.Permissions?.ForEach(p =>
+                p.CodeTranslation = translator.Translate(p.Code! ?? "")
+            );
+            Dictionary<string, PermissionResponse>? dbPermissions = group.Permissions?.ToDictionary(
+                p => p.Code!,
+                p => new PermissionResponse
+                {
+                    Id = p.Id,
+                    Code = p.Code!,
+                    CreatedAt = p.CreatedAt,
+                    CodeTranslation = p.CodeTranslation,
+                }
+            );
+            if (
+                permissionDefinitionContext.Groups.TryGetValue(group.Name!, out var groupDefinition)
+            )
+            {
+                for (int j = 0; j < group.Permissions?.Count; j++)
+                {
+                    PermissionDefinition? definition = groupDefinition.Permissions.Find(p =>
+                        p.Code == group.Permissions[j].Code
+                    );
+                    ListPermissionResponse mapped = MapDefinitionToResponse(
+                        definition,
+                        dbPermissions
+                    );
+                    group.Permissions[j].Children = mapped.Children ?? [];
+                }
+            }
+        }
+
+        return Result<IReadOnlyList<ListGroupPermissionResponse>>.Success(permissionGroup);
     }
 
     private ListPermissionResponse MapDefinitionToResponse(

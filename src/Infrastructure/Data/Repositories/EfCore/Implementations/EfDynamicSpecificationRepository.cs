@@ -11,8 +11,8 @@ using SpecificationEFCore.Evaluators;
 
 namespace Infrastructure.Data.Repositories.EfCore.Implementations;
 
-public class DynamicSpecificationRepository<T>(IEfDbContext dbContext)
-    : IDynamicSpecificationRepository<T>
+public class EfDynamicSpecificationRepository<T>(IEfDbContext dbContext)
+    : IEfDynamicSpecificationRepository<T>
     where T : class
 {
     public async Task<T?> FindByConditionAsync(

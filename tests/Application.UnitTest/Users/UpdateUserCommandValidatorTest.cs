@@ -26,9 +26,9 @@ public class UpdateUserCommandValidatorTest
     private readonly Mock<IMessageTranslatorService> translator = new();
     private readonly Mock<IEfUnitOfWork> unitOfWork = new();
 
-    private readonly Mock<IAsyncRepository<Role>> roleRepo = new();
-    private readonly Mock<IAsyncRepository<User>> userRepo = new();
-    private readonly Mock<IAsyncRepository<Permission>> permissionRepo = new();
+    private readonly Mock<IEfAsyncRepository<Role>> roleRepo = new();
+    private readonly Mock<IEfAsyncRepository<User>> userRepo = new();
+    private readonly Mock<IEfAsyncRepository<Permission>> permissionRepo = new();
 
     public UpdateUserCommandValidatorTest()
     {

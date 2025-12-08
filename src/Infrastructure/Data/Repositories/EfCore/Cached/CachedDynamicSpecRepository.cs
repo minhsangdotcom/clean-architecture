@@ -9,10 +9,10 @@ using Specification.Interfaces;
 namespace Infrastructure.Data.Repositories.EfCore.Cached;
 
 public class CachedDynamicSpecRepository<T>(
-    IDynamicSpecificationRepository<T> repository,
+    IEfDynamicSpecificationRepository<T> repository,
     ILogger<UnitOfWork> logger,
     IMemoryCacheService memoryCacheService
-) : IDynamicSpecificationRepository<T>
+) : IEfDynamicSpecificationRepository<T>
     where T : class
 {
     public Task<TResult?> FindByConditionAsync<TResult>(
