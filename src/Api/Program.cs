@@ -13,7 +13,6 @@ using Cysharp.Serialization.Json;
 using Infrastructure;
 using Infrastructure.Data;
 using Infrastructure.Data.Seeds;
-using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Localization;
 using Serilog;
 using Swashbuckle.AspNetCore.SwaggerUI;
@@ -46,7 +45,7 @@ services.AddLocalizationConfigurations(configuration);
 services.AddHttpContextAccessor();
 services.AddScoped<IRequestContextProvider, RequestContextProvider>();
 
-// I set it Singleton because it's called inside many singleton service, but if u want, set it for Scoped for the standard.
+// I set it Singleton because it's called inside many singleton services, but if u want, set it for Scoped for the standard.
 services.AddSingleton<ICurrentUser, CurrentUser>();
 
 List<CorsProfileSettings> corsProfiles =
@@ -80,38 +79,9 @@ try
     Log.Logger.Information("Application is starting....");
     var app = builder.Build();
 
-    string healthCheckPath =
-        builder.Configuration.GetValue<string>("HealthCheckSettings:Path") ?? "/health";
-    app.MapHealthChecks(
-        healthCheckPath,
-        new HealthCheckOptions
-        {
-            AllowCachingResponses = false,
-            ResponseWriter = async (context, report) =>
-            {
-                context.Response.ContentType = "application/json";
-
-                var result = new
-                {
-                    status = report.Status.ToString(),
-                    totalDuration = report.TotalDuration.ToString(),
-                    entries = report.Entries.Select(x => new
-                    {
-                        key = x.Key,
-                        status = x.Value.Status.ToString(),
-                        description = x.Value.Description,
-                        duration = x.Value.Duration.ToString(),
-                        data = x.Value.Data,
-                    }),
-                };
-
-                await context.Response.WriteAsJsonAsync(result);
-            },
-        }
-    );
+    app.UseHealthCheck(configuration);
 
     bool isDevelopment = app.Environment.IsDevelopment();
-
     #region seeding area
     if (
         app.Environment.EnvironmentName != "Testing-Deployment"
@@ -133,6 +103,8 @@ try
             configs.ConfigObject.PersistAuthorization = true;
             configs.DocExpansion(DocExpansion.None);
         });
+        string healthCheckPath =
+            configuration.GetValue<string>("HealthCheckSettings:Path") ?? "/health";
         app.AddLog(Log.Logger, "swagger", healthCheckPath);
     }
     string defaultCulture =
@@ -152,7 +124,7 @@ try
     app.UseAuthorization();
 
     app.UseRequestLocalizationMiddleware();
-    app.MapEndpoints(apiVersion: EndpointVersion.One);
+    app.MapEndpoints(EndpointVersion.One);
     if (isDevelopment)
     {
         app.AddSynchronizedLocalizationEndpoint();

@@ -1,4 +1,5 @@
 using Application.Contracts.ApiWrapper;
+using Application.Contracts.Binds;
 using Application.Contracts.Dtos.Requests;
 using Application.Contracts.Dtos.Responses;
 using Application.SharedFeatures.Projections.Regions;
@@ -9,10 +10,9 @@ namespace Application.Features.Regions.Queries.List.Communes;
 
 public class ListCommuneQuery
     : QueryParamRequest,
+        IQueryBinding<ListCommuneQuery>,
         IRequest<Result<PaginationResponse<CommuneProjection>>>
 {
-    public static ValueTask<ListCommuneQuery> BindAsync(HttpContext context)
-    {
-        return ValueTask.FromResult(QueryParamRequestExtension.Bind<ListCommuneQuery>(context));
-    }
+    public static ValueTask<ListCommuneQuery> BindAsync(HttpContext context) =>
+        ValueTask.FromResult(QueryParamRequestExtension.Bind<ListCommuneQuery>(context));
 }
