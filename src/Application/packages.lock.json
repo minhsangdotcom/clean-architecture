@@ -36,16 +36,6 @@
           "Scriban": "6.2.0"
         }
       },
-      "minhsangdotcom.TheTemplate.ElasticsearchFluentConfig": {
-        "type": "Direct",
-        "requested": "[1.0.1-alpha, )",
-        "resolved": "1.0.1-alpha",
-        "contentHash": "oqzZX0iyIA6jM7p3tgIanoJrQBpEouZx/1OJmBCY+Zv5R9VcCOq5Ymi8c3TICoejv7T2AkMC8WEEtTB+XZdjFA==",
-        "dependencies": {
-          "CaseConverter": "2.0.1",
-          "Elastic.Clients.Elasticsearch": "8.17.1"
-        }
-      },
       "Wangkanai.Detection": {
         "type": "Direct",
         "requested": "[8.17.0, )",
@@ -78,19 +68,6 @@
         "dependencies": {
           "Microsoft.Extensions.Options": "3.1.10"
         }
-      },
-      "Elastic.Clients.Elasticsearch": {
-        "type": "Transitive",
-        "resolved": "8.17.1",
-        "contentHash": "H1TI5dMB/si8GzoEy17sgjzr8frO+nURIjfgoHFg3AOGugbvPwm4FzCNLk+R++vdPOmsQ3wS0NZPH3VufP4HcQ==",
-        "dependencies": {
-          "Elastic.Transport": "0.5.7"
-        }
-      },
-      "Elastic.Transport": {
-        "type": "Transitive",
-        "resolved": "0.5.7",
-        "contentHash": "0VQhS6RauOqydF1bUs7nqpk9u8X2Sa2O7djiioD5b/jWf/cX6S7GcmlWzqvm2j1a+np1Q79B2SwEFOI2zMkcbw=="
       },
       "FluentValidation": {
         "type": "Transitive",

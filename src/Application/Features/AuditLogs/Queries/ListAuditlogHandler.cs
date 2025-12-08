@@ -2,7 +2,6 @@ using Application.Common.Interfaces.Services.Elasticsearch;
 using Application.Contracts.ApiWrapper;
 using Application.Contracts.Dtos.Responses;
 using Domain.Aggregates.AuditLogs;
-using Elastic.Clients.Elasticsearch;
 using Mediator;
 
 namespace Application.Features.AuditLogs.Queries;
@@ -20,14 +19,11 @@ public class ListAuditLogHandler(IElasticsearchServiceFactory? elasticsearch = n
             throw new NotImplementedException("Elasticsearch has not enabled");
         }
 
-        SearchResponse<AuditLog> searchResponse = await elasticsearch
-            .Get<AuditLog>()
-            .ListAsync(request);
-
+        IList<AuditLog> auditLogs = await elasticsearch.Get<AuditLog>().ListAsync(request);
         PaginationResponse<ListAuditLogResponse> paginationResponse =
             new(
-                searchResponse.Documents.ToListAuditLogResponse(),
-                (int)searchResponse.Total,
+                auditLogs.ToListAuditLogResponse(),
+                auditLogs.Count,
                 request.Page,
                 request.PageSize
             );
