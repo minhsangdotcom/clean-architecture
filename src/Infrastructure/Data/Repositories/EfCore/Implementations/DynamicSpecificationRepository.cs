@@ -1,5 +1,4 @@
 using System.Linq.Expressions;
-using Application.Common.Interfaces.DbContexts;
 using Application.Common.Interfaces.Repositories.EfCore;
 using Application.Contracts.Dtos.Requests;
 using Application.Contracts.Dtos.Responses;
@@ -7,8 +6,8 @@ using DynamicQuery.Extensions;
 using DynamicQuery.Models;
 using Microsoft.EntityFrameworkCore;
 using SharedKernel.Entities;
-using Specification.Evaluators;
 using Specification.Interfaces;
+using SpecificationEFCore.Evaluators;
 
 namespace Infrastructure.Data.Repositories.EfCore.Implementations;
 

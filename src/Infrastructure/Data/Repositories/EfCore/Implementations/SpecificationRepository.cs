@@ -1,62 +1,45 @@
-using System.Linq.Expressions;
-using Application.Common.Interfaces.DbContexts;
 using Application.Common.Interfaces.Repositories.EfCore;
 using Application.Contracts.Dtos.Requests;
 using Application.Contracts.Dtos.Responses;
-using DynamicQuery.Extensions;
-using DynamicQuery.Models;
 using Microsoft.EntityFrameworkCore;
-using SharedKernel.Entities;
-using Specification.Evaluators;
 using Specification.Interfaces;
+using SpecificationEFCore.Evaluators;
 
 namespace Infrastructure.Data.Repositories.EfCore.Implementations;
 
 public class SpecificationRepository<T>(IEfDbContext dbContext) : ISpecificationRepository<T>
     where T : class
 {
-    public Task<TResult?> FindByConditionAsync<TResult>(
-        ISpecification<T> spec,
-        Expression<Func<T, TResult>> selector,
+    public async Task<TResult?> FindByConditionAsync<TResult>(
+        ISpecification<T, TResult> spec,
         CancellationToken cancellationToken = default
     )
         where TResult : class =>
-        ApplySpecification(spec).Select(selector).FirstOrDefaultAsync(cancellationToken);
+        await ApplySpecification(spec).FirstOrDefaultAsync(cancellationToken);
 
-    public async Task<PaginationResponse<TResult>> CursorPagedListAsync<TResult>(
-        ISpecification<T> spec,
-        QueryParamRequest queryParam,
-        Expression<Func<T, TResult>> selector,
-        string? uniqueSort = null,
+    public async Task<IList<TResult>> ListAsync<TResult>(
+        ISpecification<T, TResult> spec,
         CancellationToken cancellationToken = default
     )
-        where TResult : class =>
-        (
-            await ApplySpecification(spec)
-                .Select(selector)
-                .ToCursorPagedListAsync(
-                    new CursorPaginationRequest(
-                        queryParam.Before,
-                        queryParam.After,
-                        queryParam.PageSize,
-                        queryParam.Sort.GetDefaultSort(),
-                        uniqueSort ?? nameof(AuditableEntity.Id)
-                    )
-                )
-        ).ToPaginationResponse();
+        where TResult : class => await ApplySpecification(spec).ToListAsync(cancellationToken);
 
     public async Task<PaginationResponse<TResult>> PagedListAsync<TResult>(
-        ISpecification<T> spec,
+        ISpecification<T, TResult> spec,
         QueryParamRequest queryParam,
-        Expression<Func<T, TResult>> selector,
         CancellationToken cancellationToken = default
-    ) =>
-        (
-            await ApplySpecification(spec)
-                .Select(selector)
-                .ToPagedListAsync(queryParam.Page, queryParam.PageSize, cancellationToken)
-        ).ToPaginationResponse();
+    )
+        where TResult : class
+    {
+        var list = await ListAsync<TResult>(spec, cancellationToken);
+        return new PaginationResponse<TResult>(
+            list,
+            list.Count,
+            queryParam.Page,
+            queryParam.PageSize
+        );
+    }
 
-    private IQueryable<T> ApplySpecification(ISpecification<T> spec) =>
-        SpecificationEvaluator.GetQuery(dbContext.Set<T>().AsQueryable(), spec);
+    private IQueryable<TResult> ApplySpecification<TResult>(ISpecification<T, TResult> spec)
+        where TResult : class =>
+        ProjectionSpecificationEvaluator.GetQuery(dbContext.Set<T>().AsQueryable(), spec);
 }

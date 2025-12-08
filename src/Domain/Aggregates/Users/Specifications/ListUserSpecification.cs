@@ -7,7 +7,7 @@ public class ListUserSpecification : Specification<User>
 {
     public ListUserSpecification()
     {
-        string key = GetUniqueCachedKey();
+        string key = SpecificationCacheKeyGenerator.Create(this);
         Query.EnableCache(key);
     }
 }

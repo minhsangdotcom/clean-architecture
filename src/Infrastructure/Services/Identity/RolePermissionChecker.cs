@@ -1,9 +1,9 @@
-using Application.Common.Interfaces.DbContexts;
 using Application.Common.Interfaces.Services.Cache;
 using Application.Common.Interfaces.Services.Identity;
 using Application.Contracts.Permissions;
 using Domain.Aggregates.Roles;
 using Domain.Aggregates.Users;
+using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Wangkanai.Extensions;

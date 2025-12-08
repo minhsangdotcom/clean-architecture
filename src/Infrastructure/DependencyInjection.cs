@@ -1,4 +1,3 @@
-using Application.Common.Interfaces.DbContexts;
 using Application.Common.Interfaces.UnitOfWorks;
 using Infrastructure.Data;
 using Infrastructure.Data.Interceptors;

@@ -98,11 +98,22 @@
         "type": "Direct",
         "requested": "[1.0.3, )",
         "resolved": "1.0.3",
-        "contentHash": "VczpDICA1GxbaQOswRmeKz+EOVfTh5ZOGscpEw3+12afTOThCvY6osbME4Qwds1puG1LJDnup7hQ+stL3q3fCw==",
+        "contentHash": "zwAynXctS9CrnG63i+2LxmRbZB5t5rOWnhZ973rLq6g/ND3lr6qUWVjuPNwG/+HniBCLCxna1AQlUIqbuFic1w==",
         "dependencies": {
           "Newtonsoft.Json": "13.0.4",
           "Npgsql.EntityFrameworkCore.PostgreSQL": "10.0.0",
           "TranMinhSang.AspNetCore.Extensions": "1.0.1"
+        }
+      },
+      "TranMinhSang.Specification.EntityFrameworkCore": {
+        "type": "Direct",
+        "requested": "[0.1.0, )",
+        "resolved": "0.1.0",
+        "contentHash": "CUgHmXmbSbRz+THuMCDF+y2WF6jpvbjNV9HRarQSFxrE7KxbBKegqg3xwruH06/m1/LxIqh9acnOVXMr10ZyOg==",
+        "dependencies": {
+          "Microsoft.EntityFrameworkCore": "10.0.0",
+          "Microsoft.EntityFrameworkCore.Relational": "10.0.0",
+          "minhsangdotcom.TheTemplate.SpecificationPattern": "1.0.8"
         }
       },
       "Ardalis.GuardClauses": {
@@ -608,12 +619,8 @@
       },
       "minhsangdotcom.TheTemplate.SpecificationPattern": {
         "type": "Transitive",
-        "resolved": "1.0.6",
-        "contentHash": "pG8A8eWH15FDnYJ6Ifw6wASH1/KIjOvrunHikjjpRu7zPlN+o6n6GrvaB8TdYyqmt3NbHMEWZCUivG8siae3aw==",
-        "dependencies": {
-          "Microsoft.EntityFrameworkCore": "10.0.0",
-          "Microsoft.EntityFrameworkCore.Relational": "10.0.0"
-        }
+        "resolved": "1.0.8",
+        "contentHash": "MZTU1ZsIdBLWI2/ehTDEZzh5Y/Khd63t/R472ziwnjuw502bmwRl654QRiIAC1dXAPleWW+Y5QYXzAK0R/G9qQ=="
       },
       "Mono.TextTemplating": {
         "type": "Transitive",
@@ -840,7 +847,7 @@
         "dependencies": {
           "Ardalis.GuardClauses": "[5.0.0, )",
           "minhsangdotcom.TheTemplate.SharedKernel": "[2.0.0, )",
-          "minhsangdotcom.TheTemplate.SpecificationPattern": "[1.0.6, )"
+          "minhsangdotcom.TheTemplate.SpecificationPattern": "[1.0.8, )"
         }
       }
     }

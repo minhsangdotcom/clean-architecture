@@ -1,4 +1,3 @@
-using Application.Common.Interfaces.DbContexts;
 using Application.Contracts.Permissions;
 using Application.SubcutaneousTests.Extensions;
 using Domain.Aggregates.Permissions;

@@ -2,7 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 
-namespace Application.Common.Interfaces.DbContexts;
+namespace Infrastructure.Data;
 
 public interface IEfDbContext : IDisposable
 {

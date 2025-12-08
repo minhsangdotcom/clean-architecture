@@ -31,7 +31,7 @@ public class RequestUserPasswordResetHandler(
     )
     {
         User? user = await unitOfWork
-            .DynamicReadOnlyRepository<User>()
+            .DynamicReadOnlyRepository<User>(true)
             .FindByConditionAsync(
                 new GetUserByEmailIncludePasswordResetRequestSpecification(command.Email!),
                 cancellationToken

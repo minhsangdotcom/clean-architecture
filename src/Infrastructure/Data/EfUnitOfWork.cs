@@ -1,5 +1,4 @@
 using System.Data.Common;
-using Application.Common.Interfaces.DbContexts;
 using Application.Common.Interfaces.Repositories.EfCore;
 using Application.Common.Interfaces.Services.Cache;
 using Application.Common.Interfaces.UnitOfWorks;

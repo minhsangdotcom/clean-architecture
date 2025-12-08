@@ -1,5 +1,4 @@
 using System.Linq.Expressions;
-using Microsoft.EntityFrameworkCore.Query;
 
 namespace Application.Common.Interfaces.Repositories.EfCore;
 
@@ -57,16 +56,9 @@ public interface IAsyncRepository<T> : IRepository<T>
         CancellationToken cancellationToken = default
     );
 
-    Task EditAsync(T entity);
-
     Task UpdateAsync(T entity);
 
     Task UpdateRangeAsync(IEnumerable<T> entities);
-
-    Task ExecuteUpdateAsync(
-        Expression<Func<T, bool>>? criteria,
-        Action<UpdateSettersBuilder<T>> updateExpression
-    );
 
     Task DeleteAsync(T entity);
 
@@ -85,6 +77,6 @@ public interface IAsyncRepository<T> : IRepository<T>
         CancellationToken cancellationToken = default
     );
 
-    IQueryable<T> Fromsql(string sqlQuery, params object[] parameters);
+    IQueryable<T> FromSql(string sqlQuery, params object[] parameters);
     #endregion
 }

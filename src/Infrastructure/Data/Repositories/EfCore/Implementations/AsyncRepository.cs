@@ -1,5 +1,4 @@
 using System.Linq.Expressions;
-using Application.Common.Interfaces.DbContexts;
 using Application.Common.Interfaces.Repositories.EfCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
@@ -80,12 +79,6 @@ public class AsyncRepository<T>(IEfDbContext dbContext) : IAsyncRepository<T>
         return entities;
     }
 
-    public async Task EditAsync(T entity)
-    {
-        dbContext.Entry(entity).State = EntityState.Modified;
-        await Task.CompletedTask;
-    }
-
     public async Task UpdateAsync(T entity)
     {
         dbContext.Set<T>().Update(entity);
@@ -96,21 +89,6 @@ public class AsyncRepository<T>(IEfDbContext dbContext) : IAsyncRepository<T>
     {
         dbContext.Set<T>().UpdateRange(entities);
         await Task.CompletedTask;
-    }
-
-    public async Task ExecuteUpdateAsync(
-        Expression<Func<T, bool>>? criteria,
-        Action<UpdateSettersBuilder<T>> updateExpression
-    )
-    {
-        IQueryable<T> query = dbContext.Set<T>();
-
-        if (criteria != null)
-        {
-            query = query.Where(criteria);
-        }
-
-        await query.ExecuteUpdateAsync(updateExpression);
     }
 
     public async Task DeleteAsync(T entity)
@@ -143,8 +121,7 @@ public class AsyncRepository<T>(IEfDbContext dbContext) : IAsyncRepository<T>
         CancellationToken cancellationToken = default
     ) => await dbContext.Set<T>().CountAsync(criteria ?? (x => true), cancellationToken);
 
-    public IQueryable<T> Fromsql(string sqlQuery, params object[] parameters) =>
+    public IQueryable<T> FromSql(string sqlQuery, params object[] parameters) =>
         dbContext.Set<T>().FromSqlRaw(sqlQuery, parameters);
-
     #endregion
 }

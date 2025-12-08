@@ -823,12 +823,8 @@
       },
       "minhsangdotcom.TheTemplate.SpecificationPattern": {
         "type": "Transitive",
-        "resolved": "1.0.6",
-        "contentHash": "pG8A8eWH15FDnYJ6Ifw6wASH1/KIjOvrunHikjjpRu7zPlN+o6n6GrvaB8TdYyqmt3NbHMEWZCUivG8siae3aw==",
-        "dependencies": {
-          "Microsoft.EntityFrameworkCore": "10.0.0",
-          "Microsoft.EntityFrameworkCore.Relational": "10.0.0"
-        }
+        "resolved": "1.0.8",
+        "contentHash": "MZTU1ZsIdBLWI2/ehTDEZzh5Y/Khd63t/R472ziwnjuw502bmwRl654QRiIAC1dXAPleWW+Y5QYXzAK0R/G9qQ=="
       },
       "Newtonsoft.Json": {
         "type": "Transitive",
@@ -841,15 +837,6 @@
         "contentHash": "xZAYhPOU2rUIFpV48xsqhCx9vXs6Y+0jX2LCoSEfDFYMw9jtAOUk3iQsCnDLrFIv9NT3JGMihn7nnuZsPKqJmA==",
         "dependencies": {
           "Microsoft.Extensions.Logging.Abstractions": "10.0.0"
-        }
-      },
-      "Npgsql.DependencyInjection": {
-        "type": "Transitive",
-        "resolved": "10.0.0",
-        "contentHash": "htuxMDQ7nHgadPxoO6XXVvSgYcVierLrhzOoamyUchvC4oHnYdD05zZ0dYsq80DN0vco9t/Vp+ZxYvnfJxbhIg==",
-        "dependencies": {
-          "Microsoft.Extensions.DependencyInjection.Abstractions": "8.0.0",
-          "Npgsql": "10.0.0"
         }
       },
       "Npgsql.EntityFrameworkCore.PostgreSQL": {
@@ -1154,11 +1141,21 @@
       "TranMinhSang.DynamicQueryExtension.EntityFrameworkCore": {
         "type": "Transitive",
         "resolved": "1.0.3",
-        "contentHash": "VczpDICA1GxbaQOswRmeKz+EOVfTh5ZOGscpEw3+12afTOThCvY6osbME4Qwds1puG1LJDnup7hQ+stL3q3fCw==",
+        "contentHash": "zwAynXctS9CrnG63i+2LxmRbZB5t5rOWnhZ973rLq6g/ND3lr6qUWVjuPNwG/+HniBCLCxna1AQlUIqbuFic1w==",
         "dependencies": {
           "Newtonsoft.Json": "13.0.4",
           "Npgsql.EntityFrameworkCore.PostgreSQL": "10.0.0",
           "TranMinhSang.AspNetCore.Extensions": "1.0.1"
+        }
+      },
+      "TranMinhSang.Specification.EntityFrameworkCore": {
+        "type": "Transitive",
+        "resolved": "0.1.0",
+        "contentHash": "CUgHmXmbSbRz+THuMCDF+y2WF6jpvbjNV9HRarQSFxrE7KxbBKegqg3xwruH06/m1/LxIqh9acnOVXMr10ZyOg==",
+        "dependencies": {
+          "Microsoft.EntityFrameworkCore": "10.0.0",
+          "Microsoft.EntityFrameworkCore.Relational": "10.0.0",
+          "minhsangdotcom.TheTemplate.SpecificationPattern": "1.0.8"
         }
       },
       "Ulid": {
@@ -1239,7 +1236,6 @@
           "AspNetCore.HealthChecks.UI.Client": "[9.0.0, )",
           "Infrastructure": "[1.0.0, )",
           "Microsoft.AspNetCore.OpenApi": "[10.0.0, )",
-          "Npgsql.DependencyInjection": "[10.0.0, )",
           "OpenTelemetry": "[1.12.0, )",
           "OpenTelemetry.Exporter.Console": "[1.12.0, )",
           "OpenTelemetry.Exporter.OpenTelemetryProtocol": "[1.12.0, )",
@@ -1279,7 +1275,7 @@
         "dependencies": {
           "Ardalis.GuardClauses": "[5.0.0, )",
           "minhsangdotcom.TheTemplate.SharedKernel": "[2.0.0, )",
-          "minhsangdotcom.TheTemplate.SpecificationPattern": "[1.0.6, )"
+          "minhsangdotcom.TheTemplate.SpecificationPattern": "[1.0.8, )"
         }
       },
       "infrastructure": {
@@ -1294,7 +1290,8 @@
           "RazorLight": "[2.3.1, )",
           "Scrutor": "[6.1.0, )",
           "StackExchange.Redis": "[2.9.32, )",
-          "TranMinhSang.DynamicQueryExtension.EntityFrameworkCore": "[1.0.3, )"
+          "TranMinhSang.DynamicQueryExtension.EntityFrameworkCore": "[1.0.3, )",
+          "TranMinhSang.Specification.EntityFrameworkCore": "[0.1.0, )"
         }
       }
     }

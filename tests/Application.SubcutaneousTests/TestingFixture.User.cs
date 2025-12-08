@@ -1,5 +1,4 @@
 using System.Text.Json;
-using Application.Common.Interfaces.DbContexts;
 using Application.Common.Interfaces.Services.Identity;
 using Application.Common.Interfaces.UnitOfWorks;
 using Application.Contracts.ApiWrapper;
@@ -9,6 +8,7 @@ using Domain.Aggregates.Roles;
 using Domain.Aggregates.Users;
 using Domain.Aggregates.Users.Enums;
 using Infrastructure.Constants;
+using Infrastructure.Data;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
