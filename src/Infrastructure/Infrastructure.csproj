@@ -16,12 +16,12 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
+    <PackageReference Include="minhsangdotcom.TheTemplate.ElasticsearchFluentConfig" Version="1.0.1" />
     <PackageReference Include="RazorLight" Version="2.3.1" />
     <PackageReference Include="Scrutor" Version="6.1.0" />
     <PackageReference Include="StackExchange.Redis" Version="2.9.32" />
     <PackageReference Include="TranMinhSang.DynamicQueryExtension.EntityFrameworkCore" Version="1.0.3" />
     <PackageReference Include="TranMinhSang.Specification.EntityFrameworkCore" Version="0.1.0" />
-    <PackageReference Include="minhsangdotcom.TheTemplate.ElasticsearchFluentConfig" Version="1.0.1-alpha" />
   </ItemGroup>
 
   <PropertyGroup>

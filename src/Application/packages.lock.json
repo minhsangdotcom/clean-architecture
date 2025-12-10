@@ -8,6 +8,15 @@
         "resolved": "4.0.3",
         "contentHash": "W+U9WvmZQgi5cX6FS5GDtDoPzUCV4LkBLkywq/kRZhuDwcbavOzcDAr3LXJFqHUi952Yj3LEYoWW0jbEUQChsA=="
       },
+      "Elastic.Clients.Elasticsearch": {
+        "type": "Direct",
+        "requested": "[9.2.2, )",
+        "resolved": "9.2.2",
+        "contentHash": "4X2a9r+4YvzJY5b26OFRhOcfisAZuz7XSvkgmUWcbFJi17VlelPC9mjxuyTEz+3g7uoQ0CNDR6eXzYyoggIt6w==",
+        "dependencies": {
+          "Elastic.Transport": "0.10.1"
+        }
+      },
       "FluentValidation.DependencyInjectionExtensions": {
         "type": "Direct",
         "requested": "[12.0.0, )",
@@ -68,6 +77,11 @@
         "dependencies": {
           "Microsoft.Extensions.Options": "3.1.10"
         }
+      },
+      "Elastic.Transport": {
+        "type": "Transitive",
+        "resolved": "0.10.1",
+        "contentHash": "8qUyxd4LzMiR+wtNEzdHHnu+iEpbKfoA001NyYgZZT0YZaNE9fWmFeZMxcTz7HMcYUidZSeT6vvongjZh1j/hQ=="
       },
       "FluentValidation": {
         "type": "Transitive",

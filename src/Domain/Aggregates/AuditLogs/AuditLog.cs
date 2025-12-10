@@ -2,9 +2,9 @@ using SharedKernel.Entities;
 
 namespace Domain.Aggregates.AuditLogs;
 
-public class AuditLog : Entity<string>
+public class AuditLog
 {
-    public override string Id { get; protected set; } = Ulid.NewUlid().ToString();
+    public string Id { get; set; } = Ulid.NewUlid().ToString();
 
     public string Entity { get; set; } = string.Empty;
 
@@ -17,4 +17,6 @@ public class AuditLog : Entity<string>
     public string? ActionPerformBy { get; set; }
 
     public Agent? Agent { get; set; }
+
+    public DateTimeOffset CreatedAt { get; set; }
 }

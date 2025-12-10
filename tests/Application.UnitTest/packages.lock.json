@@ -88,16 +88,16 @@
       },
       "Elastic.Clients.Elasticsearch": {
         "type": "Transitive",
-        "resolved": "8.17.1",
-        "contentHash": "H1TI5dMB/si8GzoEy17sgjzr8frO+nURIjfgoHFg3AOGugbvPwm4FzCNLk+R++vdPOmsQ3wS0NZPH3VufP4HcQ==",
+        "resolved": "9.2.2",
+        "contentHash": "4X2a9r+4YvzJY5b26OFRhOcfisAZuz7XSvkgmUWcbFJi17VlelPC9mjxuyTEz+3g7uoQ0CNDR6eXzYyoggIt6w==",
         "dependencies": {
-          "Elastic.Transport": "0.5.7"
+          "Elastic.Transport": "0.10.1"
         }
       },
       "Elastic.Transport": {
         "type": "Transitive",
-        "resolved": "0.5.7",
-        "contentHash": "0VQhS6RauOqydF1bUs7nqpk9u8X2Sa2O7djiioD5b/jWf/cX6S7GcmlWzqvm2j1a+np1Q79B2SwEFOI2zMkcbw=="
+        "resolved": "0.10.1",
+        "contentHash": "8qUyxd4LzMiR+wtNEzdHHnu+iEpbKfoA001NyYgZZT0YZaNE9fWmFeZMxcTz7HMcYUidZSeT6vvongjZh1j/hQ=="
       },
       "FluentValidation": {
         "type": "Transitive",
@@ -208,15 +208,6 @@
           "Newtonsoft.Json": "13.0.3"
         }
       },
-      "minhsangdotcom.TheTemplate.ElasticsearchFluentConfig": {
-        "type": "Transitive",
-        "resolved": "1.0.1-alpha",
-        "contentHash": "oqzZX0iyIA6jM7p3tgIanoJrQBpEouZx/1OJmBCY+Zv5R9VcCOq5Ymi8c3TICoejv7T2AkMC8WEEtTB+XZdjFA==",
-        "dependencies": {
-          "CaseConverter": "2.0.1",
-          "Elastic.Clients.Elasticsearch": "8.17.1"
-        }
-      },
       "minhsangdotcom.TheTemplate.SharedKernel": {
         "type": "Transitive",
         "resolved": "2.0.0",
@@ -325,10 +316,10 @@
           "Application.Contracts": "[1.0.0, )",
           "BCrypt.Net-Next": "[4.0.3, )",
           "Domain": "[1.0.0, )",
+          "Elastic.Clients.Elasticsearch": "[9.2.2, )",
           "FluentValidation.DependencyInjectionExtensions": "[12.0.0, )",
           "Mediator.Abstractions": "[3.0.1, )",
-          "Wangkanai.Detection": "[8.17.0, )",
-          "minhsangdotcom.TheTemplate.ElasticsearchFluentConfig": "[1.0.1-alpha, )"
+          "Wangkanai.Detection": "[8.17.0, )"
         }
       },
       "application.contracts": {

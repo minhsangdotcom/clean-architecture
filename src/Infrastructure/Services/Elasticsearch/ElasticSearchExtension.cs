@@ -1,5 +1,6 @@
 using System.Reflection;
 using Application.Common.Interfaces.Services.Elasticsearch;
+using CaseConverter;
 using Elastic.Clients.Elasticsearch;
 using Elastic.Transport;
 using FluentConfiguration;
@@ -23,14 +24,11 @@ public static class ElasticSearchExtension
         if (elasticsearch.IsEnabled)
         {
             IEnumerable<Uri> nodes = elasticsearch!.Nodes.Select(x => new Uri(x));
-            var pool = new StaticNodePool(nodes);
+            StaticNodePool pool = new(nodes);
             string? userName = elasticsearch.Username;
             string? password = elasticsearch.Password;
 
-            var settings = new ElasticsearchClientSettings(pool).DefaultIndex(
-                elasticsearch.DefaultIndex!
-            );
-
+            ElasticsearchClientSettings settings = new(pool);
             if (!string.IsNullOrWhiteSpace(userName) && !string.IsNullOrWhiteSpace(password))
             {
                 settings
@@ -40,26 +38,21 @@ public static class ElasticSearchExtension
                     .ServerCertificateValidationCallback(CertificateValidations.AllowAll);
             }
 
-            IEnumerable<ElasticConfigureResult> elkConfigBuilder =
-                ElasticsearchRegisterHelper.GetElasticsearchConfigBuilder(
+            //get all configs of entity
+            List<ElasticConfigureResult> elkConfigBuilder =
+            [
+                .. ElasticsearchRegisterHelper.GetElasticsearchConfigBuilder(
                     Assembly.GetExecutingAssembly(),
-                    elasticsearch.PrefixIndex!
-                );
-
+                    elasticsearch.PrefixIndex.ToKebabCase()
+                ),
+            ];
             // add configurations of id, ignore properties
             ElasticsearchRegisterHelper.ConfigureConnectionSettings(ref settings, elkConfigBuilder);
 
-            var client = new ElasticsearchClient(settings);
+            ElasticsearchClient client = new(settings);
 
-            ElasticsearchRegisterHelper
-                .ElasticFluentConfigAsync(client, elkConfigBuilder)
-                .ConfigureAwait(false)
-                .GetAwaiter();
-
-            DataSeeding
-                .SeedingAsync(client, elasticsearch.PrefixIndex)
-                .ConfigureAwait(false)
-                .GetAwaiter();
+            client.ElasticFluentConfigAsync(elkConfigBuilder).GetAwaiter();
+            client.SeedingAsync(elasticsearch.PrefixIndex).GetAwaiter();
 
             services
                 .AddSingleton(client)

@@ -1,85 +1,36 @@
 using Domain.Aggregates.AuditLogs;
-using Elastic.Clients.Elasticsearch.Analysis;
 using FluentConfiguration.Configurations;
+using Infrastructure.Services.Elasticsearch;
 
 namespace Infrastructure.Data.Configurations;
 
 public class AuditLogConfiguration : IElasticsearchDocumentConfigure<AuditLog>
 {
-    public void Configure(ref ElasticsearchConfigBuilder<AuditLog> buider, string? prefix = null)
+    public void Configure(
+        ref ElasticsearchConfigBuilder<AuditLog> builder,
+        string? prefix = null,
+        string? delimiter = null
+    )
     {
-        buider.ToIndex(prefix);
-        buider.HasKey(key => key.Id);
+        builder.ToIndex(prefix: prefix);
+        builder.HasKey(key => key.Id);
 
-        buider.Settings(setting =>
-            setting.Analysis(x =>
-                x.Analyzers(an =>
-                        an.Custom(
-                                "myTokenizer",
-                                ca => ca.Filter(["lowercase"]).Tokenizer("myTokenizer")
-                            )
-                            .Custom(
-                                "standardAnalyzer",
-                                ca => ca.Filter(["lowercase"]).Tokenizer("standard")
-                            )
-                    )
-                    .Tokenizers(tz =>
-                        tz.NGram(
-                            "myTokenizer",
-                            config =>
-                                config
-                                    .MinGram(3)
-                                    .MaxGram(4)
-                                    .TokenChars([TokenChar.Digit, TokenChar.Letter])
-                        )
-                    )
-            )
-        );
-
-        buider.Properties(config =>
+        builder.Properties(config =>
             config
                 .Text(
                     t => t.Id,
-                    config =>
-                        config
-                            .Fields(f =>
-                                f.Keyword(
-                                    ElsIndexExtension.GetKeywordName<AuditLog>(n =>
-                                        n.ActionPerformBy!
-                                    )
-                                )
-                            )
-                            .Analyzer("myTokenizer")
-                            .SearchAnalyzer("standardAnalyzer")
+                    config => config.Fields(f => f.Keyword(ElkPrefix.KeywordPrefixName))
                 )
                 .Text(
                     txt => txt.Entity,
-                    config =>
-                        config
-                            .Fields(f =>
-                                f.Keyword(
-                                    ElsIndexExtension.GetKeywordName<AuditLog>(n => n.Entity!)
-                                )
-                            )
-                            .Analyzer("myTokenizer")
-                            .SearchAnalyzer("standardAnalyzer")
+                    config => config.Fields(f => f.Keyword(ElkPrefix.KeywordPrefixName))
                 )
                 .ByteNumber(b => b.Type)
                 .Object(o => o.OldValue!)
                 .Object(o => o.NewValue!)
                 .Text(
                     txt => txt.ActionPerformBy!,
-                    config =>
-                        config
-                            .Fields(field =>
-                                field.Keyword(
-                                    ElsIndexExtension.GetKeywordName<AuditLog>(name =>
-                                        name.ActionPerformBy!
-                                    )
-                                )
-                            )
-                            .Analyzer("myTokenizer")
-                            .SearchAnalyzer("standardAnalyzer")
+                    config => config.Fields(field => field.Keyword(ElkPrefix.KeywordPrefixName))
                 )
                 .Keyword(d => d.CreatedAt)
                 .Nested(
@@ -90,62 +41,35 @@ public class AuditLogConfiguration : IElasticsearchDocumentConfigure<AuditLog>
                                 .Text(
                                     t => t.Id,
                                     config =>
-                                        config
-                                            .Fields(f =>
-                                                f.Keyword(
-                                                    ElsIndexExtension.GetKeywordName<Agent>(name =>
-                                                        name.Id
-                                                    )
-                                                )
-                                            )
-                                            .Analyzer("myTokenizer")
-                                            .SearchAnalyzer("standardAnalyzer")
+                                        config.Fields(f => f.Keyword(ElkPrefix.KeywordPrefixName))
                                 )
                                 .Text(
                                     t => t.Agent!.FirstName!,
                                     config =>
-                                        config
-                                            .Fields(f =>
-                                                f.Keyword(
-                                                    ElsIndexExtension.GetKeywordName<Agent>(n =>
-                                                        n.FirstName!
-                                                    )
-                                                )
-                                            )
-                                            .Analyzer("myTokenizer")
-                                            .SearchAnalyzer("standardAnalyzer")
+                                        config.Fields(f => f.Keyword(ElkPrefix.KeywordPrefixName))
                                 )
                                 .Text(
                                     t => t.Agent!.LastName!,
                                     config =>
-                                        config
-                                            .Fields(f =>
-                                                f.Keyword(
-                                                    ElsIndexExtension.GetKeywordName<Agent>(n =>
-                                                        n.LastName!
-                                                    )
-                                                )
-                                            )
-                                            .Analyzer("myTokenizer")
-                                            .SearchAnalyzer("standardAnalyzer")
+                                        config.Fields(f => f.Keyword(ElkPrefix.KeywordPrefixName))
                                 )
                                 .Text(
                                     t => t.Agent!.Email!,
                                     config =>
-                                        config
-                                            .Fields(f =>
-                                                f.Keyword(
-                                                    ElsIndexExtension.GetKeywordName<Agent>(n =>
-                                                        n.Email!
-                                                    )
-                                                )
-                                            )
-                                            .Analyzer("myTokenizer")
-                                            .SearchAnalyzer("standardAnalyzer")
+                                        config.Fields(f => f.Keyword(ElkPrefix.KeywordPrefixName))
                                 )
                                 .Date(d => d.Agent!.DayOfBirth!)
                                 .ByteNumber(b => b.Agent!.Gender!)
                                 .Keyword(x => x.Agent!.CreatedAt)
+                                .Nested(
+                                    nest => nest.Agent!.Detail,
+                                    nested =>
+                                        nested.Properties(nestP =>
+                                            nestProp
+                                                .Text(t => t.Agent!.Detail!.Name)
+                                                .Keyword(n => n.Agent!.Detail!.Order)
+                                        )
+                                )
                         )
                 )
         );

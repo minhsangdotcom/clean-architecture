@@ -13,7 +13,7 @@ public class ElasticsearchSettings
     /// </summary>
     public bool IsEnabled { get; set; }
 
-    public string? DefaultIndex { get; set; } = "DefaultIndex";
+    public string DefaultIndex { get; set; } = "DefaultIndex";
 
-    public string? PrefixIndex { get; set; } = "TheTemplate";
+    public string PrefixIndex { get; set; } = "TheTemplate";
 }

@@ -1,11 +1,9 @@
 using System.Reflection;
-using Application.Contracts.Dtos.Requests;
 using CaseConverter;
 using DotNetCoreExtension.Extensions.Reflections;
 using DynamicQuery.Models;
 using Elastic.Clients.Elasticsearch;
 using Elastic.Clients.Elasticsearch.QueryDsl;
-using FluentConfiguration.Configurations;
 using Infrastructure.Services.Elasticsearch;
 using SharedKernel.Constants;
 
@@ -44,7 +42,7 @@ public static class ElasticFunctionalityHelper
 
             if (isStringPropertyType)
             {
-                property += $".{ElsIndexExtension.GetKeywordName<T>(property)}";
+                property += $".{ElkPrefix.KeywordPrefixName}";
             }
 
             if (!isNestedSort)
@@ -53,21 +51,25 @@ public static class ElasticFunctionalityHelper
                 {
                     Field = new FieldSort() { Field = property.ToCamelCase(), Order = sortOrder },
                 };
-                // A.ARAW
+                // A.raw
                 results.Add(sortOptions);
             }
             else
             {
-                //A.B.C.CRAW
+                //A.B.C.raw
                 //PATH: A
                 //PATH: A.B
+                //PATH: A.B.C
                 List<string> nestedArray = [.. property.Split('.')];
-                NestedSortValue nestedSort = default!;
+                NestedSortValue? nestedSort = null;
                 string name = string.Empty;
                 for (int j = 0; j < nestedArray.Count - (isStringPropertyType ? 2 : 1); j++)
                 {
                     name += j == 0 ? nestedArray[j] : $".{nestedArray[j]}";
-                    nestedSort = nestedSort.Nested = new NestedSortValue() { Path = name! };
+                    //nestedSort = nestedSort.Nested = new NestedSortValue() { Path = name };
+                    NestedSortValue value = new() { Path = name };
+                    nestedSort?.Nested = value;
+                    nestedSort = nestedSort?.Nested ?? value;
                 }
                 SortOptions sortOptions =
                     new()
@@ -101,112 +103,6 @@ public static class ElasticFunctionalityHelper
         queries.AddRange(MultiMatchQuery(stringProperties, keyword));
 
         return search.Bool(b => b.Should(queries));
-    }
-
-    public static QueryDescriptor<T> BuildFilterItemQuery<T>(QueryDescriptor<T> q, FilterItem f)
-        where T : class
-    {
-        // Nested path support
-        if (!string.IsNullOrEmpty(f.Path))
-        {
-            return q.Nested(n => n.Path(f.Path).Query(nq => BuildSimpleQuery(nq, f)));
-        }
-
-        // Normal field
-        return BuildSimpleQuery(q, f);
-    }
-
-    private static QueryDescriptor<T> BuildSimpleQuery<T>(QueryDescriptor<T> q, FilterItem f)
-        where T : class
-    {
-        return f.Operator switch
-        {
-            "=" => q.Term(t => t.Field(f.Field).Value(f.Value!)),
-            "!=" => q.Bool(b => b.MustNot(n => n.Term(t => t.Field(f.Field).Value(f.Value!)))),
-            "contains" => q.Match(m => m.Field(f.Field).Query(f.Value!)),
-            "phrase" => q.MatchPhrase(m => m.Field(f.Field).Query(f.Value!)),
-            "in" => q.Terms(t =>
-                t.Field(f.Field!)
-                    .Terms(new TermsQueryField(f.Values!.ConvertAll(value => (FieldValue)value)))
-            ),
-            "gte" => BuildRange(q, f, RangeOperator.Gte),
-            "lte" => BuildRange(q, f, RangeOperator.Lte),
-            "gt" => BuildRange(q, f, RangeOperator.Gt),
-            "lt" => BuildRange(q, f, RangeOperator.Lt),
-            "exists" => q.Exists(e => e.Field(f.Field)),
-            "missing" => q.Bool(b => b.MustNot(n => n.Exists(e => e.Field(f.Field!)))),
-            _ => q.MatchAll(new MatchAllQuery()),
-        };
-    }
-
-    private static QueryDescriptor<T> BuildRange<T>(
-        QueryDescriptor<T> q,
-        FilterItem f,
-        RangeOperator op
-    )
-        where T : class
-    {
-        return f.FieldType switch
-        {
-            FieldType.Number => BuildNumberRange(q, f, op),
-            FieldType.Date => BuildDateRange(q, f, op),
-            _ =>
-                q.MatchAll() // wrong type → ignore
-            ,
-        };
-    }
-
-    private static QueryDescriptor<T> BuildNumberRange<T>(
-        QueryDescriptor<T> q,
-        FilterItem f,
-        RangeOperator op
-    )
-        where T : class
-    {
-        double? from = TryDouble(f.From);
-        double? to = TryDouble(f.To);
-
-        return q.Range(r =>
-            r.Number(x =>
-            {
-                var a = op switch
-                {
-                    RangeOperator.Gte => x.Gte(from).Field(f.Field),
-                    RangeOperator.Lte => x.Lte(to).Field(f.Field),
-                    RangeOperator.Gt => x.Gt(from).Field(f.Field),
-                    RangeOperator.Lt => x.Lt(to).Field(f.Field),
-                    _ => x,
-                };
-            })
-        );
-    }
-
-    private static QueryDescriptor<T> BuildDateRange<T>(
-        QueryDescriptor<T> q,
-        FilterItem f,
-        RangeOperator op
-    )
-        where T : class
-    {
-        DateTime? from = TryDate(f.From);
-        DateTime? to = TryDate(f.To);
-
-        return q.Range(r =>
-            r.Date(x =>
-            {
-                var a = op switch
-                {
-                    _ => op switch
-                    {
-                        RangeOperator.Gte => x.Gte(from).Field(f.Field),
-                        RangeOperator.Lte => x.Lte(to).Field(f.Field),
-                        RangeOperator.Gt => x.Gt(from).Field(f.Field),
-                        RangeOperator.Lt => x.Lt(to).Field(f.Field),
-                        _ => x,
-                    },
-                };
-            })
-        );
     }
 
     private static List<Query> MultiMatchQuery(
@@ -253,7 +149,7 @@ public static class ElasticFunctionalityHelper
         {
             string key = nested.key;
             string[] parts = key.Trim().Split(".");
-            NestedQuery nestedQuery = new(string.Empty, new Query());
+            NestedQuery? nestedQuery = null;
 
             string path = string.Empty;
             for (int i = 0; i < parts.Length; i++)
@@ -261,23 +157,26 @@ public static class ElasticFunctionalityHelper
                 if (i == 0)
                 {
                     path += $"{parts[i]}";
-                    nestedQuery.Path = path!;
+                    nestedQuery = new(path, new Query());
                 }
                 else
                 {
                     path += $".{parts[i]}";
                     NestedQuery nest = new(path, new Query());
-                    nestedQuery.Query = nest;
+                    nestedQuery?.Query = nest;
                     nestedQuery = nest;
                 }
             }
-            nestedQuery.Query = new MultiMatchQuery()
+            nestedQuery?.Query = new MultiMatchQuery()
             {
                 Query = $"{keyword}",
                 Fields = nested.primaryProperty.ConvertAll(x => new Field(x)).ToArray(),
                 //Fuzziness = new Fuzziness(2),
             };
-            queries.Add(nestedQuery);
+            if (nestedQuery != null)
+            {
+                queries.Add(nestedQuery);
+            }
         }
 
         return queries;
@@ -402,24 +301,6 @@ public static class ElasticFunctionalityHelper
                 return new SortItemResult(propertyName, propertyInfo, items[1].Trim());
             }),
         ];
-
-    private static double? TryDouble(string? input)
-    {
-        if (double.TryParse(input, out var d))
-        {
-            return d;
-        }
-        return null;
-    }
-
-    private static DateTime? TryDate(string? input)
-    {
-        if (DateTime.TryParse(input, out var dt))
-        {
-            return dt;
-        }
-        return null;
-    }
 
     internal record SortItemResult(string PropertyName, PropertyInfo PropertyInfo, string Order);
 }

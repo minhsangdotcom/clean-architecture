@@ -47,6 +47,8 @@ public class Paging<T>
 
     public long TotalPage { get; set; }
 
+    public long TotalItemCount { get; set; }
+
     public bool? HasNextPage { get; set; }
 
     public bool? HasPreviousPage { get; set; }
@@ -60,7 +62,7 @@ public class Paging<T>
         CurrentPage = currentPage;
         PageSize = pageSize;
         TotalPage = (long)Math.Ceiling(totalItemCount / (double)pageSize);
-
+        TotalItemCount = totalItemCount;
         HasNextPage = CurrentPage < TotalPage;
         HasPreviousPage = currentPage > 1;
     }
@@ -74,6 +76,7 @@ public class Paging<T>
     {
         PageSize = pageSize;
         TotalPage = (long)Math.Ceiling(totalItemCount / (double)pageSize);
+        TotalItemCount = totalItemCount;
         After = nextCursor;
         HasNextPage = nextCursor != null;
         Before = previousCursor;

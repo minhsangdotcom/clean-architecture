@@ -1,8 +1,8 @@
+using System.Text;
 using Domain.Aggregates.AuditLogs;
 using Domain.Aggregates.AuditLogs.Enums;
 using Domain.Aggregates.Users.Enums;
 using Elastic.Clients.Elasticsearch;
-using FluentConfiguration.Configurations;
 
 namespace Infrastructure.Services.Elasticsearch;
 
@@ -14,12 +14,12 @@ public static class DataSeeding
     /// <param name="elasticsearchClient"></param>
     /// <returns></returns>
     public static async Task SeedingAsync(
-        ElasticsearchClient elasticsearchClient,
-        string? prefix = null
+        this ElasticsearchClient elasticsearchClient,
+        string prefix
     )
     {
-        var auditLog = await elasticsearchClient.SearchAsync<AuditLog>();
-        if (auditLog.Documents.Count > 0)
+        var auditLog = await elasticsearchClient.CountAsync<AuditLog>();
+        if (auditLog.Count > 0)
         {
             return;
         }
@@ -36,9 +36,10 @@ public static class DataSeeding
                 {
                     FirstName = "Sáng",
                     LastName = "Trần Minh Sáng",
-                    Email = "anna.kim71@gmail.com",
-                    DayOfBirth = DateTime.Parse("1990-07-08T00:00:00"),
+                    Email = "sang.tran05@gmail.com",
+                    DayOfBirth = DateTime.Parse("2005-07-08T00:00:00"),
                     Gender = (int)Gender.Other,
+                    Detail = new() { Name = RandomString(10), Order = RandomInt(1, 100) },
                 },
             },
             new AuditLog()
@@ -51,9 +52,10 @@ public static class DataSeeding
                 {
                     FirstName = "Tiên",
                     LastName = "Nguyễn",
-                    Email = "anna.kim71@gmail.com",
+                    Email = "tien.nguyen90@gmail.com",
                     DayOfBirth = DateTime.Parse("1990-07-09T00:00:00"),
                     Gender = (int)Gender.Female,
+                    Detail = new() { Name = RandomString(10), Order = RandomInt(1, 100) },
                 },
             },
             new AuditLog()
@@ -66,16 +68,17 @@ public static class DataSeeding
                 {
                     FirstName = "Hiếu",
                     LastName = "Trần Minh Hiếu",
-                    Email = "anna.kim71@gmail.com",
-                    DayOfBirth = DateTime.Parse("1990-07-10T00:00:00"),
+                    Email = "hieu.tran99@gmail.com",
+                    DayOfBirth = DateTime.Parse("1999-07-10T00:00:00"),
                     Gender = (int)Gender.Male,
+                    Detail = new() { Name = RandomString(10), Order = RandomInt(1, 100) },
                 },
             },
         ];
 
         var response = await elasticsearchClient.IndexManyAsync(
             auditLogs,
-            ElsIndexExtension.GetName<AuditLog>(prefix)
+            ElkIndexExtension.GetName<AuditLog>(prefix)
         );
 
         if (response.IsSuccess())
@@ -88,5 +91,26 @@ public static class DataSeeding
                 $"Elasticsearch has been failed in seeding with {response.DebugInformation}"
             );
         }
+    }
+
+    private static string RandomString(int length)
+    {
+        const string chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+        StringBuilder sb = new(length);
+        Random random = new();
+
+        for (int i = 0; i < length; i++)
+        {
+            int index = random.Next(chars.Length);
+            sb.Append(chars[index]);
+        }
+
+        return sb.ToString();
+    }
+
+    private static int RandomInt(int min, int max)
+    {
+        Random random = new();
+        return random.Next(min, max);
     }
 }

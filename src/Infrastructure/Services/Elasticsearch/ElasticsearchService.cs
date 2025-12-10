@@ -3,7 +3,6 @@ using Application.Contracts.Dtos.Requests;
 using Application.Contracts.Dtos.Responses;
 using Elastic.Clients.Elasticsearch;
 using Elastic.Clients.Elasticsearch.QueryDsl;
-using FluentConfiguration.Configurations;
 using Microsoft.Extensions.Options;
 using SharedKernel.Constants;
 using SharedKernel.Entities;
@@ -11,97 +10,42 @@ using SharedKernel.Entities;
 namespace Infrastructure.Services.Elasticsearch;
 
 public class ElasticsearchService<T>(
-    ElasticsearchClient elasticClient,
+    ElasticsearchClient client,
     IOptions<ElasticsearchSettings> options
 ) : IElasticsearchService<T>
     where T : class
 {
-    private readonly string indexName = ElsIndexExtension.GetName<T>(options.Value?.PrefixIndex);
+    private readonly string indexName = ElkIndexExtension.GetName<T>(options.Value.PrefixIndex);
 
-    public async Task<T> AddAsync(T entity)
+    #region Queries
+    public async Task<T?> GetAsync(string id)
     {
-        await elasticClient.IndexAsync(entity, i => i.Refresh(Refresh.WaitFor).Index(indexName));
-
-        return entity;
-    }
-
-    public async Task<IEnumerable<T>> AddRangeAsync(IEnumerable<T> entities)
-    {
-        await elasticClient.BulkAsync(x =>
-            x.Index(indexName).IndexMany(entities).Refresh(Refresh.WaitFor)
-        );
-
-        return entities;
-    }
-
-    // public async Task<bool> AnyAsync(Action<BoolQueryDescriptor<T>> selector)
-    // {
-    //     SearchResponse<T> searchResponse = await elasticClient.SearchAsync<T>(s =>
-    //         s.Query(q => q.Bool(selector)).Indices(indexName)
-    //     );
-
-    //     return searchResponse.Documents.Count != 0;
-    // }
-
-    // public async Task<long> CountAsync(CountRequestDescriptor<T> selector)
-    // {
-    //     CountResponse countResponse = await elasticClient.CountAsync<T>(x =>
-    //         selector.Indices(indexName)
-    //     );
-    //     return countResponse.Count;
-    // }
-
-    public async Task DeleteAsync(T entity)
-    {
-        await elasticClient.DeleteAsync(entity, i => i.Index(indexName).Refresh(Refresh.WaitFor));
-    }
-
-    // public async Task DeleteByQueryAsync(Action<QueryDescriptor<T>> querySelector)
-    // {
-    //     await elasticClient.DeleteByQueryAsync<T>(x => x.Indices(indexName).Query(querySelector));
-    // }
-
-    public async Task DeleteRangeAsync(IEnumerable<T> entities)
-    {
-        await elasticClient.BulkAsync(x =>
-            x.Index(indexName).DeleteMany(entities).Refresh(Refresh.WaitFor)
-        );
-    }
-
-    public async Task<T?> GetAsync(object id)
-    {
-        GetResponse<T> getResponse = await elasticClient.GetAsync<T>(
-            id.ToString()!,
-            idx => idx.Index(indexName)
-        );
+        GetResponse<T> getResponse = await client.GetAsync<T>(id, idx => idx.Index(indexName));
 
         return getResponse.Source;
     }
 
-    public async Task<IEnumerable<T>> ListAsync()
+    public async Task<List<T>> ListAsync()
     {
-        SearchResponse<T> searchResponse = await elasticClient.SearchAsync<T>(s =>
-            s.Indices(indexName)
-        );
-
-        return searchResponse.Documents;
+        SearchResponse<T> searchResponse = await client.SearchAsync<T>(s => s.Indices(indexName));
+        return [.. searchResponse.Documents];
     }
 
-    public async Task<IList<T>> ListAsync(
+    public async Task<List<T>> ListAsync(
         QueryParamRequest request,
-        ElkFilterRequest? filter = null
+        Action<QueryDescriptor<T>>? filters = null
     )
     {
-        SearchResponse<T> searchResponse = await SearchAsync(request, filter);
+        SearchResponse<T> searchResponse = await SearchAsync(request, filters);
         return [.. searchResponse.Documents];
     }
 
     public async Task<PaginationResponse<T>> PaginatedListAsync(
         QueryParamRequest request,
-        ElkFilterRequest? filter = null
+        Action<QueryDescriptor<T>>? filters = null
     )
     {
-        SearchResponse<T> searchResponse = await SearchAsync(request, filter);
+        SearchResponse<T> searchResponse = await SearchAsync(request, filters);
         return new PaginationResponse<T>(
             searchResponse.Documents ?? [],
             searchResponse.Total,
@@ -109,14 +53,33 @@ public class ElasticsearchService<T>(
             request.PageSize
         );
     }
+    #endregion
+
+    #region CRUD
+    public async Task<T> IndexAsync(T entity)
+    {
+        _ = await client.IndexAsync(entity, i => i.Index(indexName));
+        return entity;
+    }
+
+    public async Task<List<T>> IndexManyAsync(IEnumerable<T> entities)
+    {
+        BulkResponse bulkResponse = await client.BulkAsync(x =>
+            x.Index(indexName).IndexMany(entities)
+        );
+
+        return [.. entities];
+    }
 
     public async Task UpdateAsync(string id, T entity)
     {
-        string stringId = id.ToString();
-        await elasticClient.UpdateAsync<T, T>(
-            indexName,
-            stringId,
-            i => i.Doc(entity).Refresh(Refresh.WaitFor)
+        var a = await client.UpdateAsync<T, T>(indexName, id, i => i.Doc(entity));
+    }
+
+    public async Task UpdateManyAsync(IEnumerable<T> entities)
+    {
+        _ = await client.BulkAsync(x =>
+            x.Index(indexName).UpdateMany(entities, (x, i) => x.Doc(i))
         );
     }
 
@@ -126,39 +89,55 @@ public class ElasticsearchService<T>(
         Dictionary<string, object> parameters
     )
     {
-        string stringId = id.ToString();
-        await elasticClient.UpdateAsync<T, T>(
+        var a = await client.UpdateAsync<T, T>(
             indexName,
-            stringId,
-            u => u.Script(s => s.Source(query).Params(parameters)).Refresh(Refresh.True)
+            id,
+            u => u.Script(s => s.Source(query).Params(parameters))
         );
     }
 
-    public async Task UpdateRangeAsync(IEnumerable<T> entities)
+    public async Task DeleteAsync(T entity)
     {
-        await elasticClient.BulkAsync(x =>
-            x.Index(indexName).UpdateMany(entities, (x, i) => x.Doc(i)).Refresh(Refresh.WaitFor)
-        );
+        _ = await client.DeleteAsync(entity, i => i.Index(indexName));
     }
+
+    public async Task DeleteManyAsync(IEnumerable<T> entities)
+    {
+        _ = await client.BulkAsync(x => x.Index(indexName).DeleteMany(entities));
+    }
+
+    public async Task DeleteByQueryAsync(Action<QueryDescriptor<T>> querySelector)
+    {
+        _ = await client.DeleteByQueryAsync<T>(x => x.Indices(indexName).Query(querySelector));
+    }
+    #endregion
+
+    #region Bool Query
+    public async Task<bool> AnyAsync(Action<BoolQueryDescriptor<T>> selector)
+    {
+        SearchResponse<T> searchResponse = await client.SearchAsync<T>(s =>
+            s.Query(q => q.Bool(selector)).Indices(indexName).Size(0).TrackTotalHits(false)
+        );
+
+        return searchResponse.HitsMetadata?.Total?.Value2 > 0;
+    }
+
+    public async Task<long> CountAsync(CountRequestDescriptor<T> selector)
+    {
+        CountResponse countResponse = await client.CountAsync<T>(x => selector.Indices(indexName));
+        return countResponse.Count;
+    }
+    #endregion
 
     private async Task<SearchResponse<T>> SearchAsync(
         QueryParamRequest request,
-        ElkFilterRequest? filter = null
+        Action<QueryDescriptor<T>>? filters = null
     )
     {
         List<Action<QueryDescriptor<T>>> queries = [];
-
-        if (filter != null && filter.Filters.Count != 0)
+        if (filters != null)
         {
-            queries.Add(q =>
-                q.Bool(b =>
-                {
-                    foreach (var item in filter.Filters)
-                    {
-                        b.Must(m => ElasticFunctionalityHelper.BuildFilterItemQuery(m, item));
-                    }
-                })
-            );
+            queries.Add(filters);
         }
 
         if (!string.IsNullOrWhiteSpace(request.Keyword))
@@ -177,7 +156,7 @@ public class ElasticsearchService<T>(
             SearchRequestDescriptor<T> results = new();
             if (queries.Count > 0)
             {
-                search.Query(q => q.Bool(b => b.Must(queries.ToArray())));
+                search.Query(x => queries.ToArray());
             }
 
             search
@@ -187,6 +166,6 @@ public class ElasticsearchService<T>(
                 .Size(request.PageSize);
         }
 
-        return await elasticClient.SearchAsync<T>(Search);
+        return await client.SearchAsync<T>(Search);
     }
 }
