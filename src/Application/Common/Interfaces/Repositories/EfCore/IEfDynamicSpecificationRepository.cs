@@ -25,6 +25,8 @@ public interface IEfDynamicSpecificationRepository<T>
     )
         where TResult : class;
 
+    Task<IList<T>> ListAsync(ISpecification<T> spec, CancellationToken cancellationToken = default);
+
     Task<IList<T>> ListAsync(
         ISpecification<T> spec,
         QueryParamRequest queryParam,

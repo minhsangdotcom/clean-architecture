@@ -3,6 +3,7 @@ using Application.Common.Interfaces.Services.Storage;
 using Application.Common.Interfaces.UnitOfWorks;
 using Application.Contracts.ApiWrapper;
 using Domain.Aggregates.Permissions;
+using Domain.Aggregates.Permissions.Specifications;
 using Domain.Aggregates.Roles;
 using Domain.Aggregates.Roles.Specifications;
 using Domain.Aggregates.Users;
@@ -45,10 +46,10 @@ public class CreateUserHandler(
             // add permissions
             if (command.Permissions?.Count > 0)
             {
-                List<Permission> permissions = await unitOfWork
-                    .Repository<Permission>()
+                IList<Permission> permissions = await unitOfWork
+                    .DynamicReadOnlyRepository<Permission>()
                     .ListAsync(
-                        x => command.Permissions!.Contains(x.Id),
+                        new ListPermissionByIdSpecification(command.Permissions),
                         cancellationToken: cancellationToken
                     );
                 await userManager.AddPermissionsAsync(user, permissions, cancellationToken);

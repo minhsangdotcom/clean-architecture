@@ -7,7 +7,6 @@ public class ListUserSpecification : Specification<User>
 {
     public ListUserSpecification()
     {
-        string key = SpecificationCacheKeyGenerator.Create(this);
-        Query.EnableCache(key);
+        Query.AsNoTracking();
     }
 }

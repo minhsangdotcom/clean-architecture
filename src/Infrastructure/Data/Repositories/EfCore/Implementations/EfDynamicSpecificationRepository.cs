@@ -30,6 +30,11 @@ public class EfDynamicSpecificationRepository<T>(IEfDbContext dbContext)
 
     public async Task<IList<T>> ListAsync(
         ISpecification<T> spec,
+        CancellationToken cancellationToken = default
+    ) => await ApplySpecification(spec).ToListAsync(cancellationToken);
+
+    public async Task<IList<T>> ListAsync(
+        ISpecification<T> spec,
         QueryParamRequest queryParam,
         int deep = 1,
         CancellationToken cancellationToken = default

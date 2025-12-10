@@ -7,6 +7,7 @@ using Application.Common.Interfaces.UnitOfWorks;
 using Application.Contracts.ApiWrapper;
 using Application.Contracts.Constants;
 using Domain.Aggregates.Permissions;
+using Domain.Aggregates.Permissions.Specifications;
 using Domain.Aggregates.Roles;
 using Domain.Aggregates.Roles.Specifications;
 using Domain.Aggregates.Users;
@@ -69,10 +70,10 @@ public class UpdateUserHandler(
             // add permissions
             if (updateData.Permissions?.Count > 0)
             {
-                List<Permission> permissions = await unitOfWork
-                    .Repository<Permission>()
+                IList<Permission> permissions = await unitOfWork
+                    .DynamicReadOnlyRepository<Permission>()
                     .ListAsync(
-                        x => updateData.Permissions.Contains(x.Id),
+                        new ListPermissionByIdSpecification(updateData.Permissions),
                         cancellationToken: cancellationToken
                     );
                 await userManager.ReplacePermissionsAsync(user, permissions, cancellationToken);
