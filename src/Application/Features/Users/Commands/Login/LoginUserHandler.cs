@@ -110,7 +110,7 @@ public class LoginUserHandler(
                 RefreshToken = refreshToken,
                 AccessTokenExpiredIn = (long)
                     Math.Ceiling((accessTokenExpiredTime - DateTime.UtcNow).TotalSeconds),
-                TokenType = currentUser.AuthenticationScheme,
+                TokenType = AuthenticationSchemeDefinition.Bearer,
                 User = user.ToUserProjection(),
             }
         );

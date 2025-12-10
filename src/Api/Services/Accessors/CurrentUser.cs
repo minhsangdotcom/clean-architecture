@@ -1,7 +1,5 @@
 using System.Security.Claims;
 using Application.Common.Interfaces.Services.Accessors;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 
 namespace Api.Services.Accessors;
 
@@ -11,12 +9,6 @@ public class CurrentUser(IHttpContextAccessor httpContextAccessor) : ICurrentUse
 
     public string? ClientIp =>
         httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString();
-
-    public string? AuthenticationScheme =>
-        httpContextAccessor
-            .HttpContext?.Features.Get<IAuthenticateResultFeature>()
-            ?.AuthenticateResult?.Ticket?.AuthenticationScheme
-        ?? JwtBearerDefaults.AuthenticationScheme;
 
     private Ulid? GetId(string claimType)
     {

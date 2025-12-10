@@ -1,14 +1,12 @@
-using Application.Common.Interfaces.Services.Accessors;
 using Application.Common.Security;
+using Application.Contracts.Constants;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Options;
 
 namespace Application.Common.Auth;
 
-public class AuthorizePolicyProvider(
-    IOptions<AuthorizationOptions> options,
-    ICurrentUser currentUser
-) : IAuthorizationPolicyProvider
+public class AuthorizePolicyProvider(IOptions<AuthorizationOptions> options)
+    : IAuthorizationPolicyProvider
 {
     public DefaultAuthorizationPolicyProvider FallbackPolicyProvider { get; } =
         new DefaultAuthorizationPolicyProvider(options);
@@ -25,7 +23,7 @@ public class AuthorizePolicyProvider(
             policyName.StartsWith(AuthorizePolicy.POLICY_PREFIX, StringComparison.OrdinalIgnoreCase)
         )
         {
-            var policy = new AuthorizationPolicyBuilder(currentUser.AuthenticationScheme!);
+            AuthorizationPolicyBuilder policy = new(AuthenticationSchemeDefinition.Bearer);
             policy.AddRequirements(new AuthorizationRequirement(policyName));
 
             return Task.FromResult(policy.Build())!;
