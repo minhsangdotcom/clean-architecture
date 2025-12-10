@@ -15,22 +15,23 @@ public class LoggingBehavior<TMessage, TResponse>(
         string requestName = typeof(TMessage).Name;
         Ulid? id = currentUser.Id;
 
-        const string replacePhrase = "for user {userId}";
-        string loggingMessage =
-            "\n\n Incoming request: {Name} " + replacePhrase + " with payload \n {@Request} \n";
-
-        List<object?> parameters = [requestName, id, message];
-        if (id == null)
+        if (id == Ulid.Empty)
         {
-            loggingMessage = loggingMessage.Replace(
-                $"{replacePhrase}",
-                "for anonymous",
-                StringComparison.Ordinal
+            logger.LogInformation(
+                "\n\n Incoming request: {Name} for anonymous user  with payload \n {@Request} \n",
+                requestName,
+                message
             );
-            parameters.RemoveAt(1);
         }
-
-        logger.LogInformation(loggingMessage, [.. parameters]);
+        else
+        {
+            logger.LogInformation(
+                "\n\n Incoming request: {Name} for user {userId} with payload \n {@Request} \n",
+                requestName,
+                id,
+                message
+            );
+        }
         return default!;
     }
 }
