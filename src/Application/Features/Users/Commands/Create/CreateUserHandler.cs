@@ -4,6 +4,7 @@ using Application.Common.Interfaces.UnitOfWorks;
 using Application.Contracts.ApiWrapper;
 using Domain.Aggregates.Permissions;
 using Domain.Aggregates.Roles;
+using Domain.Aggregates.Roles.Specifications;
 using Domain.Aggregates.Users;
 using Mediator;
 
@@ -33,10 +34,12 @@ public class CreateUserHandler(
             _ = await userManager.CreateAsync(user, command.Password!, cancellationToken);
             userAvatar = user.Avatar;
 
-            // add roles
-            List<string> roles = await unitOfWork
-                .Repository<Role>()
-                .ListAsync(x => command.Roles!.Contains(x.Id), x => x.Name, cancellationToken);
+            IList<string> roles = await unitOfWork
+                .ReadOnlyRepository<Role>()
+                .ListAsync(
+                    new GetRoleNameByListRoleIdSpecification(command.Roles!),
+                    cancellationToken
+                );
             await userManager.AddToRolesAsync(user, roles, cancellationToken);
 
             // add permissions

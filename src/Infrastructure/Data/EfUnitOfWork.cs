@@ -13,11 +13,7 @@ public class EfUnitOfWork(
     IMemoryCacheService cache
 ) : IEfUnitOfWork
 {
-    private readonly IEfRepositoryFactory factory = new EfRepositoryFactory(
-        dbContext,
-        logger,
-        cache
-    );
+    private readonly EfRepositoryFactory factory = new(dbContext, logger, cache);
 
     public ITransaction? CurrentTransaction { get; private set; }
     private bool disposed = false;

@@ -8,6 +8,7 @@ using Application.Contracts.ApiWrapper;
 using Application.Contracts.Constants;
 using Domain.Aggregates.Permissions;
 using Domain.Aggregates.Roles;
+using Domain.Aggregates.Roles.Specifications;
 using Domain.Aggregates.Users;
 using Mediator;
 using Microsoft.AspNetCore.Http;
@@ -57,9 +58,12 @@ public class UpdateUserHandler(
             await userManager.UpdateAsync(user, cancellationToken);
 
             // add roles
-            List<string> roles = await unitOfWork
-                .Repository<Role>()
-                .ListAsync(x => updateData.Roles!.Contains(x.Id), x => x.Name, cancellationToken);
+            IList<string> roles = await unitOfWork
+                .ReadOnlyRepository<Role>()
+                .ListAsync(
+                    new GetRoleNameByListRoleIdSpecification(updateData.Roles!),
+                    cancellationToken
+                );
             await userManager.ReplaceRolesAsync(user, roles, cancellationToken);
 
             // add permissions
