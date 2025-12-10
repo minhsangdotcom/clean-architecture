@@ -1,7 +1,4 @@
-using System.Text;
 using Domain.Aggregates.AuditLogs;
-using Domain.Aggregates.AuditLogs.Enums;
-using Domain.Aggregates.Users.Enums;
 using Elastic.Clients.Elasticsearch;
 
 namespace Infrastructure.Services.Elasticsearch;
@@ -24,60 +21,63 @@ public static class DataSeeding
             return;
         }
 
-        List<AuditLog> auditLogs =
+        List<AuditLog> logs =
         [
-            new AuditLog()
+            new AuditLog
             {
-                Entity =
-                    "Theo Heatworld, Victoria Beckham đang rất lo lắng khi David Beckham dồn hết tâm huyết và thời gian cho điền trang Cotswolds. Như Heatworld đưa tin trước đó, cặp đôi này đã cân nhắc chuyển đến sống ở khu điền trang trị giá 12 triệu bảng Anh của họ ở Oxfordshire suốt một thời gian dài. David gần đây chia sẻ trên Instagram khung cảnh của điền trang cũng như việc làm khoai tây chiên giòn do anh tự trồng và thu thập trứng gà.",
-                Type = (int)AuditLogType.Create,
-                ActionPerformBy = "01J8HF8PE8SYB0NRVCC8CZGA11",
-                Agent = new Agent()
+                Id = "01KC3GC0F03F2FZAQMAX9BS43H",
+                Entity = "Customer",
+                Type = 3,
+                OldValue = new { Phone = "0123456789" },
+                NewValue = new { Phone = "0987654321" },
+                ActionPerformBy = "admin-superuser",
+                Agent = new Agent
                 {
-                    FirstName = "Sáng",
-                    LastName = "Trần Minh Sáng",
-                    Email = "sang.tran05@gmail.com",
-                    DayOfBirth = DateTime.Parse("2005-07-08T00:00:00"),
-                    Gender = (int)Gender.Other,
-                    Detail = new() { Name = RandomString(10), Order = RandomInt(1, 100) },
+                    FirstName = "David",
+                    LastName = "Tran",
+                    Email = "david.tran@example.com",
+                    DayOfBirth = new DateTime(1988, 12, 1),
+                    Gender = 1,
                 },
             },
-            new AuditLog()
+            new AuditLog
             {
-                Entity =
-                    "Trong buổi phỏng vấn vào tháng 7, Karim Benzema, đồng đội cũ của Vinicius tại Real Madrid, cũng dự đoán chiến thắng thuộc về chân sút sinh năm 2000. 'Chủ nhân Quả bóng vàng sao? Tôi sẽ chọn Vinicius, đơn giản là vì cậu ấy xứng đáng. Không chỉ năm nay, mà năm ngoái cậu ấy cũng chơi rất hay. Vini vượt trội so với các cầu thủ khác ở kỹ năng cá nhân. Cậu ấy đã là một cầu thủ rất toàn diện'.",
-                Type = (int)AuditLogType.Create,
-                ActionPerformBy = "01J8HF8PE8SYB0NRVCC8CZGA11",
-                Agent = new Agent()
+                Id = Ulid.NewUlid().ToString(),
+                Entity = "Order",
+                Type = 2,
+                OldValue = new { Status = "Pending" },
+                NewValue = new { Status = "Completed" },
+                ActionPerformBy = "system-job",
+                Agent = new Agent
                 {
-                    FirstName = "Tiên",
-                    LastName = "Nguyễn",
-                    Email = "tien.nguyen90@gmail.com",
-                    DayOfBirth = DateTime.Parse("1990-07-09T00:00:00"),
-                    Gender = (int)Gender.Female,
-                    Detail = new() { Name = RandomString(10), Order = RandomInt(1, 100) },
+                    FirstName = "Sarah",
+                    LastName = "Nguyen",
+                    Email = "sarah.nguyen@example.com",
+                    DayOfBirth = new DateTime(1995, 5, 10),
+                    Gender = 2,
                 },
             },
-            new AuditLog()
+            new AuditLog
             {
-                Entity =
-                    "Trong số nhiều trang bị bôi đen, tài liệu pháp lý bao gồm những cáo buộc cho rằng các thí sinh phải chịu đựng môi trường làm việc 'dung dưỡng văn hóa kỳ thị giới và phân biệt đối xử với phụ nữ'. Những cáo buộc này đánh vỡ hình ảnh của MrBeast, thường được xem là một trong những người tử tế nhất trên Internet.",
-                Type = (int)AuditLogType.Update,
-                ActionPerformBy = "01J8HHP6VGVDGWSP08KG82AFCD",
-                Agent = new Agent()
+                Id = Ulid.NewUlid().ToString(),
+                Entity = "Product",
+                Type = 1,
+                OldValue = new { Price = 999, Name = "iPhone 13" },
+                NewValue = new { Price = 899, Name = "iPhone 13" },
+                ActionPerformBy = "admin-system",
+                Agent = new Agent
                 {
-                    FirstName = "Hiếu",
-                    LastName = "Trần Minh Hiếu",
-                    Email = "hieu.tran99@gmail.com",
-                    DayOfBirth = DateTime.Parse("1999-07-10T00:00:00"),
-                    Gender = (int)Gender.Male,
-                    Detail = new() { Name = RandomString(10), Order = RandomInt(1, 100) },
+                    FirstName = "John",
+                    LastName = "Doe",
+                    Email = "john.doe@example.com",
+                    DayOfBirth = new DateTime(1990, 1, 5),
+                    Gender = 1,
                 },
             },
         ];
 
         var response = await elasticsearchClient.IndexManyAsync(
-            auditLogs,
+            logs,
             ElkIndexExtension.GetName<AuditLog>(prefix)
         );
 
@@ -91,26 +91,5 @@ public static class DataSeeding
                 $"Elasticsearch has been failed in seeding with {response.DebugInformation}"
             );
         }
-    }
-
-    private static string RandomString(int length)
-    {
-        const string chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-        StringBuilder sb = new(length);
-        Random random = new();
-
-        for (int i = 0; i < length; i++)
-        {
-            int index = random.Next(chars.Length);
-            sb.Append(chars[index]);
-        }
-
-        return sb.ToString();
-    }
-
-    private static int RandomInt(int min, int max)
-    {
-        Random random = new();
-        return random.Next(min, max);
     }
 }

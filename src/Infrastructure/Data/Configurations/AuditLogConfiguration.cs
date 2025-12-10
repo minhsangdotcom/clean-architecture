@@ -61,15 +61,6 @@ public class AuditLogConfiguration : IElasticsearchDocumentConfigure<AuditLog>
                                 .Date(d => d.Agent!.DayOfBirth!)
                                 .ByteNumber(b => b.Agent!.Gender!)
                                 .Keyword(x => x.Agent!.CreatedAt)
-                                .Nested(
-                                    nest => nest.Agent!.Detail,
-                                    nested =>
-                                        nested.Properties(nestP =>
-                                            nestProp
-                                                .Text(t => t.Agent!.Detail!.Name)
-                                                .Keyword(n => n.Agent!.Detail!.Order)
-                                        )
-                                )
                         )
                 )
         );
