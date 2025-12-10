@@ -58,7 +58,7 @@ public class ProcessImagePathBehavior<TMessage, TResponse>(
     {
         PropertyInfo? dataProperty = response
             .GetType()
-            .GetProperty(nameof(PaginationResponse<object>.Data));
+            .GetProperty(nameof(PaginationResponse<>.Data));
         if (dataProperty == null)
         {
             return;
