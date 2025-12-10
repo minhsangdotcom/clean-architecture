@@ -88,7 +88,7 @@ public class ResetUserPasswordHandler(
 
         await unitOfWork.Repository<UserPasswordReset>().DeleteAsync(resetPassword);
         await unitOfWork.Repository<User>().UpdateAsync(user);
-        await unitOfWork.SaveAsync(cancellationToken);
+        await unitOfWork.SaveChangesAsync(cancellationToken);
 
         return Result<string>.Success();
     }

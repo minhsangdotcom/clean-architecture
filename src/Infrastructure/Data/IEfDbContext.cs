@@ -1,3 +1,4 @@
+using Application.Common.Interfaces.UnitOfWorks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Infrastructure;
@@ -12,6 +13,8 @@ public interface IEfDbContext : IDisposable
         where TEntity : class;
 
     public DatabaseFacade DatabaseFacade { get; }
+
+    Task<ITransaction> BeginTransactionAsync(CancellationToken cancellationToken = default);
 
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 }

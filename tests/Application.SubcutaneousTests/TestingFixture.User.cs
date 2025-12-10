@@ -55,7 +55,7 @@ public partial class TestingFixture
         await unitOfWork.Repository<District>().AddAsync(district);
         await unitOfWork.Repository<Commune>().AddAsync(commune);
 
-        await unitOfWork.SaveAsync();
+        await unitOfWork.SaveChangesAsync();
         return new(province.Id, district.Id, commune.Id);
     }
 

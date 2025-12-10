@@ -39,7 +39,7 @@ public class RegionDataSeeding
         await unitOfWork.Repository<Commune>().AddRangeAsync(communes ?? []);
         logger.LogInformation("Seeding region data has finished....");
 
-        await unitOfWork.SaveAsync();
+        await unitOfWork.SaveChangesAsync();
     }
 
     private static List<T>? Read<T>(string path)

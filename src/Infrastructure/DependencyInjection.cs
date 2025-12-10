@@ -44,7 +44,7 @@ public static class DependencyInjection
 
         services
             .AddScoped<IEfDbContext, TheDbContext>()
-            .AddScoped<IEfUnitOfWork, UnitOfWork>()
+            .AddScoped<IEfUnitOfWork, EfUnitOfWork>()
             .AddSingleton<UpdateAuditableEntityInterceptor>()
             .AddSingleton<DispatchDomainEventInterceptor>();
 

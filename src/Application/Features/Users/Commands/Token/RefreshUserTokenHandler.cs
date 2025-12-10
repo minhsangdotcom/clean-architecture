@@ -82,7 +82,7 @@ public class RefreshUserTokenHandler(
         {
             // remove all the token by family token
             await unitOfWork.Repository<UserRefreshToken>().DeleteRangeAsync(refreshTokens);
-            await unitOfWork.SaveAsync(cancellationToken);
+            await unitOfWork.SaveChangesAsync(cancellationToken);
 
             return Result<RefreshUserTokenResponse>.Failure(
                 new UnauthorizedError(
@@ -157,7 +157,7 @@ public class RefreshUserTokenHandler(
         await unitOfWork
             .Repository<UserRefreshToken>()
             .AddAsync(userRefreshToken, cancellationToken);
-        await unitOfWork.SaveAsync(cancellationToken);
+        await unitOfWork.SaveChangesAsync(cancellationToken);
 
         return Result<RefreshUserTokenResponse>.Success(
             new() { Token = accessToken, RefreshToken = refreshToken }

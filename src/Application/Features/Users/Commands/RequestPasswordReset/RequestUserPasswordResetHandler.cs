@@ -82,7 +82,7 @@ public class RequestUserPasswordResetHandler(
         await unitOfWork
             .Repository<UserPasswordReset>()
             .AddAsync(userPasswordReset, cancellationToken);
-        await unitOfWork.SaveAsync(cancellationToken);
+        await unitOfWork.SaveChangesAsync(cancellationToken);
 
         UriBuilder linkBuilder =
             new(forgotPasswordSettings.Uri)

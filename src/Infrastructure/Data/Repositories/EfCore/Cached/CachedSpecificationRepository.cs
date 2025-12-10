@@ -9,7 +9,7 @@ namespace Infrastructure.Data.Repositories.EfCore.Cached;
 
 public class CachedSpecificationRepository<T>(
     IEfSpecificationRepository<T> repository,
-    ILogger<UnitOfWork> logger,
+    ILogger<EfUnitOfWork> logger,
     IMemoryCacheService memoryCacheService
 ) : IEfSpecificationRepository<T>
     where T : class

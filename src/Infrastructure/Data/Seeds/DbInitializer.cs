@@ -95,7 +95,7 @@ public class DbInitializer
             {
                 logger.LogInformation("Inserting permissions is starting.............");
                 await unitOfWork.Repository<Permission>().AddRangeAsync(permissions);
-                await unitOfWork.SaveAsync();
+                await unitOfWork.SaveChangesAsync();
                 logger.LogInformation("Inserting permissions has finished.............");
             }
             else
@@ -201,7 +201,7 @@ public class DbInitializer
             await unitOfWork
                 .Repository<Permission>()
                 .ExecuteDeleteAsync(x => idsToDelete.Contains(x.Id));
-            await unitOfWork.SaveAsync();
+            await unitOfWork.SaveChangesAsync();
             logger.LogInformation(
                 "deleting {count} permissions include {data}",
                 permissionsToDelete.Count,
@@ -212,7 +212,7 @@ public class DbInitializer
         if (permissionsToInsert.Count > 0)
         {
             await unitOfWork.Repository<Permission>().AddRangeAsync(permissionsToInsert);
-            await unitOfWork.SaveAsync();
+            await unitOfWork.SaveChangesAsync();
             logger.LogInformation(
                 "inserting {count} permissions include {data}",
                 permissionsToInsert.Count,

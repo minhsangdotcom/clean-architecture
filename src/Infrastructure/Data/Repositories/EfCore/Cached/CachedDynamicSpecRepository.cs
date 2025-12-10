@@ -10,7 +10,7 @@ namespace Infrastructure.Data.Repositories.EfCore.Cached;
 
 public class CachedDynamicSpecRepository<T>(
     IEfDynamicSpecificationRepository<T> repository,
-    ILogger<UnitOfWork> logger,
+    ILogger<EfUnitOfWork> logger,
     IMemoryCacheService memoryCacheService
 ) : IEfDynamicSpecificationRepository<T>
     where T : class

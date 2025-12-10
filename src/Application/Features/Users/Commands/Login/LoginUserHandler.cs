@@ -101,7 +101,7 @@ public class LoginUserHandler(
         await unitOfWork
             .Repository<UserRefreshToken>()
             .AddAsync(userRefreshToken, cancellationToken);
-        await unitOfWork.SaveAsync(cancellationToken);
+        await unitOfWork.SaveChangesAsync(cancellationToken);
 
         return Result<LoginUserResponse>.Success(
             new()
