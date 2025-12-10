@@ -3,6 +3,7 @@ using Application.Common.Interfaces.Services.Cache;
 using Application.Common.Interfaces.UnitOfWorks;
 using Infrastructure.Data.Repositories.EfCore.Implementations;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.Logging;
 
 namespace Infrastructure.Data;
@@ -14,8 +15,8 @@ public class EfUnitOfWork(
 ) : IEfUnitOfWork
 {
     private readonly EfRepositoryFactory factory = new(dbContext, logger, cache);
+    private IDbContextTransaction? currentTransaction = null;
 
-    public ITransaction? CurrentTransaction { get; private set; }
     private bool disposed = false;
 
     public IEfAsyncRepository<TEntity> Repository<TEntity>()
@@ -31,24 +32,24 @@ public class EfUnitOfWork(
 
     public async Task BeginTransactionAsync(CancellationToken cancellationToken = default)
     {
-        if (CurrentTransaction != null)
+        if (currentTransaction != null)
         {
             throw new InvalidOperationException("A transaction is already in progress.");
         }
 
-        CurrentTransaction = await dbContext.BeginTransactionAsync(cancellationToken);
+        currentTransaction = await dbContext.BeginTransactionAsync(cancellationToken);
     }
 
     public async Task CommitAsync(CancellationToken cancellationToken = default)
     {
-        if (CurrentTransaction == null)
+        if (currentTransaction == null)
         {
             throw new InvalidOperationException("No transaction started.");
         }
 
         try
         {
-            await CurrentTransaction.CommitAsync(cancellationToken);
+            await currentTransaction.CommitAsync(cancellationToken);
         }
         catch (Exception ex)
         {
@@ -57,18 +58,18 @@ public class EfUnitOfWork(
         }
         finally
         {
-            CurrentTransaction?.DisposeAsync();
+            await DisposeAsync();
         }
     }
 
     public async Task RollbackAsync(CancellationToken cancellationToken = default)
     {
-        if (CurrentTransaction == null)
+        if (currentTransaction == null)
         {
             logger.LogWarning("There is no transaction started.");
             return;
         }
-        await CurrentTransaction.RollbackAsync(cancellationToken);
+        await currentTransaction.RollbackAsync(cancellationToken);
     }
 
     public int ExecuteSqlCommand(string sql, params object[] parameters) =>
@@ -92,5 +93,14 @@ public class EfUnitOfWork(
         }
 
         disposed = true;
+    }
+
+    private async Task DisposeAsync()
+    {
+        if (currentTransaction != null)
+        {
+            await currentTransaction.DisposeAsync();
+            currentTransaction = null;
+        }
     }
 }

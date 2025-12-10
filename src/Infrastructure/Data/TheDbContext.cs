@@ -1,5 +1,4 @@
 using System.Reflection;
-using Application.Common.Interfaces.UnitOfWorks;
 using DynamicQuery.Extensions;
 using Infrastructure.Data.Converters;
 using Microsoft.EntityFrameworkCore;
@@ -12,13 +11,9 @@ public class TheDbContext(DbContextOptions<TheDbContext> options) : DbContext(op
 {
     public DatabaseFacade DatabaseFacade => Database;
 
-    public async Task<ITransaction> BeginTransactionAsync(
+    public async Task<IDbContextTransaction> BeginTransactionAsync(
         CancellationToken cancellationToken = default
-    )
-    {
-        IDbContextTransaction transaction = await Database.BeginTransactionAsync(cancellationToken);
-        return new EfTransaction(transaction);
-    }
+    ) => await Database.BeginTransactionAsync(cancellationToken);
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

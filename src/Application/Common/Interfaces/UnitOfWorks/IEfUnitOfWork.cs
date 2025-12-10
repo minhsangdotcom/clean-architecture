@@ -4,8 +4,6 @@ namespace Application.Common.Interfaces.UnitOfWorks;
 
 public interface IEfUnitOfWork : IUnitOfWork
 {
-    public ITransaction? CurrentTransaction { get; }
-
     IEfAsyncRepository<TEntity> Repository<TEntity>()
         where TEntity : class;
     IEfDynamicSpecificationRepository<TEntity> DynamicReadOnlyRepository<TEntity>(

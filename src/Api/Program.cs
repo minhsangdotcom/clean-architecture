@@ -11,7 +11,6 @@ using Application;
 using Application.Common.Interfaces.Services.Accessors;
 using Cysharp.Serialization.Json;
 using Infrastructure;
-using Infrastructure.Data;
 using Infrastructure.Data.Seeds;
 using Microsoft.AspNetCore.Localization;
 using Serilog;
