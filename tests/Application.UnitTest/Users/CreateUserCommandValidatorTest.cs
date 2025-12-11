@@ -1,4 +1,5 @@
 using System.Linq.Expressions;
+using System.Runtime.CompilerServices;
 using Application.Common.ErrorCodes;
 using Application.Common.Interfaces.Repositories.EfCore;
 using Application.Common.Interfaces.Services.Accessors;
@@ -417,7 +418,6 @@ public partial class CreateUserCommandValidatorTest
     #region ROLES RULES
     [Theory]
     [InlineData(null)]
-    [InlineData(default(List<Ulid>))]
     public async Task Validate_When_RolesNullOrEmpty_Should_HaveError(List<Ulid>? roles)
     {
         // Arrange
@@ -538,7 +538,6 @@ public partial class CreateUserCommandValidatorTest
     #region PERMISSIONS RULES
     [Theory]
     [InlineData(null)]
-    [InlineData(default(List<Ulid>))]
     public async Task Validate_When_PermissionsIsNullOrEmpty_Should_HaveError(
         List<Ulid>? permissionIds
     )

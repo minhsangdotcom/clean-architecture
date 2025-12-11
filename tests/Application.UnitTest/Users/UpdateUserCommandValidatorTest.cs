@@ -418,7 +418,6 @@ public class UpdateUserCommandValidatorTest
     #region ROLES RULES
     [Theory]
     [InlineData(null)]
-    [InlineData(default(List<Ulid>))]
     public async Task Validate_When_RolesNullOrEmpty_Should_HaveError(List<Ulid>? roles)
     {
         // Arrange
@@ -539,7 +538,6 @@ public class UpdateUserCommandValidatorTest
     #region PERMISSIONS RULES
     [Theory]
     [InlineData(null)]
-    [InlineData(default(List<Ulid>))]
     public async Task Validate_When_PermissionsIsNullOrEmpty_Should_HaveError(
         List<Ulid>? permissionIds
     )
