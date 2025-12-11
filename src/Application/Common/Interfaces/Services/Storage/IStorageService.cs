@@ -15,9 +15,9 @@ public interface IStorageService
 
     Task<StorageResponse> DeleteAsync(string key);
 
-    string? GetFullPath(string key);
+    string GetFullPath(string key);
 
-    string? GetPublicPath(string originalPath);
+    string GetPublicPath(string originalPath);
 
     string UniqueFileName(string fileName);
 }

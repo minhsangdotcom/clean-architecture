@@ -4,7 +4,6 @@ using Application.Common.Errors;
 using Application.Common.Interfaces.Services.Localization;
 using Application.Common.Interfaces.Services.Token;
 using Application.Contracts.Messages;
-using Domain.Aggregates.Users;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -16,13 +15,15 @@ public static class TokenExtension
 {
     public static IServiceCollection AddJwt(this IServiceCollection services, IConfiguration config)
     {
-        services.Configure<JwtSettings>(
-            config.GetSection($"SecuritySettings:{nameof(JwtSettings)}")
-        );
+        services
+            .AddOptions<JwtSettings>()
+            .Bind(config.GetSection($"SecuritySettings:{nameof(JwtSettings)}"))
+            .ValidateDataAnnotations()
+            .ValidateOnStart();
 
-        var jwtSettings = config
-            .GetSection($"SecuritySettings:{nameof(JwtSettings)}")
-            .Get<JwtSettings>();
+        JwtSettings jwtSettings =
+            config.GetSection($"SecuritySettings:{nameof(JwtSettings)}").Get<JwtSettings>()
+            ?? new();
 
         return services
             .AddSingleton<ITokenFactoryService, TokenFactoryService>()
@@ -37,7 +38,7 @@ public static class TokenExtension
                 {
                     ValidateIssuerSigningKey = true,
                     IssuerSigningKey = new SymmetricSecurityKey(
-                        Encoding.ASCII.GetBytes(jwtSettings!.SecretKey!)
+                        Encoding.ASCII.GetBytes(jwtSettings.SecretKey)
                     ),
                     ValidateIssuer = false,
                     ValidateAudience = false,

@@ -52,7 +52,7 @@ public static class QueueRegisterExtension
                         !a.FullName!.StartsWith("Microsoft") && !a.FullName.StartsWith("System")
                     )
                     .AddClasses(classes =>
-                        classes.AssignableTo(typeof(IQueueHandler<TRequest, TResponse>))
+                        classes.AssignableTo<IQueueHandler<TRequest, TResponse>>()
                     )
                     .AsImplementedInterfaces()
                     .WithScopedLifetime()

@@ -13,7 +13,7 @@ public class AmazonS3Service(IAmazonS3 amazonS3, IOptions<S3AwsSettings> awsSett
 {
     private readonly S3AwsSettings s3AwsSettings = awsSetting.Value;
 
-    public string PublicUrl => s3AwsSettings.PublicUrl!;
+    public string PublicUrl => s3AwsSettings.PublicUrl;
 
     public async Task<StorageResponse> UploadAsync(Stream stream, string key) =>
         await UploadAsync(
@@ -167,9 +167,9 @@ public class AmazonS3Service(IAmazonS3 amazonS3, IOptions<S3AwsSettings> awsSett
         return $"{name}.{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}{extension}";
     }
 
-    public string? GetFullPath(string key) => GeneratePreSignedURL(key);
+    public string GetFullPath(string key) => GeneratePreSignedURL(key);
 
-    public string? GetPublicPath(string originalPath)
+    public string GetPublicPath(string originalPath)
     {
         if (string.IsNullOrWhiteSpace(originalPath))
         {
@@ -177,7 +177,7 @@ public class AmazonS3Service(IAmazonS3 amazonS3, IOptions<S3AwsSettings> awsSett
         }
 
         return originalPath.Replace(
-            s3AwsSettings.ServiceUrl!,
+            s3AwsSettings.ServiceUrl,
             s3AwsSettings.PublicUrl,
             StringComparison.OrdinalIgnoreCase
         );

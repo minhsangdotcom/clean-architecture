@@ -19,13 +19,13 @@ public static class DistributedCacheExtension
         if (databaseSettings.IsEnabled)
         {
             services
-                .Configure<RedisDatabaseSettings>(options =>
-                    configuration.GetSection(nameof(RedisDatabaseSettings)).Bind(options)
-                )
-                .AddSingleton<IConnectionMultiplexer>(_ =>
+                .AddOptions<RedisDatabaseSettings>()
+                .Bind(configuration.GetSection(nameof(RedisDatabaseSettings)))
+                .ValidateDataAnnotations()
+                .Services.AddSingleton<IConnectionMultiplexer>(_ =>
                 {
                     ConfigurationOptions options = new() { Password = databaseSettings.Password };
-                    options.EndPoints.Add(databaseSettings.Host!, databaseSettings.Port!.Value);
+                    options.EndPoints.Add(databaseSettings.Host, databaseSettings.Port);
 
                     return ConnectionMultiplexer.Connect(options);
                 })

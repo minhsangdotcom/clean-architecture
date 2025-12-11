@@ -19,11 +19,10 @@ public static class ElasticSearchExtension
         ElasticsearchSettings elasticsearch =
             configuration.GetSection(nameof(ElasticsearchSettings)).Get<ElasticsearchSettings>()
             ?? new();
-        services.AddSingleton(typeof(IElasticsearchService<>), typeof(ElasticsearchService<>));
 
         if (elasticsearch.IsEnabled)
         {
-            IEnumerable<Uri> nodes = elasticsearch!.Nodes.Select(x => new Uri(x));
+            List<Uri> nodes = elasticsearch.Nodes.ConvertAll(x => new Uri(x));
             StaticNodePool pool = new(nodes);
             string? userName = elasticsearch.Username;
             string? password = elasticsearch.Password;

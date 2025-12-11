@@ -15,7 +15,7 @@ public static class SerilogExtension
             builder.Configuration.GetSection(nameof(SerilogSettings)).Get<SerilogSettings>()
             ?? new();
 
-        if (serilogSettings!.IsDistributeLog)
+        if (serilogSettings.IsDistributeLog)
         {
             loggerConfiguration.WriteTo.Seq(serilogSettings.SeqUrl!);
         }

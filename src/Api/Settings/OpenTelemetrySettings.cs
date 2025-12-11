@@ -2,31 +2,20 @@ namespace Api.Settings;
 
 public class OpenTelemetrySettings
 {
-    public string? ServiceName { get; set; } = "Testing Service";
-    public string? ServiceVersion { get; set; } = "1.0.0";
-    public string? ActivitySourceName { get; set; } = "Testing Service";
+    public string ServiceName { get; set; } = "TheTemplate";
+    public string ServiceVersion { get; set; } = "1.0.0";
+    public string ActivitySourceName { get; set; } = "TheTemplate.Source";
 
-    public string? Endpoint { get; set; }
+    public string Endpoint { get; set; } = string.Empty;
 
-    public OtelpOption Options { get; set; } = OtelpOption.Non;
+    public string Options { get; set; } = OpenTelemetryTracingOption.None;
 
     public bool IsEnabled { get; set; }
 }
 
-public enum OtelpOption
+public class OpenTelemetryTracingOption
 {
-    /// <summary>
-    /// Add log to distributed server
-    /// </summary>
-    DistributedServer = 1,
-
-    /// <summary>
-    /// Add log to console
-    /// </summary>
-    Console = 2,
-
-    /// <summary>
-    /// Do not thing
-    /// </summary>
-    Non = 3,
+    public const string Distribution = nameof(Distribution);
+    public const string Console = nameof(Console);
+    public const string None = nameof(None);
 }

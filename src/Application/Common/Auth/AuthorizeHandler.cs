@@ -22,7 +22,7 @@ public class AuthorizeHandler(IServiceProvider serviceProvider, ICurrentUser cur
             scope.ServiceProvider.GetRequiredService<IRolePermissionChecker>();
 
         Ulid? userId = currentUser.Id;
-        if (userId == null)
+        if (userId == null || userId == Ulid.Empty)
         {
             context.Fail(new AuthorizationFailureReason(this, "User is UnAuthenticated"));
             return;
