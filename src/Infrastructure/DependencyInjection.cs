@@ -30,15 +30,16 @@ public static class DependencyInjection
         services.AddDetection();
         AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 
-        services.Configure<DatabaseSettings>(options =>
-            configuration.GetSection(nameof(DatabaseSettings)).Bind(options)
-        );
-        services.TryAddSingleton<IValidateOptions<DatabaseSettings>, ValidateDatabaseSetting>();
+        services
+            .AddOptions<DatabaseSettings>()
+            .Bind(configuration.GetSection(nameof(DatabaseSettings)))
+            .ValidateOnStart();
+        services.AddSingleton<IValidateOptions<DatabaseSettings>, ValidateDatabaseSetting>();
 
         services.AddSingleton(sp =>
         {
             var databaseSettings = sp.GetRequiredService<IOptions<DatabaseSettings>>().Value;
-            string connectionString = databaseSettings.DatabaseConnection!;
+            string connectionString = databaseSettings.DatabaseConnection;
             return new NpgsqlDataSourceBuilder(connectionString).EnableDynamicJson().Build();
         });
 

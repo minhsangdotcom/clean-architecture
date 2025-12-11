@@ -22,6 +22,7 @@ public static class DistributedCacheExtension
                 .AddOptions<RedisDatabaseSettings>()
                 .Bind(configuration.GetSection(nameof(RedisDatabaseSettings)))
                 .ValidateDataAnnotations()
+                .ValidateOnStart()
                 .Services.AddSingleton<IConnectionMultiplexer>(_ =>
                 {
                     ConfigurationOptions options = new() { Password = databaseSettings.Password };
