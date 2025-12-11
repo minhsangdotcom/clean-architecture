@@ -19,18 +19,18 @@ public class AuditLogConfiguration : IElasticsearchDocumentConfigure<AuditLog>
             config
                 .Text(
                     t => t.Id,
-                    config => config.Fields(f => f.Keyword(ElkPrefix.KeywordPrefixName))
+                    config => config.Fields(f => f.Keyword(ElkPrefixProvider.KeywordPrefixName))
                 )
                 .Text(
                     txt => txt.Entity,
-                    config => config.Fields(f => f.Keyword(ElkPrefix.KeywordPrefixName))
+                    config => config.Fields(f => f.Keyword(ElkPrefixProvider.KeywordPrefixName))
                 )
                 .ByteNumber(b => b.Type)
                 .Object(o => o.OldValue!)
                 .Object(o => o.NewValue!)
                 .Text(
                     txt => txt.ActionPerformBy!,
-                    config => config.Fields(field => field.Keyword(ElkPrefix.KeywordPrefixName))
+                    config => config.Fields(field => field.Keyword(ElkPrefixProvider.KeywordPrefixName))
                 )
                 .Keyword(d => d.CreatedAt)
                 .Nested(
@@ -41,22 +41,22 @@ public class AuditLogConfiguration : IElasticsearchDocumentConfigure<AuditLog>
                                 .Text(
                                     t => t.Id,
                                     config =>
-                                        config.Fields(f => f.Keyword(ElkPrefix.KeywordPrefixName))
+                                        config.Fields(f => f.Keyword(ElkPrefixProvider.KeywordPrefixName))
                                 )
                                 .Text(
                                     t => t.Agent!.FirstName!,
                                     config =>
-                                        config.Fields(f => f.Keyword(ElkPrefix.KeywordPrefixName))
+                                        config.Fields(f => f.Keyword(ElkPrefixProvider.KeywordPrefixName))
                                 )
                                 .Text(
                                     t => t.Agent!.LastName!,
                                     config =>
-                                        config.Fields(f => f.Keyword(ElkPrefix.KeywordPrefixName))
+                                        config.Fields(f => f.Keyword(ElkPrefixProvider.KeywordPrefixName))
                                 )
                                 .Text(
                                     t => t.Agent!.Email!,
                                     config =>
-                                        config.Fields(f => f.Keyword(ElkPrefix.KeywordPrefixName))
+                                        config.Fields(f => f.Keyword(ElkPrefixProvider.KeywordPrefixName))
                                 )
                                 .Date(d => d.Agent!.DayOfBirth!)
                                 .ByteNumber(b => b.Agent!.Gender!)

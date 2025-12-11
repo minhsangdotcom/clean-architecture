@@ -6,12 +6,12 @@ using Microsoft.Extensions.Logging;
 
 namespace Infrastructure.Data.Seeds;
 
-public class RegionDataSeeding
+public class RegionDataInitializer
 {
     public static async Task SeedingAsync(IServiceProvider provider)
     {
         IEfUnitOfWork unitOfWork = provider.GetRequiredService<IEfUnitOfWork>();
-        ILogger logger = provider.GetRequiredService<ILogger<RegionDataSeeding>>();
+        ILogger logger = provider.GetRequiredService<ILogger<RegionDataInitializer>>();
 
         if (
             await unitOfWork.Repository<Province>().AnyAsync()

@@ -1,6 +1,6 @@
 namespace Infrastructure.Services.Elasticsearch;
 
-public static class ElkPrefix
+public static class ElkPrefixProvider
 {
     public const string KeywordPrefixName = "raw";
 }

@@ -6,6 +6,7 @@ using Elastic.Transport;
 using FluentConfiguration;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 
 namespace Infrastructure.Services.Elasticsearch;
 
@@ -16,48 +17,79 @@ public static class ElasticSearchExtension
         IConfiguration configuration
     )
     {
-        ElasticsearchSettings elasticsearch =
-            configuration.GetSection(nameof(ElasticsearchSettings)).Get<ElasticsearchSettings>()
-            ?? new();
+        ElkSettings elastic =
+            configuration.GetSection(nameof(ElasticsearchSettings)).Get<ElkSettings>() ?? new();
 
-        if (elasticsearch.IsEnabled)
+        if (!elastic.IsEnabled)
         {
-            List<Uri> nodes = elasticsearch.Nodes.ConvertAll(x => new Uri(x));
-            StaticNodePool pool = new(nodes);
-            string? userName = elasticsearch.Username;
-            string? password = elasticsearch.Password;
-
-            ElasticsearchClientSettings settings = new(pool);
-            if (!string.IsNullOrWhiteSpace(userName) && !string.IsNullOrWhiteSpace(password))
-            {
-                settings
-                    .Authentication(new BasicAuthentication(userName, password))
-                    // without ssl trust
-                    .ServerCertificateValidationCallback((o, certificate, chain, errors) => true)
-                    .ServerCertificateValidationCallback(CertificateValidations.AllowAll);
-            }
-
-            //get all configs of entity
-            List<ElasticConfigureResult> elkConfigBuilder =
-            [
-                .. ElasticsearchRegisterHelper.GetElasticsearchConfigBuilder(
-                    Assembly.GetExecutingAssembly(),
-                    elasticsearch.PrefixIndex.ToKebabCase()
-                ),
-            ];
-            // add configurations of id, ignore properties
-            ElasticsearchRegisterHelper.ConfigureConnectionSettings(ref settings, elkConfigBuilder);
-
-            ElasticsearchClient client = new(settings);
-
-            client.ElasticFluentConfigAsync(elkConfigBuilder).GetAwaiter();
-            client.SeedingAsync(elasticsearch.PrefixIndex).GetAwaiter();
-
-            services
-                .AddSingleton(client)
-                .AddSingleton<IElasticsearchServiceFactory, ElasticsearchServiceFactory>();
+            return services;
         }
 
+        // Load all elasticsearch entity configs
+        List<ElasticConfigureResult> configurations =
+        [
+            .. ElasticsearchRegisterHelper.GetElasticsearchConfigBuilder(
+                Assembly.GetExecutingAssembly(),
+                elastic.PrefixIndex.ToKebabCase()
+            ),
+        ];
+        services.AddSingleton(new ElasticConfiguration(configurations));
+
+        services
+            .AddOptions<ElasticsearchSettings>()
+            .Bind(configuration.GetSection(nameof(ElasticsearchSettings)))
+            .Validate(
+                opts => opts.Nodes?.Count > 0,
+                $"{nameof(ElasticsearchSettings)} {nameof(ElasticsearchSettings.Nodes)} is not empty or null"
+            )
+            .ValidateOnStart();
+
+        services
+            .AddSingleton(sp =>
+            {
+                ElasticsearchSettings settings = sp.GetRequiredService<
+                    IOptions<ElasticsearchSettings>
+                >().Value;
+                return BuildElasticClient(settings, configurations);
+            })
+            .AddSingleton<IElasticsearchServiceFactory, ElasticsearchServiceFactory>()
+            .AddHostedService<ElasticInitialization>();
+
         return services;
+    }
+
+    private static ElasticsearchClient BuildElasticClient(
+        ElasticsearchSettings settings,
+        List<ElasticConfigureResult> configurations
+    )
+    {
+        List<Uri> nodes = settings.Nodes.ConvertAll(static n => new Uri(n));
+        StaticNodePool pool = new(nodes);
+
+        ElasticsearchClientSettings clientSettings = new(pool);
+
+        if (
+            !string.IsNullOrWhiteSpace(settings.Username)
+            && !string.IsNullOrWhiteSpace(settings.Password)
+        )
+        {
+            clientSettings.Authentication(
+                new BasicAuthentication(settings.Username!, settings.Password!)
+            );
+
+            // Disable SSL validation
+            clientSettings.ServerCertificateValidationCallback(CertificateValidations.AllowAll);
+        }
+
+        // Apply ID mappings
+        ElasticsearchRegisterHelper.ConfigureConnectionSettings(ref clientSettings, configurations);
+
+        return new ElasticsearchClient(clientSettings);
+    }
+
+    private class ElkSettings
+    {
+        public bool IsEnabled { get; set; }
+        public string PrefixIndex { get; set; } = "TheTemplate";
     }
 }

@@ -1,3 +1,5 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace Infrastructure.Services.Elasticsearch;
 
 public class ElasticsearchSettings

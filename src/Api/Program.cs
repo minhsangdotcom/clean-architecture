@@ -81,18 +81,6 @@ try
     app.UseHealthCheck(configuration);
 
     bool isDevelopment = app.Environment.IsDevelopment();
-    #region seeding area
-    if (
-        app.Environment.EnvironmentName != "Testing-Deployment"
-        && app.Environment.EnvironmentName != "Testing-Development"
-    )
-    {
-        using var scope = app.Services.CreateScope();
-        var serviceProvider = scope.ServiceProvider;
-        await RegionDataSeeding.SeedingAsync(serviceProvider);
-        await DbInitializer.InitializeAsync(serviceProvider);
-    }
-    #endregion
     if (isDevelopment)
     {
         app.MapOpenApi("openapi/{documentName}.json");

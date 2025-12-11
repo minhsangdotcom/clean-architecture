@@ -2,6 +2,7 @@ using Application.Common.Interfaces.UnitOfWorks;
 using Infrastructure.Data;
 using Infrastructure.Data.Interceptors;
 using Infrastructure.Data.Repositories;
+using Infrastructure.Data.Seeds;
 using Infrastructure.Data.Settings;
 using Infrastructure.Services.Aws;
 using Infrastructure.Services.Cache.DistributedCache;
@@ -15,6 +16,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 using Npgsql;
 
@@ -73,7 +75,13 @@ public static class DependencyInjection
             .AddMail(configuration)
             .AddMemoryCaching(configuration)
             .AddDistributedCache(configuration)
-            .AddRepositories();
+            .AddRepositories()
+            .Configure<HostOptions>(options =>
+            {
+                options.ServicesStartConcurrently = true;
+                options.ServicesStopConcurrently = true;
+            })
+            .AddHostedService<DatabaseSeedingLifecycle>();
 
         return services;
     }

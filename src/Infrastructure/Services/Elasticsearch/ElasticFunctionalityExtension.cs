@@ -9,7 +9,7 @@ using SharedKernel.Constants;
 
 namespace Infrastructure.Services.Elasticsearch;
 
-public static class ElasticFunctionalityHelper
+public static class ElasticFunctionalityExtension
 {
     public static SearchRequestDescriptor<T> OrderBy<T>(
         this SearchRequestDescriptor<T> sortQuery,
@@ -42,7 +42,7 @@ public static class ElasticFunctionalityHelper
 
             if (isStringPropertyType)
             {
-                property += $".{ElkPrefix.KeywordPrefixName}";
+                property += $".{ElkPrefixProvider.KeywordPrefixName}";
             }
 
             if (!isNestedSort)
