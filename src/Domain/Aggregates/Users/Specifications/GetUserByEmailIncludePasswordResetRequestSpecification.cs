@@ -7,8 +7,6 @@ public class GetUserByEmailIncludePasswordResetRequestSpecification : Specificat
 {
     public GetUserByEmailIncludePasswordResetRequestSpecification(string email)
     {
-        Query.Where(x => x.Email == email).Include(x => x.PasswordResetRequests).AsNoTracking();
-        string key = SpecificationCacheKeyGenerator.Create(this, email);
-        Query.EnableCache(key);
+        Query.Where(x => x.Email == email).Include(x => x.PasswordResetRequests);
     }
 }

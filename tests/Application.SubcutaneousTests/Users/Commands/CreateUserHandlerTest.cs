@@ -38,7 +38,7 @@ public class CreateUserHandlerTest(TestingFixture testingFixture) : IAsyncLifeti
 
         user.DateOfBirth.ShouldBe(command.DateOfBirth!.Value);
         user.Roles.Select(x => x.RoleId).ShouldBe(command.Roles);
-        user.Permissions.Select(x => x.PermissionId).ShouldBe(command.Permissions);
+        user.Permissions.Select(x => x.PermissionId).ShouldBe(command.Permissions, true);
 
         user.Avatar.ShouldNotBeNull();
     }

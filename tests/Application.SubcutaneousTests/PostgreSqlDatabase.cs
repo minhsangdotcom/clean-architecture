@@ -11,12 +11,12 @@ public class PostgreSqlDatabase : IDatabase
 {
     private NpgsqlConnection? connection;
 
-    private readonly string? connectionString;
+    private string? connectionString;
     private Respawner? respawner;
 
-    private readonly string? environmentName;
+    private string? environmentName;
 
-    public PostgreSqlDatabase()
+    public async Task InitializeAsync()
     {
         environmentName =
             Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Development";
@@ -32,10 +32,6 @@ public class PostgreSqlDatabase : IDatabase
             .Build();
 
         connectionString = configuration["DatabaseSettings:DatabaseConnection"];
-    }
-
-    public async Task InitializeAsync()
-    {
         connection = new NpgsqlConnection(connectionString);
 
         var options = new DbContextOptionsBuilder<TheDbContext>()
@@ -52,7 +48,8 @@ public class PostgreSqlDatabase : IDatabase
             {
                 DbAdapter = DbAdapter.Postgres,
                 // don't remove these tables
-                TablesToIgnore = ["__EFMigrationsHistory", "province", "district", "commune"],
+                TablesToIgnore = ["__EFMigrationsHistory"],
+                SchemasToInclude = ["public"],
             }
         );
         await connection.CloseAsync();

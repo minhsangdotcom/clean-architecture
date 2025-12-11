@@ -120,8 +120,3 @@ public class ResetUserPasswordHandlerTest(TestingFixture testingFixture) : IAsyn
         };
     }
 }
-
-internal class ResetPasswordData
-{
-    public Ulid UserId { get; set; }
-}
