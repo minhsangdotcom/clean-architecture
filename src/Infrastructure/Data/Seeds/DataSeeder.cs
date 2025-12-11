@@ -5,10 +5,10 @@ using Microsoft.Extensions.Logging;
 
 namespace Infrastructure.Data.Seeds;
 
-public class DatabaseSeedingLifecycle(
+public class DataSeeder(
     IServiceProvider serviceProvider,
     IWebHostEnvironment env,
-    ILogger<DatabaseSeedingLifecycle> logger
+    ILogger<DataSeeder> logger
 ) : IHostedLifecycleService
 {
     public Task StartingAsync(CancellationToken cancellationToken)
@@ -18,7 +18,6 @@ public class DatabaseSeedingLifecycle(
 
     public async Task StartAsync(CancellationToken cancellationToken)
     {
-        // Skip seeding for test environments
         if (env.IsEnvironment("Testing-Deployment") || env.IsEnvironment("Testing-Development"))
         {
             return;
@@ -31,7 +30,7 @@ public class DatabaseSeedingLifecycle(
             using var scope = serviceProvider.CreateScope();
             var provider = scope.ServiceProvider;
 
-            await RegionDataInitializer.SeedingAsync(provider);
+            await RegionDataInitializer.InitializeAsync(provider);
             await DbInitializer.InitializeAsync(provider);
 
             logger.LogInformation("Database seeding completed successfully.");

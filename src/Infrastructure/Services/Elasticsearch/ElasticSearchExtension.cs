@@ -53,7 +53,7 @@ public static class ElasticSearchExtension
                 return BuildElasticClient(settings, configurations);
             })
             .AddSingleton<IElasticsearchServiceFactory, ElasticsearchServiceFactory>()
-            .AddHostedService<ElasticInitialization>();
+            .AddHostedService<ElasticDataSeeder>();
 
         return services;
     }

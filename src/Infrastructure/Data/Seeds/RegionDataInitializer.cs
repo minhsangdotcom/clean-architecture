@@ -8,7 +8,7 @@ namespace Infrastructure.Data.Seeds;
 
 public class RegionDataInitializer
 {
-    public static async Task SeedingAsync(IServiceProvider provider)
+    public static async Task InitializeAsync(IServiceProvider provider)
     {
         IEfUnitOfWork unitOfWork = provider.GetRequiredService<IEfUnitOfWork>();
         ILogger logger = provider.GetRequiredService<ILogger<RegionDataInitializer>>();

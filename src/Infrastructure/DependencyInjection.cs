@@ -81,7 +81,7 @@ public static class DependencyInjection
                 options.ServicesStartConcurrently = true;
                 options.ServicesStopConcurrently = true;
             })
-            .AddHostedService<DatabaseSeedingLifecycle>();
+            .AddHostedService<DataSeeder>();
 
         return services;
     }

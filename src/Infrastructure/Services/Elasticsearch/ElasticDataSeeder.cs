@@ -5,7 +5,7 @@ using Microsoft.Extensions.Options;
 
 namespace Infrastructure.Services.Elasticsearch;
 
-public class ElasticInitialization(
+public class ElasticDataSeeder(
     ElasticsearchClient client,
     ElasticConfiguration configuration,
     IOptions<ElasticsearchSettings> options
