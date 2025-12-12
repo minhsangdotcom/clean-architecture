@@ -33,11 +33,6 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
 
-    <None Include="..\..\src\Api\wwwroot\Templates\ForgotPassword.cshtml">
-      <Link>Templates\ForgotPassword.cshtml</Link>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-
     <None Include="..\..\src\Api\Resources\Messages\Messages.en.json">
       <Link>\Resources\Messages\Messages.en.json</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -53,6 +48,13 @@
     </None>
     <None Include="..\..\src\Api\Resources\Permissions\Permissions.vi.json">
       <Link>\Resources\Permissions\Permissions.vi.json</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+
+    <None Include="appsettings.DeploymentTest.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="appsettings.DevelopmentTest.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>

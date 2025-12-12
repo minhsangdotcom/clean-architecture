@@ -22,9 +22,8 @@ public class RegionDataInitializer
             return;
         }
 
-        // bin/Debug/{net_version}/
-        string path = AppContext.BaseDirectory;
-        string fullPath = Path.Combine(path, "Data", "Seeds");
+        string path = Directory.GetCurrentDirectory();
+        string fullPath = Path.Combine(path, @"..\Infrastructure", "Data", "Seeds", "Resources");
 
         string provinceFilePath = Path.Combine(fullPath, "Provinces.json");
         IEnumerable<Province>? provinces = Read<Province>(provinceFilePath);

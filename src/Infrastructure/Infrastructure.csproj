@@ -3,6 +3,16 @@
   <ItemGroup>
     <ProjectReference Include="..\Application\Application.csproj" />
     <Using Include="BCrypt.Net.BCrypt" Static="True" />
+
+    <None Include="Data\Seeds\Resources\Provinces.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Data\Seeds\Resources\Districts.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Data\Seeds\Resources\Wards.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
   <ItemGroup>

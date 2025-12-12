@@ -18,7 +18,7 @@ public class DataSeeder(
 
     public async Task StartAsync(CancellationToken cancellationToken)
     {
-        if (env.IsEnvironment("Testing-Deployment") || env.IsEnvironment("Testing-Development"))
+        if (env.IsEnvironment("DeploymentTest") || env.IsEnvironment("DevelopmentTest"))
         {
             return;
         }

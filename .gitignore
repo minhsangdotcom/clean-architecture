@@ -486,9 +486,6 @@ $RECYCLE.BIN/
 *.swp
 
 # ignore secret appsettings
+tests/Application.SubcutaneousTests/appsettings.DevelopmentTest.json
 src/Api/appsettings.Development.json
-#src/Api/appsettings.Production.json
-src/Api/appsettings.Testing-Development.json
-#src/Api/appsettings.Testing-Deployment.json
-src/Api/appsettings.json
 !Dockers/*/.env

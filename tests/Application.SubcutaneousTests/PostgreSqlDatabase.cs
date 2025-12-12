@@ -20,12 +20,12 @@ public class PostgreSqlDatabase : IDatabase
     {
         environmentName =
             Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Development";
-
+        string path = Directory.GetCurrentDirectory();
         var configuration = new ConfigurationBuilder()
-            .SetBasePath(AppContext.BaseDirectory)
+            .SetBasePath(path)
             .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
             .AddJsonFile(
-                $"appsettings.Testing-{environmentName}.json",
+                $"appsettings.{environmentName}Test.json",
                 optional: true,
                 reloadOnChange: true
             )
@@ -37,7 +37,7 @@ public class PostgreSqlDatabase : IDatabase
         var options = new DbContextOptionsBuilder<TheDbContext>()
             .UseNpgsql(connectionString)
             .Options;
-        var context = new TheDbContext(options);
+        TheDbContext context = new(options);
         context.Database.EnsureDeleted();
         context.Database.Migrate();
 
@@ -59,7 +59,7 @@ public class PostgreSqlDatabase : IDatabase
 
     public string GetConnectionString() => connectionString!;
 
-    public string GetEnvironmentVariable() => $"Testing-{environmentName}"!;
+    public string GetEnvironmentVariable() => $"{environmentName}Test";
 
     public async Task ResetAsync()
     {
