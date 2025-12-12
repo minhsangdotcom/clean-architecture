@@ -9,17 +9,12 @@ namespace Application.SubcutaneousTests;
 public partial class TestingFixture : IAsyncLifetime
 {
     private CustomWebApplicationFactory<Program>? factory;
-    private readonly PostgreSqlDatabase database = null!;
+    private readonly PostgreSqlDatabase database = new();
 
     private const string BASE_URL = "http://localhost:8080/api/v1";
 
     private HttpClient? client;
     private static Ulid UserId;
-
-    public TestingFixture()
-    {
-        database = new PostgreSqlDatabase();
-    }
 
     public async Task DisposeAsync()
     {
@@ -38,9 +33,9 @@ public partial class TestingFixture : IAsyncLifetime
     public async Task InitializeAsync()
     {
         await database.InitializeAsync();
-        var connection = database.GetConnection();
-        string environmentName = database.GetEnvironmentVariable();
-        factory = new(connection, environmentName);
+        var connection = database.Connection;
+        string environmentName = database.EnvironmentVariable;
+        factory = new(connection, environmentName, database.GetConfiguration());
         CreateClient();
     }
 

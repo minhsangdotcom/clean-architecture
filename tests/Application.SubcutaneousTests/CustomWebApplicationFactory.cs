@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Moq;
@@ -14,7 +15,8 @@ namespace Application.SubcutaneousTests;
 
 public class CustomWebApplicationFactory<TProgram>(
     DbConnection dbConnection,
-    string environmentName
+    string environmentName,
+    IConfiguration configuration
 ) : WebApplicationFactory<TProgram>
     where TProgram : class
 {
@@ -51,6 +53,11 @@ public class CustomWebApplicationFactory<TProgram>(
                     return context;
                 });
         });
-        builder.UseEnvironment(environmentName);
+
+        string path = Path.Combine(Directory.GetCurrentDirectory(), "../../../");
+        builder
+            .UseEnvironment(environmentName)
+            .UseConfiguration(configuration)
+            .UseContentRoot(path);
     }
 }
