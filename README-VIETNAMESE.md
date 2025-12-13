@@ -4,7 +4,6 @@
 
 #
 
-
 ![Visual Studio Code](https://img.shields.io/badge/Visual%20Studio%20Code-0078d7.svg?logo=visual-studio-code&logoColor=white)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 ![GitHub Release](https://img.shields.io/github/v/release/minhsangdotcom/clean-architecture?color=orange)
@@ -12,8 +11,10 @@
 ![GitHub forks](https://img.shields.io/github/forks/minhsangdotcom/clean-architecture?color=%23f61d9c)
 [![NuGet Version](https://img.shields.io/nuget/v/minhsangdotcom.TheTemplate.SharedKernel?label=SharedKernel&color=red)](https://www.nuget.org/packages/minhsangdotcom.TheTemplate.SharedKernel)
 [![NuGet Version](https://img.shields.io/nuget/v/TranMinhSang.DynamicQueryExtension.EntityFrameworkCore?label=DynamicQueryExtension&color=red)](https://www.nuget.org/packages/TranMinhSang.DynamicQueryExtension.EntityFrameworkCore)
-[![NuGet Version](https://img.shields.io/nuget/vpre/minhsangdotcom.TheTemplate.SpecificationPattern?style=flat&label=SpecificationPattern&color=red)](https://www.nuget.org/packages/minhsangdotcom.TheTemplate.SpecificationPattern/)
-[![NuGet Version](https://img.shields.io/nuget/vpre/minhsangdotcom.TheTemplate.ElasticsearchFluentConfig?style=flat&label=ElasticsearchFluentConfig&color=red)](https://www.nuget.org/packages/minhsangdotcom.TheTemplate.ElasticsearchFluentConfig/1.0.1-alpha)
+[![NuGet Version](https://img.shields.io/nuget/vpre/minhsangdotcom.TheTemplate.SpecificationPattern?style=flat&label=Specification&color=red)](https://www.nuget.org/packages/minhsangdotcom.TheTemplate.SpecificationPattern/)
+[![NuGet Version](https://img.shields.io/nuget/vpre/TranMinhSang.Specification.EntityFrameworkCore?style=flat&label=Specification.EntityFramewokCore&color=red)](https://www.nuget.org/packages/TranMinhSang.Specification.EntityFrameworkCore/)
+[![NuGet Version](https://img.shields.io/nuget/vpre/minhsangdotcom.TheTemplate.ElasticsearchFluentConfig?style=flat&label=ElasticsearchFluentConfig&color=red)](https://www.nuget.org/packages/minhsangdotcom.TheTemplate.ElasticsearchFluentConfig/)
+[![NuGet Version](https://img.shields.io/nuget/vpre/TranMinhSang.AspNetCore.Extensions?style=flat&label=AspNetCore.Extensions&color=red)](https://www.nuget.org/packages/TranMinhSang.AspNetCore.Extensions/)
 
 # Bảng nội dung <div id= "bang-noi-dung"/>
 
@@ -30,7 +31,6 @@
   - [Api](#api)
   - [Truy vết](#truy-vet)
   - [Lưu trử file media bằng Minio](#minio-storage)
-  - [Tự động dịch message](#message-translation)
 - [Sơ lượt về Cấu trúc :mag_right:](#so-luot-ve-cau-truc)
 - [Bắt đầu thôi nào](#bắt-đầu-thôi-nào)
   - [Cách để chạy ứng dụng](#cách-để-chạy-ứng-dụng)
@@ -39,24 +39,26 @@
     - [Thêm một quyền mới vào ứng dụng](#thêm-một-quyền-mới-vào-ứng-dụng)
     - [Bộ lọc](#bộ-lọc)
     - [Phân trang](#phân-trang)
+- [Khởi tạo dữ liệu mặc định](#seeding)
+- [Dịch lỗi](#TranslationError)
 - [Công nghệ](#công-nghệ)
 - [Hỗ trợ](#hỗ-trợ)
 - [Lời cảm ơn](#lời-cảm-ơn)
 - [Cấp phép](#cấp-phép)
 <div id="gioi-thieu" />
 
-# Giới thiệu 
+# Giới thiệu
 
 Template này được thiết kế dành cho các bạn backend làm việc với ASP.NET Core. Nó cung cấp một cách hiệu quả để xây dựng các ứng dụng enterprise một cách đơn giản bằng cách tận dụng lợi thế từ kiến trúc Clean Architecture và .NET Core framework.
 
-Với template này, tất cả đã được thiết lập sẵn :smiley:.
 <div id='cho-minh-sao-nhe'/>
 
-# Cho mình 1 ⭐ nhé 
+# Cho mình 1 ⭐ nhé
 
 Nếu bạn thấy template này hữu ích và học được điều gì đó từ nó, hãy cân nhắc cho mình một :star:.
 
 Sự hỗ trợ của bạn là động lực giúp mình mang đến những tính năng mới và cải tiến tốt hơn trong các phiên bản sắp tới.
+
 <div id ="dinh-nghia"/>
 
 # Định Nghĩa
@@ -89,13 +91,14 @@ Có gì đặc biệt khiến cho template này trở nên khác biệt so với
 
 ### Tính năng cần thiết cho mọi dự án:
 
-- Đăng nhập :closed_lock_with_key:
+- Đăng nhập :lock:
+- Xác thực người dùng (Role, Permission) :shield:
 - Refresh token :arrows_counterclockwise:
 - Đổi mật khẩu :repeat:
 - Quên mật khẩu :unlock:
-- Xem và cập nhật profile người dùng :man_with_gua_pi_mao:
-- User CRUD :family:
-- Role CRUD 🛡️
+- Audit log :clipboard:
+- Quản lý người dùng :busts_in_silhouette:
+- Quản lý vai trò :shield:
 
 ### Một số tính năng hữu ích khác:
 
@@ -103,12 +106,14 @@ Có gì đặc biệt khiến cho template này trở nên khác biệt so với
 1. [CQRS & Mediator](/src/Application/Features/) :twisted_rightwards_arrows:
 1. [Cross-cutting concern](/src/Application/Common/Behaviors/) :scissors:
 1. [Mail Sender](/src/Infrastructure/Services/Mail/) :mailbox:
-1. [Cached Repository](/src/Infrastructure/UnitOfWorks/CachedRepositories/) :computer:
+1. [Caching (Memory & Distributed)](/src/Infrastructure/Services/Cache/) :computer:
 1. [Queue](/src/Infrastructure/Services/Queue/) [Example at feature/TicketSale](https://github.com/minhsangdotcom/clean-architecture/tree/feature/TicketSale) :walking:
 1. [Logging](/src/Api/Extensions/SerialogExtension.cs) :pencil:
 1. [Tracing](/src/Api/Extensions/OpenTelemetryExtensions.cs) :chart_with_upwards_trend:
-1. [Automatical translatable messages](https://github.com/minhsangdotcom/the-template_shared-kernel) :globe_with_meridians:
+1. [Hỗ trợ dịch đa ngôn ngữ](src/Api/Resources/) :globe_with_meridians:
 1. [S3 AWS](/src/Infrastructure/Services/Aws/) :cloud:
+1. [Elasticsearch](/src/Infrastructure/Services/Elasticsearch/) :mag:
+1. [Docker deployment](/Dockerfile) :whale:
 <div id= 'nha-hang-cho-cac-tinh-nang'/>
 
 # Nhá hàng cho các tính năng :fire:
@@ -118,36 +123,21 @@ Có gì đặc biệt khiến cho template này trở nên khác biệt so với
 ![User Apis](/Screenshots/user-api.png)
 
 ![Role Apis](/Screenshots/role-api.png)
+
+![Other Apis](/Screenshots/others.png)
+
 <div id='truy-vet'/>
 
 ### Truy Vết
 
 ![Tracing](/Screenshots/trace.png)
+
 <div id='minio-storage'/>
 
 ### Lưu trử file media bằng Minio
 
 ![AWS s3 feature](Screenshots/AWS_S3_Feature.png)
-<div id='message-translation'/>
 
-### Tự động dịch message
-
-```json
-{
-  "type": "BadRequestError",
-  "title": "Error has occured with password",
-  "status": 400,
-  "instance": "POST /api/v1/Users/Login",
-  "ErrorDetail": {
-    "message": "user_password_incorrect",
-    "en": "Password of user is incorrect",
-    "vi": "Mật khẩu của Người dùng không đúng"
-  },
-  "requestId": "0HNC1ERHD53E2:00000001",
-  "traceId": "fa7b365b49f1b554a9cfabd978d858c8",
-  "spanId": "8623dbe038a6dede"
-}
-```
 <div id='so-luot-ve-cau-truc'/>
 
 # Sơ lượt về Cấu trúc :mag_right:
@@ -155,100 +145,84 @@ Có gì đặc biệt khiến cho template này trở nên khác biệt so với
 ```
 /Domain
   ├── /Aggregates/           # Domain aggregates (entities with business rules)
-  └── /Common/               # Shared domain logic and base types
-       ├── AggregateRoot.cs       # Base class for aggregate roots
-       ├── BaseEntity.cs          # Base class for entities
-       └── UlidToStringConverter.cs  # Value converter for ULIDs
+  └── /Common/               # Shared domain logic
 ```
 
 ```
 /Application
   ├── /Common
-  │     ├── /Auth/                   # custom authorization & policies in .NET Core
-  │     ├── /Behaviors/              # MediatR pipeline behaviors (CQRS cross‑cutting)
-  │     ├── /DomainEventHandlers/    # handlers for raising/domain events
-  │     ├── /Errors/                 # error types for Result‑pattern responses
-  │     ├── /Exceptions/             # domain/application exception definitions
-  │     ├── /Extensions/             # helper methods (pagination, LHS parsing, etc.)
-  │     ├── /Interfaces/             # application‑level contracts & abstractions
-  │     ├── /QueryStringProcessing/  # validation logic for query‑string params
-  │     └── /Security/               # security attributes (e.g. [Authorize], roles)
-  ├── /Features/                     # CQRS + MediatR pattern modules
-  │     ├── AuditLogs/               # commands & queries for audit‑trail
-  │     ├── Common/                  # shared feature utilities
-  │     ├── Permissions/             # manage app permissions
-  │     ├── QueueLogs/               # logging for background/queued jobs
-  │     ├── Regions/                 # region‑related commands & queries
-  │     ├── Roles/                   # role management (CRUD, assignments)
-  │     └── Users/                   # user‑centric commands & queries
-  └── DependencyInjection.cs         # Registration of all Application services into DI
+  │     ├── /Auth/                   # Authentication & authorization helpers (policy builders, claim extractors)
+  │     ├── /Behaviors/              # MediatR pipeline behaviors (logging, validation, transaction, caching)
+  │     ├── /ErrorCodes/             # Centralized error code definitions for the whole app
+  │     ├── /Errors/                 # Error result & problem details mappings
+  │     ├── /Interfaces/             # Application-level interfaces (services, repos, abstractions)
+  │     ├── /QueryStringProcessing/  # Parsing, validating & normalizing query parameters
+  │     ├── /Security/               # Security helpers (permission attributes, role metadata)
+  │     └── /Validators/             # Global validators used across features
+  │
+  ├── /Features                      # Vertical slices styles (CQRS + MediatR)
+  │     ├── /AuditLogs/              # Commands & queries to manage audit logs
+  │     ├── /Permissions/            # Permission management
+  │     ├── /QueueLogs/              # Query logs for background queue jobs
+  │     ├── /Regions/                # Region-based CQRS handlers
+  │     ├── /Roles/                  # Role CRUD + role-permission commands
+  │     └── /Users/                  # User CRUD + account actions
+  │
+  ├── /SharedFeatures                # Common CQRS components reused across multiple features.
+  │     ├── /Mapping/                # Shared mapping used by multiple features.
+  │     ├── /Projections/            # Common read-side DTO builders or lightweight view models.
+  │     ├── /Requests/               # Shared command/query models (e.g., Upsert commands used by multiple operations).
+  │     └── /Validators/             # Reusable FluentValidation rules shared across commands/queries.
+  │
+  ├── Application.csproj             # Application project definition
+  └── DependencyInjection.cs          # Registers all Application services into DI container
 
 ```
 
 ```
 /Infrastructure
-  ├── /Constants/                    # application-wide constants & credential definitions
-  │     └── Credential.cs            # strongly-typed credentials (keys, secrets, etc.)
+  ├── /Constants                       # Static constants for Infrastructure layer
   │
-  ├── /Data/                         # EF Core data layer: context, migrations, seeding, configs
-  │     ├── /Configurations/         # IEntityTypeConfiguration<> implementations
-  │     ├── /Interceptors/           # DbCommand/SaveChanges interceptors (logging, auditing)
-  │     ├── /Migrations/             # EF Core migration files
-  │     ├── /Seeds/                  # seed-data providers for initial data
-  │     ├── DatabaseSettings.cs      # POCO for database connection/settings
-  │     ├── DbInitializer.cs         # ensures DB is created & seeded on startup
-  │     ├── DesignTimeDbContextFactory.cs  # design-time factory for `dotnet ef` commands
-  │     ├── RegionDataSeeding.cs           # specific seed logic for Regions table
-  │     ├── TheDbContext.cs                # your `DbContext` implementation
-  │     └── ValidateDatabaseSetting.cs     # runtime validation of DB settings
+  ├── /Data                            # EF Core + persistence layer
+  │     ├── /Configurations/           # Fluent API entity configurations
+  │     ├── /Converters/               # Type converters (e.g., Ulid ↔ string)
+  │     ├── /Interceptors/             # EF Core interceptors (audit, logging)
+  │     ├── /Migrations/               # EF Core migration files
+  │     ├── /Repositories/             # Repository implementations
+  │     ├── /Seeds/                    # Seed data for database initialization
+  │     └── /Settings/                 # DbContext, UnitOfWork, factories, settings
   │
-  ├── /Services/                     # external/infrastructure services & integrations
-  │     ├── /Aws/                    # AWS SDK wrappers (S3, SNS, etc.)
-  │     ├── /Cache/                  # caching implementations (Redis, MemoryCache)
-  │     ├── /ElasticSearch/          # Elasticsearch client & indexing/search logic
-  │     ├── /Hangfire/               # background-job scheduler configuration
-  │     ├── /Identity/               # identity provider integrations (JWT, OAuth)
-  │     ├── /Mail/                   # SMTP, SendGrid, or other mail-sending services
-  │     ├── /Queue/                  # Request queueing with Redis
-  │     ├── /Token/                  # token-related services and helpers
-  │     ├── ActionAccessorService.cs # grabs current `HttpContext` action info
-  │     └── CurrentUserService.cs    # resolves authenticated user details
+  ├── /Services                         # Infrastructure service implementations
   │
-  ├── /UnitOfWorks/                  # Unit-of-Work & repository abstractions
-  │     ├── /CachedRepositories/     # repositories with built-in caching layers
-  │     ├── /Repositories/           # concrete repository implementations
-  │     ├── RepositoryExtension.cs   # extension methods for IRepository<T>
-  │     └── UnitOfWork.cs            # coordinates multiple repository commits
-  │
-  └── DependencyInjection.cs         # registration of all Infrastructure services into DI
+  ├── DependencyInjection.cs            # Registers Infrastructure services into DI
+  └── Infrastructure.csproj             # Project file
+
 ```
 
 ```
 /Api
-  ├── /common/                         # shared helpers, configurations for API layer
+  ├── /common                           # Shared helpers/utilities for the API layer
   │
-  ├── /Converters/                     # JSON/string converters for date types
-  │     ├── DateTimeConverter.cs           # custom converter for System.DateTime
-  │     └── DateTimeOffsetConverter.cs     # custom converter for System.DateTimeOffset
+  ├── /Converters                       # converters for project
   │
-  ├── /Endpoints/                      # minimal‑API endpoint definitions
+  ├── /Endpoints                        # HTTP endpoint definitions (minimal APIs or controllers)
   │
-  ├── /Extensions/                     # extension methods (IServiceCollection, HttpContext, etc.)
+  ├── /Extensions                       # API extension methods (Swagger, CORS, routing, etc.)
   │
-  ├── /Middlewares/                    # custom middleware (error handling, logging, auth, etc.)
+  ├── /Middlewares                      # Custom middlewares (exception handling, logging, etc.)
   │
-  ├── /Resources/                      # static resource files
-  │     └── /Translations/               # localization .resx files
-  │           ├── Message.en.resx           # English resource strings
-  │           └── Message.vi.resx           # Vietnamese resource strings
+  ├── /Resources                        # Localization resources for message translation
+  │     ├── /Messages/                  # Localized message files (e.g., en.json, vi.json)
+  │     └── /Permissions/               # Permission translation files
   │
-  ├── /Settings/                       # POCOs bound to appsettings.json sections
-  │     ├── OpenApiSettings.cs             # swagger/OpenAPI configuration
-  │     ├── OpenTelemetrySettings.cs       # OTEL exporter/tracing settings
-  │     └── SerilogSettings.cs             # Serilog sink & logging configuration
+  ├── /Services                         # API-layer services (if any API-specific logic is needed)
   │
-  └── /wwwroot/                        # publicly served static content
-        └── /Templates/                   # email/html templates, static assets
+  ├── /Settings                         # Settings for IOption
+  │
+  ├── /wwwroot/Templates                # Static template files (email templates, exports, etc.)
+  │
+  ├── Api.csproj                        # Project file
+  └── Program.cs                        # Application startup
 ```
 
 ```
@@ -263,9 +237,9 @@ Có gì đặc biệt khiến cho template này trở nên khác biệt so với
         +------------------+       |                    |
                         |          |                    |
                         ↓          ↓                    ↓
-                    +--------------------+    +---------------------+
-                    |   Application      | -> | Contracts           |
-                    +--------------------+    +---------------------+
+                    +--------------------+    +----------------------+
+                    |   Application      | -> | Application.Contracts|
+                    +--------------------+    +----------------------+
                              |
                              ↓
             +---------------------------+
@@ -355,7 +329,7 @@ dotnet run
 
 ```
 
-vào swagger ui ở http://localhost:8080/docs
+vào swagger ui ở http://localhost:8080/swagger
 
 Tài khoản admin mặc định là <ins>username:</ins> <b>chloe.kim</b>, <ins>password</ins>: <b>Admin@123</b>
 
@@ -365,65 +339,83 @@ Xong rồi đó :tada: :tada: :tada: :clap:
 
 ### Authorize
 
-Để phân quyền cho nó sử dụng RequireAuth vào minimal api,
-tham số permissions là kiểu string, các quyền được phân tách bởi dấu phẩy.
+Gọi hàm `MustHaveAuthorization` để xác thực người dùng bằng vai trò, quyền, hoặc cả 2.
+Có 2 tham số là permissions và roles đều là kiểu string và ngăn cách bằng dấu phẩy.
 
 ```csharp
-app.MapPost(Router.UserRoute.Users, HandleAsync)
-    .WithOpenApi(operation => new OpenApiOperation(operation)
-    {
-        Summary = "Create user 🧑",
-        Description = "Creates a new user and returns the created user details.",
-        Tags = [new OpenApiTag() { Name = Router.UserRoute.Tags }],
-    })
-    .WithRequestValidation<CreateUserCommand>()
-    .RequireAuth(
-        permissions: Permission.Generate(PermissionAction.Create, PermissionResource.User)
-    )
-    .DisableAntiforgery();
+public void MapEndpoint(IEndpointRouteBuilder app)
+{
+    app.MapPost(Router.RoleRoute.Roles, HandleAsync)
+        .WithTags(Router.RoleRoute.Tags)
+        .AddOpenApiOperationTransformer(
+            (operation, context, _) =>
+            {
+                operation.Summary = "Create role 👮";
+                operation.Description = "Creates a new role and assigns permission IDs.";
+                return Task.CompletedTask;
+            }
+        )
+        .WithRequestValidation<CreateRoleCommand>()
+        .MustHaveAuthorization(
+            permissions: PermissionGenerator.Generate(
+                PermissionResource.Role,
+                PermissionAction.Create
+            )
+        );
+}
 ```
 
 **_Tạo ra role kèm theo permission_**
 
 ```json
 {
-  "description": "this is super admin role",
-  "name": "superAdmin",
-  "roleClaims": [
-    {
-      "claimType": "permission",
-      "claimValue": "create:customer"
-    },
-    {
-      "claimType": "permission",
-      "claimValue": "update:customer"
-    }
-  ]
+  "name": "string",
+  "description": "string",
+  "permissionIds": ["01KCB884CW3JKVQT09M5ME06VH"]
 }
 ```
 
 ### Thêm một quyền mới vào ứng dụng
 
-Vào thư mục Constants trong Infrastructure mở file Credential.cs và chú ý tới permissions
+Tất cả quền được khởi tạo ở
+
+```
+cd src/Application.Contracts/Permissions/
+```
+
+Đăng ký tất cả permission vào file **`SystemPermissionDefinitionProvider`**.  
+Đầu tiên tạo ra **permission group** sau đó thêm vào một hoặc nhiều quyền vào group đó.
 
 ```csharp
-public static readonly List<Dictionary<string, List<string>>> permissions =
-    [
-        Permission.CreatebasicPermissions(PermissionResource.User),
-        Permission.CreatebasicPermissions(PermissionResource.Role),
-    ];
+#region Role permission
+PermissionGroupDefinition roleGroup =
+    context.AddGroup("RoleManagement", "Role Management");
+
+roleGroup.AddPermission(
+    PermissionNames.PermissionGenerator.Generate(
+        PermissionNames.PermissionResource.Role,
+        PermissionNames.PermissionAction.List
+    ),
+    "View list role"
+);
+#endregion
+
 ```
 
-Chú ý rằng, key là quyền chính còn value là danh sách quyền liên quan của nó
+#### Cấu trúc quyền
 
-Permission được gộp từ hành động và tên entity.
+```
+  {Resource}.{Action}
+```
+
 VD:
 
-```
-create:user
-```
+- Role.List
+- Role.Create
 
-Đây là nơi để tạo ra các PermissionAction từ lớp ActionPermission và PermissionResource.
+#### Tạo mới action và resource
+
+Tất cả action và resource sử dụng cho việc tạo permission đều nằm trong PermissionNames.cs
 
 ```csharp
 public class PermissionAction
@@ -434,17 +426,35 @@ public class PermissionAction
     public const string Detail = nameof(Detail);
     public const string List = nameof(List);
     public const string Test = nameof(Test);
-    public const string Testing = nameof(Testing);
+    public const string Test1 = nameof(Test1);
 }
 
 public class PermissionResource
 {
     public const string User = nameof(User);
     public const string Role = nameof(Role);
+    public const string QueueLog = nameof(QueueLog);
 }
 ```
 
-Tạo ra permission mới sau đó thêm nó vào list tên là permissions, tắt và chạy lại ứng dụng.
+#### Cơ chế quyền Kế thừa
+
+Hệ thống hỗ trợ kế thừa quyền, nghĩa là khi một quyền cấp cao hơn được cấp cho người dùng thì họ sẽ tự động có luôn các quyền cấp thấp hơn bên dưới.
+
+Vd: người dùng có chỉ có quyền role.update nhưng muốn truy cập api có quyền role.list, vẫn chấp nhận vì quyền cha sẽ bao gồm các quyền con:
+
+- **Update** bao gồm **Detail** và **List**
+- **Detail** bao gồm **List**
+- **List**
+
+Cơ chế này giúp bạn chỉ cần cấp 1 quyền (vd role.update) thay vì cấp nhiều quyền như role.list,role.detail cho một vai trò hay người dùng cụ thể.
+
+#### Cách Quyền được lưu trử
+
+- **Parent permissions** (quyền ở cấp root) khởi tạo ở `SystemPermissionDefinitionProvider` được lưu ở Db
+
+- **Child permissions** lưu ở bộ nhớ ram hệ thống **không lưu ở DB**
+
 <div id='filtering'/>
 
 ### Bộ lọc
@@ -546,6 +556,7 @@ Mình đã nhúng sẳn filter tự động vào tất cả các hàm lấy danh
 ```csharp
 unitOfWork.DynamicReadOnlyRepository<User>()
 ```
+
 <div id='pagination'/>
 
 ### Phân trang
@@ -590,7 +601,6 @@ var response = await unitOfWork
         "phoneNumber": "0925123320",
         "dayOfBirth": "1990-01-09T17:00:00Z",
         "gender": 2,
-        "address": "abcdef,Xã Phước Vĩnh An,Huyện Củ Chi,Thành phố Hồ Chí Minh",
         "avatar": null,
         "status": 1,
         "createdBy": "01JD936AXSDNMQ713P5XMVRQDV",
@@ -614,19 +624,50 @@ var response = await unitOfWork
 }
 ```
 
+<div id='seeding'/>
+
+### Khởi tạo dữ liệu mặc định
+
+```
+cd Infrastructure/Data/Seeds/
+```
+
+Ở file `DataSeeder.cs` hàm StartAsync
+
+<div id='TranslationError'/>
+
+### Dịch lỗi
+
+Để dịch các thông điệp lỗi, tên quyền hoặc tên vai trò, làm theo các bước sau:
+
+1. **Định nghĩa mã lỗi (error code)**  
+   Thêm một file mới trong thư mục `ErrorCodes` (ví dụ: `UserErrorMessages.cs`, `RoleErrorMessages.cs`) tại  
+   `Application/Common/ErrorCodes/`.
+
+2. **Thêm mã lỗi vào file dịch**  
+   Vào API layer → `Resources/` và thêm mã lỗi (hoặc tên quyền/tên vai trò) và bản dịch vào file JSON tương ứng  
+   (ví dụ: `Permissions.en.json`, `Messages.vi.json`).
+
+3. **(Tùy chọn nhưng khuyến dùng) Đồng bộ hóa dữ liệu dịch**  
+   Gọi endpoint để tự động thêm các mục còn thiếu và xóa các mục không còn sử dụng:
+
+   ```rest
+   GET /api/localizations/sync
+   ```
+
 # Công nghệ
 
-- .NET 8
-- EntityFramework core 8
-- AutoMapper
+- .NET 10
+- EntityFramework core 10
+- PostgresSQL
 - FluentValidation
 - Mediator
-- XUnit, FluentAssertion, Respawn
+- XUnit, Shouldly, Respawn
 - OpenTelemetry
-- PostgresSQL
+- Serilog
 - Redis
 - ElasticSearch
-- Serilog
+- Aws S3
 - Docker
 - GitHub Workflow
 
@@ -635,8 +676,6 @@ var response = await unitOfWork
 Nếu như có bất kì vấn đề nào thì cho mình biết qua [phần issue ](https://github.com/minhsangdotcom/clean-architecture/issues) nhé.
 
 # Lời cảm ơn
-
-:heart: Cảm ơn mọi người rất nhiều :heart: :pray:.
 
 - [Clean architecture by Jayson Taylor](https://github.com/jasontaylordev/CleanArchitecture)
 
@@ -649,4 +688,4 @@ Nếu như có bất kì vấn đề nào thì cho mình biết qua [phần issu
 
 # Cấp phép
 
-Dự án này sử dụng [MIT license](LICENSE)
+Dự án này sử dụng [MIT license](LICENSE).
