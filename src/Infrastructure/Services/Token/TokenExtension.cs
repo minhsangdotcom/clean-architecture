@@ -1,11 +1,13 @@
 using System.Text;
+using Application.Common.ErrorCodes;
 using Application.Common.Errors;
+using Application.Common.Interfaces.Services.Localization;
 using Application.Common.Interfaces.Services.Token;
+using Application.Contracts.Messages;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
-using SharedKernel.Common.Messages;
 
 namespace Infrastructure.Services.Token;
 
@@ -13,13 +15,15 @@ public static class TokenExtension
 {
     public static IServiceCollection AddJwt(this IServiceCollection services, IConfiguration config)
     {
-        services.Configure<JwtSettings>(
-            config.GetSection($"SecuritySettings:{nameof(JwtSettings)}")
-        );
+        services
+            .AddOptions<JwtSettings>()
+            .Bind(config.GetSection($"SecuritySettings:{nameof(JwtSettings)}"))
+            .ValidateDataAnnotations()
+            .ValidateOnStart();
 
-        var jwtSettings = config
-            .GetSection($"SecuritySettings:{nameof(JwtSettings)}")
-            .Get<JwtSettings>();
+        JwtSettings jwtSettings =
+            config.GetSection($"SecuritySettings:{nameof(JwtSettings)}").Get<JwtSettings>()
+            ?? new();
 
         return services
             .AddSingleton<ITokenFactoryService, TokenFactoryService>()
@@ -34,7 +38,7 @@ public static class TokenExtension
                 {
                     ValidateIssuerSigningKey = true,
                     IssuerSigningKey = new SymmetricSecurityKey(
-                        Encoding.ASCII.GetBytes(jwtSettings!.SecretKey!)
+                        Encoding.ASCII.GetBytes(jwtSettings.SecretKey)
                     ),
                     ValidateIssuer = false,
                     ValidateAudience = false,
@@ -48,18 +52,26 @@ public static class TokenExtension
                     OnChallenge = context =>
                     {
                         context.HandleResponse();
-                        return TokenErrorExtension.UnauthorizedException(
-                            context,
-                            !context.Response.HasStarted
-                                ? new UnauthorizedError(Message.UNAUTHORIZED)
-                                : new UnauthorizedError(Message.TOKEN_EXPIRED)
-                        );
+                        bool isUnauthorized = !context.Response.HasStarted;
+                        IMessageTranslatorService translator =
+                            context.HttpContext.RequestServices.GetRequiredService<IMessageTranslatorService>();
+
+                        string unauthorizedMessage = UserErrorMessages.UserUnauthorized;
+                        string tokenExpiredMessage = UserErrorMessages.UserTokenExpired;
+
+                        UnauthorizedError unauthorizedError = isUnauthorized
+                            ? new UnauthorizedError(
+                                Message.UNAUTHORIZED,
+                                new(unauthorizedMessage, translator.Translate(unauthorizedMessage))
+                            )
+                            : new UnauthorizedError(
+                                Message.TOKEN_EXPIRED,
+                                new(tokenExpiredMessage, translator.Translate(tokenExpiredMessage))
+                            );
+                        return context.UnauthorizedException(unauthorizedError);
                     },
                     OnForbidden = context =>
-                        TokenErrorExtension.ForbiddenException(
-                            context,
-                            new ForbiddenError(Message.FORBIDDEN)
-                        ),
+                        context.ForbiddenException(UserErrorMessages.UserForbidden),
                 };
             })
             .Services;

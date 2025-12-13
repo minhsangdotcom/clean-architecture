@@ -1,15 +1,14 @@
 using System.Text.Json;
 using Application.Common.Interfaces.Services.Identity;
 using Application.Common.Interfaces.UnitOfWorks;
-using Application.Features.Common.Payloads.Users;
-using Application.Features.Common.Projections.Users;
+using Application.Contracts.ApiWrapper;
 using Application.Features.Users.Commands.Create;
-using Contracts.ApiWrapper;
 using Domain.Aggregates.Regions;
 using Domain.Aggregates.Roles;
 using Domain.Aggregates.Users;
 using Domain.Aggregates.Users.Enums;
-using Domain.Aggregates.Users.Specifications;
+using Infrastructure.Constants;
+using Infrastructure.Data;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -18,7 +17,7 @@ namespace Application.SubcutaneousTests;
 
 public partial class TestingFixture
 {
-    public async Task<UserAddress> SeedingRegionsAsync()
+    public async Task<AddressResult> SeedingRegionsAsync()
     {
         using var scope = factory!.Services.CreateScope();
         var provider = scope.ServiceProvider;
@@ -33,6 +32,7 @@ public partial class TestingFixture
             return GetDefaultAddress();
         }
 
+        // read from bin/
         string path = AppContext.BaseDirectory;
         string fullPath = Path.Combine(path, "Data", "Seeds");
 
@@ -55,18 +55,162 @@ public partial class TestingFixture
         await unitOfWork.Repository<District>().AddAsync(district);
         await unitOfWork.Repository<Commune>().AddAsync(commune);
 
-        await unitOfWork.SaveAsync();
-
+        await unitOfWork.SaveChangesAsync();
         return new(province.Id, district.Id, commune.Id);
     }
 
+    private static readonly Random _rand = new();
+
+    public async Task<List<User>> SeedingUsersAsync(int count, string? overrideFirstName = null)
+    {
+        using var scope = factory!.Services.CreateScope();
+        IEfDbContext dbContext = scope.ServiceProvider.GetRequiredService<IEfDbContext>();
+
+        List<User> users = [];
+        for (int i = 0; i < count; i++)
+        {
+            var (first, last) = GetRandomName();
+            string firstName = !string.IsNullOrWhiteSpace(overrideFirstName)
+                ? overrideFirstName
+                : first;
+            User user =
+                new(
+                    firstName: firstName,
+                    lastName: last,
+                    username: $"{firstName.ToLower()}.{last.ToLower()}{i}",
+                    password: Credential.USER_DEFAULT_PASSWORD,
+                    email: $"{firstName.ToLower()}.{last.ToLower()}{i}@gmail.com",
+                    phoneNumber: $"41572890{i:D3}",
+                    dateOfBirth: new DateTime(2005, 10, 1),
+                    gender: Gender.Male
+                );
+
+            users.Add(user);
+        }
+
+        await dbContext.Set<User>().AddRangeAsync(users);
+        await dbContext.SaveChangesAsync();
+        return users;
+    }
+
+    public async Task<List<User>> SeedingUserForFilterTesting()
+    {
+        using var scope = factory!.Services.CreateScope();
+        IEfDbContext dbContext = scope.ServiceProvider.GetRequiredService<IEfDbContext>();
+
+        List<User> users = [];
+
+        // 1️⃣ John Doe - should match
+        var johnDoe = new User(
+            firstName: "John",
+            lastName: "Doe",
+            username: "john.doe",
+            password: Credential.USER_DEFAULT_PASSWORD,
+            email: "john.doe@example.com",
+            phoneNumber: "0900000001",
+            dateOfBirth: new DateTime(1995, 5, 21),
+            gender: Gender.Male
+        );
+        users.Add(johnDoe);
+
+        // 2️⃣ John Smith - should match
+        var johnSmith = new User(
+            firstName: "John",
+            lastName: "Smith",
+            username: "john.smith",
+            password: Credential.USER_DEFAULT_PASSWORD,
+            email: "john.smith@company.com",
+            phoneNumber: "0900000002",
+            dateOfBirth: new DateTime(1996, 3, 10),
+            gender: Gender.Male
+        );
+        users.Add(johnSmith);
+
+        // 3️⃣ Alice Wong - inactive (should NOT match)
+        var aliceWong = new User(
+            firstName: "Alice",
+            lastName: "Wong",
+            username: "alice.wong",
+            password: Credential.USER_DEFAULT_PASSWORD,
+            email: "alice.wong@example.com",
+            phoneNumber: "0900000003",
+            dateOfBirth: new DateTime(1990, 1, 1),
+            gender: Gender.Female
+        );
+        aliceWong.Deactivate();
+        users.Add(aliceWong);
+
+        // 4️⃣ Bob Lee - active but outside DOB range (optional)
+        var bobLee = new User(
+            firstName: "Bob",
+            lastName: "Lee",
+            username: "bob.lee",
+            password: Credential.USER_DEFAULT_PASSWORD,
+            email: "bob.lee@example.com",
+            phoneNumber: "0900000004",
+            dateOfBirth: new DateTime(2005, 1, 1),
+            gender: Gender.Male
+        );
+        users.Add(bobLee);
+
+        // Save all
+        await dbContext.Set<User>().AddRangeAsync(users);
+        await dbContext.SaveChangesAsync();
+
+        return users;
+    }
+
+    public static (string FirstName, string LastName) GetRandomName()
+    {
+        string[] FirstNames =
+        [
+            "Zayden",
+            "Liam",
+            "Noah",
+            "Oliver",
+            "Elijah",
+            "James",
+            "Aiden",
+            "Lucas",
+            "Mason",
+            "Ethan",
+            "Jacob",
+            "Logan",
+            "Michael",
+            "Daniel",
+            "Henry",
+        ];
+
+        string[] LastNames =
+        [
+            "Cruz",
+            "Smith",
+            "Johnson",
+            "Williams",
+            "Brown",
+            "Jones",
+            "Garcia",
+            "Miller",
+            "Davis",
+            "Rodriguez",
+            "Martinez",
+            "Hernandez",
+            "Lopez",
+            "Gonzalez",
+            "Wilson",
+        ];
+        string first = FirstNames[_rand.Next(FirstNames.Length)];
+        string last = LastNames[_rand.Next(LastNames.Length)];
+
+        return (first, last);
+    }
+
     public async Task<User> CreateAdminUserAsync(
-        UserAddress? address = null,
         IFormFile? avatar = null,
-        List<Ulid>? roleIds = null
+        List<Ulid>? roleIds = null,
+        List<Ulid>? permissionId = null
     )
     {
-        address ??= GetDefaultAddress();
         Role role = await CreateAdminRoleAsync();
         List<Ulid> roles = roleIds ?? [];
         roles.Add(role.Id);
@@ -77,24 +221,15 @@ public partial class TestingFixture
                 FirstName = "admin",
                 LastName = "super",
                 Username = "super.admin",
-                Password = DEFAULT_USER_PASSWORD,
+                Password = Credential.USER_DEFAULT_PASSWORD,
                 Email = "super.amdin@gmail.com",
-                DayOfBirth = new DateTime(1990, 1, 2),
+                DateOfBirth = new DateTime(1990, 1, 2),
                 PhoneNumber = "0925123321",
                 Gender = Gender.Male,
-                ProvinceId = address.ProvinceId,
-                DistrictId = address.DistrictId,
-                CommuneId = address.CommuneId,
                 Roles = roles,
-                Street = "abcdef",
+                Permissions = permissionId,
                 Status = UserStatus.Active,
                 Avatar = avatar,
-                UserClaims =
-                [
-                    new UserClaimPayload() { ClaimType = "test1", ClaimValue = "test1.value" },
-                    new UserClaimPayload() { ClaimType = "test2", ClaimValue = "test2.value" },
-                    new UserClaimPayload() { ClaimType = "test3", ClaimValue = "test3.value" },
-                ],
             };
 
         var user = await CreateUserAsync(command);
@@ -103,12 +238,11 @@ public partial class TestingFixture
     }
 
     public async Task<User> CreateManagerUserAsync(
-        UserAddress? address = null,
         IFormFile? avatar = null,
-        List<Ulid>? roleIds = null
+        List<Ulid>? roleIds = null,
+        List<Ulid>? permissionId = null
     )
     {
-        address ??= GetDefaultAddress();
         Role role = await CreateManagerRoleAsync();
         List<Ulid> roles = roleIds ?? [];
         roles.Add(role.Id);
@@ -118,24 +252,15 @@ public partial class TestingFixture
                 FirstName = "Steave",
                 LastName = "Roger",
                 Username = "steave.Roger",
-                Password = DEFAULT_USER_PASSWORD,
+                Password = Credential.USER_DEFAULT_PASSWORD,
                 Email = "steave.roger@gmail.com",
-                DayOfBirth = new DateTime(1990, 1, 3),
+                DateOfBirth = new DateTime(1990, 1, 3),
                 PhoneNumber = "0925321321",
                 Gender = Gender.Male,
-                ProvinceId = address.ProvinceId,
-                DistrictId = address.DistrictId,
-                CommuneId = address.CommuneId,
                 Roles = roles,
-                Street = "abcdef",
+                Permissions = permissionId,
                 Status = UserStatus.Active,
                 Avatar = avatar,
-                UserClaims =
-                [
-                    new UserClaimPayload() { ClaimType = "test1", ClaimValue = "test1.value" },
-                    new UserClaimPayload() { ClaimType = "test2", ClaimValue = "test2.value" },
-                    new UserClaimPayload() { ClaimType = "test3", ClaimValue = "test3.value" },
-                ],
             };
 
         var user = await CreateUserAsync(command);
@@ -144,12 +269,11 @@ public partial class TestingFixture
     }
 
     public async Task<User> CreateNormalUserAsync(
-        UserAddress? address = null,
         IFormFile? avatar = null,
-        List<Ulid>? roleIds = null
+        List<Ulid>? roleIds = null,
+        List<Ulid>? permissionId = null
     )
     {
-        address ??= GetDefaultAddress();
         Role role = await CreateNormalRoleAsync();
         List<Ulid> roles = roleIds ?? [];
         roles.Add(role.Id);
@@ -159,24 +283,15 @@ public partial class TestingFixture
                 FirstName = "Sang",
                 LastName = "Tran",
                 Username = "sang.tran",
-                Password = DEFAULT_USER_PASSWORD,
+                Password = Credential.USER_DEFAULT_PASSWORD,
                 Email = "sang.tran@gmail.com",
-                DayOfBirth = new DateTime(1990, 1, 4),
+                DateOfBirth = new DateTime(1990, 1, 4),
                 PhoneNumber = "0925123124",
                 Gender = Gender.Male,
-                ProvinceId = address.ProvinceId,
-                DistrictId = address.DistrictId,
-                CommuneId = address.CommuneId,
                 Roles = roles,
-                Street = "abcdef",
+                Permissions = permissionId,
                 Status = UserStatus.Active,
                 Avatar = avatar,
-                UserClaims =
-                [
-                    new UserClaimPayload() { ClaimType = "test1", ClaimValue = "test1.value" },
-                    new UserClaimPayload() { ClaimType = "test2", ClaimValue = "test2.value" },
-                    new UserClaimPayload() { ClaimType = "test3", ClaimValue = "test3.value" },
-                ],
             };
 
         var user = await CreateUserAsync(command);
@@ -188,20 +303,65 @@ public partial class TestingFixture
     {
         Result<CreateUserResponse> result = await SendAsync(command);
         CreateUserResponse createUserResponse = result.Value!;
-        return (await FindUserByIdAsync(createUserResponse.Id))!;
+        return (await FindUserByIdInCludeChildrenAsync(createUserResponse.Id))!;
     }
 
     public async Task<User?> FindUserByIdAsync(Ulid userId)
     {
         using var scope = factory!.Services.CreateScope();
-        IEfUnitOfWork? unitOfWork = scope.ServiceProvider.GetService<IEfUnitOfWork>();
-
-        return await unitOfWork!
-            .DynamicReadOnlyRepository<User>()
-            .FindByConditionAsync(new GetUserByIdSpecification(userId));
+        IUserManager userManager = scope.ServiceProvider.GetRequiredService<IUserManager>();
+        return await userManager.FindByIdAsync(userId, false);
     }
 
-    private static UserAddress GetDefaultAddress() =>
+    public async Task<User?> FindUserByIdInCludeChildrenAsync(Ulid userId)
+    {
+        using var scope = factory!.Services.CreateScope();
+        IUserManager userManager = scope.ServiceProvider.GetRequiredService<IUserManager>();
+        return await userManager.FindByIdAsync(userId);
+    }
+
+    public async Task DeactivateUserAsync(Ulid userId)
+    {
+        using var scope = factory!.Services.CreateScope();
+        IUserManager userManager = scope.ServiceProvider.GetRequiredService<IUserManager>();
+        User? user = await userManager.FindByIdAsync(userId, false);
+
+        if (user == null)
+        {
+            return;
+        }
+        user.Deactivate();
+        await userManager.UpdateAsync(user);
+    }
+
+    public async Task ClearRefreshTokenAsync(Ulid userId)
+    {
+        using var scope = factory!.Services.CreateScope();
+        IUserManager userManager = scope.ServiceProvider.GetRequiredService<IUserManager>();
+        IEfDbContext dbContext = scope.ServiceProvider.GetRequiredService<IEfDbContext>();
+
+        await dbContext.Set<UserRefreshToken>().Where(x => x.UserId == userId).ExecuteDeleteAsync();
+    }
+
+    public async Task<string> GetPasswordResetTokenAsync(Ulid userId)
+    {
+        using var scope = factory!.Services.CreateScope();
+        IUserManager userManager = scope.ServiceProvider.GetRequiredService<IUserManager>();
+        IEfDbContext dbContext = scope.ServiceProvider.GetRequiredService<IEfDbContext>();
+
+        var userPasswordReset = await dbContext
+            .Set<UserPasswordReset>()
+            .FirstOrDefaultAsync(x => x.UserId == userId);
+
+        if (userPasswordReset == null)
+        {
+            return string.Empty;
+        }
+
+        return userPasswordReset.Token;
+    }
+
+    private static AddressResult GetDefaultAddress() =>
         new(
             Ulid.Parse("01JRQHWS3RQR1N0J84EV1DQXR1"),
             Ulid.Parse("01JRQHWSNPR3Z8Z20GBSB22CSJ"),
@@ -212,9 +372,9 @@ public partial class TestingFixture
         where T : class
     {
         using FileStream json = File.OpenRead(path);
-        List<T>? datas = JsonSerializer.Deserialize<List<T>>(json);
-        return datas;
+        List<T>? data = JsonSerializer.Deserialize<List<T>>(json);
+        return data;
     }
 }
 
-public record UserAddress(Ulid ProvinceId, Ulid DistrictId, Ulid CommuneId);
+public record AddressResult(Ulid ProvinceId, Ulid DistrictId, Ulid CommuneId);

@@ -1,16 +1,22 @@
+using Application.Common.Errors;
+using Application.Common.Interfaces.Services.Localization;
 using Application.Common.Interfaces.UnitOfWorks;
 using Application.Common.QueryStringProcessing;
-using Contracts.ApiWrapper;
+using Application.Contracts.ApiWrapper;
+using Application.Contracts.Constants;
+using Application.Contracts.Dtos.Responses;
 using Domain.Aggregates.Users;
 using Domain.Aggregates.Users.Specifications;
 using Mediator;
 using Microsoft.Extensions.Logging;
-using SharedKernel.Models;
 
 namespace Application.Features.Users.Queries.List;
 
-public class ListUserHandler(IEfUnitOfWork unitOfWork, ILogger<ListUserHandler> logger)
-    : IRequestHandler<ListUserQuery, Result<PaginationResponse<ListUserResponse>>>
+public class ListUserHandler(
+    IEfUnitOfWork unitOfWork,
+    IMessageTranslatorService translator,
+    ILogger<ListUserHandler> logger
+) : IRequestHandler<ListUserQuery, Result<PaginationResponse<ListUserResponse>>>
 {
     public async ValueTask<Result<PaginationResponse<ListUserResponse>>> Handle(
         ListUserQuery query,
@@ -18,16 +24,27 @@ public class ListUserHandler(IEfUnitOfWork unitOfWork, ILogger<ListUserHandler> 
     )
     {
         var validationResult = query.ValidateQuery();
-        if (validationResult.Error != null)
+        if (!string.IsNullOrWhiteSpace(validationResult.Error))
         {
-            return Result<PaginationResponse<ListUserResponse>>.Failure(validationResult.Error);
+            return Result<PaginationResponse<ListUserResponse>>.Failure(
+                new BadRequestError(
+                    TitleMessage.VALIDATION_ERROR,
+                    new(validationResult.Error, translator.Translate(validationResult.Error))
+                )
+            );
         }
 
         var validationFilterResult = query.ValidateFilter<ListUserQuery, User>(logger);
-        if (validationFilterResult.Error != null)
+        if (!string.IsNullOrWhiteSpace(validationFilterResult.Error))
         {
             return Result<PaginationResponse<ListUserResponse>>.Failure(
-                validationFilterResult.Error
+                new BadRequestError(
+                    TitleMessage.VALIDATION_ERROR,
+                    new(
+                        validationFilterResult.Error,
+                        translator.Translate(validationFilterResult.Error)
+                    )
+                )
             );
         }
 

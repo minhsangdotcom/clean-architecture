@@ -1,7 +1,6 @@
-using Contracts.ApiWrapper;
+using Application.Contracts.ApiWrapper;
 using Mediator;
-using Microsoft.AspNetCore.Mvc;
 
 namespace Application.Features.Roles.Commands.Delete;
 
-public record DeleteRoleCommand([FromRoute] Ulid RoleId) : IRequest<Result<string>>;
+public record DeleteRoleCommand(string RoleId) : IRequest<Result<string>>;

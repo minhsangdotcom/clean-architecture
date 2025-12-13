@@ -1,18 +1,18 @@
-using Application.Features.Common.Projections.Regions;
-using Contracts.ApiWrapper;
-using Contracts.Dtos.Requests;
+using Application.Contracts.ApiWrapper;
+using Application.Contracts.Binds;
+using Application.Contracts.Dtos.Requests;
+using Application.Contracts.Dtos.Responses;
+using Application.SharedFeatures.Projections.Regions;
 using Mediator;
 using Microsoft.AspNetCore.Http;
-using SharedKernel.Models;
 
 namespace Application.Features.Regions.Queries.List.Districts;
 
 public class ListDistrictQuery
     : QueryParamRequest,
+        IQueryBinding<ListDistrictQuery>,
         IRequest<Result<PaginationResponse<DistrictProjection>>>
 {
-    public static ValueTask<ListDistrictQuery> BindAsync(HttpContext context)
-    {
-        return ValueTask.FromResult(QueryParamRequestExtension.Bind<ListDistrictQuery>(context));
-    }
+    public static ValueTask<ListDistrictQuery> BindAsync(HttpContext context) =>
+        ValueTask.FromResult(QueryParamRequestExtension.Bind<ListDistrictQuery>(context));
 }

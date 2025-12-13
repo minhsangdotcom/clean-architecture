@@ -4,26 +4,21 @@ namespace Application.Features.Users.Commands.Create;
 
 public static class CreateUserMapping
 {
-    public static User ToUser(this CreateUserCommand command)
-    {
-        return new User(
+    public static User ToUser(this CreateUserCommand command) =>
+        new(
             command.FirstName!,
             command.LastName!,
             command.Username!,
-            HashPassword(command.Password!),
+            command.Password!,
             command.Email!,
-            command.PhoneNumber!
-        )
-        {
-            Gender = command.Gender,
-            Status = command.Status,
-            DayOfBirth = command.DayOfBirth,
-        };
-    }
+            command.PhoneNumber!,
+            command.DateOfBirth,
+            command.Gender
+        );
 
     public static CreateUserResponse ToCreateUserResponse(this User user)
     {
-        var response = new CreateUserResponse();
+        CreateUserResponse response = new();
         response.MappingFrom(user);
         return response;
     }

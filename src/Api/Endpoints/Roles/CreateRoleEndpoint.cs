@@ -1,13 +1,12 @@
 using Api.common.EndpointConfigurations;
 using Api.common.Results;
 using Api.common.Routers;
+using Application.Contracts.ApiWrapper;
 using Application.Features.Roles.Commands.Create;
-using Contracts.ApiWrapper;
-using Infrastructure.Constants;
 using Mediator;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.OpenApi.Models;
+using static Application.Contracts.Permissions.PermissionNames;
 
 namespace Api.Endpoints.Roles;
 
@@ -18,16 +17,21 @@ public class CreateRoleEndpoint : IEndpoint
     public void MapEndpoint(IEndpointRouteBuilder app)
     {
         app.MapPost(Router.RoleRoute.Roles, HandleAsync)
-            .WithOpenApi(x => new OpenApiOperation(x)
-            {
-                Summary = "Create role 👮",
-                Description =
-                    "Creates a new role with optional claims like permissions, etc. This endpoint can be used to define the authorization boundaries within your application. Provide a list of claims to associate them with the newly created role.",
-                Tags = [new OpenApiTag() { Name = Router.RoleRoute.Tags }],
-            })
+            .WithTags(Router.RoleRoute.Tags)
+            .AddOpenApiOperationTransformer(
+                (operation, context, _) =>
+                {
+                    operation.Summary = "Create role 👮";
+                    operation.Description = "Creates a new role and assigns permission IDs.";
+                    return Task.CompletedTask;
+                }
+            )
             .WithRequestValidation<CreateRoleCommand>()
-            .RequireAuth(
-                permissions: Permission.Generate(PermissionAction.Create, PermissionResource.Role)
+            .MustHaveAuthorization(
+                permissions: PermissionGenerator.Generate(
+                    PermissionResource.Role,
+                    PermissionAction.Create
+                )
             );
     }
 

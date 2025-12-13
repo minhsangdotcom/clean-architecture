@@ -9,7 +9,7 @@ public class ValidateDatabaseSetting : IValidateOptions<DatabaseSettings>
         if (string.IsNullOrWhiteSpace(options.DatabaseConnection))
         {
             return ValidateOptionsResult.Fail(
-                $"{nameof(options.DatabaseConnection)} must be not null or empty"
+                $"{nameof(DatabaseSettings)} {nameof(options.DatabaseConnection)} must be not null or empty"
             );
         }
 

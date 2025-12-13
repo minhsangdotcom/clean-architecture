@@ -1,9 +1,10 @@
-using Application.Common.Interfaces.Services;
+using Application.Common.Interfaces.Services.Accessors;
 using Application.Common.Interfaces.Services.Identity;
+using Domain.Aggregates.Users;
+using Domain.Aggregates.Users.Enums;
 using DotNetCoreExtension.Extensions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.DependencyInjection;
-using SharedKernel.Constants;
 
 namespace Application.Common.Auth;
 
@@ -16,13 +17,26 @@ public class AuthorizeHandler(IServiceProvider serviceProvider, ICurrentUser cur
     )
     {
         using var scope = serviceProvider.CreateScope();
-        IUserManagerService userManagerService =
-            scope.ServiceProvider.GetRequiredService<IUserManagerService>();
+        IUserManager userManager = scope.ServiceProvider.GetRequiredService<IUserManager>();
+        IRolePermissionChecker rolePermissionChecker =
+            scope.ServiceProvider.GetRequiredService<IRolePermissionChecker>();
 
         Ulid? userId = currentUser.Id;
-        if (userId == null)
+        if (userId == null || userId == Ulid.Empty)
         {
             context.Fail(new AuthorizationFailureReason(this, "User is UnAuthenticated"));
+            return;
+        }
+
+        User? user = await userManager.FindByIdAsync(userId.Value, false);
+        if (user == null)
+        {
+            context.Fail(new AuthorizationFailureReason(this, "User is not found"));
+            return;
+        }
+        if (user.Status == UserStatus.Inactive)
+        {
+            context.Fail(new AuthorizationFailureReason(this, "User is Inactive"));
             return;
         }
 
@@ -44,37 +58,32 @@ public class AuthorizeHandler(IServiceProvider serviceProvider, ICurrentUser cur
 
         if (authorizeModel.Roles?.Count > 0 && authorizeModel.Permissions?.Count > 0)
         {
-            bool hasRolesAndClaims = await userManagerService.HasUserClaimsAndRolesAsync(
-                userId.Value,
-                authorizeModel.Roles,
-                authorizeModel.Permissions.Select(permission => new KeyValuePair<string, string>(
-                    ClaimTypes.Permission,
-                    permission
-                ))
-            );
-            SuccessOrFailure(context, requirement, hasRolesAndClaims);
+            bool isGrantedAccess =
+                await rolePermissionChecker.CheckAnyPermissionAsync(
+                    user.Id,
+                    authorizeModel.Permissions
+                ) && await rolePermissionChecker.CheckAnyRoleAsync(user.Id, authorizeModel.Roles);
+            SuccessOrFailure(context, requirement, isGrantedAccess);
             return;
         }
 
         if (authorizeModel.Roles?.Count > 0)
         {
-            bool hasRole = await userManagerService.HasUserRolesAsync(
-                userId.Value,
+            bool hasRole = await rolePermissionChecker.CheckAnyRoleAsync(
+                user.Id,
                 authorizeModel.Roles
             );
             SuccessOrFailure(context, requirement, hasRole);
-
             return;
         }
 
         if (authorizeModel.Permissions?.Count > 0)
         {
-            bool hasPermission = await userManagerService.HasUserPermissionAsync(
-                userId.Value,
+            bool hasPermission = await rolePermissionChecker.CheckAnyPermissionAsync(
+                user.Id,
                 authorizeModel.Permissions
             );
             SuccessOrFailure(context, requirement, hasPermission);
-
             return;
         }
 

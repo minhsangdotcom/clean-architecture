@@ -1,7 +1,8 @@
-using Contracts.ApiWrapper;
+using Application.Contracts.ApiWrapper;
+using Application.Contracts.Constants;
+using Application.Contracts.Messages;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
-using SharedKernel.Common.Messages;
 
 namespace Api.common.Results;
 
@@ -48,9 +49,10 @@ public static class ResultMapping
         {
             Status = errorDetails.Status,
             Title = errorDetails.Title,
+            Detail = errorDetails.Detail,
             Extensions = new Dictionary<string, object?>()
             {
-                { "errorDetails", errorDetails.ErrorMessage },
+                { ProblemDetailCustomField.Message, errorDetails.ErrorMessage },
             },
             Type = errorDetails.Type,
         };

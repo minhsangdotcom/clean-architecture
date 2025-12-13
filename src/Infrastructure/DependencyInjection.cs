@@ -1,10 +1,9 @@
-using Application.Common.Interfaces.Contexts;
-using Application.Common.Interfaces.Services;
 using Application.Common.Interfaces.UnitOfWorks;
 using Infrastructure.Data;
 using Infrastructure.Data.Interceptors;
+using Infrastructure.Data.Repositories;
+using Infrastructure.Data.Seeds;
 using Infrastructure.Data.Settings;
-using Infrastructure.Services;
 using Infrastructure.Services.Aws;
 using Infrastructure.Services.Cache.DistributedCache;
 using Infrastructure.Services.Cache.MemoryCache;
@@ -17,6 +16,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 using Npgsql;
 
@@ -32,21 +32,22 @@ public static class DependencyInjection
         services.AddDetection();
         AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 
-        services.Configure<DatabaseSettings>(options =>
-            configuration.GetSection(nameof(DatabaseSettings)).Bind(options)
-        );
-        services.TryAddSingleton<IValidateOptions<DatabaseSettings>, ValidateDatabaseSetting>();
+        services
+            .AddOptions<DatabaseSettings>()
+            .Bind(configuration.GetSection(nameof(DatabaseSettings)))
+            .ValidateOnStart();
+        services.AddSingleton<IValidateOptions<DatabaseSettings>, ValidateDatabaseSetting>();
 
         services.AddSingleton(sp =>
         {
             var databaseSettings = sp.GetRequiredService<IOptions<DatabaseSettings>>().Value;
-            string connectionString = databaseSettings.DatabaseConnection!;
+            string connectionString = databaseSettings.DatabaseConnection;
             return new NpgsqlDataSourceBuilder(connectionString).EnableDynamicJson().Build();
         });
 
         services
             .AddScoped<IEfDbContext, TheDbContext>()
-            .AddScoped<IEfUnitOfWork, UnitOfWork>()
+            .AddScoped<IEfUnitOfWork, EfUnitOfWork>()
             .AddSingleton<UpdateAuditableEntityInterceptor>()
             .AddSingleton<DispatchDomainEventInterceptor>();
 
@@ -68,15 +69,19 @@ public static class DependencyInjection
 
         services
             .AddAmazonS3(configuration)
-            .AddHttpContextAccessor()
-            .AddSingleton<ICurrentUser, CurrentUserService>()
-            .AddScoped<IHttpContextAccessorService, HttpContextAccessorService>()
             .AddJwt(configuration)
             .AddElasticSearch(configuration)
-            .AddIdentity()
+            .AddIdentity(configuration)
             .AddMail(configuration)
             .AddMemoryCaching(configuration)
-            .AddDistributedCache(configuration);
+            .AddDistributedCache(configuration)
+            .AddRepositories()
+            .Configure<HostOptions>(options =>
+            {
+                options.ServicesStartConcurrently = true;
+                options.ServicesStopConcurrently = true;
+            })
+            .AddHostedService<DataSeeder>();
 
         return services;
     }

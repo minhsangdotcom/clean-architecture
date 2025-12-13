@@ -1,10 +1,10 @@
 using System.Security.Cryptography;
 using System.Text;
-using Domain.Common;
+using Application.Contracts.Dtos.Responses;
 using DynamicQuery.Models;
 using Newtonsoft.Json;
 using SharedKernel.Constants;
-using SharedKernel.Models;
+using SharedKernel.Entities;
 
 namespace Infrastructure.Data.Repositories;
 
@@ -13,12 +13,12 @@ public static class RepositoryExtension
     public static string GetSort(this string? sort)
     {
         string defaultSort = sort.GetDefaultSort();
-        return $"{defaultSort},{nameof(BaseEntity.Id)}";
+        return $"{defaultSort},{nameof(AuditableEntity.Id)}";
     }
 
     public static string GetDefaultSort(this string? sort) =>
         string.IsNullOrWhiteSpace(sort)
-            ? $"{nameof(BaseEntity.CreatedAt)}{OrderTerm.DELIMITER}{OrderTerm.DESC}"
+            ? $"{nameof(AuditableEntity.CreatedAt)}{OrderTerm.DELIMITER}{OrderTerm.DESC}"
             : sort.Trim();
 
     public static string HashKey(params object?[] parameters)

@@ -1,17 +1,20 @@
-using Application.Common.Constants;
+using Application.Common.ErrorCodes;
 using Application.Common.Errors;
+using Application.Common.Interfaces.Services.Localization;
 using Application.Common.Interfaces.UnitOfWorks;
-using Contracts.ApiWrapper;
+using Application.Contracts.ApiWrapper;
+using Application.Contracts.Constants;
 using Domain.Aggregates.Users;
 using Domain.Aggregates.Users.Enums;
 using Domain.Aggregates.Users.Specifications;
 using Mediator;
-using SharedKernel.Common.Messages;
 
 namespace Application.Features.Users.Commands.ResetPassword;
 
-public class ResetUserPasswordHandler(IEfUnitOfWork unitOfWork)
-    : IRequestHandler<ResetUserPasswordCommand, Result<string>>
+public class ResetUserPasswordHandler(
+    IEfUnitOfWork unitOfWork,
+    IMessageTranslatorService translator
+) : IRequestHandler<ResetUserPasswordCommand, Result<string>>
 {
     public async ValueTask<Result<string>> Handle(
         ResetUserPasswordCommand command,
@@ -21,7 +24,7 @@ public class ResetUserPasswordHandler(IEfUnitOfWork unitOfWork)
         User? user = await unitOfWork
             .DynamicReadOnlyRepository<User>()
             .FindByConditionAsync(
-                new GetUserByIdIncludeResetPassword(Ulid.Parse(command.UserId)),
+                new GetUserByEmailIncludePasswordResetRequestSpecification(command.Email!),
                 cancellationToken
             );
 
@@ -29,20 +32,17 @@ public class ResetUserPasswordHandler(IEfUnitOfWork unitOfWork)
         {
             return Result<string>.Failure(
                 new NotFoundError(
-                    "The TitleMessage.RESOURCE_NOT_FOUND",
-                    Messenger
-                        .Create<User>()
-                        .Message(MessageType.Found)
-                        .Negative()
-                        .VietnameseTranslation(TranslatableMessage.VI_USER_NOT_FOUND)
-                        .Build()
+                    TitleMessage.RESOURCE_NOT_FOUND,
+                    new(
+                        UserErrorMessages.UserNotFound,
+                        translator.Translate(UserErrorMessages.UserNotFound)
+                    )
                 )
             );
         }
 
-        UpdateUserPassword? updateUserPassword = command.UpdateUserPassword;
-        UserResetPassword? resetPassword = user.UserResetPasswords?.FirstOrDefault(x =>
-            x.Token == updateUserPassword!.Token
+        UserPasswordReset? resetPassword = user.PasswordResetRequests?.FirstOrDefault(x =>
+            x.Token == command.Token
         );
 
         if (resetPassword == null)
@@ -50,12 +50,10 @@ public class ResetUserPasswordHandler(IEfUnitOfWork unitOfWork)
             return Result<string>.Failure(
                 new BadRequestError(
                     "Error has occurred with reset password token",
-                    Messenger
-                        .Create<UserResetPassword>()
-                        .Property(x => x.Token)
-                        .Message(MessageType.Correct)
-                        .Negative()
-                        .Build()
+                    new(
+                        UserErrorMessages.UserResetPasswordTokenInvalid,
+                        translator.Translate(UserErrorMessages.UserResetPasswordTokenInvalid)
+                    )
                 )
             );
         }
@@ -65,11 +63,10 @@ public class ResetUserPasswordHandler(IEfUnitOfWork unitOfWork)
             return Result<string>.Failure(
                 new BadRequestError(
                     "Error has occurred with reset password token",
-                    Messenger
-                        .Create<UserResetPassword>()
-                        .Property(x => x.Token)
-                        .Message(MessageType.Expired)
-                        .Build()
+                    new(
+                        UserErrorMessages.UserPasswordResetTokenExpired,
+                        translator.Translate(UserErrorMessages.UserPasswordResetTokenExpired)
+                    )
                 )
             );
         }
@@ -79,16 +76,19 @@ public class ResetUserPasswordHandler(IEfUnitOfWork unitOfWork)
             return Result<string>.Failure(
                 new BadRequestError(
                     "Error has occurred with current user",
-                    Messenger.Create<User>().Message(MessageType.Active).Negative().Build()
+                    new(
+                        UserErrorMessages.UserInactive,
+                        translator.Translate(UserErrorMessages.UserInactive)
+                    )
                 )
             );
         }
 
-        user.SetPassword(HashPassword(updateUserPassword!.Password));
+        user.ChangePassword(HashPassword(command.Password));
 
-        await unitOfWork.Repository<UserResetPassword>().DeleteAsync(resetPassword);
+        await unitOfWork.Repository<UserPasswordReset>().DeleteAsync(resetPassword);
         await unitOfWork.Repository<User>().UpdateAsync(user);
-        await unitOfWork.SaveAsync(cancellationToken);
+        await unitOfWork.SaveChangesAsync(cancellationToken);
 
         return Result<string>.Success();
     }

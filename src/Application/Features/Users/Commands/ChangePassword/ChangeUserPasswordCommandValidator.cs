@@ -1,44 +1,31 @@
-using Application.Common.Extensions;
-using Domain.Aggregates.Users;
+using Application.Common.ErrorCodes;
+using Application.Common.Interfaces.Services.Accessors;
+using Application.Common.Interfaces.Services.Localization;
+using Application.Common.Validators;
 using FluentValidation;
-using SharedKernel.Common.Messages;
 
 namespace Application.Features.Users.Commands.ChangePassword;
 
-public class ChangeUserPasswordCommandValidator : AbstractValidator<ChangeUserPasswordCommand>
+public class ChangeUserPasswordCommandValidator(
+    IRequestContextProvider contextProvider,
+    IMessageTranslatorService translator
+) : FluentValidator<ChangeUserPasswordCommand>(contextProvider, translator)
 {
-    public ChangeUserPasswordCommandValidator()
+    protected sealed override void ApplyRules(IMessageTranslatorService translator)
     {
         RuleFor(x => x.OldPassword)
             .NotEmpty()
-            .WithState(x =>
-                Messenger
-                    .Create<ChangeUserPasswordCommand>(nameof(User))
-                    .Property(x => x.OldPassword!)
-                    .Message(MessageType.Null)
-                    .Negative()
-                    .Build()
-            );
+            .WithTranslatedError(translator, UserErrorMessages.UserOldPasswordRequired);
 
         RuleFor(x => x.NewPassword)
-            .Cascade(CascadeMode.Stop)
             .NotEmpty()
-            .WithState(x =>
-                Messenger
-                    .Create<ChangeUserPasswordCommand>(nameof(User))
-                    .Property(x => x.NewPassword!)
-                    .Message(MessageType.Null)
-                    .Negative()
-                    .Build()
-            )
-            .Must(x => x!.IsValidPassword())
-            .WithState(x =>
-                Messenger
-                    .Create<ChangeUserPasswordCommand>(nameof(User))
-                    .Property(x => x.NewPassword!)
-                    .Message(MessageType.Strong)
-                    .Negative()
-                    .Build()
-            );
+            .WithTranslatedError(translator, UserErrorMessages.UserNewPasswordRequired)
+            .BeValidPassword()
+            .WithTranslatedError(translator, UserErrorMessages.UserNewPasswordNotStrong);
     }
+
+    protected sealed override void ApplyRules(
+        IRequestContextProvider contextProvider,
+        IMessageTranslatorService translator
+    ) { }
 }

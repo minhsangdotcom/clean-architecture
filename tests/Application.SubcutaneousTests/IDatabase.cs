@@ -1,15 +1,17 @@
 using System.Data.Common;
+using Microsoft.Extensions.Configuration;
 
 namespace Application.SubcutaneousTests;
 
 public interface IDatabase
 {
-    Task InitialiseAsync();
+    DbConnection Connection { get; }
+    string ConnectionString { get; }
+    string EnvironmentVariable { get; }
 
-    DbConnection GetConnection();
+    IConfiguration GetConfiguration();
 
-    string GetConnectionString();
-
+    Task InitializeAsync();
     Task ResetAsync();
 
     Task DisposeAsync();

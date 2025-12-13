@@ -1,22 +1,22 @@
-using Application.Common.Constants;
+using Application.Common.ErrorCodes;
 using Application.Common.Errors;
-using Application.Common.Interfaces.Services;
+using Application.Common.Interfaces.Services.Accessors;
 using Application.Common.Interfaces.Services.Identity;
-using Application.Common.Interfaces.UnitOfWorks;
-using Contracts.ApiWrapper;
-using Domain.Aggregates.Regions;
+using Application.Common.Interfaces.Services.Storage;
+using Application.Contracts.ApiWrapper;
+using Application.Contracts.Constants;
 using Domain.Aggregates.Users;
-using Domain.Aggregates.Users.Specifications;
 using Mediator;
 using Microsoft.AspNetCore.Http;
-using SharedKernel.Common.Messages;
+using Microsoft.Extensions.Localization;
 
 namespace Application.Features.Users.Commands.Profiles;
 
 public class UpdateUserProfileHandler(
-    IEfUnitOfWork unitOfWork,
-    ICurrentUser currentUser,
-    IMediaUpdateService<User> avatarUpdate
+    IUserManager userManager,
+    IMediaStorageService<User> storageService,
+    IStringLocalizer<UpdateUserProfileHandler> stringLocalizer,
+    ICurrentUser currentUser
 ) : IRequestHandler<UpdateUserProfileCommand, Result<UpdateUserProfileResponse>>
 {
     public async ValueTask<Result<UpdateUserProfileResponse>> Handle(
@@ -24,24 +24,21 @@ public class UpdateUserProfileHandler(
         CancellationToken cancellationToken
     )
     {
-        User? user = await unitOfWork
-            .DynamicReadOnlyRepository<User>()
-            .FindByConditionAsync(
-                new GetUserByIdWithoutIncludeSpecification(currentUser.Id ?? Ulid.Empty),
-                cancellationToken
-            );
+        User? user = await userManager.FindByIdAsync(
+            currentUser.Id!.Value,
+            false,
+            cancellationToken
+        );
 
         if (user == null)
         {
             return Result<UpdateUserProfileResponse>.Failure(
                 new NotFoundError(
                     TitleMessage.RESOURCE_NOT_FOUND,
-                    Messenger
-                        .Create<User>()
-                        .Message(MessageType.Found)
-                        .Negative()
-                        .VietnameseTranslation(TranslatableMessage.VI_USER_NOT_FOUND)
-                        .BuildMessage()
+                    new(
+                        UserErrorMessages.UserNotFound,
+                        stringLocalizer[UserErrorMessages.UserNotFound]
+                    )
                 )
             );
         }
@@ -49,101 +46,27 @@ public class UpdateUserProfileHandler(
         IFormFile? avatar = command.Avatar;
         string? oldAvatar = user.Avatar;
 
-        user.MapFromUpdateUserProfileCommand(command);
+        user.MapFromCommand(command);
 
-        Province? province = await unitOfWork
-            .Repository<Province>()
-            .FindByIdAsync(command.ProvinceId, cancellationToken);
-        if (province == null)
-        {
-            return Result<UpdateUserProfileResponse>.Failure<NotFoundError>(
-                new(
-                    TitleMessage.RESOURCE_NOT_FOUND,
-                    Messenger
-                        .Create<User>()
-                        .Property(nameof(UpdateUserProfileCommand.ProvinceId))
-                        .Message(MessageType.Existence)
-                        .Negative()
-                        .Build()
-                )
-            );
-        }
-
-        District? district = await unitOfWork
-            .Repository<District>()
-            .FindByIdAsync(command.DistrictId, cancellationToken);
-        if (district == null)
-        {
-            return Result<UpdateUserProfileResponse>.Failure<NotFoundError>(
-                new(
-                    TitleMessage.RESOURCE_NOT_FOUND,
-                    Messenger
-                        .Create<User>()
-                        .Property(nameof(UpdateUserProfileCommand.DistrictId))
-                        .Message(MessageType.Existence)
-                        .Negative()
-                        .Build()
-                )
-            );
-        }
-
-        Commune? commune = null;
-        if (command.CommuneId.HasValue)
-        {
-            commune = await unitOfWork
-                .Repository<Commune>()
-                .FindByIdAsync(command.CommuneId.Value, cancellationToken);
-
-            if (commune == null)
-            {
-                return Result<UpdateUserProfileResponse>.Failure<NotFoundError>(
-                    new(
-                        TitleMessage.RESOURCE_NOT_FOUND,
-                        Messenger
-                            .Create<User>()
-                            .Property(nameof(UpdateUserProfileCommand.CommuneId))
-                            .Message(MessageType.Existence)
-                            .Negative()
-                            .Build()
-                    )
-                );
-            }
-        }
-        user.UpdateAddress(
-            new(
-                province!.FullName,
-                province.Id,
-                district!.FullName,
-                district.Id,
-                commune?.FullName,
-                commune?.Id,
-                command.Street!
-            )
-        );
-
-        string? key = avatarUpdate.GetKey(avatar);
-        user.Avatar = await avatarUpdate.UploadAvatarAsync(avatar, key);
+        string? key = storageService.GetKey(avatar);
+        user.ChangeAvatar(await storageService.UploadAsync(avatar, key));
 
         try
         {
-            await unitOfWork.Repository<User>().UpdateAsync(user);
-            await unitOfWork.SaveAsync(cancellationToken);
-            await avatarUpdate.DeleteAvatarAsync(oldAvatar);
+            await userManager.UpdateAsync(user, cancellationToken);
+            await storageService.DeleteAsync(oldAvatar);
         }
         catch (Exception)
         {
-            await avatarUpdate.DeleteAvatarAsync(user.Avatar);
+            await storageService.DeleteAsync(user.Avatar);
             throw;
         }
 
-        UpdateUserProfileResponse? response = await unitOfWork
-            .DynamicReadOnlyRepository<User>()
-            .FindByConditionAsync(
-                new GetUserByIdSpecification(user.Id),
-                x => x.ToUpdateUserProfileResponse(),
-                cancellationToken
-            );
+        User? response = await userManager.FindByIdAsync(
+            user.Id,
+            cancellationToken: cancellationToken
+        );
 
-        return Result<UpdateUserProfileResponse>.Success(response!);
+        return Result<UpdateUserProfileResponse>.Success(response!.ToUpdateUserProfileResponse());
     }
 }

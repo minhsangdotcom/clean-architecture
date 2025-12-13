@@ -1,4 +1,7 @@
 using Application.Common.Errors;
+using Application.Common.Interfaces.Services.Localization;
+using Application.Contracts.Constants;
+using Application.Contracts.Messages;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -6,15 +9,20 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Infrastructure.Services.Token;
 
-public class TokenErrorExtension
+public static class TokenErrorExtension
 {
     public static async Task ForbiddenException(
-        ForbiddenContext httpContext,
-        ForbiddenError forbiddenError
+        this ForbiddenContext httpContext,
+        string errorMessage
     )
     {
-        var problemDetailsService =
+        IProblemDetailsService problemDetailsService =
             httpContext.HttpContext.RequestServices.GetRequiredService<IProblemDetailsService>();
+        IMessageTranslatorService translator =
+            httpContext.HttpContext.RequestServices.GetRequiredService<IMessageTranslatorService>();
+
+        ForbiddenError forbiddenError =
+            new(Message.FORBIDDEN, new(errorMessage, translator.Translate(errorMessage)));
 
         int statusCode = forbiddenError.Status;
         httpContext.Response.StatusCode = statusCode;
@@ -25,9 +33,10 @@ public class TokenErrorExtension
                 Title = forbiddenError.Title,
                 Type = forbiddenError.Type,
                 Status = forbiddenError.Status,
+                Detail = forbiddenError.Detail,
                 Extensions = new Dictionary<string, object?>()
                 {
-                    { "errorDetails", forbiddenError.ErrorMessage },
+                    { ProblemDetailCustomField.Message, forbiddenError.ErrorMessage },
                 },
             };
 
@@ -37,11 +46,11 @@ public class TokenErrorExtension
     }
 
     public static async Task UnauthorizedException(
-        JwtBearerChallengeContext httpContext,
+        this JwtBearerChallengeContext httpContext,
         UnauthorizedError unauthorizedError
     )
     {
-        var problemDetailsService =
+        IProblemDetailsService problemDetailsService =
             httpContext.HttpContext.RequestServices.GetRequiredService<IProblemDetailsService>();
 
         int statusCode = unauthorizedError.Status;
@@ -52,10 +61,11 @@ public class TokenErrorExtension
             {
                 Title = unauthorizedError.Title,
                 Type = unauthorizedError.Type,
+                Detail = unauthorizedError.Detail,
                 Status = unauthorizedError.Status,
                 Extensions = new Dictionary<string, object?>()
                 {
-                    { "errorDetails", unauthorizedError.ErrorMessage },
+                    { ProblemDetailCustomField.Message, unauthorizedError.ErrorMessage },
                 },
             };
 

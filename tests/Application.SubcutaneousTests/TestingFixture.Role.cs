@@ -1,13 +1,13 @@
 using Application.Common.Interfaces.Services.Identity;
-using Application.Features.Common.Payloads.Roles;
-using Application.Features.Common.Projections.Roles;
+using Application.Contracts.ApiWrapper;
 using Application.Features.Roles.Commands.Create;
 using Application.SubcutaneousTests.Extensions;
-using Contracts.ApiWrapper;
+using Domain.Aggregates.Permissions;
 using Domain.Aggregates.Roles;
-using Infrastructure.Constants;
+using Infrastructure.Data;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using SharedKernel.Constants;
+using static Application.Contracts.Permissions.PermissionNames;
 
 namespace Application.SubcutaneousTests;
 
@@ -17,79 +17,90 @@ public partial class TestingFixture
     {
         factory.ThrowIfNull();
         using var scope = factory!.Services.CreateScope();
-        var roleManagerService = scope.ServiceProvider.GetRequiredService<IRoleManagerService>();
-        return await roleManagerService.GetByIdAsync(id);
+        var roleManager = scope.ServiceProvider.GetRequiredService<IRoleManager>();
+        return await roleManager.FindByIdAsync(id, false);
     }
 
-    public async Task<Role?> FindRoleByIdIncludeRoleClaimsAsync(Ulid id)
+    public async Task<Role?> FindRoleByIdIncludeChildrenAsync(Ulid id)
     {
         factory.ThrowIfNull();
         using var scope = factory!.Services.CreateScope();
-        var roleManagerService = scope.ServiceProvider.GetRequiredService<IRoleManagerService>();
-        return await roleManagerService.FindByIdAsync(id);
+        var roleManager = scope.ServiceProvider.GetRequiredService<IRoleManager>();
+        return await roleManager.FindByIdAsync(id);
     }
 
     public async Task<Role> CreateAdminRoleAsync()
     {
-        List<RoleClaimPayload> roleClaimModels =
-        [
-            .. Credential.ADMIN_CLAIMS.Select(permission => new RoleClaimPayload()
-            {
-                ClaimType = ClaimTypes.Permission,
-                ClaimValue = permission,
-            }),
-        ];
-
-        return await CreateRoleAsync(Credential.ADMIN_ROLE, roleClaimModels);
+        factory.ThrowIfNull();
+        using var scope = factory!.Services.CreateScope();
+        var dbContext = scope.ServiceProvider.GetRequiredService<IEfDbContext>();
+        var permissionIds = await dbContext
+            .Set<Permission>()
+            .AsNoTracking()
+            .Select(x => x.Id)
+            .ToListAsync();
+        return await CreateRoleAsync(RoleSeeding.ADMIN, permissionIds);
     }
 
     public async Task<Role> CreateManagerRoleAsync()
     {
-        List<RoleClaimPayload> roleClaimModels =
+        factory.ThrowIfNull();
+        using var scope = factory!.Services.CreateScope();
+        var dbContext = scope.ServiceProvider.GetRequiredService<IEfDbContext>();
+        string[] permissionCodes =
         [
-            .. Credential.MANAGER_CLAIMS.Select(permission => new RoleClaimPayload()
-            {
-                ClaimType = ClaimTypes.Permission,
-                ClaimValue = permission,
-            }),
+            PermissionGenerator.Generate(PermissionResource.Role, PermissionAction.Detail),
+            PermissionGenerator.Generate(PermissionResource.Role, PermissionAction.Create),
+            PermissionGenerator.Generate(PermissionResource.User, PermissionAction.Detail),
+            PermissionGenerator.Generate(PermissionResource.User, PermissionAction.Create),
         ];
-
-        return await CreateRoleAsync(Credential.MANAGER_ROLE, roleClaimModels);
+        var permissionIds = await dbContext
+            .Set<Permission>()
+            .AsNoTracking()
+            .Where(p => permissionCodes.Contains(p.Code))
+            .Select(x => x.Id)
+            .ToListAsync();
+        return await CreateRoleAsync(RoleSeeding.MANAGER, permissionIds);
     }
 
-    public async Task<Role> CreateNormalRoleAsync() =>
-        await CreateRoleAsync("user", DefaultUserClaims());
-
-    public async Task<Role> CreateRoleAsync(string roleName, List<RoleClaimPayload> roleClaims)
+    public async Task<Role> CreateNormalRoleAsync()
     {
-        CreateRoleCommand role = new() { Name = roleName, RoleClaims = roleClaims };
+        factory.ThrowIfNull();
+        using var scope = factory!.Services.CreateScope();
+        var dbContext = scope.ServiceProvider.GetRequiredService<IEfDbContext>();
+        string[] permissionCodes =
+        [
+            PermissionGenerator.Generate(PermissionResource.Role, PermissionAction.Detail),
+            PermissionGenerator.Generate(PermissionResource.User, PermissionAction.Detail),
+        ];
+        var permissionIds = await dbContext
+            .Set<Permission>()
+            .AsNoTracking()
+            .Where(p => permissionCodes.Contains(p.Code))
+            .Select(x => x.Id)
+            .ToListAsync();
+        return await CreateRoleAsync(RoleSeeding.NORMAL_USER, permissionIds);
+    }
+
+    public async Task<Role> CreateRoleAsync(string roleName, List<Ulid> permissionIds)
+    {
+        CreateRoleCommand role =
+            new()
+            {
+                Name = roleName,
+                Description = $"Create {roleName}",
+                PermissionIds = permissionIds,
+            };
         factory.ThrowIfNull();
         Result<CreateRoleResponse> result = await SendAsync(role);
         CreateRoleResponse response = result.Value!;
-        return (await FindRoleByIdIncludeRoleClaimsAsync(response.Id))!;
+        return (await FindRoleByIdIncludeChildrenAsync(response.Id))!;
     }
+}
 
-    public static List<RoleClaimPayload> DefaultUserClaims() =>
-        [
-            new RoleClaimPayload()
-            {
-                ClaimType = ClaimTypes.Permission,
-                ClaimValue = $"{PermissionAction.List}:{PermissionResource.Role}",
-            },
-            new RoleClaimPayload()
-            {
-                ClaimType = ClaimTypes.Permission,
-                ClaimValue = $"{PermissionAction.Detail}:{PermissionResource.Role}",
-            },
-            new RoleClaimPayload()
-            {
-                ClaimType = ClaimTypes.Permission,
-                ClaimValue = $"{PermissionAction.List}:{PermissionResource.User}",
-            },
-            new RoleClaimPayload()
-            {
-                ClaimType = ClaimTypes.Permission,
-                ClaimValue = $"{PermissionAction.Detail}:{PermissionResource.User}",
-            },
-        ];
+public class RoleSeeding
+{
+    public const string ADMIN = "ADMIN";
+    public const string MANAGER = "MANAGER";
+    public const string NORMAL_USER = "NORMAL_USER";
 }

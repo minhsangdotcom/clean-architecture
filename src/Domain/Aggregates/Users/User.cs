@@ -1,50 +1,35 @@
-using System.ComponentModel.DataAnnotations.Schema;
 using Ardalis.GuardClauses;
 using Domain.Aggregates.Users.Enums;
-using Domain.Aggregates.Users.Events;
-using Domain.Aggregates.Users.ValueObjects;
-using Domain.Common;
-using DotNetCoreExtension.Extensions.Reflections;
-using Mediator;
-using SharedKernel.Constants;
+using Domain.Aggregates.Users.Exceptions;
+using SharedKernel.DomainEvents;
+using SharedKernel.Entities;
 
 namespace Domain.Aggregates.Users;
 
 public class User : AggregateRoot
 {
-    public string FirstName { get; private set; }
+    #region Core Properties
+    public string FirstName { get; private set; } = string.Empty;
+    public string LastName { get; private set; } = string.Empty;
+    public string Username { get; private set; } = string.Empty;
+    public string Password { get; private set; } = string.Empty;
+    public string Email { get; private set; } = string.Empty;
+    public string? PhoneNumber { get; private set; }
+    public DateTime? DateOfBirth { get; private set; }
+    public Gender? Gender { get; private set; }
+    public string? Avatar { get; private set; }
+    public UserStatus Status { get; private set; } = UserStatus.Active;
+    #endregion
 
-    public string LastName { get; private set; }
+    #region Navigation Collections
+    public ICollection<UserClaim> Claims { get; private set; } = [];
+    public ICollection<UserPermission> Permissions { get; private set; } = [];
+    public ICollection<UserRole> Roles { get; private set; } = [];
+    public ICollection<UserRefreshToken> RefreshTokens { get; private set; } = [];
+    public ICollection<UserPasswordReset> PasswordResetRequests { get; private set; } = [];
+    #endregion
 
-    public string Username { get; private set; }
-
-    public string Password { get; private set; }
-
-    public string Email { get; private set; }
-
-    public string PhoneNumber { get; set; }
-
-    public DateTime? DayOfBirth { get; set; }
-
-    public Gender? Gender { get; set; }
-
-    public Address? Address { get; private set; }
-
-    public string? Avatar { get; set; }
-
-    public UserStatus Status { get; set; } = UserStatus.Active;
-
-    public ICollection<UserClaim>? UserClaims { get; set; } = [];
-
-    public ICollection<UserRole>? UserRoles { get; set; } = [];
-
-    public ICollection<UserToken>? UserTokens { get; set; } = [];
-
-    public ICollection<UserResetPassword>? UserResetPasswords { get; set; } = [];
-
-    // default user claim are ready to update into db
-    [NotMapped]
-    public IReadOnlyCollection<UserClaim> DefaultUserClaimsToUpdates { get; private set; } = [];
+    private User() { }
 
     public User(
         string firstName,
@@ -52,167 +37,96 @@ public class User : AggregateRoot
         string username,
         string password,
         string email,
-        string phoneNumber,
-        Address? address = null
+        string? phoneNumber = null,
+        DateTime? dateOfBirth = null,
+        Gender? gender = null,
+        string? avatar = null
     )
     {
         FirstName = Guard.Against.NullOrEmpty(firstName, nameof(FirstName));
-        LastName = Guard.Against.Null(lastName, nameof(LastName));
-        Username = Guard.Against.Null(username, nameof(Username));
-        Password = Guard.Against.Null(password, nameof(Password));
-        Email = Guard.Against.Null(email, nameof(Email));
-        PhoneNumber = Guard.Against.Null(phoneNumber, nameof(PhoneNumber));
-        Address = address;
+        LastName = Guard.Against.NullOrEmpty(lastName, nameof(LastName));
+        Username = Guard.Against.NullOrEmpty(username, nameof(Username));
+        Password = Guard.Against.NullOrEmpty(password, nameof(Password));
+        Email = Guard.Against.NullOrEmpty(email, nameof(Email));
+        PhoneNumber = phoneNumber;
+        DateOfBirth = dateOfBirth;
+        Gender = gender;
+        Avatar = avatar;
     }
 
-    private User()
+    public void InitializeIdentity(Ulid id, string createdBy)
     {
-        FirstName = string.Empty;
-        LastName = string.Empty;
-        Username = string.Empty;
-        Password = string.Empty;
-        Email = string.Empty;
-        PhoneNumber = string.Empty;
+        Id = id;
+        CreatedBy = createdBy;
     }
 
-    public void SetPassword(string password) =>
+    public void HasPasswordAsync(string password) =>
         Password = Guard.Against.NullOrWhiteSpace(password, nameof(password));
 
-    public void Update(
-        string? firstName,
-        string? lastName,
-        string? email,
+    public void ChangePassword(string password) =>
+        Password = Guard.Against.NullOrWhiteSpace(password, nameof(password));
+
+    public void ChangeAvatar(string? avatar) => Avatar = avatar;
+
+    public void Deactivate()
+    {
+        if (Status != UserStatus.Active)
+        {
+            throw new UserAlreadyInactiveException(Id);
+        }
+        Status = UserStatus.Inactive;
+    }
+
+    public void Activate()
+    {
+        if (Status != UserStatus.Inactive)
+        {
+            throw new UserAlreadyActiveException(Id);
+        }
+        Status = UserStatus.Inactive;
+    }
+
+    public void ClearAllRoles() => Roles.Clear();
+
+    public void ClearAllPermissions() => Permissions.Clear();
+
+    public User Update(
+        string firstName,
+        string lastName,
+        string email,
         string? phoneNumber,
-        DateTime? dayOfBirth
+        DateTime? dateOfBirth
     )
     {
-        if (!string.IsNullOrWhiteSpace(firstName))
-        {
-            FirstName = firstName;
-        }
-        if (!string.IsNullOrWhiteSpace(lastName))
-        {
-            LastName = lastName;
-        }
-        if (!string.IsNullOrWhiteSpace(email))
-        {
-            Email = email;
-        }
-        if (!string.IsNullOrWhiteSpace(phoneNumber))
-        {
-            PhoneNumber = phoneNumber;
-        }
-
-        if (dayOfBirth != null)
-        {
-            DayOfBirth = dayOfBirth;
-        }
+        PhoneNumber = phoneNumber;
+        DateOfBirth = dateOfBirth;
+        Email = email;
+        FirstName = firstName;
+        LastName = lastName;
+        return this;
     }
 
-    public void UpdateAddress(Address address) => Address = address;
-
-    public void UpdateDefaultUserClaims() =>
-        Emit(new UpdateDefaultUserClaimEvent() { User = this });
-
-    public void CreateDefaultUserClaims() => ApplyCreateDefaultUserClaim();
-
-    private List<UserClaim> GetUserClaims(bool isCreated = false) =>
-        [
-            new()
-            {
-                ClaimType = ClaimTypes.GivenName,
-                ClaimValue = this.GetValue(x => x.FirstName!),
-                UserId = isCreated ? Ulid.Empty : Id,
-            },
-            new()
-            {
-                ClaimType = ClaimTypes.FamilyName,
-                ClaimValue = this.GetValue(x => x.LastName!),
-                UserId = isCreated ? Ulid.Empty : Id,
-            },
-            new()
-            {
-                ClaimType = ClaimTypes.PreferredUsername,
-                ClaimValue = this.GetValue(x => x.Username!),
-                UserId = isCreated ? Ulid.Empty : Id,
-            },
-            new()
-            {
-                ClaimType = ClaimTypes.BirthDate,
-                ClaimValue = this.GetValue(x => x.DayOfBirth!),
-                UserId = isCreated ? Ulid.Empty : Id,
-            },
-            new()
-            {
-                ClaimType = ClaimTypes.Address,
-                ClaimValue = this.GetValue(x => x.Address!),
-                UserId = isCreated ? Ulid.Empty : Id,
-            },
-            new()
-            {
-                ClaimType = ClaimTypes.Picture,
-                ClaimValue = this.GetValue(x => x.Avatar!),
-                UserId = isCreated ? Ulid.Empty : Id,
-            },
-            new()
-            {
-                ClaimType = ClaimTypes.Gender,
-                ClaimValue = this.GetValue(x => x.Gender!),
-                UserId = isCreated ? Ulid.Empty : Id,
-            },
-            new()
-            {
-                ClaimType = ClaimTypes.Email,
-                ClaimValue = this.GetValue(x => x.Email!),
-                UserId = isCreated ? Ulid.Empty : Id,
-            },
-        ];
-
-    private void ApplyUpdateDefaultUserClaim()
+    public User UpdateProfile(
+        string firstName,
+        string lastName,
+        string email,
+        Gender? gender = null,
+        string? phoneNumber = null,
+        DateTime? dateOfBirth = null
+    )
     {
-        if (UserClaims == null || UserClaims.Count <= 0)
-        {
-            return;
-        }
+        PhoneNumber = phoneNumber;
+        DateOfBirth = dateOfBirth;
+        Email = email;
+        FirstName = firstName;
+        LastName = lastName;
+        Gender = gender;
 
-        UserClaim[] defaultClaims = [.. UserClaims.Where(x => x.Type == UserClaimType.Default)];
-        Span<UserClaim> currentUserClaims = defaultClaims.AsSpan();
-
-        List<UserClaim> userClaims = GetUserClaims();
-        for (int i = 0; i < currentUserClaims.Length; i++)
-        {
-            UserClaim currentUserClaim = currentUserClaims[i];
-
-            UserClaim? userClaim = userClaims.Find(x => x.ClaimType == currentUserClaim.ClaimType);
-            if (userClaim == null)
-            {
-                continue;
-            }
-
-            currentUserClaim.ClaimValue = userClaim.ClaimValue;
-        }
-
-        DefaultUserClaimsToUpdates = defaultClaims;
+        return this;
     }
 
-    private void ApplyCreateDefaultUserClaim()
+    protected override bool TryApplyDomainEvent(IDomainEvent domainEvent)
     {
-        if (UserClaims != null && UserClaims.Count > 0)
-        {
-            return;
-        }
-        UserClaims = GetUserClaims(true);
-    }
-
-    protected override bool TryApplyDomainEvent(INotification domainEvent)
-    {
-        switch (domainEvent)
-        {
-            case UpdateDefaultUserClaimEvent:
-                ApplyUpdateDefaultUserClaim();
-                return true;
-            default:
-                return false;
-        }
+        return false;
     }
 }

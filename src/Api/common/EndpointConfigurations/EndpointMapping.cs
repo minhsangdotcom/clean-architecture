@@ -1,8 +1,8 @@
 using System.Reflection;
 using Api.common.Routers;
+using Application.Contracts.Constants;
 using Asp.Versioning;
 using Asp.Versioning.Builder;
-using Contracts.Constants;
 
 namespace Api.common.EndpointConfigurations;
 
@@ -24,8 +24,9 @@ public static class EndpointMapping
         EndpointVersion apiVersion
     )
     {
+        int version = (int)apiVersion;
         ApiVersionSet apiVersionSet = app.NewApiVersionSet()
-            .HasApiVersion(new ApiVersion((int)apiVersion))
+            .HasApiVersion(new ApiVersion(version))
             .ReportApiVersions()
             .Build();
 
@@ -36,12 +37,11 @@ public static class EndpointMapping
                 .Where(endpoint => endpoint.Version == apiVersion),
         ];
 
-        RouteGroupBuilder routeGroupBuilder = app.MapGroup(
-                $"/{RoutePath.prefix}" + "v{version:apiVersion}/"
-            )
-            .WithApiVersionSet(apiVersionSet);
+        RouteGroupBuilder v1 = app.MapGroup($"/{RoutePath.prefix}" + "v{version:apiVersion}/")
+            .WithApiVersionSet(apiVersionSet)
+            .MapToApiVersion(version);
 
-        endpoints.ForEach(endpoint => endpoint.MapEndpoint(routeGroupBuilder));
+        endpoints.ForEach(endpoint => endpoint.MapEndpoint(v1));
         return app;
     }
 }

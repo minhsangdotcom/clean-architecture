@@ -1,5 +1,5 @@
 using Application.Common.Interfaces.Services.Queue;
-using Contracts.Dtos.Requests;
+using Application.Contracts.Dtos.Requests;
 using DotNetCoreExtension.Extensions;
 using Microsoft.Extensions.Options;
 using StackExchange.Redis;

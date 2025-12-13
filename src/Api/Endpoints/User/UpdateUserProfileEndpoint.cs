@@ -1,14 +1,11 @@
 using Api.common.EndpointConfigurations;
 using Api.common.Results;
 using Api.common.Routers;
-using Application.Common.Interfaces.Services;
-using Application.Common.Interfaces.Services.Cache;
+using Application.Contracts.ApiWrapper;
 using Application.Features.Users.Commands.Profiles;
-using Contracts.ApiWrapper;
 using Mediator;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.OpenApi.Models;
 
 namespace Api.Endpoints.User;
 
@@ -19,14 +16,18 @@ public class UpdateUserProfileEndpoint : IEndpoint
     public void MapEndpoint(IEndpointRouteBuilder app)
     {
         app.MapPut(Router.UserRoute.Profile, HandleAsync)
-            .WithOpenApi(operation => new OpenApiOperation(operation)
-            {
-                Summary = "Update user profile 🛠️ 👨 📋",
-                Description = "Updates profile information for the currently authenticated user.",
-                Tags = [new OpenApiTag() { Name = Router.UserRoute.Tags }],
-            })
+            .WithTags(Router.UserRoute.Tags)
+            .AddOpenApiOperationTransformer(
+                (operation, context, _) =>
+                {
+                    operation.Summary = "Update user profile 🛠️ 👨 📋";
+                    operation.Description =
+                        "Updates profile information for the currently authenticated user.";
+                    return Task.CompletedTask;
+                }
+            )
             .WithRequestValidation<UpdateUserProfileCommand>()
-            .RequireAuth()
+            .MustHaveAuthorization()
             .DisableAntiforgery();
     }
 
@@ -35,18 +36,9 @@ public class UpdateUserProfileEndpoint : IEndpoint
     > HandleAsync(
         [FromForm] UpdateUserProfileCommand request,
         [FromServices] ISender sender,
-        [FromServices] ICurrentUser currentUser,
-        [FromServices] IMemoryCacheService cacheService,
         CancellationToken cancellationToken = default
     )
     {
-        Ulid? userId = currentUser.Id;
-        string key = $"{nameof(GetUserProfileEndpoint)}:{userId}";
-        bool isExisted = cacheService.HasKey(key);
-        if (isExisted)
-        {
-            cacheService.Remove(key);
-        }
         var result = await sender.Send(request, cancellationToken);
         return result.ToResult();
     }

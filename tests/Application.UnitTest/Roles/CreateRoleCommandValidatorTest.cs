@@ -1,223 +1,276 @@
-using Application.Common.Interfaces.Services;
-using Application.Common.Interfaces.Services.Identity;
-using Application.Features.Common.Payloads.Roles;
-using Application.Features.Common.Projections.Roles;
+using Application.Common.ErrorCodes;
+using Application.Common.Interfaces.Repositories.EfCore;
+using Application.Common.Interfaces.Services.Accessors;
+using Application.Common.Interfaces.Services.Localization;
+using Application.Common.Interfaces.UnitOfWorks;
+using Application.Contracts.ApiWrapper;
 using Application.Features.Roles.Commands.Create;
-using AutoFixture;
+using Bogus;
+using Domain.Aggregates.Permissions;
 using Domain.Aggregates.Roles;
 using FluentValidation;
 using FluentValidation.TestHelper;
 using Moq;
-using SharedKernel.Common.Messages;
 
 namespace Application.UnitTest.Roles;
 
 public class CreateRoleCommandValidatorTest
 {
-    private readonly InlineValidator<CreateRoleCommand> mockValidator;
     private readonly CreateRoleCommandValidator validator;
+    private readonly InlineValidator<CreateRoleCommand> inlineValidator;
+    private CreateRoleCommand command = null!;
 
-    private readonly CreateRoleCommand command;
-    private readonly List<RoleClaimPayload> roleClaims;
-    private readonly Fixture fixture = new();
-    private readonly Mock<IRoleManagerService> mockRoleManager = new();
-    private readonly Mock<IHttpContextAccessorService> mockHttpContextAccessorService = new();
+    private readonly Mock<IEfUnitOfWork> unitOfWork = new();
+
+    private readonly Mock<IRequestContextProvider> contextProvider = new();
+    private readonly Mock<IMessageTranslatorService> translator = new();
 
     public CreateRoleCommandValidatorTest()
     {
-        mockValidator = [];
+        contextProvider.Setup(x => x.GetHttpMethod()).Returns(HttpMethod.Post.ToString());
+
+        Mock<IEfAsyncRepository<Role>> roleRepo = new();
+        Mock<IEfAsyncRepository<Permission>> permissionRepo = new();
+
+        unitOfWork.Setup(x => x.Repository<Role>()).Returns(roleRepo.Object);
+        unitOfWork.Setup(x => x.Repository<Permission>()).Returns(permissionRepo.Object);
+
         validator = new CreateRoleCommandValidator(
-            mockRoleManager.Object,
-            mockHttpContextAccessorService.Object
+            unitOfWork.Object,
+            contextProvider.Object,
+            translator.Object
         );
-        roleClaims = [.. fixture.Build<RoleClaimPayload>().Without(x => x.Id).CreateMany(2)];
-        command = fixture
-            .Build<CreateRoleCommand>()
-            .With(x => x.Name, "manager")
-            .With(x => x.RoleClaims, roleClaims)
-            .Create();
+        inlineValidator = [];
+        ResetCommand();
     }
+
+    private void ResetCommand()
+    {
+        var faker = new Faker<CreateRoleCommand>()
+            .RuleFor(x => x.Name, f => f.Commerce.Department())
+            .RuleFor(x => x.Description, f => f.Lorem.Sentence(8))
+            .RuleFor(x => x.PermissionIds, f => [Ulid.NewUlid(), Ulid.NewUlid(), Ulid.NewUlid()]);
+
+        command = faker.Generate();
+    }
+
+    #region Name Validation
 
     [Theory]
     [InlineData(null)]
     [InlineData("")]
-    public async Task Validate_NameIsNullOrEmpty_ShouldHaveNotEmptyFailure(string? name)
+    public async Task Validate_When_NameIsNullOrEmpty_Should_HaveError(string? name)
     {
-        // arrage
+        //Arrange
         command.Name = name;
+        translator.SetupTranslate(RoleErrorMessages.RoleNameRequired, SharedResource.TranslateText);
 
-        // act
+        //Act
         var result = await validator.TestValidateAsync(command);
 
-        //assert
-        MessageResult expectedState = Messenger
-            .Create<RolePayload>(nameof(Role))
-            .Property(x => x.Name!)
-            .Negative()
-            .Message(MessageType.Null)
-            .Build();
-
+        //Assert
+        var expected = new ErrorReason(
+            RoleErrorMessages.RoleNameRequired,
+            SharedResource.TranslateText
+        );
         result
             .ShouldHaveValidationErrorFor(x => x.Name)
-            .WithCustomState(expectedState, new MessageResultComparer())
-            .Only();
+            .WithCustomState(expected, new ErrorReasonComparer());
     }
 
     [Fact]
-    public async Task Validate_NameTooLong_ShouldHaveMaximumLengthFailure()
+    public async Task Validate_When_NameTooLong_Should_HaveError()
     {
-        // arrage
-        command.Name = new string([.. fixture.CreateMany<char>(257)]);
+        command.Name = new string('X', 300);
+        translator.SetupTranslate(RoleErrorMessages.RoleNameTooLong, SharedResource.TranslateText);
 
-        // act
         var result = await validator.TestValidateAsync(command);
-
-        //assert
-        MessageResult expectedState = Messenger
-            .Create<RolePayload>(nameof(Role))
-            .Property(x => x.Name!)
-            .Message(MessageType.MaximumLength)
-            .Build();
+        var expected = new ErrorReason(
+            RoleErrorMessages.RoleNameTooLong,
+            SharedResource.TranslateText
+        );
 
         result
             .ShouldHaveValidationErrorFor(x => x.Name)
-            .WithCustomState(expectedState, new MessageResultComparer())
-            .Only();
+            .WithCustomState(expected, new ErrorReasonComparer());
     }
 
     [Fact]
-    public async Task Validate_WhenNameExists_ShouldHaveExistenceFailure()
+    public async Task Validate_When_NameAlreadyExists_Should_HaveError()
     {
-        //arrage
-        const string existedName = "ADMIN";
-        command.Name = existedName;
-        MessageResult expectedState = Messenger
-            .Create<RolePayload>(nameof(Role))
-            .Property(x => x.Name!)
-            .Message(MessageType.Existence)
-            .Build();
+        //Arrange
+        command.Name = "Admin";
+        var expected = new ErrorReason(
+            RoleErrorMessages.RoleNameExistent,
+            SharedResource.TranslateText
+        );
 
-        mockValidator
+        inlineValidator
             .RuleFor(x => x.Name)
-            .Must(name => command.Name != existedName)
-            .When(_ => true)
-            .WithState(x => expectedState);
+            .MustAsync((name, ct) => Task.FromResult(false))
+            .When(_ => true, ApplyConditionTo.CurrentValidator)
+            .WithState(_ => expected);
 
-        // act
-        var result = await mockValidator.TestValidateAsync(command);
-        //assert
+        //Act
+        var result = await inlineValidator.TestValidateAsync(command);
+
+        //Assert
         result
             .ShouldHaveValidationErrorFor(x => x.Name)
-            .WithCustomState(expectedState, new MessageResultComparer())
-            .Only();
+            .WithCustomState(expected, new ErrorReasonComparer());
     }
 
     [Fact]
-    public async Task Validate_DescriptionTooLong_ShouldHaveMaximumLengthFailure()
+    public async Task Validate_When_NameIsUnique_Should_Pass()
     {
-        //arrage
-        command.Description = new string([.. fixture.CreateMany<char>(10001)]);
+        //Arrange
+        command.Name = "Manager";
 
-        //act
+        inlineValidator
+            .RuleFor(x => x.Name)
+            .MustAsync((name, ct) => Task.FromResult(true))
+            .When(_ => true, ApplyConditionTo.CurrentValidator);
+
+        //Act
+        var result = await inlineValidator.TestValidateAsync(command);
+
+        //Assert
+        result.ShouldNotHaveValidationErrorFor(x => x.Name);
+    }
+
+    #endregion
+
+
+    #region Description Validation
+
+    [Fact]
+    public async Task Validate_When_DescriptionTooLong_Should_HaveError()
+    {
+        //Arrange
+        command.Description = new string('D', 2000);
+        translator.SetupTranslate(
+            RoleErrorMessages.RoleDescriptionTooLong,
+            SharedResource.TranslateText
+        );
+
+        //Act
         var result = await validator.TestValidateAsync(command);
 
-        //assert
-        MessageResult expectedState = Messenger
-            .Create<RolePayload>(nameof(Role))
-            .Property(x => x.Description!)
-            .Message(MessageType.MaximumLength)
-            .Build();
-
+        //Assert
+        var expected = new ErrorReason(
+            RoleErrorMessages.RoleDescriptionTooLong,
+            SharedResource.TranslateText
+        );
         result
             .ShouldHaveValidationErrorFor(x => x.Description)
-            .WithCustomState(expectedState, new MessageResultComparer())
-            .Only();
+            .WithCustomState(expected, new ErrorReasonComparer());
     }
 
     [Fact]
-    public async Task Validate_ClaimTypeIsEmpty_ShouldHaveNotEmptyFailure()
+    public async Task Validate_When_DescriptionIsValid_Should_Pass()
     {
-        // arrage
-        roleClaims.ForEach(claim => claim.ClaimType = null);
+        //Arrange
+        command.Description = "Valid description";
 
-        //act
+        //Act
         var result = await validator.TestValidateAsync(command);
 
-        //assert
-        MessageResult expectedState = Messenger
-            .Create<RoleClaim>(nameof(Role.RoleClaims))
-            .Property(x => x.ClaimType!)
-            .Message(MessageType.Null)
-            .Negative()
-            .Build();
+        //Assert
+        result.ShouldNotHaveValidationErrorFor(x => x.Description);
+    }
 
+    #endregion
+
+
+    #region PermissionIds Validation
+
+    [Fact]
+    public async Task Validate_When_PermissionsEmpty_Should_HaveError()
+    {
+        //Arrange
+        command.PermissionIds = [];
+        translator.SetupTranslate(
+            RoleErrorMessages.RolePermissionsRequired,
+            SharedResource.TranslateText
+        );
+
+        //Act
+        var result = await validator.TestValidateAsync(command);
+
+        //Assert
+        var expected = new ErrorReason(
+            RoleErrorMessages.RolePermissionsRequired,
+            SharedResource.TranslateText
+        );
         result
-            .ShouldHaveValidationErrorFor(
-                $"{nameof(CreateRoleCommand.RoleClaims)}[0].{nameof(RoleClaimPayload.ClaimType)}"
-            )
-            .WithCustomState(expectedState, new MessageResultComparer());
+            .ShouldHaveValidationErrorFor(x => x.PermissionIds)
+            .WithCustomState(expected, new ErrorReasonComparer());
     }
 
     [Fact]
-    public async Task Validate_ClaimTypeIsNull_ShouldHaveNotEmptyFailure()
+    public async Task Validate_When_PermissionIdsNotUnique_Should_HaveError()
     {
-        // arrage
-        roleClaims.ForEach(claim => claim.ClaimType = string.Empty);
+        //Arrange
+        var id = Ulid.NewUlid();
+        command.PermissionIds = [id, id];
 
-        //act
+        translator.SetupTranslate(
+            RoleErrorMessages.RolePermissionsUnique,
+            SharedResource.TranslateText
+        );
+
+        //Act
         var result = await validator.TestValidateAsync(command);
 
-        //assert
-        MessageResult expectedState = Messenger
-            .Create<RoleClaim>(nameof(Role.RoleClaims))
-            .Property(x => x.ClaimType!)
-            .Message(MessageType.Null)
-            .Negative()
-            .Build();
+        //Assert
+        var expected = new ErrorReason(
+            RoleErrorMessages.RolePermissionsUnique,
+            SharedResource.TranslateText
+        );
         result
-            .ShouldHaveValidationErrorFor(
-                $"{nameof(CreateRoleCommand.RoleClaims)}[0].{nameof(RoleClaimPayload.ClaimType)}"
-            )
-            .WithCustomState(expectedState, new MessageResultComparer());
+            .ShouldHaveValidationErrorFor(x => x.PermissionIds)
+            .WithCustomState(expected, new ErrorReasonComparer());
     }
 
     [Fact]
-    public async Task Validate_ClaimValueIsEmpty_ShouldHaveNotEmptyFailureAsync()
+    public async Task Validate_When_PermissionNotExistent_Should_HaveError()
     {
-        roleClaims.ForEach(claim => claim.ClaimValue = null);
-        //act
-        var result = await validator.TestValidateAsync(command);
-        //assert
-        MessageResult expectedState = Messenger
-            .Create<RoleClaim>(nameof(Role.RoleClaims))
-            .Property(x => x.ClaimValue!)
-            .Message(MessageType.Null)
-            .Negative()
-            .Build();
+        // Arrange
+        var expected = new ErrorReason(
+            RoleErrorMessages.RolePermissionsExistent,
+            SharedResource.TranslateText
+        );
+
+        inlineValidator
+            .RuleFor(x => x.PermissionIds)
+            .MustAsync((permissionIds, ct) => Task.FromResult(false))
+            .When(_ => true, ApplyConditionTo.CurrentValidator)
+            .WithState(_ => expected);
+
+        //Act
+        var result = await inlineValidator.TestValidateAsync(command);
+
+        //Assert
         result
-            .ShouldHaveValidationErrorFor(
-                $"{nameof(CreateRoleCommand.RoleClaims)}[0].{nameof(RoleClaimPayload.ClaimValue)}"
-            )
-            .WithCustomState(expectedState, new MessageResultComparer());
+            .ShouldHaveValidationErrorFor(x => x.PermissionIds)
+            .WithCustomState(expected, new ErrorReasonComparer());
     }
 
     [Fact]
-    public async Task Validate_ClaimValueIsNull_ShouldHaveNotEmptyFailureAsync()
+    public async Task Validate_When_AllPermissionIdsAreValid_Should_Pass()
     {
-        roleClaims.ForEach(claim => claim.ClaimValue = string.Empty);
-        //act
-        var result = await validator.TestValidateAsync(command);
+        //Arrange
+        inlineValidator
+            .RuleFor(x => x.PermissionIds)
+            .MustAsync((permissionIds, ct) => Task.FromResult(true))
+            .When(_ => true, ApplyConditionTo.CurrentValidator);
+
+        //Act
+        var result = await inlineValidator.TestValidateAsync(command);
+
         //assert
-        MessageResult expectedState = Messenger
-            .Create<RoleClaim>(nameof(Role.RoleClaims))
-            .Property(x => x.ClaimValue!)
-            .Message(MessageType.Null)
-            .Negative()
-            .Build();
-        result
-            .ShouldHaveValidationErrorFor(
-                $"{nameof(CreateRoleCommand.RoleClaims)}[0].{nameof(RoleClaimPayload.ClaimValue)}"
-            )
-            .WithCustomState(expectedState, new MessageResultComparer());
+        result.ShouldNotHaveValidationErrorFor(x => x.PermissionIds);
     }
+
+    #endregion
 }

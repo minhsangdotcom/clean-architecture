@@ -1,66 +1,113 @@
 using Application.Common.Interfaces.Services.Identity;
 using Application.Common.Interfaces.UnitOfWorks;
-using Domain.Aggregates.Regions;
+using Application.Contracts.Permissions;
+using Domain.Aggregates.Permissions;
 using Domain.Aggregates.Roles;
 using Domain.Aggregates.Users;
 using Domain.Aggregates.Users.Enums;
-using Domain.Aggregates.Users.ValueObjects;
 using Infrastructure.Constants;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using SharedKernel.Constants;
+using static Application.Contracts.Permissions.PermissionNames;
 
-namespace Infrastructure.Data;
+namespace Infrastructure.Data.Seeds;
 
 public class DbInitializer
 {
     public static async Task InitializeAsync(IServiceProvider provider)
     {
         var unitOfWork = provider.GetRequiredService<IEfUnitOfWork>();
-        var roleManagerService = provider.GetRequiredService<IRoleManagerService>();
-        var userManagerService = provider.GetRequiredService<IUserManagerService>();
+        var roleManager = provider.GetRequiredService<IRoleManager>();
+        var userManager = provider.GetRequiredService<IUserManager>();
         var logger = provider.GetRequiredService<ILogger<DbInitializer>>();
+        var permissionContext = provider.GetRequiredService<PermissionDefinitionContext>();
 
+        IReadOnlyDictionary<string, PermissionGroupDefinition> groups = permissionContext.Groups;
+        List<GroupedPermissionDefinition> groupedPermissions =
+        [
+            .. groups.Select(g => new GroupedPermissionDefinition(
+                g.Key,
+                [.. g.Value.Permissions.DistinctBy(p => p.Code)]
+            )),
+        ];
+
+        List<Permission> permissions =
+        [
+            .. groupedPermissions.SelectMany(g =>
+                g.Permissions.Select(p => new Permission(
+                    p.Code,
+                    p.Name,
+                    p.Description,
+                    g.GroupName,
+                    createdBy: Credential.CREATED_BY_SYSTEM
+                ))
+            ),
+        ];
+
+        List<Permission> specificPermissions = permissions.FindAll(p =>
+            p.Code == PermissionGenerator.Generate(PermissionResource.Role, PermissionAction.Detail)
+            || p.Code
+                == PermissionGenerator.Generate(PermissionResource.Role, PermissionAction.Create)
+            || p.Code
+                == PermissionGenerator.Generate(PermissionResource.User, PermissionAction.Detail)
+            || p.Code
+                == PermissionGenerator.Generate(PermissionResource.User, PermissionAction.Create)
+        );
+
+        Ulid adminRoleId = Ulid.Parse(Credential.ADMIN_ROLE_ID);
+        Ulid managerRoleId = Ulid.Parse(Credential.MANAGER_ROLE_ID);
         Role adminRole =
-            new()
-            {
-                Id = Ulid.Parse(Credential.ADMIN_ROLE_ID),
-                Name = Credential.ADMIN_ROLE,
-                RoleClaims =
+            new(
+                adminRoleId,
+                Credential.ADMIN_ROLE,
                 [
-                    .. Credential.ADMIN_CLAIMS.Select(permission => new RoleClaim()
+                    .. permissions.Select(p => new RolePermission
                     {
-                        ClaimType = ClaimTypes.Permission,
-                        ClaimValue = permission,
+                        PermissionId = p.Id,
+                        RoleId = adminRoleId,
                     }),
                 ],
-            };
-
+                null,
+                Credential.CREATED_BY_SYSTEM
+            );
         Role managerRole =
-            new()
-            {
-                Id = Ulid.Parse(Credential.MANAGER_ROLE_ID),
-                Name = Credential.MANAGER_ROLE,
-                RoleClaims =
+            new(
+                managerRoleId,
+                Credential.MANAGER_ROLE,
                 [
-                    .. Credential.MANAGER_CLAIMS.Select(permission => new RoleClaim()
+                    .. specificPermissions.Select(p => new RolePermission
                     {
-                        ClaimType = ClaimTypes.Permission,
-                        ClaimValue = permission,
+                        PermissionId = p.Id,
+                        RoleId = managerRoleId,
                     }),
                 ],
-            };
+                null,
+                Credential.CREATED_BY_SYSTEM
+            );
 
-        Role[] roles = [adminRole, managerRole];
+        List<PermissionDefinitionWithGroup> allDefinitions = GetPermissionDefinitionWithGroups(
+            groupedPermissions
+        );
+        await unitOfWork.BeginTransactionAsync();
         try
         {
-            await unitOfWork.BeginTransactionAsync();
+            if (!await unitOfWork.Repository<Permission>().AnyAsync())
+            {
+                logger.LogInformation("Inserting permissions is starting.............");
+                await unitOfWork.Repository<Permission>().AddRangeAsync(permissions);
+                await unitOfWork.SaveChangesAsync();
+                logger.LogInformation("Inserting permissions has finished.............");
+            }
+            else
+            {
+                await UpdatePermissionAsync(allDefinitions, unitOfWork, logger);
+            }
 
-            if (!await roleManagerService.Roles.AnyAsync())
+            if (!await unitOfWork.Repository<Role>().AnyAsync())
             {
                 logger.LogInformation("Inserting roles is starting.............");
-                await roleManagerService.CreateRangeAsync(roles);
+                await roleManager.CreateAsync(adminRole);
+                await roleManager.CreateAsync(managerRole);
                 logger.LogInformation("Inserting roles has finished.............");
             }
 
@@ -68,27 +115,54 @@ public class DbInitializer
             {
                 logger.LogInformation("Seeding user data is starting.............");
 
-                await CreateAdminUserAsync(
-                    unitOfWork,
-                    userManagerService,
-                    adminRole.Id,
-                    managerRole.Id
+                // Create default admin user
+                User adminUser =
+                    new(
+                        "Chloe",
+                        "Kim",
+                        "chloe.kim",
+                        Credential.USER_DEFAULT_PASSWORD,
+                        "chloe.kim@naver.kr",
+                        "01039247816",
+                        new DateTime(2002, 10, 1),
+                        Gender.Female
+                    );
+                adminUser.InitializeIdentity(
+                    Ulid.Parse(Credential.CHLOE_KIM_ID),
+                    Credential.CREATED_BY_SYSTEM
                 );
 
+                User managerUser =
+                    new(
+                        "Zayden",
+                        "Cruz",
+                        "zayden.cruz",
+                        Credential.USER_DEFAULT_PASSWORD,
+                        "zayden.cruz@gmail.com",
+                        "4157289034",
+                        new DateTime(2005, 10, 1),
+                        Gender.Female
+                    );
+                managerUser.InitializeIdentity(
+                    Ulid.Parse(Credential.ZAYDEN_CRUZ_ID),
+                    Credential.CREATED_BY_SYSTEM
+                );
+                await userManager.CreateAsync(adminUser, Credential.USER_DEFAULT_PASSWORD);
+                await userManager.CreateAsync(managerUser, Credential.USER_DEFAULT_PASSWORD);
+
+                // add roles for users
+                await userManager.AddToRolesAsync(adminUser, [adminRole.Name]);
+                await userManager.AddToRolesAsync(managerUser, [managerRole.Name]);
                 logger.LogInformation("Seeding user data has finished.............");
             }
 
-            List<string> adminPermissions = Credential.ADMIN_CLAIMS;
-            List<string> managerPermissions = Credential.MANAGER_CLAIMS;
-
-            await UpdatePermissionAsync(adminPermissions, adminRole, roleManagerService, logger);
-            await UpdatePermissionAsync(
-                managerPermissions,
-                managerRole,
-                roleManagerService,
+            await UpdatePermissionToRoleAsync(
+                allDefinitions,
+                adminRole.Id,
+                roleManager,
+                unitOfWork,
                 logger
             );
-
             await unitOfWork.CommitAsync();
         }
         catch (Exception ex)
@@ -100,147 +174,111 @@ public class DbInitializer
     }
 
     private static async Task UpdatePermissionAsync(
-        List<string> permissions,
-        Role role,
-        IRoleManagerService roleManagerService,
+        List<PermissionDefinitionWithGroup> allDefinitions,
+        IEfUnitOfWork unitOfWork,
         ILogger logger
     )
     {
-        Role? processingRole = await roleManagerService
-            .Roles.Where(x => x.Id == role.Id)
-            .Include(x => x.RoleClaims!.Where(p => p.ClaimType == ClaimTypes.Permission))
-            .FirstOrDefaultAsync();
+        List<Permission> permissions = await unitOfWork.Repository<Permission>().ListAsync();
 
-        if (processingRole == null)
+        var permissionsToDelete = permissions.FindAll(rp =>
+            !allDefinitions.Exists(dp => dp.Permission.Code == rp.Code)
+        );
+
+        var permissionsToInsert = allDefinitions
+            .FindAll(dp => !permissions.Exists(rp => rp.Code == dp.Permission.Code))
+            .ConvertAll(dp => new Permission(
+                code: dp.Permission.Code,
+                name: dp.Permission.Name,
+                description: dp.Permission.Description,
+                group: dp.GroupName,
+                createdBy: Credential.CREATED_BY_SYSTEM
+            ));
+
+        if (permissionsToDelete.Count > 0)
+        {
+            List<Ulid> idsToDelete = permissionsToDelete.ConvertAll(x => x.Id);
+            await unitOfWork
+                .Repository<Permission>()
+                .ExecuteDeleteAsync(x => idsToDelete.Contains(x.Id));
+            await unitOfWork.SaveChangesAsync();
+            logger.LogInformation(
+                "deleting {count} permissions include {data}",
+                permissionsToDelete.Count,
+                string.Join(',', permissionsToDelete.Select(x => x.Code))
+            );
+        }
+
+        if (permissionsToInsert.Count > 0)
+        {
+            await unitOfWork.Repository<Permission>().AddRangeAsync(permissionsToInsert);
+            await unitOfWork.SaveChangesAsync();
+            logger.LogInformation(
+                "inserting {count} permissions include {data}",
+                permissionsToInsert.Count,
+                string.Join(',', permissionsToInsert.Select(x => x.Code))
+            );
+        }
+    }
+
+    private static async Task UpdatePermissionToRoleAsync(
+        List<PermissionDefinitionWithGroup> allDefinitions,
+        Ulid roleId,
+        IRoleManager manager,
+        IEfUnitOfWork unitOfWork,
+        ILogger logger
+    )
+    {
+        List<Permission> permissions = await unitOfWork.Repository<Permission>().ListAsync();
+        Role? role = await manager.FindByIdAsync(roleId);
+        if (role == null)
         {
             return;
         }
+        List<RolePermission> rolePermissions = (List<RolePermission>)role.Permissions;
 
-        List<RoleClaim> roleClaims = (List<RoleClaim>)processingRole.RoleClaims!;
+        var rolePermissionsToDelete = rolePermissions
+            .FindAll(rp => !allDefinitions.Exists(dp => dp.Permission.Code == rp.Permission!.Code))
+            .ConvertAll(x => x.Permission!);
 
-        var claimsToDelete = roleClaims.FindAll(x => !permissions.Contains(x.ClaimValue));
-        var claimsToInsert = permissions.FindAll(x => !roleClaims.Exists(p => p.ClaimValue == x));
+        var rolePermissionsToInsert = allDefinitions
+            .FindAll(dp => !rolePermissions.Exists(rp => rp.Permission!.Code == dp.Permission.Code))
+            .ConvertAll(dp => permissions.Find(p => p.Code == dp.Permission.Code)!)
+            .FindAll(p => p != null);
 
-        if (claimsToDelete.Count > 0)
+        if (rolePermissionsToDelete.Count > 0)
         {
-            await roleManagerService.RemoveClaimsFromRoleAsync(role, claimsToDelete);
+            await manager.RemovePermissionsAsync(role, rolePermissionsToDelete);
             logger.LogInformation(
-                "deleting {count} claims of {roleName} include {data}",
-                claimsToDelete.Count,
+                "deleting {count} permission of {roleName} include {data}",
+                rolePermissionsToDelete.Count,
                 role.Name,
-                string.Join(',', claimsToDelete.Select(x => x.ClaimValue))
+                string.Join(',', rolePermissionsToDelete.Select(x => x.Code))
             );
         }
 
-        if (claimsToInsert.Count > 0)
+        if (rolePermissionsToInsert.Count > 0)
         {
-            await roleManagerService.AssignClaimsToRoleAsync(
-                role,
-                claimsToInsert.ConvertAll(claim => new RoleClaim()
-                {
-                    ClaimType = ClaimTypes.Permission,
-                    ClaimValue = claim,
-                })
-            );
+            await manager.AddPermissionsAsync(role, rolePermissionsToInsert);
             logger.LogInformation(
                 "inserting {count} claims of {roleName} include {data}",
-                claimsToInsert.Count,
+                rolePermissionsToInsert.Count,
                 role.Name,
-                string.Join(',', claimsToInsert)
+                string.Join(',', rolePermissionsToInsert.Select(x => x.Code))
             );
         }
     }
 
-    private static async Task CreateAdminUserAsync(
-        IEfUnitOfWork unitOfWork,
-        IUserManagerService userManagerService,
-        Ulid adminRoleId,
-        Ulid managerRoleId
-    )
-    {
-        GetRegionResult region = await GetRegionAsync(unitOfWork, "79", "783", "27535");
-
-        User chloe =
-            new(
-                "Chloe",
-                "Kim",
-                "chloe.kim",
-                HashPassword(Credential.USER_DEFAULT_PASSWORD),
-                "minhsang.1mil@gmail.com",
-                "0925123123",
-                new Address(
-                    region.Province!.FullName,
-                    region.Province!.Id,
-                    region.District!.FullName,
-                    region.District!.Id,
-                    region.Commune?.FullName,
-                    region.Commune?.Id,
-                    "132 Ham Nghi"
-                )
-            )
-            {
-                DayOfBirth = new DateTime(1990, 10, 1),
-                Status = UserStatus.Active,
-                Gender = Gender.Female,
-                Id = Credential.CHLOE_KIM_ID,
-            };
-        chloe.CreateDefaultUserClaims();
-
-        GetRegionResult johnDoeRegion = await GetRegionAsync(unitOfWork, "79", "760", "26743");
-        User johnDoe =
-            new(
-                "John",
-                "Doe",
-                "john.doe",
-                HashPassword(Credential.USER_DEFAULT_PASSWORD),
-                "john.doe@example.com",
-                "0803456789",
-                new Address(
-                    johnDoeRegion.Province!.FullName,
-                    johnDoeRegion.Province!.Id,
-                    johnDoeRegion.District!.FullName,
-                    johnDoeRegion.District!.Id,
-                    johnDoeRegion.Commune?.FullName,
-                    johnDoeRegion.Commune?.Id,
-                    "136/9 Le Thanh Ton"
-                )
-            )
-            {
-                DayOfBirth = new DateTime(1985, 4, 23),
-                Status = UserStatus.Active,
-                Gender = (Gender)new Random().Next(1, 3),
-                Id = Credential.JOHN_DOE_ID,
-            };
-        johnDoe.CreateDefaultUserClaims();
-
-        await unitOfWork.Repository<User>().AddRangeAsync([chloe, johnDoe]);
-        await unitOfWork.SaveAsync();
-
-        await userManagerService.CreateAsync(chloe, [adminRoleId]);
-        await userManagerService.CreateAsync(johnDoe, [managerRoleId]);
-    }
-
-    private static async Task<GetRegionResult> GetRegionAsync(
-        IEfUnitOfWork unitOfWork,
-        string provinceCode,
-        string districtCode,
-        string communeCode
-    )
-    {
-        Province? province = await unitOfWork
-            .Repository<Province>()
-            .QueryAsync(x => x.Code == provinceCode)
-            .FirstOrDefaultAsync();
-        District? district = await unitOfWork
-            .Repository<District>()
-            .QueryAsync(x => x.Code == districtCode)
-            .FirstOrDefaultAsync();
-        Commune? commune = await unitOfWork
-            .Repository<Commune>()
-            .QueryAsync(x => x.Code == communeCode)
-            .FirstOrDefaultAsync();
-        return new(province, district, commune);
-    }
+    private static List<PermissionDefinitionWithGroup> GetPermissionDefinitionWithGroups(
+        List<GroupedPermissionDefinition> groupedPermissions
+    ) =>
+        [
+            .. groupedPermissions.SelectMany(g =>
+                g.Permissions.Select(p => new PermissionDefinitionWithGroup(g.GroupName, p))
+            ),
+        ];
 }
 
-internal record GetRegionResult(Province? Province, District? District, Commune? Commune);
+public record GroupedPermissionDefinition(string GroupName, List<PermissionDefinition> Permissions);
+
+public record PermissionDefinitionWithGroup(string GroupName, PermissionDefinition Permission);

@@ -1,17 +1,25 @@
-using Application.Common.Interfaces.Services;
-using Application.Common.Interfaces.Services.Identity;
-using Application.Features.Common.Validators.Roles;
-using FluentValidation;
+using Application.Common.Interfaces.Services.Accessors;
+using Application.Common.Interfaces.Services.Localization;
+using Application.Common.Interfaces.UnitOfWorks;
+using Application.Common.Validators;
+using Application.SharedFeatures.Validators.Roles;
 
 namespace Application.Features.Roles.Commands.Update;
 
-public class UpdateRoleCommandValidator : AbstractValidator<RoleUpdateRequest>
+public class UpdateRoleCommandValidator(
+    IEfUnitOfWork unitOfWork,
+    IRequestContextProvider contextProvider,
+    IMessageTranslatorService translator
+) : FluentValidator<UpdateRoleCommand>(contextProvider, translator)
 {
-    public UpdateRoleCommandValidator(
-        IRoleManagerService roleManagerService,
-        IHttpContextAccessorService httpContextAccessorService
+    protected sealed override void ApplyRules(
+        IRequestContextProvider contextProvider,
+        IMessageTranslatorService translator
     )
     {
-        Include(new RoleValidator(roleManagerService, httpContextAccessorService));
+        RuleFor(x => x.UpdateData)
+            .SetValidator(new RoleValidator(unitOfWork, contextProvider, translator));
     }
+
+    protected override void ApplyRules(IMessageTranslatorService translator) { }
 }

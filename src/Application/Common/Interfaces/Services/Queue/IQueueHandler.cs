@@ -1,5 +1,5 @@
-using Contracts.Dtos.Requests;
-using Contracts.Dtos.Responses;
+using Application.Contracts.Dtos.Requests;
+using Application.Contracts.Dtos.Responses;
 
 namespace Application.Common.Interfaces.Services.Queue;
 

@@ -1,8 +1,8 @@
-using Domain.Common;
+using SharedKernel.Entities;
 
 namespace Domain.Aggregates.AuditLogs;
 
-public class Agent : DefaultEntity<string>
+public class Agent : Entity<string>
 {
     public string? FirstName { get; set; }
 

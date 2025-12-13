@@ -1,9 +1,9 @@
 using Domain.Aggregates.QueueLogs.Enums;
-using Domain.Common;
+using SharedKernel.Entities;
 
 namespace Domain.Aggregates.QueueLogs;
 
-public class QueueLog : BaseEntity
+public class QueueLog : AuditableEntity
 {
     public Guid RequestId { get; set; }
 

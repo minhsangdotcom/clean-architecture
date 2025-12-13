@@ -1,6 +1,7 @@
+using System.Data;
 using System.Diagnostics;
 using Api.Settings;
-using Contracts.Constants;
+using Application.Contracts.Constants;
 using OpenTelemetry.Logs;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
@@ -23,21 +24,21 @@ public static class OpenTelemetryExtensions
 
         if (openTelemetrySettings.IsEnabled)
         {
-            ActivitySource source = new(openTelemetrySettings!.ActivitySourceName!);
+            ActivitySource source = new(openTelemetrySettings.ActivitySourceName!);
 
             services
                 .AddOpenTelemetry()
                 .ConfigureResource(r =>
                     r.AddService(
-                        serviceName: openTelemetrySettings!.ServiceName!,
-                        serviceVersion: openTelemetrySettings.ServiceVersion ?? "unknown",
+                        serviceName: openTelemetrySettings.ServiceName,
+                        serviceVersion: openTelemetrySettings.ServiceVersion,
                         serviceInstanceId: Environment.MachineName
                     )
                 )
                 .WithTracing(options =>
                 {
                     options
-                        .AddSource(openTelemetrySettings!.ActivitySourceName!)
+                        .AddSource(openTelemetrySettings.ActivitySourceName)
                         .AddHttpClientInstrumentation()
                         .AddAspNetCoreInstrumentation(option =>
                         {
@@ -71,26 +72,41 @@ public static class OpenTelemetryExtensions
                         {
                             opt.SetDbStatementForText = true;
                             opt.SetDbStatementForStoredProcedure = true;
-                            opt.EnrichWithIDbCommand = (activity, command) => {
-                                // var stateDisplayName = $"{command.CommandType} main";
-                                // activity.DisplayName = stateDisplayName;
-                                // activity.SetTag("db.name", stateDisplayName);
+                            opt.EnrichWithIDbCommand = (activity, command) =>
+                            {
+                                if (activity == null)
+                                {
+                                    return;
+                                }
+                                // Extract SQL operation name: SELECT / INSERT / UPDATE / DELETE / EXEC...
+                                string operation =
+                                    command.CommandType == CommandType.StoredProcedure
+                                        ? "EXEC"
+                                        : command.CommandText.Split(
+                                            ' ',
+                                            StringSplitOptions.RemoveEmptyEntries
+                                        )[0];
+
+                                activity.SetTag("db.system", command.Connection?.GetType().Name);
+                                activity.SetTag("db.name", command.Connection?.Database);
+                                activity.SetTag("db.operation", operation);
+                                activity.SetTag("db.command_type", command.CommandType.ToString());
                             };
                         })
                         .AddHttpClientInstrumentation();
 
                     switch (openTelemetrySettings.Options)
                     {
-                        case OtelpOption.DistributedServer:
+                        case OpenTelemetryTracingOption.Distribution:
                             options.AddOtlpExporter(option =>
                             {
-                                option.Endpoint = new Uri(openTelemetrySettings.Endpoint!);
+                                option.Endpoint = new Uri(openTelemetrySettings.Endpoint);
                             });
                             break;
-                        case OtelpOption.Console:
+                        case OpenTelemetryTracingOption.Console:
                             options.AddConsoleExporter();
                             break;
-                        case OtelpOption.Non:
+                        case OpenTelemetryTracingOption.None:
                         default:
                             break;
                     }

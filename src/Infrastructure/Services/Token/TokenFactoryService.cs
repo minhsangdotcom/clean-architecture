@@ -1,8 +1,7 @@
 using System.Security.Claims;
 using Application.Common.Interfaces.Services.Token;
-using Contracts.Dtos.Responses;
+using Application.Contracts.Dtos.Responses;
 using DotNetCoreExtension.Extensions;
-using JWT;
 using JWT.Algorithms;
 using JWT.Builder;
 using Microsoft.Extensions.Options;
@@ -17,18 +16,20 @@ public class TokenFactoryService(IOptions<JwtSettings> jwtSettings) : ITokenFact
 
     public DateTime RefreshTokenExpiredTime => GetRefreshTokenExpiredTime();
 
-    public string CreateToken(IEnumerable<Claim> claims, DateTime expirationTime)
+    public string CreateToken(IEnumerable<Claim> claims, DateTime? expirationTime = null)
     {
-        return JwtBuilder
+        JwtBuilder tokenBuilder = JwtBuilder
             .Create()
             .WithAlgorithm(new HMACSHA256Algorithm())
             .AddClaims(claims.Select(x => new KeyValuePair<string, object>(x.Type, x.Value)))
-            .WithSecret(settings.SecretKey)
-            .ExpirationTime(expirationTime)
-            .WithValidationParameters(
-                new ValidationParameters() { ValidateExpirationTime = true, TimeMargin = 0 }
-            )
-            .Encode();
+            .WithSecret(settings.SecretKey);
+
+        if (expirationTime.HasValue)
+        {
+            tokenBuilder.ExpirationTime(expirationTime.Value);
+        }
+
+        return tokenBuilder.Encode();
     }
 
     public DecodeTokenResponse DecodeToken(string token)

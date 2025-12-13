@@ -1,29 +1,16 @@
-using Contracts.ApiWrapper;
-using Domain.Aggregates.Users;
+using Application.Contracts.ApiWrapper;
 using Microsoft.AspNetCore.Http;
-using SharedKernel.Common.Messages;
 
 namespace Application.Common.Errors;
 
-public class ForbiddenError(string title, MessageResult? message = null)
+public class ForbiddenError(string title, LocalizedTextResult message)
     : ErrorDetails(
         title,
-        message
-            ?? Messenger
-                .Create<User>()
-                .Negative()
-                .Message(
-                    new CustomMessage(
-                        "Forbidden",
-                        new Dictionary<string, string>()
-                        {
-                            { "En", "forbidden" },
-                            { "Vi", "đủ quyền" },
-                        },
-                        "forbidden"
-                    )
-                )
-                .Build(),
-        nameof(ForbiddenError),
+        message,
+        "https://datatracker.ietf.org/doc/html/rfc9110#name-403-forbidden",
         StatusCodes.Status403Forbidden
-    );
+    )
+{
+    public sealed override string? Detail { get; protected set; } =
+        "You do not have permission to perform this action.";
+}

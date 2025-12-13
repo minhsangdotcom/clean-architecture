@@ -1,10 +1,12 @@
 using System.Data.Common;
-using Application.Common.Interfaces.Services;
+using Application.Common.Interfaces.Services.Accessors;
+using Application.Contracts.Permissions;
 using Infrastructure.Data;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Moq;
@@ -13,7 +15,8 @@ namespace Application.SubcutaneousTests;
 
 public class CustomWebApplicationFactory<TProgram>(
     DbConnection dbConnection,
-    string environmentName
+    string environmentName,
+    IConfiguration configuration
 ) : WebApplicationFactory<TProgram>
     where TProgram : class
 {
@@ -40,7 +43,21 @@ public class CustomWebApplicationFactory<TProgram>(
                 .AddTransient(provider =>
                     Mock.Of<ICurrentUser>(x => x.Id == TestingFixture.GetUserId())
                 );
+
+            services
+                .RemoveAll<PermissionDefinitionContext>()
+                .AddSingleton(_ =>
+                {
+                    PermissionDefinitionContext context = new();
+                    new SystemPermissionDefinitionProvider().Define(context);
+                    return context;
+                });
         });
-        builder.UseEnvironment(environmentName);
+
+        string path = Path.Combine(Directory.GetCurrentDirectory(), "../../../");
+        builder
+            .UseEnvironment(environmentName)
+            .UseConfiguration(configuration)
+            .UseContentRoot(path);
     }
 }

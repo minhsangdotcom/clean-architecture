@@ -1,22 +1,26 @@
-using Application.Common.Constants;
+using Application.Common.ErrorCodes;
 using Application.Common.Errors;
 using Application.Common.Interfaces.Services.Identity;
+using Application.Common.Interfaces.Services.Localization;
+using Application.Common.Interfaces.Services.Storage;
 using Application.Common.Interfaces.UnitOfWorks;
-using Contracts.ApiWrapper;
-using Domain.Aggregates.Regions;
+using Application.Contracts.ApiWrapper;
+using Application.Contracts.Constants;
+using Domain.Aggregates.Permissions;
+using Domain.Aggregates.Permissions.Specifications;
+using Domain.Aggregates.Roles;
+using Domain.Aggregates.Roles.Specifications;
 using Domain.Aggregates.Users;
-using Domain.Aggregates.Users.Enums;
-using Domain.Aggregates.Users.Specifications;
 using Mediator;
 using Microsoft.AspNetCore.Http;
-using SharedKernel.Common.Messages;
 
 namespace Application.Features.Users.Commands.Update;
 
 public class UpdateUserHandler(
+    IUserManager userManager,
     IEfUnitOfWork unitOfWork,
-    IMediaUpdateService<User> mediaUpdateService,
-    IUserManagerService userManagerService
+    IMediaStorageService<User> storageService,
+    IMessageTranslatorService translator
 ) : IRequestHandler<UpdateUserCommand, Result<UpdateUserResponse>>
 {
     public async ValueTask<Result<UpdateUserResponse>> Handle(
@@ -24,137 +28,71 @@ public class UpdateUserHandler(
         CancellationToken cancellationToken
     )
     {
-        User? user = await GetUserAsync(Ulid.Parse(command.UserId), cancellationToken);
+        User? user = await userManager.FindByIdAsync(
+            Ulid.Parse(command.UserId),
+            cancellationToken: cancellationToken
+        );
         if (user == null)
         {
             return Result<UpdateUserResponse>.Failure(
                 new NotFoundError(
                     TitleMessage.RESOURCE_NOT_FOUND,
-                    Messenger
-                        .Create<User>()
-                        .Message(MessageType.Found)
-                        .Negative()
-                        .VietnameseTranslation(TranslatableMessage.VI_USER_NOT_FOUND)
-                        .BuildMessage()
+                    new(
+                        UserErrorMessages.UserNotFound,
+                        translator.Translate(UserErrorMessages.UserNotFound)
+                    )
                 )
             );
         }
-
-        UserUpdateRequest updateData = command.UpdateData;
+        UserUpdateData updateData = command.UpdateData;
 
         IFormFile? avatar = updateData.Avatar;
         string? oldAvatar = user.Avatar;
 
         user.FromUpdateUser(updateData);
+        string? key = storageService.GetKey(avatar);
+        user.ChangeAvatar(await storageService.UploadAsync(avatar, key));
 
-        Province? province = await unitOfWork
-            .Repository<Province>()
-            .FindByIdAsync(updateData.ProvinceId, cancellationToken);
-        if (province == null)
-        {
-            return Result<UpdateUserResponse>.Failure<NotFoundError>(
-                new(
-                    TitleMessage.RESOURCE_NOT_FOUND,
-                    Messenger
-                        .Create<User>()
-                        .Property(nameof(UserUpdateRequest.ProvinceId))
-                        .Message(MessageType.Existence)
-                        .Negative()
-                        .Build()
-                )
-            );
-        }
-
-        District? district = await unitOfWork
-            .Repository<District>()
-            .FindByIdAsync(updateData.DistrictId, cancellationToken);
-        if (district == null)
-        {
-            return Result<UpdateUserResponse>.Failure<NotFoundError>(
-                new(
-                    TitleMessage.RESOURCE_NOT_FOUND,
-                    Messenger
-                        .Create<User>()
-                        .Property(nameof(updateData.DistrictId))
-                        .Message(MessageType.Existence)
-                        .Negative()
-                        .Build()
-                )
-            );
-        }
-
-        Commune? commune = null;
-        if (updateData.CommuneId.HasValue)
-        {
-            commune = await unitOfWork
-                .Repository<Commune>()
-                .FindByIdAsync(updateData.CommuneId.Value, cancellationToken);
-
-            if (commune == null)
-            {
-                return Result<UpdateUserResponse>.Failure<NotFoundError>(
-                    new(
-                        TitleMessage.RESOURCE_NOT_FOUND,
-                        Messenger
-                            .Create<User>()
-                            .Property(nameof(UserUpdateRequest.CommuneId))
-                            .Message(MessageType.Existence)
-                            .Negative()
-                            .Build()
-                    )
-                );
-            }
-        }
-
-        //* replace address
-        user.UpdateAddress(
-            new(
-                province!.FullName,
-                province.Id,
-                district!.FullName,
-                district.Id,
-                commune?.FullName,
-                commune?.Id,
-                command.UpdateData.Street!
-            )
-        );
-
-        string? key = mediaUpdateService.GetKey(avatar);
-        user.Avatar = await mediaUpdateService.UploadAvatarAsync(avatar, key);
-
-        //* trigger event to update default claims -  that's information of user
-        user.UpdateDefaultUserClaims();
-
+        await unitOfWork.BeginTransactionAsync(cancellationToken);
         try
         {
-            await unitOfWork.BeginTransactionAsync(cancellationToken);
+            await userManager.UpdateAsync(user, cancellationToken);
 
-            await unitOfWork.Repository<User>().UpdateAsync(user);
-            await unitOfWork.SaveAsync(cancellationToken);
+            // add roles
+            IList<string> roles = await unitOfWork
+                .ReadOnlyRepository<Role>()
+                .ListAsync(
+                    new GetRoleNameByListRoleIdSpecification(updateData.Roles!),
+                    cancellationToken
+                );
+            await userManager.ReplaceRolesAsync(user, roles, cancellationToken);
 
-            //* update custom claims of user like permissions ...
-            List<UserClaim> customUserClaims =
-                updateData.UserClaims?.ToListUserClaim(UserClaimType.Custom, user.Id) ?? [];
-            await userManagerService.UpdateAsync(user, updateData.Roles!, customUserClaims);
-
+            // add permissions
+            if (updateData.Permissions?.Count > 0)
+            {
+                IList<Permission> permissions = await unitOfWork
+                    .DynamicReadOnlyRepository<Permission>()
+                    .ListAsync(
+                        new ListPermissionByIdSpecification(updateData.Permissions),
+                        cancellationToken: cancellationToken
+                    );
+                await userManager.ReplacePermissionsAsync(user, permissions, cancellationToken);
+            }
             await unitOfWork.CommitAsync(cancellationToken);
-
-            await mediaUpdateService.DeleteAvatarAsync(oldAvatar);
-            User? userResponse = await GetUserAsync(user.Id, cancellationToken);
-            return Result<UpdateUserResponse>.Success(userResponse!.ToUpdateUserResponse());
         }
         catch (Exception)
         {
-            await mediaUpdateService.DeleteAvatarAsync(user.Avatar);
+            // rollback new avatar
+            await storageService.DeleteAsync(user.Avatar);
             await unitOfWork.RollbackAsync(cancellationToken);
             throw;
         }
-    }
-
-    private async Task<User?> GetUserAsync(Ulid id, CancellationToken cancellationToken)
-    {
-        return await unitOfWork
-            .DynamicReadOnlyRepository<User>()
-            .FindByConditionAsync(new GetUserByIdSpecification(id), cancellationToken);
+        // delete old avatar after updating Successfully
+        await storageService.DeleteAsync(oldAvatar);
+        var response = await userManager.FindByIdAsync(
+            user.Id,
+            cancellationToken: cancellationToken
+        );
+        return Result<UpdateUserResponse>.Success(response!.ToUpdateUserResponse());
     }
 }

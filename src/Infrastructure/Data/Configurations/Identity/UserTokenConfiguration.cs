@@ -4,11 +4,11 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Infrastructure.Data.Configurations.Identity;
 
-public class UserTokenConfiguration : IEntityTypeConfiguration<UserToken>
+public class UserTokenConfiguration : IEntityTypeConfiguration<UserRefreshToken>
 {
-    public void Configure(EntityTypeBuilder<UserToken> builder)
+    public void Configure(EntityTypeBuilder<UserRefreshToken> builder)
     {
         builder.HasKey(x => x.Id);
-        builder.HasOne(x => x.User).WithMany(x => x.UserTokens).HasForeignKey(x => x.UserId);
+        builder.HasOne(x => x.User).WithMany(x => x.RefreshTokens).HasForeignKey(x => x.UserId);
     }
 }

@@ -24,7 +24,7 @@ public class RedisCacheService(
                 {
                     ExpirationType = CacheExpirationType.Absolute,
                     Expiration = TimeSpan.FromMinutes(
-                        redisDatabaseSettings.DefaultCachingTimeInMinute
+                        redisDatabaseSettings.DefaultCacheExpirationInMinute
                     ),
                 }
         );
@@ -44,23 +44,10 @@ public class RedisCacheService(
                 {
                     ExpirationType = CacheExpirationType.Absolute,
                     Expiration = TimeSpan.FromMinutes(
-                        redisDatabaseSettings.DefaultCachingTimeInMinute
+                        redisDatabaseSettings.DefaultCacheExpirationInMinute
                     ),
                 }
         );
-    }
-
-    public void Remove(string key)
-    {
-        bool isSuccess = redis.KeyDelete(key);
-        if (isSuccess)
-        {
-            logger.LogDebug("Redis KeyDelete {Key}", key);
-        }
-        else
-        {
-            logger.LogDebug("Redis KeyDelete {Key} failed", key);
-        }
     }
 
     public async Task RemoveAsync(string key)
@@ -75,6 +62,11 @@ public class RedisCacheService(
         {
             logger.LogDebug("Redis KeyDelete {Key} failed", key);
         }
+    }
+
+    public async Task<bool> HasKeyAsync(string key)
+    {
+        return await redis.KeyExistsAsync(key);
     }
 
     private async Task<T?> GetOrSetDefaultAsync<T>(
@@ -118,7 +110,7 @@ public class RedisCacheService(
         {
             expiry =
                 options.Expiration
-                ?? TimeSpan.FromMinutes(redisDatabaseSettings.DefaultCachingTimeInMinute);
+                ?? TimeSpan.FromMinutes(redisDatabaseSettings.DefaultCacheExpirationInMinute);
         }
 
         await redis.StringSetAsync(key, json, expiry);
@@ -171,7 +163,7 @@ public class RedisCacheService(
         {
             expiry =
                 options.Expiration
-                ?? TimeSpan.FromMinutes(redisDatabaseSettings.DefaultCachingTimeInMinute);
+                ?? TimeSpan.FromMinutes(redisDatabaseSettings.DefaultCacheExpirationInMinute);
         }
 
         redis.StringSet(key, json, expiry);

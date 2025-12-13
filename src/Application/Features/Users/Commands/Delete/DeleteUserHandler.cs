@@ -1,49 +1,47 @@
-using Application.Common.Constants;
+using Application.Common.ErrorCodes;
 using Application.Common.Errors;
 using Application.Common.Interfaces.Services.Identity;
-using Application.Common.Interfaces.UnitOfWorks;
-using Contracts.ApiWrapper;
+using Application.Common.Interfaces.Services.Localization;
+using Application.Common.Interfaces.Services.Storage;
+using Application.Contracts.ApiWrapper;
+using Application.Contracts.Constants;
 using Domain.Aggregates.Users;
-using Domain.Aggregates.Users.Specifications;
 using Mediator;
-using SharedKernel.Common.Messages;
 
 namespace Application.Features.Users.Commands.Delete;
 
-public class DeleteUserHandler(IEfUnitOfWork unitOfWork, IMediaUpdateService<User> mediaUpdateService)
-    : IRequestHandler<DeleteUserCommand, Result<string>>
+public class DeleteUserHandler(
+    IUserManager userManager,
+    IMediaStorageService<User> mediaUpdateService,
+    IMessageTranslatorService translator
+) : IRequestHandler<DeleteUserCommand, Result<string>>
 {
     public async ValueTask<Result<string>> Handle(
         DeleteUserCommand command,
         CancellationToken cancellationToken
     )
     {
-        User? user = await unitOfWork
-            .DynamicReadOnlyRepository<User>()
-            .FindByConditionAsync(
-                new GetUserByIdWithoutIncludeSpecification(command.UserId),
-                cancellationToken
-            );
-
+        User? user = await userManager.FindByIdAsync(
+            Ulid.Parse(command.UserId),
+            false,
+            cancellationToken
+        );
         if (user == null)
         {
             return Result<string>.Failure(
                 new NotFoundError(
                     TitleMessage.RESOURCE_NOT_FOUND,
-                    Messenger
-                        .Create<User>()
-                        .Message(MessageType.Found)
-                        .Negative()
-                        .VietnameseTranslation(TranslatableMessage.VI_USER_NOT_FOUND)
-                        .BuildMessage()
+                    new(
+                        UserErrorMessages.UserNotFound,
+                        translator.Translate(UserErrorMessages.UserNotFound)
+                    )
                 )
             );
         }
         string? avatar = user.Avatar;
-        await unitOfWork.Repository<User>().DeleteAsync(user);
-        await unitOfWork.SaveAsync(cancellationToken);
 
-        await mediaUpdateService.DeleteAvatarAsync(avatar);
+        await userManager.DeleteAsync(user, cancellationToken);
+        await mediaUpdateService.DeleteAsync(avatar);
         return Result<string>.Success();
     }
 }

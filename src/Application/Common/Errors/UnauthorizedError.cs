@@ -1,30 +1,16 @@
-using Contracts.ApiWrapper;
-using Domain.Aggregates.Users;
+using Application.Contracts.ApiWrapper;
 using Microsoft.AspNetCore.Http;
-using SharedKernel.Common.Messages;
 
 namespace Application.Common.Errors;
 
-public class UnauthorizedError(string title, MessageResult? message = null)
+public class UnauthorizedError(string title, LocalizedTextResult message)
     : ErrorDetails(
         title,
-        message
-            ?? Messenger
-                .Create<User>()
-                .CustomProperty("", "ViToBeTranslation=chưa")
-                .Negative()
-                .Message(
-                    new CustomMessage(
-                        "authorized",
-                        new Dictionary<string, string>()
-                        {
-                            { "En", "unauthorized" },
-                            { "Vi", "đăng nhập" },
-                        },
-                        "unauthorized"
-                    )
-                )
-                .Build(),
-        nameof(UnauthorizedError),
+        message,
+        "https://datatracker.ietf.org/doc/html/rfc9110#name-401-unauthorized",
         StatusCodes.Status401Unauthorized
-    );
+    )
+{
+    public sealed override string? Detail { get; protected set; } =
+        "Authentication is required to access this resource.";
+}

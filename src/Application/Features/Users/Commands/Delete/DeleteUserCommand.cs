@@ -1,6 +1,6 @@
-using Contracts.ApiWrapper;
+using Application.Contracts.ApiWrapper;
 using Mediator;
 
 namespace Application.Features.Users.Commands.Delete;
 
-public record DeleteUserCommand(Ulid UserId) : IRequest<Result<string>>;
+public record DeleteUserCommand(string UserId) : IRequest<Result<string>>;

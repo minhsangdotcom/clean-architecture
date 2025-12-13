@@ -25,7 +25,7 @@ public static class RequiredAuthorizationBuilder
         return new(builder);
     }
 
-    public static RequiredAuthorization<TBuilder> AddPermission<TBuilder>(
+    public static RequiredAuthorization<TBuilder> HasPermission<TBuilder>(
         this RequiredAuthorization<TBuilder> requiredAuthorization,
         string permission
     )
@@ -35,7 +35,7 @@ public static class RequiredAuthorizationBuilder
         return requiredAuthorization;
     }
 
-    public static RequiredAuthorization<TBuilder> AddRoles<TBuilder>(
+    public static RequiredAuthorization<TBuilder> HasRole<TBuilder>(
         this RequiredAuthorization<TBuilder> requiredAuthorization,
         string role
     )
@@ -70,7 +70,9 @@ public static class RequiredAuthorizationBuilder
         );
     }
 
-    public static TBuilder RequireAuth<TBuilder>(
+    // authorize with string pattern roles or permissions, roles and permissions
+    // permissions:"user.create,user.list"
+    public static TBuilder MustHaveAuthorization<TBuilder>(
         this TBuilder builder,
         string? roles = null,
         string? permissions = null

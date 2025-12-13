@@ -1,0 +1,19 @@
+{
+  "RoleManagement": "Role Management",
+  "role.list": "List roles",
+  "role.detail": "View role details",
+  "role.create": "Create role",
+  "role.update": "Update role",
+  "role.delete": "Delete role",
+  "role.test": "Test role",
+
+  "UserManagement": "User management",
+  "user.list": "List Users",
+  "user.detail": "View user details",
+  "user.create": "Create user",
+  "user.update": "Update user",
+  "user.delete": "Delete user",
+
+  "QueueManagement": "Queue management",
+  "queue-log.list": "View  list of Queue Logging"
+}

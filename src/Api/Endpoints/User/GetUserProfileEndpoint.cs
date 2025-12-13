@@ -1,14 +1,11 @@
 using Api.common.EndpointConfigurations;
 using Api.common.Results;
 using Api.common.Routers;
-using Application.Common.Interfaces.Services;
-using Application.Common.Interfaces.Services.Cache;
+using Application.Contracts.ApiWrapper;
 using Application.Features.Users.Queries.Profiles;
-using Contracts.ApiWrapper;
 using Mediator;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.OpenApi.Models;
 
 namespace Api.Endpoints.User;
 
@@ -19,34 +16,23 @@ public class GetUserProfileEndpoint : IEndpoint
     public void MapEndpoint(IEndpointRouteBuilder app)
     {
         app.MapGet(Router.UserRoute.Profile, HandleAsync)
-            .WithOpenApi(operation => new OpenApiOperation(operation)
-            {
-                Summary = "Get current user's profile 🧑‍💼",
-                Description = "Returns user profile if found",
-                Tags = [new OpenApiTag() { Name = Router.UserRoute.Tags }],
-            })
-            .RequireAuth();
+            .WithTags(Router.UserRoute.Tags)
+            .AddOpenApiOperationTransformer(
+                (operation, context, _) =>
+                {
+                    operation.Summary = "Get current user's profile 🧑‍💼";
+                    operation.Description = "Returns user profile if found";
+                    return Task.CompletedTask;
+                }
+            )
+            .MustHaveAuthorization();
     }
 
     private async Task<
         Results<Ok<ApiResponse<GetUserProfileResponse>>, ProblemHttpResult>
-    > HandleAsync(
-        [FromServices] ISender sender,
-        [FromServices] ICurrentUser currentUser,
-        [FromServices] IMemoryCacheService cacheService,
-        CancellationToken cancellationToken = default
-    )
+    > HandleAsync([FromServices] ISender sender, CancellationToken cancellationToken = default)
     {
-        Ulid? userId = currentUser.Id;
-        var result = await cacheService.GetOrSetAsync(
-            $"{nameof(GetUserProfileEndpoint)}:{userId}",
-            () => sender.Send(new GetUserProfileQuery(), cancellationToken).AsTask(),
-            new CacheOptions()
-            {
-                ExpirationType = CacheExpirationType.Sliding,
-                Expiration = TimeSpan.FromMinutes(15),
-            }
-        );
+        var result = await sender.Send(new GetUserProfileQuery(), cancellationToken);
         return result!.ToResult();
     }
 }

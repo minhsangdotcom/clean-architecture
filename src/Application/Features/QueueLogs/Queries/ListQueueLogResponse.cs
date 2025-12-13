@@ -1,9 +1,9 @@
+using Application.Contracts.Dtos.Responses;
 using Domain.Aggregates.QueueLogs.Enums;
-using SharedKernel.Models;
 
 namespace Application.Features.QueueLogs.Queries;
 
-public class ListQueueLogResponse : DefaultBaseResponse
+public class ListQueueLogResponse : EntityResponse
 {
     public Guid RequestId { get; set; }
 

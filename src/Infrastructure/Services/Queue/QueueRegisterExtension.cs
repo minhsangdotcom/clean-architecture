@@ -23,11 +23,6 @@ public static class QueueRegisterExtension
                 .Configure<QueueSettings>(options =>
                     configuration.GetSection(nameof(QueueSettings)).Bind(options)
                 )
-                .Configure<HostOptions>(options =>
-                {
-                    options.ServicesStartConcurrently = true;
-                    options.ServicesStopConcurrently = true;
-                })
                 .AddSingleton<IQueueService, QueueService>();
         }
 
@@ -52,7 +47,7 @@ public static class QueueRegisterExtension
                         !a.FullName!.StartsWith("Microsoft") && !a.FullName.StartsWith("System")
                     )
                     .AddClasses(classes =>
-                        classes.AssignableTo(typeof(IQueueHandler<TRequest, TResponse>))
+                        classes.AssignableTo<IQueueHandler<TRequest, TResponse>>()
                     )
                     .AsImplementedInterfaces()
                     .WithScopedLifetime()

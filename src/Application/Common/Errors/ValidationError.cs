@@ -1,7 +1,6 @@
-using Contracts.ApiWrapper;
+using Application.Contracts.ApiWrapper;
 using FluentValidation.Results;
 using Microsoft.AspNetCore.Http;
-using SharedKernel.Common.Messages;
 
 namespace Application.Common.Errors;
 
@@ -14,18 +13,16 @@ public class ValidationError(List<ValidationFailure> invalidParams)
                 .Select(failureGroups => new InvalidParam
                 {
                     PropertyName = failureGroups.Key,
-                    Reasons = failureGroups.Select(failure =>
-                    {
-                        MessageResult messageResult = (MessageResult)failure.CustomState;
-                        return new ErrorReason()
-                        {
-                            Message = messageResult.Message,
-                            En = messageResult.En,
-                            Vi = messageResult.Vi,
-                        };
-                    }),
+                    Reasons =
+                    [
+                        .. failureGroups.Select(failure => (ErrorReason)failure.CustomState),
+                    ],
                 }),
         ],
-        nameof(ValidationError),
+        "https://datatracker.ietf.org/doc/html/rfc9110#name-400-bad-request",
         StatusCodes.Status400BadRequest
-    );
+    )
+{
+    public sealed override string? Detail { get; protected set; } =
+        "One or more validation errors occurred.";
+}

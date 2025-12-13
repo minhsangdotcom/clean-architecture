@@ -1,22 +1,18 @@
-using Application.Features.Common.Payloads.Users;
-using Application.Features.Common.Projections.Users;
 using Domain.Aggregates.Users;
-using Domain.Aggregates.Users.Enums;
 
 namespace Application.Features.Users.Commands.Update;
 
 public static class UpdateUserMapping
 {
-    public static User FromUpdateUser(this User user, UserUpdateRequest update)
+    public static User FromUpdateUser(this User user, UserUpdateData update)
     {
-        user.Update(
-            update.FirstName,
-            update.LastName,
-            update.Email,
+        return user.Update(
+            update.FirstName!,
+            update.LastName!,
+            update.Email!,
             update.PhoneNumber,
-            update.DayOfBirth
+            update.DateOfBirth
         );
-        return user;
     }
 
     public static UpdateUserResponse ToUpdateUserResponse(this User user)
@@ -25,33 +21,5 @@ public static class UpdateUserMapping
         response.MappingFrom(user);
 
         return response;
-    }
-
-    public static List<UserClaim> ToListUserClaim(
-        this List<UserClaimPayload> userClaims,
-        UserClaimType claimType,
-        Ulid userId
-    )
-    {
-        return
-        [
-            .. userClaims.Select(claim =>
-            {
-                var result = new UserClaim()
-                {
-                    ClaimType = claim.ClaimType!,
-                    ClaimValue = claim.ClaimValue!,
-                    Type = claimType,
-                    UserId = userId,
-                };
-
-                if (claim.Id != null)
-                {
-                    result.Id = claim.Id.Value;
-                }
-                
-                return result;
-            }),
-        ];
     }
 }

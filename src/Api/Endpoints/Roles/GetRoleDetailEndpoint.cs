@@ -1,13 +1,12 @@
 using Api.common.EndpointConfigurations;
 using Api.common.Results;
 using Api.common.Routers;
+using Application.Contracts.ApiWrapper;
 using Application.Features.Roles.Queries.Detail;
-using Contracts.ApiWrapper;
-using Infrastructure.Constants;
 using Mediator;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.OpenApi.Models;
+using static Application.Contracts.Permissions.PermissionNames;
 
 namespace Api.Endpoints.Roles;
 
@@ -19,15 +18,21 @@ public class GetRoleDetailEndpoint : IEndpoint
     {
         app.MapGet(Router.RoleRoute.GetUpdateDelete, HandleAsync)
             .WithName(Router.RoleRoute.GetRouteName)
-            .WithOpenApi(operation => new OpenApiOperation(operation)
-            {
-                Summary = "Get role details 🔎",
-                Description =
-                    "Retrieves detailed information about a specific role, including its name and associated claims/permissions. Use this to review or audit the role’s configurations.",
-                Tags = [new OpenApiTag() { Name = Router.RoleRoute.Tags }],
-            })
-            .RequireAuth(
-                permissions: Permission.Generate(PermissionAction.Detail, PermissionResource.Role)
+            .WithTags(Router.RoleRoute.Tags)
+            .AddOpenApiOperationTransformer(
+                (operation, context, _) =>
+                {
+                    operation.Summary = "Get role details 🔎";
+                    operation.Description =
+                        "Retrieves a role’s details, including its name and permission IDs.";
+                    return Task.CompletedTask;
+                }
+            )
+            .MustHaveAuthorization(
+                permissions: PermissionGenerator.Generate(
+                    PermissionResource.Role,
+                    PermissionAction.Detail
+                )
             );
     }
 
@@ -37,7 +42,7 @@ public class GetRoleDetailEndpoint : IEndpoint
         CancellationToken cancellationToken = default
     )
     {
-        var command = new GetRoleDetailQuery(Ulid.Parse(id));
+        var command = new GetRoleDetailQuery(id);
         var result = await sender.Send(command, cancellationToken);
         return result.ToResult();
     }

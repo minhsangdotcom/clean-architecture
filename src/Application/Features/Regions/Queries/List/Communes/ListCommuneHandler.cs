@@ -1,18 +1,25 @@
+using Application.Common.Errors;
+using Application.Common.Interfaces.Services.Localization;
 using Application.Common.Interfaces.UnitOfWorks;
 using Application.Common.QueryStringProcessing;
-using Application.Features.Common.Mapping.Regions;
-using Application.Features.Common.Projections.Regions;
-using Contracts.ApiWrapper;
+using Application.Contracts.ApiWrapper;
+using Application.Contracts.Constants;
+using Application.Contracts.Dtos.Responses;
+using Application.SharedFeatures.Mapping.Regions;
+using Application.SharedFeatures.Projections.Regions;
 using Domain.Aggregates.Regions;
 using Domain.Aggregates.Regions.Specifications;
 using Mediator;
+using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Logging;
-using SharedKernel.Models;
 
 namespace Application.Features.Regions.Queries.List.Communes;
 
-public class ListCommuneHandler(IEfUnitOfWork unitOfWork, ILogger<ListCommuneHandler> logger)
-    : IRequestHandler<ListCommuneQuery, Result<PaginationResponse<CommuneProjection>>>
+public class ListCommuneHandler(
+    IEfUnitOfWork unitOfWork,
+    ILogger<ListCommuneHandler> logger,
+    IMessageTranslatorService translator
+) : IRequestHandler<ListCommuneQuery, Result<PaginationResponse<CommuneProjection>>>
 {
     public async ValueTask<Result<PaginationResponse<CommuneProjection>>> Handle(
         ListCommuneQuery query,
@@ -21,17 +28,28 @@ public class ListCommuneHandler(IEfUnitOfWork unitOfWork, ILogger<ListCommuneHan
     {
         var validationResult = query.ValidateQuery();
 
-        if (validationResult.Error != null)
+        if (!string.IsNullOrWhiteSpace(validationResult.Error))
         {
-            return Result<PaginationResponse<CommuneProjection>>.Failure(validationResult.Error);
+            return Result<PaginationResponse<CommuneProjection>>.Failure(
+                new BadRequestError(
+                    TitleMessage.VALIDATION_ERROR,
+                    new(validationResult.Error, translator.Translate(validationResult.Error))
+                )
+            );
         }
 
         var validationFilterResult = query.ValidateFilter<ListCommuneQuery, Commune>(logger);
 
-        if (validationFilterResult.Error != null)
+        if (!string.IsNullOrWhiteSpace(validationFilterResult.Error))
         {
             return Result<PaginationResponse<CommuneProjection>>.Failure(
-                validationFilterResult.Error
+                new BadRequestError(
+                    TitleMessage.VALIDATION_ERROR,
+                    new(
+                        validationFilterResult.Error,
+                        translator.Translate(validationFilterResult.Error)
+                    )
+                )
             );
         }
 
