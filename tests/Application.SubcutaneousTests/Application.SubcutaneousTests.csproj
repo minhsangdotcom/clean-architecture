@@ -54,7 +54,7 @@
     <None Include="appsettings.Deployment.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="appsettings.Test.json">
+    <None Include="appsettings.Test.json" Condition="Exists('appsettings.Test.json')">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
