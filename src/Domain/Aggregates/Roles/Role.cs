@@ -1,17 +1,58 @@
+using Ardalis.GuardClauses;
 using Domain.Aggregates.Users;
-using Domain.Common;
+using SharedKernel.DomainEvents;
+using SharedKernel.Entities;
 
 namespace Domain.Aggregates.Roles;
 
-public class Role : DefaultEntity
+public class Role : AggregateRoot
 {
-    public string? Guard { get; set; }
-
+    public string Name { get; private set; } = string.Empty;
     public string? Description { get; set; }
 
-    public string Name { get; set; } = string.Empty;
+    public ICollection<UserRole> Users { get; private set; } = [];
+    public ICollection<RoleClaim> Claims { get; private set; } = [];
+    public ICollection<RolePermission> Permissions { get; private set; } = [];
 
-    public ICollection<UserRole>? UserRoles { get; set; } = [];
+    private Role() { }
 
-    public ICollection<RoleClaim>? RoleClaims { get; set; } = [];
+    public Role(string name, string? description = null)
+    {
+        Name = Guard.Against.NullOrEmpty(name, nameof(name));
+        Description = description;
+    }
+
+    // for seeding purpose
+    public Role(
+        Ulid id,
+        string name,
+        List<RolePermission> permissions,
+        string? description,
+        string createdBy
+    )
+    {
+        Id = id;
+        Name = Guard.Against.NullOrEmpty(name, nameof(name));
+        Description = description;
+        Permissions = [.. Permissions.Concat(permissions)];
+        CreatedBy = createdBy;
+    }
+
+    public void Update(string name, string? description)
+    {
+        SetName(name);
+        Description = description;
+    }
+
+    public void SetName(string name) => Name = Guard.Against.NullOrEmpty(name, nameof(name));
+
+    public void ClearAllPermissions()
+    {
+        Permissions.Clear();
+    }
+
+    protected override bool TryApplyDomainEvent(IDomainEvent domainEvent)
+    {
+        return false;
+    }
 }

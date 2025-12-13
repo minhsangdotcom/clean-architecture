@@ -2,7 +2,6 @@ using Amazon.S3;
 using Application.Common.Interfaces.Services.Storage;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
 
 namespace Infrastructure.Services.Aws;
@@ -14,26 +13,23 @@ public static class AmazonS3Extension
         IConfiguration configuration
     )
     {
-        services.Configure<S3AwsSettings>(options =>
-            configuration.GetSection(nameof(S3AwsSettings)).Bind(options)
-        );
-        services.TryAddSingleton<IValidateOptions<S3AwsSettings>, ValidateS3AwsSettings>();
-        services.AddSingleton<IStorageService, AmazonS3Service>();
+        services
+            .AddOptions<S3AwsSettings>()
+            .Bind(configuration.GetSection(nameof(S3AwsSettings)))
+            .ValidateOnStart();
+        services.AddSingleton<IValidateOptions<S3AwsSettings>, ValidateS3AwsSettings>();
 
-        S3AwsSettings s3AwsSettings =
-            configuration.GetSection(nameof(S3AwsSettings)).Get<S3AwsSettings>() ?? new();
-        var clientConfig = new AmazonS3Config
-        {
-            ServiceURL = s3AwsSettings.ServiceUrl ?? string.Empty,
-            ForcePathStyle = true,
-        };
+        services
+            .AddSingleton<IAmazonS3>(sp =>
+            {
+                S3AwsSettings settings = sp.GetRequiredService<IOptions<S3AwsSettings>>().Value;
+                AmazonS3Config clientConfig =
+                    new() { ServiceURL = settings.ServiceUrl, ForcePathStyle = true };
 
-        var s3Client = new AmazonS3Client(
-            s3AwsSettings.AccessKey,
-            s3AwsSettings.SecretKey,
-            clientConfig
-        );
-        services.AddSingleton<IAmazonS3>(s3Client);
+                return new AmazonS3Client(settings.AccessKey, settings.SecretKey, clientConfig);
+            })
+            .AddSingleton<IStorageService, AmazonS3Service>()
+            .AddSingleton(typeof(IMediaStorageService<>), typeof(MediaStorageService<>));
 
         return services;
     }

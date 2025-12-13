@@ -1,4 +1,4 @@
-using Application.Features.Common.Projections.Users;
+using Application.SharedFeatures.Projections.Users;
 
 namespace Application.Features.Users.Commands.Profiles;
 

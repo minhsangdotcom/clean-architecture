@@ -1,43 +1,68 @@
-using Application.Common.Constants;
+using Application.Common.ErrorCodes;
 using Application.Common.Errors;
 using Application.Common.Interfaces.Services.Identity;
-using Application.Features.Common.Mapping.Roles;
-using Contracts.ApiWrapper;
+using Application.Common.Interfaces.Services.Localization;
+using Application.Common.Interfaces.UnitOfWorks;
+using Application.Contracts.ApiWrapper;
+using Application.Contracts.Constants;
+using Domain.Aggregates.Permissions;
 using Domain.Aggregates.Roles;
 using Mediator;
-using SharedKernel.Common.Messages;
 
 namespace Application.Features.Roles.Commands.Update;
 
-public class UpdateRoleHandler(IRoleManagerService roleManagerService)
-    : IRequestHandler<UpdateRoleCommand, Result<UpdateRoleResponse>>
+public class UpdateRoleHandler(
+    IRoleManager manager,
+    IEfUnitOfWork unitOfWork,
+    IMessageTranslatorService translator
+) : IRequestHandler<UpdateRoleCommand, Result<UpdateRoleResponse>>
 {
     public async ValueTask<Result<UpdateRoleResponse>> Handle(
         UpdateRoleCommand command,
         CancellationToken cancellationToken
     )
     {
-        Role? role = await roleManagerService.FindByIdAsync(Ulid.Parse(command.RoleId));
-
+        Role? role = await manager.FindByIdAsync(
+            Ulid.Parse(command.RoleId),
+            cancellationToken: cancellationToken
+        );
         if (role == null)
         {
             return Result<UpdateRoleResponse>.Failure(
                 new NotFoundError(
                     TitleMessage.RESOURCE_NOT_FOUND,
-                    Messenger
-                        .Create<Role>()
-                        .Message(MessageType.Found)
-                        .Negative()
-                        .VietnameseTranslation(TranslatableMessage.VI_ROLE_NOT_FOUND)
-                        .BuildMessage()
+                    new(
+                        RoleErrorMessages.RoleNotFound,
+                        translator.Translate(RoleErrorMessages.RoleNotFound)
+                    )
                 )
             );
         }
 
-        role.FromUpdateRole(command.UpdateData);
+        role.FromCommand(command);
+        List<Permission> permissions =
+        [
+            .. await unitOfWork
+                .Repository<Permission>()
+                .ListAsync(
+                    x => command.UpdateData.PermissionIds!.Contains(x.Id),
+                    cancellationToken
+                ),
+        ];
 
-        List<RoleClaim> roleClaims = command.UpdateData.RoleClaims.ToListRoleClaim() ?? [];
-        await roleManagerService.UpdateAsync(role, roleClaims);
+        await unitOfWork.BeginTransactionAsync(cancellationToken);
+        try
+        {
+            await manager.UpdateAsync(role, cancellationToken);
+            await manager.ReplacePermissionAsync(role, permissions, cancellationToken);
+
+            await unitOfWork.CommitAsync(cancellationToken);
+        }
+        catch (Exception)
+        {
+            await unitOfWork.RollbackAsync(cancellationToken);
+            throw;
+        }
         return Result<UpdateRoleResponse>.Success(role.ToUpdateRoleResponse());
     }
 }

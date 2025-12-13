@@ -13,8 +13,8 @@ public static class MemoryCacheExtension
     {
         return services
             .AddMemoryCache()
-            .Configure<CacheSettings>(options =>
-                configuration.GetSection(nameof(CacheSettings)).Bind(options)
+            .Configure<MemoryCacheSettings>(options =>
+                configuration.GetSection(nameof(MemoryCacheSettings)).Bind(options)
             )
             .AddSingleton<IMemoryCacheService, MemoryCacheService>();
     }

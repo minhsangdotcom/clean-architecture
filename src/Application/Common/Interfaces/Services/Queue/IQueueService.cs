@@ -1,14 +1,16 @@
+using Application.Contracts.Dtos.Requests;
+
 namespace Application.Common.Interfaces.Services.Queue;
 
 public interface IQueueService
 {
     public long Size { get; }
 
-    public long Length();
+    public long Length(string name);
 
-    public Task<bool> EnqueueAsync<T>(T payload);
+    public Task<bool> EnqueueAsync<T>(QueueRequest<T> request);
 
-    public Task<TResponse?> DequeueAsync<TResponse, TRequest>();
+    public Task<QueueRequest<T>> DequeueAsync<T>();
 
     public Task<bool> PingAsync();
 }

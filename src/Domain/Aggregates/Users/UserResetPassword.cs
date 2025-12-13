@@ -1,8 +1,8 @@
-using Domain.Common;
+using SharedKernel.Entities;
 
 namespace Domain.Aggregates.Users;
 
-public class UserResetPassword : BaseEntity
+public class UserPasswordReset : AuditableEntity
 {
     public string Token { get; set; } = string.Empty;
 

@@ -1,12 +1,22 @@
+using Application.Contracts.Dtos.Responses;
+using Application.SharedFeatures.Projections.Permissions;
+
 namespace Application.Features.Permissions;
+
+public class ListGroupPermissionResponse
+{
+    public string? Name { get; set; }
+    public string? NameTranslation { get; set; }
+    public List<ListPermissionResponse>? Permissions { get; set; }
+}
 
 public class ListPermissionResponse : PermissionResponse
 {
-    public IReadOnlyCollection<PermissionResponse>? Children { get; set; }
+    public List<ListPermissionResponse>? Children { get; set; }
 }
 
-public class PermissionResponse
+public class PermissionResponse : EntityResponse
 {
-    public string? ClaimType { get; set; }
-    public string? ClaimValue { get; set; }
+    public string? Code { get; set; }
+    public string? CodeTranslation { get; set; }
 }

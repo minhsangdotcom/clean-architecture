@@ -2,17 +2,17 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Domain\Domain.csproj" />
-    <ProjectReference Include="..\Contracts\Contracts.csproj" />
+    <ProjectReference Include="..\Application.Contracts\Application.Contracts.csproj" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="BCrypt.Net-Next" Version="4.0.3" />
+    <PackageReference Include="Elastic.Clients.Elasticsearch" Version="9.2.2" />
     <PackageReference Include="Mediator.Abstractions" Version="3.0.1" />
     <PackageReference Include="Mediator.SourceGenerator" Version="3.0.1">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
-    <PackageReference Include="minhsangdotcom.TheTemplate.ElasticsearchFluentConfig" Version="1.0.1-alpha" />
     <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="12.0.0" />
     <PackageReference Include="Wangkanai.Detection" Version="8.17.0" />
 
@@ -20,7 +20,7 @@
   </ItemGroup>
 
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <PreserveCompilationContext>true</PreserveCompilationContext>

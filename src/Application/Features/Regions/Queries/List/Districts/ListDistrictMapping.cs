@@ -1,4 +1,4 @@
-using Application.Features.Common.Projections.Regions;
+using Application.SharedFeatures.Projections.Regions;
 using Domain.Aggregates.Regions;
 
 namespace Application.Features.Regions.Queries.List.Districts;

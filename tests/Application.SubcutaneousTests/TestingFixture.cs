@@ -1,5 +1,7 @@
 using Application.SubcutaneousTests.Extensions;
 using Mediator;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Application.SubcutaneousTests;
@@ -7,18 +9,12 @@ namespace Application.SubcutaneousTests;
 public partial class TestingFixture : IAsyncLifetime
 {
     private CustomWebApplicationFactory<Program>? factory;
-    private readonly PostgreSqlDatabase database;
+    private readonly PostgreSqlDatabase database = new();
 
-    private const string BASE_URL = "http://localhost:8080/api/";
-    public const string DEFAULT_USER_PASSWORD = "Admin@123";
-    private HttpClient? Client;
+    private const string BASE_URL = "http://localhost:8080/api/v1";
 
+    private HttpClient? client;
     private static Ulid UserId;
-
-    public TestingFixture()
-    {
-        database = new();
-    }
 
     public async Task DisposeAsync()
     {
@@ -28,18 +24,18 @@ public partial class TestingFixture : IAsyncLifetime
             await factory!.DisposeAsync();
         }
 
-        if (Client != null)
+        if (client != null)
         {
-            Client!.Dispose();
+            client!.Dispose();
         }
     }
 
     public async Task InitializeAsync()
     {
-        await database.InitialiseAsync();
-        var connection = database.GetConnection();
-        string environmentName = database.GetEnvironmentVariable();
-        factory = new(connection, environmentName);
+        await database.InitializeAsync();
+        var connection = database.Connection;
+        string environmentName = database.EnvironmentVariable;
+        factory = new(connection, environmentName, database.GetConfiguration());
         CreateClient();
     }
 
@@ -59,49 +55,30 @@ public partial class TestingFixture : IAsyncLifetime
         return await sender.Send(request);
     }
 
-    public async Task<HttpResponseMessage> MakeRequestAsync(
-        string uriString,
-        HttpMethod method,
-        object payload,
-        string? contentType = null
-    )
-    {
-        if (Client == null)
-        {
-            throw new Exception($"{nameof(Client)} is null");
-        }
-
-        var loginPayload = new { Username = "super.admin", Password = "Admin@123" };
-        HttpResponseMessage httpResponse = await Client.CreateRequestAsync(
-            $"{BASE_URL}users/login",
-            HttpMethod.Post,
-            loginPayload
-        );
-        var response = await httpResponse.ToResponse<Response<LoginResponse>>();
-
-        return await Client.CreateRequestAsync(
-            $"{BASE_URL}{uriString}",
-            method,
-            payload,
-            contentType,
-            response!.Results!.Token
-        );
-    }
-
     private void CreateClient()
     {
         factory.ThrowIfNull();
-        Client = factory!.CreateClient();
+        client = factory!.CreateClient();
+    }
+
+    public HttpContext SetHttpContextQuery(string rawQuery)
+    {
+        factory.ThrowIfNull();
+        var context = new DefaultHttpContext();
+
+        var parsed = QueryHelpers.ParseQuery(rawQuery);
+        context.Request.Query = new QueryCollection(parsed);
+
+        factory.ThrowIfNull();
+        using var scope = factory!.Services.CreateScope();
+        var accessor = scope.ServiceProvider.GetRequiredService<IHttpContextAccessor>();
+        context.RequestServices = scope.ServiceProvider;
+        accessor.HttpContext = context;
+
+        return context;
     }
 
     public static Ulid GetUserId() => UserId;
 
     public static void RemoveUserId() => UserId = Ulid.Empty;
-}
-
-record LoginResponse(string Token, string Refresh);
-
-public class Response<T>
-{
-    public T? Results { get; set; }
 }

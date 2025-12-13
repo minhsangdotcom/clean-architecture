@@ -2,14 +2,13 @@ using Api.common.Documents;
 using Api.common.EndpointConfigurations;
 using Api.common.Results;
 using Api.common.Routers;
-using Application.Features.Common.Projections.Regions;
+using Application.Contracts.ApiWrapper;
+using Application.Contracts.Dtos.Responses;
 using Application.Features.Regions.Queries.List.Communes;
-using Contracts.ApiWrapper;
+using Application.SharedFeatures.Projections.Regions;
 using Mediator;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.OpenApi.Models;
-using SharedKernel.Models;
 
 namespace Api.Endpoints.Regions;
 
@@ -20,13 +19,16 @@ public class ListCommuneEndpoint : IEndpoint
     public void MapEndpoint(IEndpointRouteBuilder app)
     {
         app.MapGet(Router.RegionRoute.Communes, HandleAsync)
-            .WithOpenApi(operation => new OpenApiOperation(operation)
-            {
-                Summary = "Get list of communes 🗺️ 🇻🇳",
-                Description = "Retrieves a list of communes in Vietnam.",
-                Tags = [new OpenApiTag() { Name = Router.RegionRoute.Tags }],
-                Parameters = operation.AddDocs(),
-            });
+            .WithTags(Router.RegionRoute.Tags)
+            .AddOpenApiOperationTransformer(
+                (operation, context, _) =>
+                {
+                    operation.Summary = "Get list of communes 🗺️ 🇻🇳";
+                    operation.Description = "Retrieves a list of communes in Vietnam.";
+                    operation.Parameters = operation.AddDocs();
+                    return Task.CompletedTask;
+                }
+            );
     }
 
     private async Task<

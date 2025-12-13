@@ -1,395 +1,685 @@
-using Application.Common.Interfaces.Services;
-using Application.Common.Interfaces.Services.Identity;
-using Application.Features.Common.Payloads.Users;
-using Application.Features.Common.Projections.Users;
+using System.Linq.Expressions;
+using Application.Common.ErrorCodes;
+using Application.Common.Interfaces.Repositories.EfCore;
+using Application.Common.Interfaces.Services.Accessors;
+using Application.Common.Interfaces.Services.Localization;
+using Application.Common.Interfaces.UnitOfWorks;
+using Application.Contracts.ApiWrapper;
 using Application.Features.Users.Commands.Update;
-using AutoFixture;
+using Bogus;
+using Domain.Aggregates.Permissions;
+using Domain.Aggregates.Roles;
 using Domain.Aggregates.Users;
+using Domain.Aggregates.Users.Enums;
 using FluentValidation;
 using FluentValidation.TestHelper;
 using Moq;
-using SharedKernel.Common.Messages;
 
 namespace Application.UnitTest.Users;
 
 public class UpdateUserCommandValidatorTest
 {
-    private readonly UserUpdateRequest userUpdate;
-    private readonly Fixture fixture = new();
-
+    private readonly UpdateUserCommand command = null!;
+    private readonly InlineValidator<UpdateUserCommand> inlineValidator;
     private readonly UpdateUserCommandValidator validator;
-    private readonly InlineValidator<UserUpdateRequest> mockValidator = [];
+
+    private readonly Mock<IMessageTranslatorService> translator = new();
+    private readonly Mock<IEfUnitOfWork> unitOfWork = new();
+
+    private readonly Mock<IEfAsyncRepository<Role>> roleRepo = new();
+    private readonly Mock<IEfAsyncRepository<User>> userRepo = new();
+    private readonly Mock<IEfAsyncRepository<Permission>> permissionRepo = new();
 
     public UpdateUserCommandValidatorTest()
     {
-        Mock<IUserManagerService> mockUserManagerService = new();
-        Mock<IHttpContextAccessorService> mockHttpContextAccessorService = new();
-        Mock<ICurrentUser> currentUserService = new();
-        validator = new(
-            mockUserManagerService.Object,
-            mockHttpContextAccessorService.Object,
-            currentUserService.Object
+        unitOfWork.Setup(x => x.Repository<Role>()).Returns(roleRepo.Object);
+        unitOfWork.Setup(x => x.Repository<User>()).Returns(userRepo.Object);
+        unitOfWork.Setup(x => x.Repository<Permission>()).Returns(permissionRepo.Object);
+
+        Mock<IRequestContextProvider> contextProvider = new();
+        validator = new(unitOfWork.Object, contextProvider.Object, translator.Object);
+        inlineValidator = [];
+
+        command = Default();
+    }
+
+    #region LAST NAME RULES
+    [Theory]
+    [InlineData(null)]
+    [InlineData("")]
+    public async Task Validate_When_LastNameIsNullOrEmpty_Should_HaveError(string? lastName)
+    {
+        // Arrange
+        command.UpdateData.LastName = lastName;
+        translator.SetupTranslate(
+            UserErrorMessages.UserLastNameRequired,
+            SharedResource.TranslateText
         );
-        userUpdate = fixture
-            .Build<UserUpdateRequest>()
-            .With(x => x.ProvinceId, Ulid.Parse("01JRQHWS3RQR1N0J84EV1DQXR1"))
-            .With(x => x.DistrictId, Ulid.Parse("01JRQHWSNPR3Z8Z20GBSB22CSJ"))
-            .With(x => x.CommuneId, Ulid.Parse("01JRQHWTCHN5WBZ12WC08AZCZ8"))
-            .Without(x => x.Avatar)
-            .With(
-                x => x.UserClaims,
-                [new UserClaimPayload() { ClaimType = "test", ClaimValue = "test.value" }]
-            )
-            .With(x => x.Roles, [Ulid.Parse("01JS72XZJ6NFKFVWA9QM03RY5G")])
-            .With(x => x.Email, "admin@gmail.com")
-            .With(x => x.PhoneNumber, "0123456789")
-            .Create();
-    }
+        FakeRoleAndPermissionFound();
 
-    [Theory]
-    [InlineData("")]
-    [InlineData(null)]
-    public async Task Validate_WhenFirstNameNullOrEmpty_ShouldReturnNullFailure(string? firstName)
-    {
-        //arrage
-        userUpdate!.FirstName = firstName;
+        // Act
+        var result = await validator.TestValidateAsync(command);
 
-        //act
-        var result = await validator.TestValidateAsync(userUpdate);
-
-        //assert
-        var expectedState = Messenger
-            .Create<User>()
-            .Property(x => x.FirstName)
-            .Message(MessageType.Null)
-            .Negative()
-            .Build();
+        // Assert
+        var expected = new ErrorReason(
+            UserErrorMessages.UserLastNameRequired,
+            SharedResource.TranslateText
+        );
         result
-            .ShouldHaveValidationErrorFor(x => x.FirstName)
-            .WithCustomState(expectedState, new MessageResultComparer())
+            .ShouldHaveValidationErrorFor(x => x.UpdateData.LastName)
+            .WithCustomState(expected, new ErrorReasonComparer())
             .Only();
     }
 
     [Fact]
-    public async Task Validate_WhenInvalidLengthOfFirstName_ShouldReturnMaximumLengthFailure()
+    public async Task Validate_When_LastNameTooLong_Should_HaveError()
     {
-        userUpdate!.FirstName = new string([.. fixture.CreateMany<char>(257)]);
+        // Arrange
+        command.UpdateData.LastName = new string('X', 300);
+        translator.SetupTranslate(
+            UserErrorMessages.UserLastNameTooLong,
+            SharedResource.TranslateText
+        );
+        FakeRoleAndPermissionFound();
 
-        //act
-        var result = await validator.TestValidateAsync(userUpdate);
+        // Act
+        var result = await validator.TestValidateAsync(command);
 
-        //assert
-        var expectedState = Messenger
-            .Create<User>()
-            .Property(x => x.FirstName)
-            .Message(MessageType.MaximumLength)
-            .Build();
+        // Assert
+        var expected = new ErrorReason(
+            UserErrorMessages.UserLastNameTooLong,
+            SharedResource.TranslateText
+        );
+
         result
-            .ShouldHaveValidationErrorFor(x => x.FirstName)
-            .WithCustomState(expectedState, new MessageResultComparer())
-            .Only();
-    }
-
-    [Theory]
-    [InlineData("")]
-    [InlineData(null)]
-    public async Task Validate_WhenLastNameNullOrEmpty_ShouldReturnNullFailure(string? lastName)
-    {
-        userUpdate!.LastName = lastName;
-        //act
-        var result = await validator.TestValidateAsync(userUpdate);
-
-        //assert
-        var expectedState = Messenger
-            .Create<User>()
-            .Property(x => x.LastName)
-            .Message(MessageType.Null)
-            .Negative()
-            .Build();
-        result
-            .ShouldHaveValidationErrorFor(x => x.LastName)
-            .WithCustomState(expectedState, new MessageResultComparer())
+            .ShouldHaveValidationErrorFor(x => x.UpdateData.LastName)
+            .WithCustomState(expected, new ErrorReasonComparer())
             .Only();
     }
 
     [Fact]
-    public async Task Validate_WhenInvalidLengthOfLastName_ShouldReturnMaximumLengthFailure()
+    public async Task Validate_When_LastNameIsValid_Should_Pass()
     {
-        userUpdate!.LastName = new string([.. fixture.CreateMany<char>(257)]);
+        //Arrange
+        command.UpdateData.LastName = "Nguyen";
 
-        //act
-        var result = await validator.TestValidateAsync(userUpdate);
+        //Act
+        var result = await validator.TestValidateAsync(command);
 
-        //assert
-        var expectedState = Messenger
-            .Create<User>()
-            .Property(x => x.LastName)
-            .Message(MessageType.MaximumLength)
-            .Build();
-        result
-            .ShouldHaveValidationErrorFor(x => x.LastName)
-            .WithCustomState(expectedState, new MessageResultComparer())
-            .Only();
+        //Assert
+        result.ShouldNotHaveValidationErrorFor(x => x.UpdateData.LastName);
     }
+    #endregion
 
+    #region FIRST NAME RULES
     [Theory]
     [InlineData(null)]
     [InlineData("")]
-    public async Task Validate_WhenEmailNullOrEmpty_ShouldReturnNullFailure(string? email)
+    public async Task Validate_When_FirstNameIsNullOrEmpty_Should_HaveError(string? firstName)
     {
-        userUpdate!.Email = email;
+        // Arrange
+        command.UpdateData.FirstName = firstName;
+        translator.SetupTranslate(
+            UserErrorMessages.UserFirstNameRequired,
+            SharedResource.TranslateText
+        );
+        FakeRoleAndPermissionFound();
 
-        //act
-        var result = await validator.TestValidateAsync(userUpdate);
+        //Act
+        var result = await validator.TestValidateAsync(command);
 
-        //assert
-        var expectedState = Messenger
-            .Create<User>()
-            .Property(x => x.Email)
-            .Message(MessageType.Null)
-            .Negative()
-            .Build();
+        //Assert
+        var expected = new ErrorReason(
+            UserErrorMessages.UserFirstNameRequired,
+            SharedResource.TranslateText
+        );
         result
-            .ShouldHaveValidationErrorFor(x => x.Email)
-            .WithCustomState(expectedState, new MessageResultComparer())
-            .Only();
-    }
-
-    [Theory]
-    [InlineData("admin@gmail")]
-    [InlineData("admingmail.com")]
-    [InlineData("@gmail.com")]
-    public async Task CreateUser_WhenEmailInvalidFormat_ShouldReturnInvalidFailure(string email)
-    {
-        userUpdate!.Email = email;
-
-        //act
-        var result = await validator.TestValidateAsync(userUpdate);
-
-        //assert
-        var expectedState = Messenger
-            .Create<User>()
-            .Property(x => x.Email)
-            .Message(MessageType.Valid)
-            .Negative()
-            .Build();
-        result
-            .ShouldHaveValidationErrorFor(x => x.Email)
-            .WithCustomState(expectedState, new MessageResultComparer())
+            .ShouldHaveValidationErrorFor(x => x.UpdateData.FirstName)
+            .WithCustomState(expected, new ErrorReasonComparer())
             .Only();
     }
 
     [Fact]
-    public async Task Validate_WhenEmailDuplicated_ShouldReturnExistFailure()
+    public async Task Validate_When_FirstNameTooLong_Should_HaveError()
     {
-        const string existedEmail = "admin@gmail.com";
-        userUpdate!.Email = existedEmail;
-        var expectedState = Messenger
-            .Create<User>()
-            .Property(x => x.Email)
-            .Message(MessageType.Existence)
-            .Build();
+        //Arrange
+        command.UpdateData.FirstName = new string('X', 300);
+        translator.SetupTranslate(
+            UserErrorMessages.UserFirstNameTooLong,
+            SharedResource.TranslateText
+        );
+        FakeRoleAndPermissionFound();
 
-        mockValidator
-            .RuleFor(x => x.Email)
-            .MustAsync(
-                (email, cancellationToken) =>
-                    IsEmailAvailableAsync(email!, existedEmail, cancellationToken)
-            )
-            .When(_ => true)
-            .WithState(x => expectedState);
+        //Act
+        var result = await validator.TestValidateAsync(command);
 
-        //act
-        var result = await mockValidator.TestValidateAsync(userUpdate);
-
-        //assert
+        //Assert
+        var expected = new ErrorReason(
+            UserErrorMessages.UserFirstNameTooLong,
+            SharedResource.TranslateText
+        );
         result
-            .ShouldHaveValidationErrorFor(x => x.Email)
-            .WithCustomState(expectedState, new MessageResultComparer())
+            .ShouldHaveValidationErrorFor(x => x.UpdateData.FirstName)
+            .WithCustomState(expected, new ErrorReasonComparer())
             .Only();
     }
 
+    [Fact]
+    public async Task Validate_When_FirstNameIsValid_Should_Pass()
+    {
+        //Arrange
+        command.UpdateData.FirstName = "Minh";
+
+        //Act
+        var result = await validator.TestValidateAsync(command);
+
+        //Assert
+        result.ShouldNotHaveValidationErrorFor(x => x.UpdateData.FirstName);
+    }
+    #endregion
+
+    #region PHONE NUMBER RULES
+    [Fact]
+    public async Task Validate_When_PhoneNumberIsNullOrEmpty_Should_Pass()
+    {
+        //Arrange
+        command.UpdateData.PhoneNumber = null;
+
+        //Act
+        var result = await validator.TestValidateAsync(command);
+
+        //Assert
+        result.ShouldNotHaveValidationErrorFor(x => x.UpdateData.PhoneNumber);
+    }
+
     [Theory]
-    [InlineData("")]
     [InlineData(null)]
-    public async Task Validate_WhenPhoneNumberNullOrEmpty_ShouldReturNullFailure(string phoneNumber)
-    {
-        userUpdate.PhoneNumber = phoneNumber;
-
-        //act
-        var result = await validator.TestValidateAsync(userUpdate);
-
-        //assert
-        var expectedState = Messenger
-            .Create<User>()
-            .Property(x => x.PhoneNumber)
-            .Message(MessageType.Null)
-            .Negative()
-            .Build();
-        result
-            .ShouldHaveValidationErrorFor(x => x.PhoneNumber)
-            .WithCustomState(expectedState, new MessageResultComparer())
-            .Only();
-    }
-
-    [Theory]
+    [InlineData("")]
+    [InlineData("123")]
     [InlineData("123456")]
-    [InlineData("++12345678")]
-    public async Task Validate_WhenPhoneNumberInvalidFormat_ShouldReturnInvalidFailure(
-        string phoneNumber
+    [InlineData("1234567890123456")]
+    [InlineData("123 4567")]
+    [InlineData("123-4567")]
+    [InlineData("(123)4567")]
+    [InlineData("abc12345")]
+    [InlineData("+12345abcd")]
+    [InlineData("++1234567")]
+    [InlineData("123+4567")]
+    public async Task Validate_When_PhoneNumberInvalid_Should_HaveError(string? phoneNumber)
+    {
+        //Arrange
+        var expected = new ErrorReason(
+            UserErrorMessages.UserPhoneNumberInvalid,
+            SharedResource.TranslateText
+        );
+        translator.SetupTranslate(
+            UserErrorMessages.UserPhoneNumberInvalid,
+            SharedResource.TranslateText
+        );
+
+        inlineValidator
+            .RuleFor(x => x.UpdateData.PhoneNumber)
+            .Must(x => false)
+            .When(x => true)
+            .WithState(_ => expected);
+
+        command.UpdateData.PhoneNumber = phoneNumber;
+
+        //Act
+        var result = await inlineValidator.TestValidateAsync(command);
+
+        //Assert
+        result
+            .ShouldHaveValidationErrorFor(x => x.UpdateData.PhoneNumber)
+            .WithCustomState(expected, new ErrorReasonComparer())
+            .Only();
+    }
+
+    [Fact]
+    public async Task Validate_When_PhoneNumberIsValid_Should_Pass()
+    {
+        // Arrange
+        inlineValidator
+            .RuleFor(x => x.UpdateData.PhoneNumber)
+            .Must(x => true)
+            .When(x => !string.IsNullOrEmpty(x.UpdateData.PhoneNumber));
+
+        command.UpdateData.PhoneNumber = "0968123456";
+
+        // Act
+        var result = await inlineValidator.TestValidateAsync(command);
+
+        // Assert
+        result.ShouldNotHaveValidationErrorFor(x => x.UpdateData.PhoneNumber);
+    }
+    #endregion
+
+    #region Email rule
+    [Theory]
+    [InlineData(null)]
+    [InlineData("")]
+    public async Task Validate_When_EmailIsNullOrEmpty_Should_HaveError(string? email)
+    {
+        // Arrange
+        command.UpdateData.Email = email;
+        translator.SetupTranslate(
+            UserErrorMessages.UserEmailRequired,
+            SharedResource.TranslateText
+        );
+        FakeRoleAndPermissionFound();
+
+        // Act
+        var result = await validator.TestValidateAsync(command);
+
+        // Assert
+        var expected = new ErrorReason(
+            UserErrorMessages.UserEmailRequired,
+            SharedResource.TranslateText
+        );
+
+        result
+            .ShouldHaveValidationErrorFor(x => x.UpdateData.Email)
+            .WithCustomState(expected, new ErrorReasonComparer())
+            .Only();
+    }
+
+    [Theory]
+    [InlineData("abc")]
+    [InlineData("user@")]
+    [InlineData("@domain.com")]
+    [InlineData("user@domain")]
+    [InlineData("user@@mail.com")]
+    public async Task Validate_When_EmailInvalid_Should_HaveError(string email)
+    {
+        // Arrange
+        command.UpdateData.Email = email;
+        translator.SetupTranslate(UserErrorMessages.UserEmailInvalid, SharedResource.TranslateText);
+        FakeRoleAndPermissionFound();
+
+        // Act
+        var result = await validator.TestValidateAsync(command);
+
+        // Assert
+        var expected = new ErrorReason(
+            UserErrorMessages.UserEmailInvalid,
+            SharedResource.TranslateText
+        );
+
+        result
+            .ShouldHaveValidationErrorFor(x => x.UpdateData.Email)
+            .WithCustomState(expected, new ErrorReasonComparer())
+            .Only();
+    }
+
+    [Fact]
+    public async Task Validate_When_EmailAlreadyExists_Should_HaveError()
+    {
+        // Arrange
+        inlineValidator
+            .RuleFor(x => x.UpdateData.Email)
+            .MustAsync((email, _) => Task.FromResult(false))
+            .WithState(_ => new ErrorReason(
+                UserErrorMessages.UserEmailExistent,
+                SharedResource.TranslateText
+            ));
+
+        command.UpdateData.Email = "test@example.com";
+
+        // Act
+        var result = await inlineValidator.TestValidateAsync(command);
+
+        // Assert
+        var expected = new ErrorReason(
+            UserErrorMessages.UserEmailExistent,
+            SharedResource.TranslateText
+        );
+
+        result
+            .ShouldHaveValidationErrorFor(x => x.UpdateData.Email)
+            .WithCustomState(expected, new ErrorReasonComparer())
+            .Only();
+    }
+
+    [Fact]
+    public async Task Validate_When_EmailUnique_Should_Pass()
+    {
+        // Arrange
+        inlineValidator
+            .RuleFor(x => x.UpdateData.Email)
+            .MustAsync((email, _) => Task.FromResult(true))
+            .When(_ => true);
+
+        command.UpdateData.Email = "unique@example.com";
+
+        // Act
+        var result = await inlineValidator.TestValidateAsync(command);
+
+        // Assert
+        result.ShouldNotHaveValidationErrorFor(x => x.UpdateData.Email);
+    }
+
+    [Fact]
+    public async Task Validate_When_EmailFormatValid_Should_Pass()
+    {
+        // Arrange
+        command.UpdateData.Email = "valid.user@example.com";
+
+        // Act
+        var result = await validator.TestValidateAsync(command);
+
+        // Assert
+        result.ShouldNotHaveValidationErrorFor(x => x.UpdateData.Email);
+    }
+    #endregion
+
+    #region STATUS RULES
+    [Theory]
+    [InlineData(4)]
+    [InlineData(3)]
+    public async Task Validate_When_StatusNotInEnum_Should_HaveError(int status)
+    {
+        // Arrange
+        command.UpdateData.Status = (UserStatus)status;
+        translator.SetupTranslate(
+            UserErrorMessages.UserStatusNotInEnum,
+            SharedResource.TranslateText
+        );
+        FakeRoleAndPermissionFound();
+
+        // Act
+        var result = await validator.TestValidateAsync(command);
+
+        // Assert
+        var expected = new ErrorReason(
+            UserErrorMessages.UserStatusNotInEnum,
+            SharedResource.TranslateText
+        );
+
+        result
+            .ShouldHaveValidationErrorFor(x => x.UpdateData.Status)
+            .WithCustomState(expected, new ErrorReasonComparer())
+            .Only();
+    }
+
+    [Fact]
+    public async Task Validate_When_StatusIsValidEnum_Should_Pass()
+    {
+        // Arrange
+        command.UpdateData.Status = UserStatus.Active;
+
+        // Act
+        var result = await validator.TestValidateAsync(command);
+
+        // Assert
+        result.ShouldNotHaveValidationErrorFor(x => x.UpdateData.Status);
+    }
+    #endregion
+
+    #region ROLES RULES
+    [Theory]
+    [InlineData(null)]
+    public async Task Validate_When_RolesNullOrEmpty_Should_HaveError(List<Ulid>? roles)
+    {
+        // Arrange
+        command.UpdateData.Roles = roles;
+        translator.SetupTranslate(
+            UserErrorMessages.UserRolesRequired,
+            SharedResource.TranslateText
+        );
+        permissionRepo
+            .Setup(r =>
+                r.CountAsync(
+                    It.IsAny<Expression<Func<Permission, bool>>>(),
+                    It.IsAny<CancellationToken>()
+                )
+            )
+            .ReturnsAsync(command.UpdateData.Permissions!.Count);
+
+        // Act
+        var result = await validator.TestValidateAsync(command);
+
+        // Assert
+        var expected = new ErrorReason(
+            UserErrorMessages.UserRolesRequired,
+            SharedResource.TranslateText
+        );
+
+        result
+            .ShouldHaveValidationErrorFor(x => x.UpdateData.Roles)
+            .WithCustomState(expected, new ErrorReasonComparer())
+            .Only();
+    }
+
+    [Fact]
+    public async Task Validate_When_RolesNotUnique_Should_HaveError()
+    {
+        // Arrange
+        Ulid id = Ulid.NewUlid();
+        command.UpdateData.Roles = [id, id];
+
+        translator.SetupTranslate(
+            UserErrorMessages.UserRolesNotUnique,
+            SharedResource.TranslateText
+        );
+        permissionRepo
+            .Setup(r =>
+                r.CountAsync(
+                    It.IsAny<Expression<Func<Permission, bool>>>(),
+                    It.IsAny<CancellationToken>()
+                )
+            )
+            .ReturnsAsync(command.UpdateData.Permissions!.Count);
+
+        // Act
+        var result = await validator.TestValidateAsync(command);
+
+        // Assert
+        var expected = new ErrorReason(
+            UserErrorMessages.UserRolesNotUnique,
+            SharedResource.TranslateText
+        );
+
+        result
+            .ShouldHaveValidationErrorFor(x => x.UpdateData.Roles)
+            .WithCustomState(expected, new ErrorReasonComparer())
+            .Only();
+    }
+
+    [Fact]
+    public async Task Validate_When_RolesNotFoundInDb_Should_HaveError()
+    {
+        // Arrange
+        var expected = new ErrorReason(
+            UserErrorMessages.UserRolesNotFound,
+            SharedResource.TranslateText
+        );
+        translator.SetupTranslate(
+            UserErrorMessages.UserRolesNotFound,
+            SharedResource.TranslateText
+        );
+
+        inlineValidator
+            .RuleFor(x => x.UpdateData.Roles)
+            .MustAsync((ids, _) => Task.FromResult(false))
+            .When(_ => true)
+            .WithState(_ => expected);
+
+        command.UpdateData.Roles = [Ulid.NewUlid()];
+
+        // Act
+        var result = await inlineValidator.TestValidateAsync(command);
+
+        // Assert
+        result
+            .ShouldHaveValidationErrorFor(x => x.UpdateData.Roles)
+            .WithCustomState(expected, new ErrorReasonComparer())
+            .Only();
+    }
+
+    [Fact]
+    public async Task Validate_When_RolesValid_Should_Pass()
+    {
+        // Arrange
+        inlineValidator
+            .RuleFor(x => x.UpdateData.Roles)
+            .MustAsync((ids, _) => Task.FromResult(true))
+            .When(_ => true);
+
+        command.UpdateData.Roles = [Ulid.NewUlid()];
+
+        // Act
+        var result = await inlineValidator.TestValidateAsync(command);
+
+        // Assert
+        result.ShouldNotHaveValidationErrorFor(x => x.UpdateData.Roles);
+    }
+    #endregion
+
+    #region PERMISSIONS RULES
+    [Theory]
+    [InlineData(null)]
+    public async Task Validate_When_PermissionsIsNullOrEmpty_Should_HaveError(
+        List<Ulid>? permissionIds
     )
     {
-        userUpdate.PhoneNumber = phoneNumber;
+        // Arrange
+        command.UpdateData.Permissions = permissionIds;
 
-        //act
-        var result = await validator.TestValidateAsync(userUpdate);
+        // Act
+        var result = await validator.TestValidateAsync(command);
 
-        //assert
-        var expectedState = Messenger
-            .Create<User>()
-            .Property(x => x.PhoneNumber)
-            .Message(MessageType.Valid)
-            .Negative()
-            .Build();
-
-        result
-            .ShouldHaveValidationErrorFor(x => x.PhoneNumber)
-            .WithCustomState(expectedState, new MessageResultComparer())
-            .Only();
+        // Assert
+        result.ShouldNotHaveValidationErrorFor(x => x.UpdateData.Permissions);
     }
 
     [Fact]
-    public async Task Validate_WhenProvinceEmpty_ShouldReturnNullFailure()
+    public async Task Validate_When_PermissionsNotUnique_Should_HaveError()
     {
-        userUpdate!.ProvinceId = Ulid.Empty;
+        // Arrange
+        Ulid id = Ulid.NewUlid();
+        command.UpdateData.Permissions = [id, id];
 
-        //act
-        var result = await validator.TestValidateAsync(userUpdate);
-
-        //assert
-        var expectedState = Messenger
-            .Create<User>()
-            .Property(nameof(UserUpdateRequest.ProvinceId))
-            .Message(MessageType.Null)
-            .Negative()
-            .Build();
-        result
-            .ShouldHaveValidationErrorFor(x => x.ProvinceId)
-            .WithCustomState(expectedState, new MessageResultComparer())
-            .Only();
-    }
-
-    [Fact]
-    public async Task Validate_WhenDistrictEmpty_ShouldReturnNullFailure()
-    {
-        userUpdate!.DistrictId = Ulid.Empty;
-        //act
-        var result = await validator.TestValidateAsync(userUpdate);
-
-        //assert
-        var expectedState = Messenger
-            .Create<User>()
-            .Property(nameof(UserUpdateRequest.DistrictId))
-            .Message(MessageType.Null)
-            .Negative()
-            .Build();
-        result
-            .ShouldHaveValidationErrorFor(x => x.DistrictId)
-            .WithCustomState(expectedState, new MessageResultComparer())
-            .Only();
-    }
-
-    [Theory]
-    [InlineData(null)]
-    [InlineData("")]
-    public async Task Validate_WhenStreetNullOrEmpty_ShouldReturnNullFailure(string? street)
-    {
-        userUpdate!.Street = street;
-
-        //act
-        var result = await validator.TestValidateAsync(userUpdate);
-
-        //assert
-        var expectedState = Messenger
-            .Create<User>()
-            .Property(nameof(UserUpdateRequest.Street))
-            .Message(MessageType.Null)
-            .Negative()
-            .Build();
-        result
-            .ShouldHaveValidationErrorFor(x => x.Street)
-            .WithCustomState(expectedState, new MessageResultComparer())
-            .Only();
-    }
-
-    [Fact]
-    public async Task Validate_WhenRolesNull_ShouldReturnNullFailure()
-    {
-        userUpdate!.Roles = null;
-
-        //act
-        var result = await validator.TestValidateAsync(userUpdate);
-        //assert
-        var expectedState = Messenger
-            .Create<UserUpdateRequest>(nameof(User))
-            .Property(x => x.Roles!)
-            .Message(MessageType.Null)
-            .Negative()
-            .Build();
-        result
-            .ShouldHaveValidationErrorFor(x => x.Roles)
-            .WithCustomState(expectedState, new MessageResultComparer())
-            .Only();
-    }
-
-    [Theory]
-    [InlineData(null)]
-    [InlineData("")]
-    public async Task Validate_WhenClaimTypeisNullOrEmpty_ShouldReturnNullFailure(string type)
-    {
-        userUpdate!.UserClaims!.ForEach(x => x.ClaimType = type);
-
-        //act
-        var result = await validator.TestValidateAsync(userUpdate);
-        //assert
-        var expectedState = Messenger
-            .Create<UserClaim>(nameof(User.UserClaims))
-            .Property(x => x.ClaimType!)
-            .Message(MessageType.Null)
-            .Negative()
-            .Build();
-        result.ShouldHaveValidationErrorFor(
-            $"{nameof(User.UserClaims)}[0].{nameof(UserClaimPayload.ClaimType)}"
+        translator.SetupTranslate(
+            UserErrorMessages.UserPermissionsNotUnique,
+            SharedResource.TranslateText
         );
-    }
+        FakeRoleAndPermissionFound();
 
-    [Theory]
-    [InlineData(null)]
-    [InlineData("")]
-    public async Task Validate_WhenClaimValueNullOrEmpty_ShouldReturnNullFailure(string? value)
-    {
-        userUpdate!.UserClaims!.ForEach(x => x.ClaimValue = value);
+        // Act
+        var result = await validator.TestValidateAsync(command);
 
-        //act
-        var result = await validator.TestValidateAsync(userUpdate);
-        //assert
-        var expectedState = Messenger
-            .Create<UserClaim>(nameof(User.UserClaims))
-            .Property(x => x.ClaimValue!)
-            .Message(MessageType.Null)
-            .Negative()
-            .Build();
-        result.ShouldHaveValidationErrorFor(
-            $"{nameof(User.UserClaims)}[0].{nameof(UserClaimPayload.ClaimValue)}"
+        // Assert
+        var expected = new ErrorReason(
+            UserErrorMessages.UserPermissionsNotUnique,
+            SharedResource.TranslateText
         );
+        result
+            .ShouldHaveValidationErrorFor(x => x.UpdateData.Permissions)
+            .WithCustomState(expected, new ErrorReasonComparer())
+            .Only();
     }
 
-    private static async Task<bool> IsEmailAvailableAsync(
-        string email,
-        string existedEmail,
-        CancellationToken cancellationToken = default
-    )
+    [Fact]
+    public async Task Validate_When_PermissionsUnique_Should_Pass()
     {
-        return await Task.Run(() => email != existedEmail, cancellationToken);
+        // Arrange
+        Ulid id = Ulid.NewUlid();
+        command.UpdateData.Permissions = [id];
+        inlineValidator.RuleFor(x => x.UpdateData.Permissions).Must((x, ct) => true);
+
+        // Act
+        var result = await inlineValidator.TestValidateAsync(command);
+
+        // Assert
+
+        result.ShouldNotHaveValidationErrorFor(x => x.UpdateData.Permissions);
+    }
+
+    [Fact]
+    public async Task Validate_When_PermissionsNotFoundInDb_Should_HaveError()
+    {
+        // Arrange
+        command.UpdateData.Permissions = [Ulid.NewUlid()];
+        var expected = new ErrorReason(
+            UserErrorMessages.UserPermissionsNotFound,
+            SharedResource.TranslateText
+        );
+        translator.SetupTranslate(
+            UserErrorMessages.UserPermissionsNotFound,
+            SharedResource.TranslateText
+        );
+
+        inlineValidator
+            .RuleFor(x => x.UpdateData.Permissions)
+            .MustAsync((p, _) => Task.FromResult(false))
+            .WithState(_ => expected);
+
+        command.UpdateData.Permissions = [Ulid.NewUlid()];
+
+        // Act
+        var result = await inlineValidator.TestValidateAsync(command);
+
+        // Assert
+        result
+            .ShouldHaveValidationErrorFor(x => x.UpdateData.Permissions)
+            .WithCustomState(expected, new ErrorReasonComparer())
+            .Only();
+    }
+
+    [Fact]
+    public async Task Validate_When_PermissionsValid_Should_Pass()
+    {
+        // Arrange
+        inlineValidator
+            .RuleFor(x => x.UpdateData.Permissions)
+            .MustAsync((p, _) => Task.FromResult(true));
+
+        command.UpdateData.Permissions = [Ulid.NewUlid()];
+
+        // Act
+        var result = await inlineValidator.TestValidateAsync(command);
+
+        // Assert
+        result.ShouldNotHaveValidationErrorFor(x => x.UpdateData.Permissions);
+    }
+    #endregion
+
+    private void FakeRoleAndPermissionFound()
+    {
+        roleRepo
+            .Setup(r =>
+                r.CountAsync(
+                    It.IsAny<Expression<Func<Role, bool>>>(),
+                    It.IsAny<CancellationToken>()
+                )
+            )
+            .ReturnsAsync(command.UpdateData.Roles!.Count);
+        permissionRepo
+            .Setup(r =>
+                r.CountAsync(
+                    It.IsAny<Expression<Func<Permission, bool>>>(),
+                    It.IsAny<CancellationToken>()
+                )
+            )
+            .ReturnsAsync(command.UpdateData.Permissions!.Count);
+    }
+
+    private static UpdateUserCommand Default()
+    {
+        Faker<UserUpdateData> updateDataFaker = new Faker<UserUpdateData>()
+            .RuleFor(x => x.FirstName, f => f.Name.FirstName())
+            .RuleFor(x => x.LastName, f => f.Name.LastName())
+            .RuleFor(x => x.PhoneNumber, f => f.Phone.PhoneNumber("0#########"))
+            .RuleFor(x => x.Email, f => f.Internet.Email())
+            .RuleFor(x => x.DateOfBirth, f => f.Date.Past(30))
+            .RuleFor(x => x.Avatar, _ => null)
+            .RuleFor(x => x.Status, f => f.PickRandom<UserStatus>())
+            .RuleFor(x => x.Roles, f => [Ulid.NewUlid(), Ulid.NewUlid()])
+            .RuleFor(x => x.Permissions, f => [Ulid.NewUlid(), Ulid.NewUlid()]);
+
+        return new Faker<UpdateUserCommand>()
+            .RuleFor(x => x.UserId, f => Ulid.NewUlid().ToString())
+            .RuleFor(x => x.UpdateData, _ => updateDataFaker.Generate())
+            .Generate();
     }
 }

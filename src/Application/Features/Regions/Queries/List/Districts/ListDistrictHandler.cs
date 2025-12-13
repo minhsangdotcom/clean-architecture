@@ -1,17 +1,23 @@
+using Application.Common.Errors;
+using Application.Common.Interfaces.Services.Localization;
 using Application.Common.Interfaces.UnitOfWorks;
 using Application.Common.QueryStringProcessing;
-using Application.Features.Common.Projections.Regions;
-using Contracts.ApiWrapper;
+using Application.Contracts.ApiWrapper;
+using Application.Contracts.Constants;
+using Application.Contracts.Dtos.Responses;
+using Application.SharedFeatures.Projections.Regions;
 using Domain.Aggregates.Regions;
 using Domain.Aggregates.Regions.Specifications;
 using Mediator;
 using Microsoft.Extensions.Logging;
-using SharedKernel.Models;
 
 namespace Application.Features.Regions.Queries.List.Districts;
 
-public class ListDistrictHandler(IUnitOfWork unitOfWork, ILogger<ListDistrictHandler> logger)
-    : IRequestHandler<ListDistrictQuery, Result<PaginationResponse<DistrictProjection>>>
+public class ListDistrictHandler(
+    IEfUnitOfWork unitOfWork,
+    ILogger<ListDistrictHandler> logger,
+    IMessageTranslatorService translator
+) : IRequestHandler<ListDistrictQuery, Result<PaginationResponse<DistrictProjection>>>
 {
     public async ValueTask<Result<PaginationResponse<DistrictProjection>>> Handle(
         ListDistrictQuery query,
@@ -20,17 +26,28 @@ public class ListDistrictHandler(IUnitOfWork unitOfWork, ILogger<ListDistrictHan
     {
         var validationResult = query.ValidateQuery();
 
-        if (validationResult.Error != null)
+        if (!string.IsNullOrWhiteSpace(validationResult.Error))
         {
-            return Result<PaginationResponse<DistrictProjection>>.Failure(validationResult.Error);
+            return Result<PaginationResponse<DistrictProjection>>.Failure(
+                new BadRequestError(
+                    TitleMessage.VALIDATION_ERROR,
+                    new(validationResult.Error, translator.Translate(validationResult.Error))
+                )
+            );
         }
 
         var validationFilterResult = query.ValidateFilter<ListDistrictQuery, District>(logger);
 
-        if (validationFilterResult.Error != null)
+        if (!string.IsNullOrWhiteSpace(validationFilterResult.Error))
         {
             return Result<PaginationResponse<DistrictProjection>>.Failure(
-                validationFilterResult.Error
+                new BadRequestError(
+                    TitleMessage.VALIDATION_ERROR,
+                    new(
+                        validationFilterResult.Error,
+                        translator.Translate(validationFilterResult.Error)
+                    )
+                )
             );
         }
         var response = await unitOfWork

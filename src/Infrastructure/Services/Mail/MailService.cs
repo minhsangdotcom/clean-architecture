@@ -1,5 +1,5 @@
 using Application.Common.Interfaces.Services.Mail;
-using Contracts.Dtos.Requests;
+using Application.Contracts.Dtos.Requests;
 using MailKit.Net.Smtp;
 using MailKit.Security;
 using Microsoft.Extensions.Logging;

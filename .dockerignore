@@ -1,0 +1,68 @@
+# --- OS / Editor junk ---
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*.bak
+
+# --- Git ---
+.git
+.gitignore
+.gitattributes
+.gitmodules
+
+# --- Docker ---
+.dockerignore
+docker-compose*.yml
+docker-compose*.yaml
+
+# --- Logs ---
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# --- Build output ---
+bin/
+obj/
+out/
+dist/
+build/
+
+# --- Dependency directories ---
+node_modules/
+packages/
+*.nuget/
+
+# --- Environment / config files ---
+*.env
+.env.*
+secrets.json
+appsettings.Development.json
+appsettings.Local.json
+
+# --- IDE / Tooling ---
+.vscode/
+.vs/
+.idea/
+*.user
+*.suo
+
+# --- Tests ---
+coverage/
+coverage-final.json
+TestResults/
+
+# --- Temporary files ---
+tmp/
+temp/
+*.tmp
+
+# --- Python / misc ---
+__pycache__/
+*.pyc
+
+# --- Images / large assets (optional) ---
+*.psd
+*.ai

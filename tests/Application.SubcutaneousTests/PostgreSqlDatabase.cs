@@ -1,4 +1,5 @@
 using System.Data.Common;
+using Ardalis.GuardClauses;
 using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -11,37 +12,45 @@ public class PostgreSqlDatabase : IDatabase
 {
     private NpgsqlConnection? connection;
 
-    private readonly string? connectionString;
+    private string? connectionString;
     private Respawner? respawner;
 
-    private readonly string? environmentName;
+    private string? environmentName;
 
-    public PostgreSqlDatabase()
+    public DbConnection Connection => connection!;
+
+    public string ConnectionString => connectionString!;
+
+    public string EnvironmentVariable => GetEnvironment(environmentName!);
+
+    public IConfiguration GetConfiguration()
+    {
+        string path = Directory.GetCurrentDirectory();
+        return new ConfigurationBuilder()
+            .SetBasePath(path)
+            .AddJsonFile(
+                $"appsettings.{GetEnvironment(environmentName!)}.json",
+                optional: false,
+                reloadOnChange: true
+            )
+            .Build();
+    }
+
+    public async Task InitializeAsync()
     {
         environmentName =
             Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Development";
 
-        var configuration = new ConfigurationBuilder()
-            .SetBasePath(AppContext.BaseDirectory)
-            .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
-            .AddJsonFile(
-                $"appsettings.Testing-{environmentName}.json",
-                optional: true,
-                reloadOnChange: true
-            )
-            .Build();
-
+        IConfiguration configuration = GetConfiguration();
         connectionString = configuration["DatabaseSettings:DatabaseConnection"];
-    }
+        Guard.Against.Null(connectionString);
 
-    public async Task InitialiseAsync()
-    {
         connection = new NpgsqlConnection(connectionString);
 
         var options = new DbContextOptionsBuilder<TheDbContext>()
             .UseNpgsql(connectionString)
             .Options;
-        var context = new TheDbContext(options);
+        TheDbContext context = new(options);
         context.Database.EnsureDeleted();
         context.Database.Migrate();
 
@@ -52,17 +61,12 @@ public class PostgreSqlDatabase : IDatabase
             {
                 DbAdapter = DbAdapter.Postgres,
                 // don't remove these tables
-                TablesToIgnore = ["__EFMigrationsHistory", "province", "district", "commune"],
+                TablesToIgnore = ["__EFMigrationsHistory"],
+                SchemasToInclude = ["public"],
             }
         );
         await connection.CloseAsync();
     }
-
-    public DbConnection GetConnection() => connection!;
-
-    public string GetConnectionString() => connectionString!;
-
-    public string GetEnvironmentVariable() => $"Testing-{environmentName}"!;
 
     public async Task ResetAsync()
     {
@@ -81,5 +85,14 @@ public class PostgreSqlDatabase : IDatabase
             await connection.CloseAsync();
             await connection.DisposeAsync();
         }
+    }
+
+    private static string GetEnvironment(string env)
+    {
+        if (env == "Development")
+        {
+            return "Test";
+        }
+        return env;
     }
 }

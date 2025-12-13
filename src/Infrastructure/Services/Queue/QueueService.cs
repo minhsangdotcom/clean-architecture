@@ -1,8 +1,7 @@
 using Application.Common.Interfaces.Services.Queue;
-using Contracts.Dtos.Requests;
+using Application.Contracts.Dtos.Requests;
+using DotNetCoreExtension.Extensions;
 using Microsoft.Extensions.Options;
-using NRedisStack;
-using SharedKernel.Extensions;
 using StackExchange.Redis;
 
 namespace Infrastructure.Services.Queue;
@@ -12,29 +11,7 @@ public class QueueService(IDatabase database, IOptions<QueueSettings> options) :
     private readonly QueueSettings queueSettings = options.Value;
 
     public long Size => size;
-
     private long size;
-
-    /// <summary>
-    /// Get queue from redis
-    /// </summary>
-    /// <typeparam name="TResponse">Map to the response</typeparam>
-    /// <typeparam name="TRequest">Type of the input that putting in queue before, treat as part of queue name</typeparam>
-    /// <returns></returns>
-    public async Task<TResponse?> DequeueAsync<TResponse, TRequest>()
-    {
-        string queueName = $"{queueSettings.OriginQueueName}:{typeof(TRequest).Name}";
-        Tuple<RedisKey, RedisValue>? value = await database.BRPopAsync([queueName], 1);
-
-        if (value == null)
-        {
-            return default;
-        }
-
-        var result = SerializerExtension.Deserialize<TResponse>(value.Item2.ToString());
-        size = Length();
-        return result.Object!;
-    }
 
     /// <summary>
     /// Add request in queue
@@ -42,19 +19,44 @@ public class QueueService(IDatabase database, IOptions<QueueSettings> options) :
     /// <typeparam name="T"> type of the request, treat as part of queue name</typeparam>
     /// <param name="payload"></param>
     /// <returns></returns>
-    public async Task<bool> EnqueueAsync<T>(T payload)
+    public async Task<bool> EnqueueAsync<T>(QueueRequest<T> request)
     {
-        QueueRequest<T> request = new() { PayloadId = Guid.NewGuid(), Payload = payload };
+        string queueName = $"{queueSettings.OriginQueueName}:{typeof(T).FullName}";
+        request.PayloadId = Guid.NewGuid();
+
         var result = SerializerExtension.Serialize(request);
-        string queueName = $"{queueSettings.OriginQueueName}:{typeof(T).Name}";
         long length = await database.ListLeftPushAsync(queueName, result.StringJson);
         size = length;
 
         return length > 0;
     }
 
-    public long Length() => database.ListLength(queueSettings.OriginQueueName);
+    /// <summary>
+    /// Dequeue request from redis
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    /// <returns></returns>
+    public async Task<QueueRequest<T>> DequeueAsync<T>()
+    {
+        string queueName = $"{queueSettings.OriginQueueName}:{typeof(T).FullName}";
+        RedisValue value = await database.ListRightPopAsync(queueName);
 
+        if (value.IsNullOrEmpty)
+        {
+            return new QueueRequest<T>();
+        }
+
+        var result = SerializerExtension.Deserialize<QueueRequest<T>>(value.ToString());
+        size = Length(queueName);
+        return result.Object!;
+    }
+
+    public long Length(string name) => database.ListLength(name);
+
+    /// <summary>
+    /// health check
+    /// </summary>
+    /// <returns></returns>
     public async Task<bool> PingAsync()
     {
         try

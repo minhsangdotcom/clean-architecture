@@ -1,4 +1,4 @@
-using Contracts.ApiWrapper;
+using Application.Contracts.ApiWrapper;
 using Mediator;
 
 namespace Application.Features.Users.Commands.Token;

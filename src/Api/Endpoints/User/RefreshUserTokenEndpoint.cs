@@ -1,12 +1,11 @@
 using Api.common.EndpointConfigurations;
 using Api.common.Results;
 using Api.common.Routers;
+using Application.Contracts.ApiWrapper;
 using Application.Features.Users.Commands.Token;
-using Contracts.ApiWrapper;
 using Mediator;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.OpenApi.Models;
 
 namespace Api.Endpoints.User;
 
@@ -17,12 +16,16 @@ public class RefreshUserTokenEndpoint() : IEndpoint
     public void MapEndpoint(IEndpointRouteBuilder app)
     {
         app.MapPost(Router.UserRoute.RefreshToken, HandleAsync)
-            .WithOpenApi(operation => new OpenApiOperation(operation)
-            {
-                Summary = "Refresh Access Token 🔄 🔐",
-                Description = "obtains a new pair of token by providing a valid refresh token.",
-                Tags = [new OpenApiTag() { Name = Router.UserRoute.Tags }],
-            });
+            .WithTags(Router.UserRoute.Tags)
+            .AddOpenApiOperationTransformer(
+                (operation, context, _) =>
+                {
+                    operation.Summary = "Refresh Access Token 🔄 🔐";
+                    operation.Description =
+                        "obtains a new pair of token by providing a valid refresh token.";
+                    return Task.CompletedTask;
+                }
+            );
     }
 
     private async Task<

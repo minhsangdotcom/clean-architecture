@@ -1,4 +1,4 @@
-using Contracts.Dtos.Requests;
+using Application.Contracts.Dtos.Requests;
 using RazorLight;
 
 namespace Infrastructure.Services.Mail;

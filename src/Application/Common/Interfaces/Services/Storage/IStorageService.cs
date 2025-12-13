@@ -1,5 +1,5 @@
-using Contracts.Dtos.Requests;
-using Contracts.Dtos.Responses;
+using Application.Contracts.Dtos.Requests;
+using Application.Contracts.Dtos.Responses;
 
 namespace Application.Common.Interfaces.Services.Storage;
 
@@ -15,9 +15,9 @@ public interface IStorageService
 
     Task<StorageResponse> DeleteAsync(string key);
 
-    string? GetFullPath(string key);
+    string GetFullPath(string key);
 
-    string? GetPublicPath(string originalPath);
+    string GetPublicPath(string originalPath);
 
     string UniqueFileName(string fileName);
 }

@@ -1,13 +1,12 @@
 using Api.common.EndpointConfigurations;
 using Api.common.Results;
 using Api.common.Routers;
+using Application.Contracts.ApiWrapper;
 using Application.Features.Users.Queries.Detail;
-using Contracts.ApiWrapper;
-using Infrastructure.Constants;
 using Mediator;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.OpenApi.Models;
+using static Application.Contracts.Permissions.PermissionNames;
 
 namespace Api.Endpoints.User;
 
@@ -19,14 +18,21 @@ public class GetUserDetailEndpoint : IEndpoint
     {
         app.MapGet(Router.UserRoute.GetUpdateDelete, HandleAsync)
             .WithName(Router.UserRoute.GetRouteName)
-            .WithOpenApi(operation => new OpenApiOperation(operation)
-            {
-                Summary = "Get user by ID 🧾",
-                Description = "Retrieves detailed information of a user based on their unique ID.",
-                Tags = [new OpenApiTag() { Name = Router.UserRoute.Tags }],
-            })
-            .RequireAuth(
-                permissions: Permission.Generate(PermissionAction.Detail, PermissionResource.User)
+            .WithTags(Router.UserRoute.Tags)
+            .AddOpenApiOperationTransformer(
+                (operation, context, _) =>
+                {
+                    operation.Summary = "Get user by ID 🧾";
+                    operation.Description =
+                        "Retrieves detailed information of a user based on their unique ID.";
+                    return Task.CompletedTask;
+                }
+            )
+            .MustHaveAuthorization(
+                permissions: PermissionGenerator.Generate(
+                    PermissionResource.User,
+                    PermissionAction.Detail
+                )
             );
     }
 
@@ -38,7 +44,7 @@ public class GetUserDetailEndpoint : IEndpoint
         CancellationToken cancellationToken = default
     )
     {
-        var command = new GetUserDetailQuery(Ulid.Parse(id));
+        var command = new GetUserDetailQuery(id);
         var result = await sender.Send(command, cancellationToken);
         return result.ToResult();
     }

@@ -1,39 +1,25 @@
-using Application.Common.Interfaces.Services;
-using Application.Common.Interfaces.Services.Identity;
-using Application.Features.Common.Validators.Users;
-using Domain.Aggregates.Users;
-using FluentValidation;
-using SharedKernel.Common.Messages;
+using Application.Common.Interfaces.Services.Accessors;
+using Application.Common.Interfaces.Services.Localization;
+using Application.Common.Interfaces.UnitOfWorks;
+using Application.Common.Validators;
+using Application.SharedFeatures.Validators.Users;
 
 namespace Application.Features.Users.Commands.Update;
 
-public class UpdateUserCommandValidator : AbstractValidator<UserUpdateRequest>
+public class UpdateUserCommandValidator(
+    IEfUnitOfWork unitOfWork,
+    IRequestContextProvider contextProvider,
+    IMessageTranslatorService translator
+) : FluentValidator<UpdateUserCommand>(contextProvider, translator)
 {
-    public UpdateUserCommandValidator(
-        IUserManagerService userManagerService,
-        IHttpContextAccessorService httpContextAccessorService,
-        ICurrentUser currentUser
+    protected sealed override void ApplyRules(
+        IRequestContextProvider contextProvider,
+        IMessageTranslatorService translator
     )
     {
-        Include(new UserValidator(userManagerService, httpContextAccessorService,currentUser)!);
-
-        RuleFor(x => x.Roles)
-            .NotEmpty()
-            .WithState(x =>
-                Messenger
-                    .Create<UserUpdateRequest>(nameof(User))
-                    .Property(x => x.Roles!)
-                    .Message(MessageType.Null)
-                    .Negative()
-                    .Build()
-            );
-
-        When(
-            x => x.UserClaims != null,
-            () =>
-            {
-                RuleForEach(x => x!.UserClaims).SetValidator(new UserClaimValidator());
-            }
-        );
+        RuleFor(x => x.UpdateData)
+            .SetValidator(new UserValidator(unitOfWork, contextProvider, translator));
     }
+
+    protected override void ApplyRules(IMessageTranslatorService translator) { }
 }

@@ -1,13 +1,12 @@
 using Api.common.EndpointConfigurations;
 using Api.common.Results;
 using Api.common.Routers;
+using Application.Contracts.ApiWrapper;
 using Application.Features.Users.Commands.Create;
-using Contracts.ApiWrapper;
-using Infrastructure.Constants;
 using Mediator;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.OpenApi.Models;
+using static Application.Contracts.Permissions.PermissionNames;
 
 namespace Api.Endpoints.User;
 
@@ -18,15 +17,22 @@ public class CreateUserEndpoint : IEndpoint
     public void MapEndpoint(IEndpointRouteBuilder app)
     {
         app.MapPost(Router.UserRoute.Users, HandleAsync)
-            .WithOpenApi(operation => new OpenApiOperation(operation)
-            {
-                Summary = "Create user 🧑",
-                Description = "Creates a new user and returns the created user details.",
-                Tags = [new OpenApiTag() { Name = Router.UserRoute.Tags }],
-            })
+            .WithTags(Router.UserRoute.Tags)
+            .AddOpenApiOperationTransformer(
+                (operation, context, _) =>
+                {
+                    operation.Summary = "Create user 🧑";
+                    operation.Description =
+                        "Creates a new user and returns the created user details.";
+                    return Task.CompletedTask;
+                }
+            )
             .WithRequestValidation<CreateUserCommand>()
-            .RequireAuth(
-                permissions: Permission.Generate(PermissionAction.Create, PermissionResource.User)
+            .MustHaveAuthorization(
+                permissions: PermissionGenerator.Generate(
+                    PermissionResource.User,
+                    PermissionAction.Create
+                )
             )
             .DisableAntiforgery();
     }

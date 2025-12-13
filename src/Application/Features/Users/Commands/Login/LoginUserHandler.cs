@@ -1,96 +1,107 @@
-using Application.Common.Constants;
+using Application.Common.ErrorCodes;
 using Application.Common.Errors;
-using Application.Common.Interfaces.Services;
+using Application.Common.Interfaces.Services.Accessors;
+using Application.Common.Interfaces.Services.Localization;
 using Application.Common.Interfaces.Services.Token;
 using Application.Common.Interfaces.UnitOfWorks;
-using Application.Features.Common.Mapping.Users;
-using Contracts.ApiWrapper;
+using Application.Contracts.ApiWrapper;
+using Application.Contracts.Constants;
+using Application.Contracts.Messages;
+using Application.SharedFeatures.Mapping.Users;
 using Domain.Aggregates.Users;
 using Domain.Aggregates.Users.Specifications;
+using DotNetCoreExtension.Extensions;
 using Mediator;
-using SharedKernel.Common.Messages;
 using SharedKernel.Constants;
-using SharedKernel.Extensions;
 using Wangkanai.Detection.Services;
 
 namespace Application.Features.Users.Commands.Login;
 
 public class LoginUserHandler(
-    IUnitOfWork unitOfWork,
+    IEfUnitOfWork unitOfWork,
     ITokenFactoryService tokenFactory,
     IDetectionService detectionService,
-    ICurrentUser currentUser
+    ICurrentUser currentUser,
+    IMessageTranslatorService translator
 ) : IRequestHandler<LoginUserCommand, Result<LoginUserResponse>>
 {
     public async ValueTask<Result<LoginUserResponse>> Handle(
-        LoginUserCommand request,
+        LoginUserCommand command,
         CancellationToken cancellationToken
     )
     {
         User? user = await unitOfWork
             .DynamicReadOnlyRepository<User>()
             .FindByConditionAsync(
-                new GetUserByUsernameSpecification(request.Username!),
+                new GetUserByIdentifierSpecification(command.Identifier!),
                 cancellationToken
             );
         if (user == null)
         {
+            string errorMessage = Messenger
+                .Create<User>()
+                .WithError(MessageErrorType.Found)
+                .Negative()
+                .GetFullMessage();
             return Result<LoginUserResponse>.Failure(
                 new NotFoundError(
                     TitleMessage.RESOURCE_NOT_FOUND,
-                    Messenger
-                        .Create<User>()
-                        .Message(MessageType.Found)
-                        .Negative()
-                        .VietnameseTranslation(TranslatableMessage.VI_USER_NOT_FOUND)
-                        .BuildMessage()
+                    new(
+                        UserErrorMessages.UserNotFound,
+                        translator.Translate(UserErrorMessages.UserNotFound)
+                    )
                 )
             );
         }
-        if (!Verify(request.Password, user.Password))
+        if (!Verify(command.Password, user.Password))
         {
+            string errorMessage = Messenger
+                .Create<User>()
+                .Property(x => x.Password)
+                .WithError(MessageErrorType.Correct)
+                .Negative()
+                .GetFullMessage();
             return Result<LoginUserResponse>.Failure(
                 new BadRequestError(
                     "Error has occurred with password",
-                    Messenger
-                        .Create<User>()
-                        .Property(x => x.Password)
-                        .Message(MessageType.Correct)
-                        .Negative()
-                        .BuildMessage()
+                    new(
+                        UserErrorMessages.UserPasswordIncorrect,
+                        translator.Translate(UserErrorMessages.UserPasswordIncorrect)
+                    )
                 )
             );
         }
 
         DateTime refreshExpireTime = tokenFactory.RefreshTokenExpiredTime;
         string familyId = StringExtension.GenerateRandomString(32);
+        string userAgent = detectionService.UserAgent.ToString();
 
-        var userAgent = detectionService.UserAgent.ToString();
+        UserRefreshToken userRefreshToken =
+            new()
+            {
+                ExpiredTime = refreshExpireTime,
+                UserId = user.Id,
+                FamilyId = familyId,
+                UserAgent = userAgent,
+                ClientIp = currentUser.ClientIp,
+            };
 
-        var userToken = new UserToken()
-        {
-            ExpiredTime = refreshExpireTime,
-            UserId = user.Id,
-            FamilyId = familyId,
-            UserAgent = userAgent,
-            ClientIp = currentUser.ClientIp,
-        };
-
-        var accessTokenExpiredTime = tokenFactory.AccessTokenExpiredTime;
+        DateTime accessTokenExpiredTime = tokenFactory.AccessTokenExpiredTime;
         string accessToken = tokenFactory.CreateToken(
             [new(ClaimTypes.Sub, user.Id.ToString())],
             accessTokenExpiredTime
         );
 
         string refreshToken = tokenFactory.CreateToken(
-            [new(ClaimTypes.TokenFamilyId, familyId), new(ClaimTypes.Sub, user.Id.ToString())],
-            refreshExpireTime
+            [new(ClaimTypes.TokenFamilyId, familyId), new(ClaimTypes.Sub, user.Id.ToString())]
         );
 
-        userToken.RefreshToken = refreshToken;
+        userRefreshToken.Token = refreshToken;
 
-        await unitOfWork.Repository<UserToken>().AddAsync(userToken, cancellationToken);
-        await unitOfWork.SaveAsync(cancellationToken);
+        await unitOfWork
+            .Repository<UserRefreshToken>()
+            .AddAsync(userRefreshToken, cancellationToken);
+        await unitOfWork.SaveChangesAsync(cancellationToken);
 
         return Result<LoginUserResponse>.Success(
             new()
@@ -99,7 +110,7 @@ public class LoginUserHandler(
                 RefreshToken = refreshToken,
                 AccessTokenExpiredIn = (long)
                     Math.Ceiling((accessTokenExpiredTime - DateTime.UtcNow).TotalSeconds),
-                TokenType = currentUser.AuthenticationScheme,
+                TokenType = AuthenticationSchemeDefinition.Bearer,
                 User = user.ToUserProjection(),
             }
         );

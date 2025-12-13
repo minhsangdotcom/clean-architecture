@@ -1,65 +1,67 @@
-using Application.Common.Constants;
+using Application.Common.ErrorCodes;
 using Application.Common.Errors;
-using Application.Common.Interfaces.Services;
-using Application.Common.Interfaces.UnitOfWorks;
-using Contracts.ApiWrapper;
+using Application.Common.Interfaces.Services.Accessors;
+using Application.Common.Interfaces.Services.Identity;
+using Application.Common.Interfaces.Services.Localization;
+using Application.Contracts.ApiWrapper;
+using Application.Contracts.Constants;
+using Application.Contracts.Messages;
 using Domain.Aggregates.Users;
-using Domain.Aggregates.Users.Specifications;
 using Mediator;
-using SharedKernel.Common.Messages;
 
 namespace Application.Features.Users.Commands.ChangePassword;
 
-public class ChangeUserPasswordHandler(IUnitOfWork unitOfWork, ICurrentUser currentUser)
-    : IRequestHandler<ChangeUserPasswordCommand, Result<string>>
+public class ChangeUserPasswordHandler(
+    IUserManager userManager,
+    ICurrentUser currentUser,
+    IMessageTranslatorService translator
+) : IRequestHandler<ChangeUserPasswordCommand, Result<string>>
 {
     public async ValueTask<Result<string>> Handle(
         ChangeUserPasswordCommand request,
         CancellationToken cancellationToken
     )
     {
-        Ulid? userId = currentUser.Id;
-        User? user = await unitOfWork
-            .DynamicReadOnlyRepository<User>()
-            .FindByConditionAsync(
-                new GetUserByIdWithoutIncludeSpecification(userId ?? Ulid.Empty),
-                cancellationToken
-            );
+        User? user = await userManager.FindByIdAsync(
+            currentUser.Id!.Value,
+            false,
+            cancellationToken
+        );
 
         if (user == null)
         {
             return Result<string>.Failure(
                 new NotFoundError(
-                    "The TitleMessage.RESOURCE_NOT_FOUND",
-                    Messenger
-                        .Create<User>()
-                        .Message(MessageType.Found)
-                        .Negative()
-                        .VietnameseTranslation(TranslatableMessage.VI_USER_NOT_FOUND)
-                        .Build()
+                    TitleMessage.RESOURCE_NOT_FOUND,
+                    new(
+                        UserErrorMessages.UserNotFound,
+                        translator.Translate(UserErrorMessages.UserNotFound)
+                    )
                 )
             );
         }
 
         if (!Verify(request.OldPassword, user.Password))
         {
+            string errorMessage = Messenger
+                .Create<ChangeUserPasswordCommand>(nameof(User))
+                .Property(x => x.OldPassword!)
+                .WithError(MessageErrorType.Correct)
+                .Negative()
+                .GetFullMessage();
             return Result<string>.Failure(
                 new BadRequestError(
-                    "Error has occured with password",
-                    Messenger
-                        .Create<ChangeUserPasswordCommand>(nameof(User))
-                        .Property(x => x.OldPassword!)
-                        .Message(MessageType.Correct)
-                        .Negative()
-                        .Build()
+                    "Error has occurred with password",
+                    new(
+                        UserErrorMessages.UserOldPasswordIncorrect,
+                        translator.Translate(UserErrorMessages.UserOldPasswordIncorrect)
+                    )
                 )
             );
         }
 
-        user.SetPassword(HashPassword(request.NewPassword));
-
-        await unitOfWork.Repository<User>().UpdateAsync(user);
-        await unitOfWork.SaveAsync(cancellationToken);
+        user.ChangePassword(HashPassword(request.NewPassword));
+        await userManager.UpdateAsync(user, cancellationToken);
 
         return Result<string>.Success();
     }

@@ -1,14 +1,15 @@
-using Application.Common.Constants;
+using Application.Common.ErrorCodes;
 using Application.Common.Errors;
 using Application.Common.Interfaces.Services.Identity;
-using Contracts.ApiWrapper;
+using Application.Common.Interfaces.Services.Localization;
+using Application.Contracts.ApiWrapper;
+using Application.Contracts.Constants;
 using Domain.Aggregates.Roles;
 using Mediator;
-using SharedKernel.Common.Messages;
 
 namespace Application.Features.Roles.Queries.Detail;
 
-public class GetRoleDetailHandler(IRoleManagerService roleManagerService)
+public class GetRoleDetailHandler(IRoleManager manager, IMessageTranslatorService translator)
     : IRequestHandler<GetRoleDetailQuery, Result<RoleDetailResponse>>
 {
     public async ValueTask<Result<RoleDetailResponse>> Handle(
@@ -16,19 +17,19 @@ public class GetRoleDetailHandler(IRoleManagerService roleManagerService)
         CancellationToken cancellationToken
     )
     {
-        Role? role = await roleManagerService.FindByIdAsync(query.Id);
-
+        Role? role = await manager.FindByIdAsync(
+            Ulid.Parse(query.Id),
+            cancellationToken: cancellationToken
+        );
         if (role == null)
         {
             return Result<RoleDetailResponse>.Failure(
                 new NotFoundError(
                     TitleMessage.RESOURCE_NOT_FOUND,
-                    Messenger
-                        .Create<Role>()
-                        .Message(MessageType.Found)
-                        .Negative()
-                        .VietnameseTranslation(TranslatableMessage.VI_ROLE_NOT_FOUND)
-                        .Build()
+                    new(
+                        RoleErrorMessages.RoleNotFound,
+                        translator.Translate(RoleErrorMessages.RoleNotFound)
+                    )
                 )
             );
         }

@@ -19,7 +19,7 @@ public class DesignTimeDbContextFactory : IDesignTimeDbContextFactory<TheDbConte
         string? connectionString = configuration.GetValue<string>(
             "DatabaseSettings:DatabaseConnection"
         );
-        var builder = new DbContextOptionsBuilder<TheDbContext>();
+        DbContextOptionsBuilder<TheDbContext> builder = new();
         builder.UseNpgsql(connectionString);
         return new TheDbContext(builder.Options);
     }

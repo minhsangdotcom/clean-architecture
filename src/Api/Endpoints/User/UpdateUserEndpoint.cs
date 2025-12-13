@@ -1,13 +1,12 @@
 using Api.common.EndpointConfigurations;
 using Api.common.Results;
 using Api.common.Routers;
+using Application.Contracts.ApiWrapper;
 using Application.Features.Users.Commands.Update;
-using Contracts.ApiWrapper;
-using Infrastructure.Constants;
 using Mediator;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.OpenApi.Models;
+using static Application.Contracts.Permissions.PermissionNames;
 
 namespace Api.Endpoints.User;
 
@@ -18,22 +17,29 @@ public class UpdateUserEndpoint : IEndpoint
     public void MapEndpoint(IEndpointRouteBuilder app)
     {
         app.MapPut(Router.UserRoute.GetUpdateDelete, HandleAsync)
-            .WithOpenApi(operation => new OpenApiOperation(operation)
-            {
-                Summary = " Update user ✏️ 🧑‍💻",
-                Description = "Updates the information of an existing user identified by their ID.",
-                Tags = [new OpenApiTag() { Name = Router.UserRoute.Tags }],
-            })
-            .WithRequestValidation<UserUpdateRequest>()
-            .RequireAuth(
-                permissions: Permission.Generate(PermissionAction.Update, PermissionResource.User)
+            .WithTags(Router.UserRoute.Tags)
+            .AddOpenApiOperationTransformer(
+                (operation, context, _) =>
+                {
+                    operation.Summary = " Update user ✏️ 🧑‍💻";
+                    operation.Description =
+                        "Updates the information of an existing user identified by their ID.";
+                    return Task.CompletedTask;
+                }
+            )
+            .WithRequestValidation<UserUpdateData>()
+            .MustHaveAuthorization(
+                permissions: PermissionGenerator.Generate(
+                    PermissionResource.User,
+                    PermissionAction.Update
+                )
             )
             .DisableAntiforgery();
     }
 
     private async Task<Results<Ok<ApiResponse<UpdateUserResponse>>, ProblemHttpResult>> HandleAsync(
         [FromRoute] string id,
-        [FromForm] UserUpdateRequest request,
+        [FromForm] UserUpdateData request,
         [FromServices] ISender sender,
         CancellationToken cancellationToken = default
     )

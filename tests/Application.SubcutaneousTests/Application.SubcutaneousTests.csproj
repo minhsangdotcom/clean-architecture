@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
 
@@ -11,47 +11,50 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="AutoFixture" Version="4.18.1" />
-    <PackageReference Include="coverlet.collector" Version="6.0.0" />
-    <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="8.0.10" />
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.8.0" />
+    <PackageReference Include="coverlet.collector" Version="6.0.4" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="10.0.0" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.0.1" />
     <PackageReference Include="Moq" Version="4.20.72" />
-    <PackageReference Include="Respawn" Version="6.2.1" />
+    <PackageReference Include="Respawn" Version="7.0.0" />
     <PackageReference Include="Shouldly" Version="4.3.0" />
-    <PackageReference Include="xunit" Version="2.5.3" />
-    <PackageReference Include="xunit.runner.visualstudio" Version="2.5.3" />
+    <PackageReference Include="xunit" Version="2.9.3" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="3.1.5" />
   </ItemGroup>
 
   <ItemGroup>
     <Using Include="Xunit" />
     <ProjectReference Include="..\..\src\Api\Api.csproj" />
 
-    <None Include="..\..\src\Api\Resources\Translations\Message.en.resx">
-      <Link>Resources\Translations\Message.en.resx</Link>
+    <None Include="wwwroot\Templates\ForgotPassword.cshtml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="..\..\src\Api\Resources\Translations\Message.vi.resx">
-      <Link>Resources\Translations\Message.vi.resx</Link>
+
+    <None Include="Files/avatar_cute_2.jpg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="..\..\src\Api\wwwroot\Templates\ForgotPassword.cshtml">
-      <Link>Templates\ForgotPassword.cshtml</Link>
+
+    <None Include="..\..\src\Api\Resources\Messages\Messages.en.json">
+      <Link>\Resources\Messages\Messages.en.json</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="..\..\src\Infrastructure\Data\Seeds\Provinces.json">
-      <Link>Data\Seeds\Provinces.json</Link>
+    <None Include="..\..\src\Api\Resources\Messages\Messages.vi.json">
+      <Link>\Resources\Messages\Messages.vi.json</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="..\..\src\Infrastructure\Data\Seeds\Districts.json">
-      <Link>Data\Seeds\Districts.json</Link>
+
+    <None Include="..\..\src\Api\Resources\Permissions\Permissions.en.json">
+      <Link>\Resources\Permissions\Permissions.en.json</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="..\..\src\Infrastructure\Data\Seeds\Wards.json">
-      <Link>Data\Seeds\Wards.json</Link>
+    <None Include="..\..\src\Api\Resources\Permissions\Permissions.vi.json">
+      <Link>\Resources\Permissions\Permissions.vi.json</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="Files\avatar_cute_2.jpg">
-      <Link>Files\avatar_cute_2.jpg</Link>
+
+    <None Include="appsettings.Deployment.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="appsettings.Test.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>

@@ -1,17 +1,23 @@
+using Application.Common.Errors;
+using Application.Common.Interfaces.Services.Localization;
 using Application.Common.Interfaces.UnitOfWorks;
 using Application.Common.QueryStringProcessing;
-using Application.Features.Common.Projections.Regions;
-using Contracts.ApiWrapper;
+using Application.Contracts.ApiWrapper;
+using Application.Contracts.Constants;
+using Application.Contracts.Dtos.Responses;
+using Application.SharedFeatures.Projections.Regions;
 using Domain.Aggregates.Regions;
 using Domain.Aggregates.Regions.Specifications;
 using Mediator;
 using Microsoft.Extensions.Logging;
-using SharedKernel.Models;
 
 namespace Application.Features.Regions.Queries.List.Provinces;
 
-public class ListProvinceHandler(IUnitOfWork unitOfWork, ILogger<ListProvinceHandler> logger)
-    : IRequestHandler<ListProvinceQuery, Result<PaginationResponse<ProvinceProjection>>>
+public class ListProvinceHandler(
+    IEfUnitOfWork unitOfWork,
+    ILogger<ListProvinceHandler> logger,
+    IMessageTranslatorService translator
+) : IRequestHandler<ListProvinceQuery, Result<PaginationResponse<ProvinceProjection>>>
 {
     public async ValueTask<Result<PaginationResponse<ProvinceProjection>>> Handle(
         ListProvinceQuery query,
@@ -19,18 +25,27 @@ public class ListProvinceHandler(IUnitOfWork unitOfWork, ILogger<ListProvinceHan
     )
     {
         var validationResult = query.ValidateQuery();
-
-        if (validationResult.Error != null)
-        {
-            return Result<PaginationResponse<ProvinceProjection>>.Failure(validationResult.Error);
-        }
-
-        var validationFilterResult = query.ValidateFilter<ListProvinceQuery, Province>(logger);
-
-        if (validationFilterResult.Error != null)
+        if (!string.IsNullOrWhiteSpace(validationResult.Error))
         {
             return Result<PaginationResponse<ProvinceProjection>>.Failure(
-                validationFilterResult.Error
+                new BadRequestError(
+                    TitleMessage.VALIDATION_ERROR,
+                    new(validationResult.Error, translator.Translate(validationResult.Error))
+                )
+            );
+        }
+
+        var validationFilterResult = query.ValidateFilter<ListProvinceQuery, District>(logger);
+        if (!string.IsNullOrWhiteSpace(validationFilterResult.Error))
+        {
+            return Result<PaginationResponse<ProvinceProjection>>.Failure(
+                new BadRequestError(
+                    TitleMessage.VALIDATION_ERROR,
+                    new(
+                        validationFilterResult.Error,
+                        translator.Translate(validationFilterResult.Error)
+                    )
+                )
             );
         }
         var response = await unitOfWork

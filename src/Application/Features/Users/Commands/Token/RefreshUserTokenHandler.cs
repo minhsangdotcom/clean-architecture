@@ -1,26 +1,28 @@
+using Application.Common.ErrorCodes;
 using Application.Common.Errors;
-using Application.Common.Interfaces.Services;
+using Application.Common.Interfaces.Services.Accessors;
+using Application.Common.Interfaces.Services.Localization;
 using Application.Common.Interfaces.Services.Token;
 using Application.Common.Interfaces.UnitOfWorks;
-using Contracts.ApiWrapper;
-using Contracts.Dtos.Responses;
+using Application.Contracts.ApiWrapper;
+using Application.Contracts.Constants;
+using Application.Contracts.Dtos.Responses;
 using Domain.Aggregates.Users;
 using Domain.Aggregates.Users.Enums;
 using Domain.Aggregates.Users.Specifications;
+using DotNetCoreExtension.Extensions;
 using Mediator;
-using SharedKernel.Common.Messages;
 using SharedKernel.Constants;
-using SharedKernel.Extensions;
-using SharedKernel.Models;
 using Wangkanai.Detection.Services;
 
 namespace Application.Features.Users.Commands.Token;
 
 public class RefreshUserTokenHandler(
-    IUnitOfWork unitOfWork,
+    IEfUnitOfWork unitOfWork,
     ITokenFactoryService tokenFactory,
     IDetectionService detectionService,
-    ICurrentUser currentUser
+    ICurrentUser currentUser,
+    IMessageTranslatorService translator
 ) : IRequestHandler<RefreshUserTokenCommand, Result<RefreshUserTokenResponse>>
 {
     public async ValueTask<Result<RefreshUserTokenResponse>> Handle(
@@ -28,7 +30,7 @@ public class RefreshUserTokenHandler(
         CancellationToken cancellationToken
     )
     {
-        bool isValid = ValidateRefreshToken(
+        bool isValid = DecodeRefreshToken(
             command.RefreshToken!,
             out DecodeTokenResponse? decodeToken
         );
@@ -36,27 +38,26 @@ public class RefreshUserTokenHandler(
         {
             return Result<RefreshUserTokenResponse>.Failure(
                 new BadRequestError(
-                    "Error has occurred with the Refresh token",
-                    Messenger
-                        .Create<UserToken>(nameof(User))
-                        .Property(x => x.RefreshToken!)
-                        .Message(MessageType.Valid)
-                        .Negative()
-                        .BuildMessage()
+                    TitleMessage.REFRESH_TOKEN_ERROR,
+                    new(
+                        UserErrorMessages.UserRefreshTokenInvalid,
+                        translator.Translate(UserErrorMessages.UserRefreshTokenInvalid)
+                    )
                 )
             );
         }
 
-        IList<UserToken> refreshTokens = await unitOfWork
-            .DynamicReadOnlyRepository<UserToken>()
+        IList<UserRefreshToken> refreshTokens = await unitOfWork
+            .DynamicReadOnlyRepository<UserRefreshToken>()
             .ListAsync(
                 new ListRefreshTokenByFamilyIdSpecification(
                     decodeToken!.FamilyId!,
                     Ulid.Parse(decodeToken.Sub!)
                 ),
-                new()
+                queryParam: new()
                 {
-                    Sort = $"{nameof(UserToken.CreatedAt)}{OrderTerm.DELIMITER}{OrderTerm.DESC}",
+                    Sort =
+                        $"{nameof(UserRefreshToken.CreatedAt)}{OrderTerm.DELIMITER}{OrderTerm.DESC}",
                 },
                 deep: 0,
                 cancellationToken: cancellationToken
@@ -66,36 +67,43 @@ public class RefreshUserTokenHandler(
         {
             return Result<RefreshUserTokenResponse>.Failure(
                 new UnauthorizedError(
-                    "Error has occurred with the Refresh token",
-                    Messenger
-                        .Create<UserToken>(nameof(User))
-                        .Property(x => x.RefreshToken!)
-                        .Negative()
-                        .Message(MessageType.Identical)
-                        .Object("TheCurrentOne")
-                        .BuildMessage()
+                    TitleMessage.REFRESH_TOKEN_ERROR,
+                    new(
+                        UserErrorMessages.UserRefreshTokenNotExistents,
+                        translator.Translate(UserErrorMessages.UserRefreshTokenNotExistents)
+                    )
                 )
             );
         }
-        UserToken validRefreshToken = refreshTokens[0];
+        UserRefreshToken validRefreshToken = refreshTokens[0];
 
         // detect cheating with token, maybe which is stolen
-        if (validRefreshToken.RefreshToken != command.RefreshToken)
+        if (validRefreshToken.Token != command.RefreshToken)
         {
             // remove all the token by family token
-            await unitOfWork.Repository<UserToken>().DeleteRangeAsync(refreshTokens);
-            await unitOfWork.SaveAsync(cancellationToken);
+            await unitOfWork.Repository<UserRefreshToken>().DeleteRangeAsync(refreshTokens);
+            await unitOfWork.SaveChangesAsync(cancellationToken);
 
             return Result<RefreshUserTokenResponse>.Failure(
                 new UnauthorizedError(
-                    "Error has occurred with the Refresh token",
-                    Messenger
-                        .Create<UserToken>(nameof(User))
-                        .Property(x => x.RefreshToken!)
-                        .Negative()
-                        .Message(MessageType.Identical)
-                        .Object("TheCurrentOne")
-                        .BuildMessage()
+                    TitleMessage.REFRESH_TOKEN_ERROR,
+                    new(
+                        UserErrorMessages.UserRefreshTokenNotIdentical,
+                        translator.Translate(UserErrorMessages.UserRefreshTokenNotIdentical)
+                    )
+                )
+            );
+        }
+
+        if (validRefreshToken.ExpiredTime <= DateTimeOffset.UtcNow)
+        {
+            return Result<RefreshUserTokenResponse>.Failure(
+                new UnauthorizedError(
+                    "Error has occurred with refresh token",
+                    new(
+                        UserErrorMessages.UserRefreshTokenExpired,
+                        translator.Translate(UserErrorMessages.UserRefreshTokenExpired)
+                    )
                 )
             );
         }
@@ -103,26 +111,27 @@ public class RefreshUserTokenHandler(
         if (validRefreshToken.User?.Status == UserStatus.Inactive)
         {
             return Result<RefreshUserTokenResponse>.Failure(
-                new BadRequestError(
+                new UnauthorizedError(
                     "Error has occurred with the current user",
-                    Messenger.Create<User>().Message(MessageType.Active).Negative().BuildMessage()
+                    new(
+                        UserErrorMessages.UserInactive,
+                        translator.Translate(UserErrorMessages.UserInactive)
+                    )
                 )
             );
         }
 
-        var accessTokenExpiredTime = tokenFactory.AccessTokenExpiredTime;
-        var accessToken = tokenFactory.CreateToken(
+        DateTime accessTokenExpiredTime = tokenFactory.AccessTokenExpiredTime;
+        string accessToken = tokenFactory.CreateToken(
             [new(ClaimTypes.Sub, decodeToken.Sub!)],
             accessTokenExpiredTime
         );
 
-        var refreshTokenExpiredTime = tokenFactory.RefreshTokenExpiredTime;
         string refreshToken = tokenFactory.CreateToken(
             [
                 new(ClaimTypes.Sub, decodeToken.Sub!),
                 new(ClaimTypes.TokenFamilyId, decodeToken.FamilyId!),
-            ],
-            refreshTokenExpiredTime
+            ]
         );
 
         var userAgent = new
@@ -134,25 +143,28 @@ public class RefreshUserTokenHandler(
             Engine = detectionService.Engine.Name,
         };
 
-        var userToken = new UserToken()
-        {
-            FamilyId = decodeToken.FamilyId,
-            UserId = Ulid.Parse(decodeToken.Sub!),
-            ExpiredTime = refreshTokenExpiredTime,
-            RefreshToken = refreshToken,
-            UserAgent = SerializerExtension.Serialize(userAgent).StringJson,
-            ClientIp = currentUser.ClientIp,
-        };
+        UserRefreshToken userRefreshToken =
+            new()
+            {
+                FamilyId = decodeToken.FamilyId,
+                UserId = Ulid.Parse(decodeToken.Sub!),
+                ExpiredTime = tokenFactory.RefreshTokenExpiredTime,
+                Token = refreshToken,
+                UserAgent = SerializerExtension.Serialize(userAgent).StringJson,
+                ClientIp = currentUser.ClientIp,
+            };
 
-        await unitOfWork.Repository<UserToken>().AddAsync(userToken, cancellationToken);
-        await unitOfWork.SaveAsync(cancellationToken);
+        await unitOfWork
+            .Repository<UserRefreshToken>()
+            .AddAsync(userRefreshToken, cancellationToken);
+        await unitOfWork.SaveChangesAsync(cancellationToken);
 
         return Result<RefreshUserTokenResponse>.Success(
             new() { Token = accessToken, RefreshToken = refreshToken }
         );
     }
 
-    private bool ValidateRefreshToken(string token, out DecodeTokenResponse? decodeTokenResponse)
+    private bool DecodeRefreshToken(string token, out DecodeTokenResponse? decodeTokenResponse)
     {
         try
         {

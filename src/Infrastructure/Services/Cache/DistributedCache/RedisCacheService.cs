@@ -1,7 +1,7 @@
 using Application.Common.Interfaces.Services.Cache;
+using DotNetCoreExtension.Extensions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using SharedKernel.Extensions;
 using StackExchange.Redis;
 
 namespace Infrastructure.Services.Cache.DistributedCache;
@@ -24,7 +24,7 @@ public class RedisCacheService(
                 {
                     ExpirationType = CacheExpirationType.Absolute,
                     Expiration = TimeSpan.FromMinutes(
-                        redisDatabaseSettings.DefaultCachingTimeInMinute
+                        redisDatabaseSettings.DefaultCacheExpirationInMinute
                     ),
                 }
         );
@@ -44,23 +44,10 @@ public class RedisCacheService(
                 {
                     ExpirationType = CacheExpirationType.Absolute,
                     Expiration = TimeSpan.FromMinutes(
-                        redisDatabaseSettings.DefaultCachingTimeInMinute
+                        redisDatabaseSettings.DefaultCacheExpirationInMinute
                     ),
                 }
         );
-    }
-
-    public void Remove(string key)
-    {
-        bool isSuccess = redis.KeyDelete(key);
-        if (isSuccess)
-        {
-            logger.LogDebug("Redis KeyDelete {Key}", key);
-        }
-        else
-        {
-            logger.LogDebug("Redis KeyDelete {Key} failed", key);
-        }
     }
 
     public async Task RemoveAsync(string key)
@@ -77,16 +64,22 @@ public class RedisCacheService(
         }
     }
 
+    public async Task<bool> HasKeyAsync(string key)
+    {
+        return await redis.KeyExistsAsync(key);
+    }
+
     private async Task<T?> GetOrSetDefaultAsync<T>(
         string key,
-        Func<Task<T>> task,
+        Func<Task<T>> factory,
         CacheOptions options
     )
     {
-        RedisValue redisValue = await redis.StringGetAsync(key);
-        if (redisValue.HasValue)
+        RedisValue cached = await redis.StringGetAsync(key);
+        if (cached.HasValue)
         {
-            logger.LogWarning("Redis HIT for {Key}", key);
+            logger.LogInformation("Redis HIT for {Key}", key);
+
             if (
                 options.ExpirationType == CacheExpirationType.Sliding
                 && options.Expiration.HasValue
@@ -95,32 +88,51 @@ public class RedisCacheService(
                 await redis.KeyExpireAsync(key, options.Expiration);
             }
 
-            return SerializerExtension.Deserialize<T>(redisValue!).Object;
+            return SerializerExtension.Deserialize<T>(cached!).Object;
         }
 
-        logger.LogWarning("Redis MISS for {Key}, invoking task", key);
-        T result = await task();
-        string json = SerializerExtension.Serialize(result!).StringJson;
+        logger.LogInformation("Redis MISS for {Key}, invoking factory", key);
 
-        TimeSpan? expiry = options.ExpirationType switch
+        T result = await factory();
+        if (result == null)
         {
-            CacheExpirationType.Absolute => options.Expiration
-                ?? TimeSpan.FromMinutes(redisDatabaseSettings.DefaultCachingTimeInMinute),
-            CacheExpirationType.Sliding => options.Expiration
-                ?? TimeSpan.FromMinutes(redisDatabaseSettings.DefaultCachingTimeInMinute),
-            _ => null,
-        };
+            logger.LogWarning("Factory returned null for {Key}. Not caching.", key);
+            return default;
+        }
+
+        string json = SerializerExtension.Serialize(result).StringJson;
+
+        TimeSpan? expiry = null;
+        if (
+            options.ExpirationType == CacheExpirationType.Absolute
+            || options.ExpirationType == CacheExpirationType.Sliding
+        )
+        {
+            expiry =
+                options.Expiration
+                ?? TimeSpan.FromMinutes(redisDatabaseSettings.DefaultCacheExpirationInMinute);
+        }
 
         await redis.StringSetAsync(key, json, expiry);
+
+        string expiryText = expiry == null ? "Unlimited" : $"{expiry?.TotalMinutes} minutes";
+        logger.LogInformation(
+            "Cached {Key} with {Type} expiration: {ExpiryText}",
+            key,
+            options.ExpirationType,
+            expiryText
+        );
+
         return result;
     }
 
-    private T? GetOrSetDefault<T>(string key, Func<T> func, CacheOptions options)
+    private T? GetOrSetDefault<T>(string key, Func<T> factory, CacheOptions options)
     {
-        RedisValue redisValue = redis.StringGet(key);
-        if (redisValue.HasValue)
+        RedisValue cached = redis.StringGet(key);
+        if (cached.HasValue)
         {
-            logger.LogWarning("Redis HIT for {Key}", key);
+            logger.LogInformation("Redis HIT for {Key}", key);
+
             if (
                 options.ExpirationType == CacheExpirationType.Sliding
                 && options.Expiration.HasValue
@@ -129,23 +141,41 @@ public class RedisCacheService(
                 redis.KeyExpire(key, options.Expiration);
             }
 
-            return SerializerExtension.Deserialize<T>(redisValue!).Object;
+            return SerializerExtension.Deserialize<T>(cached!).Object;
         }
 
-        logger.LogWarning("Redis MISS for {Key}, invoking func", key);
-        T result = func();
-        string json = SerializerExtension.Serialize(result!).StringJson;
+        logger.LogInformation("Redis MISS for {Key}, invoking factory", key);
 
-        TimeSpan? expiry = options.ExpirationType switch
+        T result = factory();
+        if (result == null)
         {
-            CacheExpirationType.Absolute => options.Expiration
-                ?? TimeSpan.FromMinutes(redisDatabaseSettings.DefaultCachingTimeInMinute),
-            CacheExpirationType.Sliding => options.Expiration
-                ?? TimeSpan.FromMinutes(redisDatabaseSettings.DefaultCachingTimeInMinute),
-            _ => null,
-        };
+            logger.LogWarning("Factory returned null for {Key}. Not caching.", key);
+            return default;
+        }
+
+        string json = SerializerExtension.Serialize(result).StringJson;
+
+        TimeSpan? expiry = null;
+        if (
+            options.ExpirationType == CacheExpirationType.Absolute
+            || options.ExpirationType == CacheExpirationType.Sliding
+        )
+        {
+            expiry =
+                options.Expiration
+                ?? TimeSpan.FromMinutes(redisDatabaseSettings.DefaultCacheExpirationInMinute);
+        }
 
         redis.StringSet(key, json, expiry);
+
+        string expiryText = expiry == null ? "Unlimited" : $"{expiry?.TotalMinutes} minutes";
+        logger.LogInformation(
+            "Cached {Key} with {Type} expiration: {ExpiryText}",
+            key,
+            options.ExpirationType,
+            expiryText
+        );
+
         return result;
     }
 }

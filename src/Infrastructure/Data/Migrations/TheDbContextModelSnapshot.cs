@@ -23,6 +23,53 @@ namespace Infrastructure.Data.Migrations
             NpgsqlModelBuilderExtensions.HasPostgresExtension(modelBuilder, "citext");
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("Domain.Aggregates.Permissions.Permission", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("character varying(26)")
+                        .HasColumnName("id");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("code");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("created_by");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("text")
+                        .HasColumnName("description");
+
+                    b.Property<string>("Group")
+                        .HasColumnType("text")
+                        .HasColumnName("group");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("name");
+
+                    b.Property<DateTimeOffset?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<string>("UpdatedBy")
+                        .HasColumnType("text")
+                        .HasColumnName("updated_by");
+
+                    b.HasKey("Id")
+                        .HasName("pk_permission");
+
+                    b.ToTable("permission", (string)null);
+                });
+
             modelBuilder.Entity("Domain.Aggregates.QueueLogs.QueueLog", b =>
                 {
                     b.Property<string>("Id")
@@ -38,21 +85,29 @@ namespace Infrastructure.Data.Migrations
                         .HasColumnType("text")
                         .HasColumnName("created_by");
 
-                    b.Property<object>("ErrorDetail")
-                        .HasColumnType("jsonb")
-                        .HasColumnName("error_detail");
-
-                    b.Property<object>("Request")
-                        .HasColumnType("jsonb")
-                        .HasColumnName("request");
+                    b.Property<string>("ErrorDetailJson")
+                        .HasColumnType("text")
+                        .HasColumnName("error_detail_json");
 
                     b.Property<Guid>("RequestId")
                         .HasColumnType("uuid")
                         .HasColumnName("request_id");
 
+                    b.Property<string>("RequestJson")
+                        .HasColumnType("text")
+                        .HasColumnName("request_json");
+
+                    b.Property<string>("ResponseJson")
+                        .HasColumnType("text")
+                        .HasColumnName("response_json");
+
                     b.Property<int>("RetryCount")
                         .HasColumnType("integer")
                         .HasColumnName("retry_count");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer")
+                        .HasColumnName("status");
 
                     b.Property<DateTimeOffset?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone")
@@ -280,25 +335,34 @@ namespace Infrastructure.Data.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
 
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("created_by");
+
                     b.Property<string>("Description")
                         .HasColumnType("text")
                         .HasColumnName("description");
 
-                    b.Property<string>("Guard")
-                        .HasColumnType("text")
-                        .HasColumnName("guard");
-
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("citext")
+                        .HasColumnType("text")
                         .HasColumnName("name");
+
+                    b.Property<DateTimeOffset?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<string>("UpdatedBy")
+                        .HasColumnType("text")
+                        .HasColumnName("updated_by");
+
+                    b.Property<long>("Version")
+                        .HasColumnType("bigint")
+                        .HasColumnName("version");
 
                     b.HasKey("Id")
                         .HasName("pk_role");
-
-                    b.HasIndex("Name")
-                        .IsUnique()
-                        .HasDatabaseName("ix_role_name");
 
                     b.ToTable("role", (string)null);
                 });
@@ -337,6 +401,25 @@ namespace Infrastructure.Data.Migrations
                     b.ToTable("role_claim", (string)null);
                 });
 
+            modelBuilder.Entity("Domain.Aggregates.Roles.RolePermission", b =>
+                {
+                    b.Property<string>("PermissionId")
+                        .HasColumnType("character varying(26)")
+                        .HasColumnName("permission_id");
+
+                    b.Property<string>("RoleId")
+                        .HasColumnType("character varying(26)")
+                        .HasColumnName("role_id");
+
+                    b.HasKey("PermissionId", "RoleId")
+                        .HasName("pk_role_permission");
+
+                    b.HasIndex("RoleId")
+                        .HasDatabaseName("ix_role_permission_role_id");
+
+                    b.ToTable("role_permission", (string)null);
+                });
+
             modelBuilder.Entity("Domain.Aggregates.Users.User", b =>
                 {
                     b.Property<string>("Id")
@@ -356,9 +439,9 @@ namespace Infrastructure.Data.Migrations
                         .HasColumnType("text")
                         .HasColumnName("created_by");
 
-                    b.Property<DateTime?>("DayOfBirth")
+                    b.Property<DateTime?>("DateOfBirth")
                         .HasColumnType("date")
-                        .HasColumnName("day_of_birth");
+                        .HasColumnName("date_of_birth");
 
                     b.Property<string>("Email")
                         .IsRequired()
@@ -385,7 +468,6 @@ namespace Infrastructure.Data.Migrations
                         .HasColumnName("password");
 
                     b.Property<string>("PhoneNumber")
-                        .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("phone_number");
 
@@ -416,14 +498,6 @@ namespace Infrastructure.Data.Migrations
                     b.HasIndex("CreatedAt")
                         .HasDatabaseName("ix_user_created_at");
 
-                    b.HasIndex("Email")
-                        .IsUnique()
-                        .HasDatabaseName("ix_user_email");
-
-                    b.HasIndex("Username")
-                        .IsUnique()
-                        .HasDatabaseName("ix_user_username");
-
                     b.ToTable("user", (string)null);
                 });
 
@@ -447,13 +521,18 @@ namespace Infrastructure.Data.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
 
-                    b.Property<string>("RoleClaimId")
-                        .HasColumnType("character varying(26)")
-                        .HasColumnName("role_claim_id");
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("created_by");
 
-                    b.Property<int>("Type")
-                        .HasColumnType("integer")
-                        .HasColumnName("type");
+                    b.Property<DateTimeOffset?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<string>("UpdatedBy")
+                        .HasColumnType("text")
+                        .HasColumnName("updated_by");
 
                     b.Property<string>("UserId")
                         .IsRequired()
@@ -463,16 +542,13 @@ namespace Infrastructure.Data.Migrations
                     b.HasKey("Id")
                         .HasName("pk_user_claim");
 
-                    b.HasIndex("RoleClaimId")
-                        .HasDatabaseName("ix_user_claim_role_claim_id");
-
                     b.HasIndex("UserId")
                         .HasDatabaseName("ix_user_claim_user_id");
 
                     b.ToTable("user_claim", (string)null);
                 });
 
-            modelBuilder.Entity("Domain.Aggregates.Users.UserResetPassword", b =>
+            modelBuilder.Entity("Domain.Aggregates.Users.UserPasswordReset", b =>
                 {
                     b.Property<string>("Id")
                         .HasColumnType("character varying(26)")
@@ -510,34 +586,34 @@ namespace Infrastructure.Data.Migrations
                         .HasColumnName("user_id");
 
                     b.HasKey("Id")
-                        .HasName("pk_user_reset_password");
+                        .HasName("pk_user_password_reset");
 
                     b.HasIndex("UserId")
-                        .HasDatabaseName("ix_user_reset_password_user_id");
+                        .HasDatabaseName("ix_user_password_reset_user_id");
 
-                    b.ToTable("user_reset_password", (string)null);
+                    b.ToTable("user_password_reset", (string)null);
                 });
 
-            modelBuilder.Entity("Domain.Aggregates.Users.UserRole", b =>
+            modelBuilder.Entity("Domain.Aggregates.Users.UserPermission", b =>
                 {
-                    b.Property<string>("RoleId")
+                    b.Property<string>("PermissionId")
                         .HasColumnType("character varying(26)")
-                        .HasColumnName("role_id");
+                        .HasColumnName("permission_id");
 
                     b.Property<string>("UserId")
                         .HasColumnType("character varying(26)")
                         .HasColumnName("user_id");
 
-                    b.HasKey("RoleId", "UserId")
-                        .HasName("pk_user_role");
+                    b.HasKey("PermissionId", "UserId")
+                        .HasName("pk_user_permission");
 
                     b.HasIndex("UserId")
-                        .HasDatabaseName("ix_user_role_user_id");
+                        .HasDatabaseName("ix_user_permission_user_id");
 
-                    b.ToTable("user_role", (string)null);
+                    b.ToTable("user_permission", (string)null);
                 });
 
-            modelBuilder.Entity("Domain.Aggregates.Users.UserToken", b =>
+            modelBuilder.Entity("Domain.Aggregates.Users.UserRefreshToken", b =>
                 {
                     b.Property<string>("Id")
                         .HasColumnType("character varying(26)")
@@ -568,9 +644,10 @@ namespace Infrastructure.Data.Migrations
                         .HasColumnType("boolean")
                         .HasColumnName("is_blocked");
 
-                    b.Property<string>("RefreshToken")
+                    b.Property<string>("Token")
+                        .IsRequired()
                         .HasColumnType("text")
-                        .HasColumnName("refresh_token");
+                        .HasColumnName("token");
 
                     b.Property<DateTimeOffset?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone")
@@ -590,12 +667,31 @@ namespace Infrastructure.Data.Migrations
                         .HasColumnName("user_id");
 
                     b.HasKey("Id")
-                        .HasName("pk_user_token");
+                        .HasName("pk_user_refresh_token");
 
                     b.HasIndex("UserId")
-                        .HasDatabaseName("ix_user_token_user_id");
+                        .HasDatabaseName("ix_user_refresh_token_user_id");
 
-                    b.ToTable("user_token", (string)null);
+                    b.ToTable("user_refresh_token", (string)null);
+                });
+
+            modelBuilder.Entity("Domain.Aggregates.Users.UserRole", b =>
+                {
+                    b.Property<string>("RoleId")
+                        .HasColumnType("character varying(26)")
+                        .HasColumnName("role_id");
+
+                    b.Property<string>("UserId")
+                        .HasColumnType("character varying(26)")
+                        .HasColumnName("user_id");
+
+                    b.HasKey("RoleId", "UserId")
+                        .HasName("pk_user_role");
+
+                    b.HasIndex("UserId")
+                        .HasDatabaseName("ix_user_role_user_id");
+
+                    b.ToTable("user_role", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Aggregates.Regions.Commune", b =>
@@ -623,7 +719,7 @@ namespace Infrastructure.Data.Migrations
             modelBuilder.Entity("Domain.Aggregates.Roles.RoleClaim", b =>
                 {
                     b.HasOne("Domain.Aggregates.Roles.Role", "Role")
-                        .WithMany("RoleClaims")
+                        .WithMany("Claims")
                         .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
@@ -632,87 +728,80 @@ namespace Infrastructure.Data.Migrations
                     b.Navigation("Role");
                 });
 
-            modelBuilder.Entity("Domain.Aggregates.Users.User", b =>
+            modelBuilder.Entity("Domain.Aggregates.Roles.RolePermission", b =>
                 {
-                    b.OwnsOne("Domain.Aggregates.Users.ValueObjects.Address", "Address", b1 =>
-                        {
-                            b1.Property<string>("UserId")
-                                .HasColumnType("character varying(26)")
-                                .HasColumnName("id");
+                    b.HasOne("Domain.Aggregates.Permissions.Permission", "Permission")
+                        .WithMany()
+                        .HasForeignKey("PermissionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_role_permission_permission_permission_id");
 
-                            b1.Property<string>("Commune")
-                                .HasColumnType("text")
-                                .HasColumnName("address_commune");
+                    b.HasOne("Domain.Aggregates.Roles.Role", "Role")
+                        .WithMany("Permissions")
+                        .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_role_permission_role_role_id");
 
-                            b1.Property<string>("CommuneId")
-                                .HasColumnType("character varying(26)")
-                                .HasColumnName("address_commune_id");
+                    b.Navigation("Permission");
 
-                            b1.Property<string>("District")
-                                .IsRequired()
-                                .HasColumnType("text")
-                                .HasColumnName("address_district");
-
-                            b1.Property<string>("DistrictId")
-                                .IsRequired()
-                                .HasColumnType("character varying(26)")
-                                .HasColumnName("address_district_id");
-
-                            b1.Property<string>("Province")
-                                .IsRequired()
-                                .HasColumnType("text")
-                                .HasColumnName("address_province");
-
-                            b1.Property<string>("ProvinceId")
-                                .IsRequired()
-                                .HasColumnType("character varying(26)")
-                                .HasColumnName("address_province_id");
-
-                            b1.Property<string>("Street")
-                                .IsRequired()
-                                .HasColumnType("text")
-                                .HasColumnName("address_street");
-
-                            b1.HasKey("UserId");
-
-                            b1.ToTable("user");
-
-                            b1.WithOwner()
-                                .HasForeignKey("UserId")
-                                .HasConstraintName("fk_user_user_id");
-                        });
-
-                    b.Navigation("Address");
+                    b.Navigation("Role");
                 });
 
             modelBuilder.Entity("Domain.Aggregates.Users.UserClaim", b =>
                 {
-                    b.HasOne("Domain.Aggregates.Roles.RoleClaim", "RoleClaim")
-                        .WithMany("UserClaims")
-                        .HasForeignKey("RoleClaimId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .HasConstraintName("fk_user_claim_role_claim_role_claim_id");
-
                     b.HasOne("Domain.Aggregates.Users.User", "User")
-                        .WithMany("UserClaims")
+                        .WithMany("Claims")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("fk_user_claim_user_user_id");
 
-                    b.Navigation("RoleClaim");
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("Domain.Aggregates.Users.UserPasswordReset", b =>
+                {
+                    b.HasOne("Domain.Aggregates.Users.User", "User")
+                        .WithMany("PasswordResetRequests")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_user_password_reset_user_user_id");
 
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("Domain.Aggregates.Users.UserResetPassword", b =>
+            modelBuilder.Entity("Domain.Aggregates.Users.UserPermission", b =>
                 {
+                    b.HasOne("Domain.Aggregates.Permissions.Permission", "Permission")
+                        .WithMany()
+                        .HasForeignKey("PermissionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_user_permission_permission_permission_id");
+
                     b.HasOne("Domain.Aggregates.Users.User", "User")
-                        .WithMany("UserResetPasswords")
+                        .WithMany("Permissions")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
-                        .HasConstraintName("fk_user_reset_password_user_user_id");
+                        .HasConstraintName("fk_user_permission_user_user_id");
+
+                    b.Navigation("Permission");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("Domain.Aggregates.Users.UserRefreshToken", b =>
+                {
+                    b.HasOne("Domain.Aggregates.Users.User", "User")
+                        .WithMany("RefreshTokens")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_user_refresh_token_user_user_id");
 
                     b.Navigation("User");
                 });
@@ -720,32 +809,20 @@ namespace Infrastructure.Data.Migrations
             modelBuilder.Entity("Domain.Aggregates.Users.UserRole", b =>
                 {
                     b.HasOne("Domain.Aggregates.Roles.Role", "Role")
-                        .WithMany("UserRoles")
+                        .WithMany("Users")
                         .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("fk_user_role_role_role_id");
 
                     b.HasOne("Domain.Aggregates.Users.User", "User")
-                        .WithMany("UserRoles")
+                        .WithMany("Roles")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("fk_user_role_user_user_id");
 
                     b.Navigation("Role");
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("Domain.Aggregates.Users.UserToken", b =>
-                {
-                    b.HasOne("Domain.Aggregates.Users.User", "User")
-                        .WithMany("UserTokens")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_user_token_user_user_id");
 
                     b.Navigation("User");
                 });
@@ -762,25 +839,24 @@ namespace Infrastructure.Data.Migrations
 
             modelBuilder.Entity("Domain.Aggregates.Roles.Role", b =>
                 {
-                    b.Navigation("RoleClaims");
+                    b.Navigation("Claims");
 
-                    b.Navigation("UserRoles");
-                });
+                    b.Navigation("Permissions");
 
-            modelBuilder.Entity("Domain.Aggregates.Roles.RoleClaim", b =>
-                {
-                    b.Navigation("UserClaims");
+                    b.Navigation("Users");
                 });
 
             modelBuilder.Entity("Domain.Aggregates.Users.User", b =>
                 {
-                    b.Navigation("UserClaims");
+                    b.Navigation("Claims");
 
-                    b.Navigation("UserResetPasswords");
+                    b.Navigation("PasswordResetRequests");
 
-                    b.Navigation("UserRoles");
+                    b.Navigation("Permissions");
 
-                    b.Navigation("UserTokens");
+                    b.Navigation("RefreshTokens");
+
+                    b.Navigation("Roles");
                 });
 #pragma warning restore 612, 618
         }

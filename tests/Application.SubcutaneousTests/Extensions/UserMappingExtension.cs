@@ -1,9 +1,6 @@
-using Application.Features.Common.Payloads.Users;
-using Application.Features.Common.Projections.Users;
 using Application.Features.Users.Commands.Profiles;
 using Application.Features.Users.Commands.Update;
 using Domain.Aggregates.Users;
-using Domain.Aggregates.Users.Enums;
 
 namespace Application.SubcutaneousTests.Extensions;
 
@@ -13,27 +10,17 @@ public static class UserMappingExtension
         new()
         {
             UserId = user.Id.ToString(),
-            UpdateData = new UserUpdateRequest()
+            UpdateData = new UserUpdateData()
             {
                 FirstName = user.FirstName,
                 LastName = user.LastName,
-                Email = user.Email,
-                DayOfBirth = user.DayOfBirth,
+                DateOfBirth = user.DateOfBirth,
                 PhoneNumber = user.PhoneNumber,
-                ProvinceId = user.Address!.ProvinceId,
-                DistrictId = user.Address!.DistrictId,
-                CommuneId = user.Address!.CommuneId,
-                Street = user.Address.Street,
-                Roles = [.. user.UserRoles!.Select(x => x.RoleId)],
-                UserClaims =
-                [
-                    .. user.UserClaims!.Where(x => x.Type == UserClaimType.Custom)
-                        .Select(x => new UserClaimPayload()
-                        {
-                            ClaimType = x.ClaimType,
-                            ClaimValue = x.ClaimValue,
-                        }),
-                ],
+                Email = user.Email,
+                Status = user.Status,
+
+                Roles = [.. user.Roles!.Select(x => x.RoleId)],
+                Permissions = [.. user.Permissions.Select(x => x.PermissionId)],
             },
         };
 
@@ -42,12 +29,8 @@ public static class UserMappingExtension
         {
             FirstName = user.FirstName,
             LastName = user.LastName,
-            Email = user.Email,
-            DayOfBirth = user.DayOfBirth,
+            DateOfBirth = user.DateOfBirth,
             PhoneNumber = user.PhoneNumber,
-            ProvinceId = user.Address!.ProvinceId,
-            DistrictId = user.Address!.DistrictId,
-            CommuneId = user.Address!.CommuneId,
-            Street = user.Address.Street,
+            Email = user.Email,
         };
 }

@@ -1,44 +1,47 @@
-using Contracts.Dtos.Requests;
+using Application.Contracts.Dtos.Requests;
+using Application.Contracts.Dtos.Responses;
 using Elastic.Clients.Elasticsearch;
 using Elastic.Clients.Elasticsearch.QueryDsl;
-using SharedKernel.Models;
 
 namespace Application.Common.Interfaces.Services.Elasticsearch;
 
 public interface IElasticsearchService<T>
     where T : class
 {
-    Task<T?> GetAsync(object id);
+    #region Queries
+    Task<T?> GetAsync(string id);
 
-    Task<IEnumerable<T>> ListAsync();
+    Task<List<T>> ListAsync();
 
-    Task<SearchResponse<T>> ListAsync(
-        QueryParamRequest request,
-        Action<QueryDescriptor<T>>? filter = null
-    );
+    Task<List<T>> ListAsync(QueryParamRequest request, Action<QueryDescriptor<T>>? filters = null);
 
     Task<PaginationResponse<T>> PaginatedListAsync(
         QueryParamRequest request,
-        Action<QueryDescriptor<T>>? filter = null
+        Action<QueryDescriptor<T>>? filters = null
     );
+    #endregion
 
-    Task<T> AddAsync(T entity);
+    #region CRUD
+    Task<T> IndexAsync(T entity);
 
-    Task<IEnumerable<T>> AddRangeAsync(IEnumerable<T> entities);
+    Task<List<T>> IndexManyAsync(IEnumerable<T> entities);
 
-    Task UpdateAsync(T entity);
+    Task UpdateAsync(string id, T entity);
 
-    Task UpdateRangeAsync(IEnumerable<T> entities);
+    Task UpdateManyAsync(IEnumerable<T> entities);
+
+    Task UpdateByQueryAsync(string id, string query, Dictionary<string, object> parameters);
 
     Task DeleteAsync(T entity);
 
-    Task DeleteRangeAsync(IEnumerable<T> entities);
-
-    Task UpdateByQueryAsync(T entity, string query, Dictionary<string, object> parameters);
+    Task DeleteManyAsync(IEnumerable<T> entities);
 
     Task DeleteByQueryAsync(Action<QueryDescriptor<T>> querySelector);
+    #endregion
 
+    #region Bool queries
     Task<bool> AnyAsync(Action<BoolQueryDescriptor<T>> selector);
 
     Task<long> CountAsync(CountRequestDescriptor<T> selector);
+    #endregion
 }
