@@ -66,7 +66,7 @@ public sealed class UpdateRoleCommandValidatorTest
         translator.SetupTranslate(RoleErrorMessages.RoleNameRequired, SharedResource.TranslateText);
 
         //Act
-        var result = await validator.TestValidateAsync(command);
+        var result = await validator.TestValidateAsync(command.UpdateData);
 
         //Assert
         var expected = new ErrorReason(
@@ -74,7 +74,7 @@ public sealed class UpdateRoleCommandValidatorTest
             SharedResource.TranslateText
         );
         result
-            .ShouldHaveValidationErrorFor(x => x.UpdateData.Name)
+            .ShouldHaveValidationErrorFor(x => x.Name)
             .WithCustomState(expected, new ErrorReasonComparer());
     }
 
@@ -84,14 +84,14 @@ public sealed class UpdateRoleCommandValidatorTest
         command.UpdateData.Name = new string('X', 300);
         translator.SetupTranslate(RoleErrorMessages.RoleNameTooLong, SharedResource.TranslateText);
 
-        var result = await validator.TestValidateAsync(command);
+        var result = await validator.TestValidateAsync(command.UpdateData);
         var expected = new ErrorReason(
             RoleErrorMessages.RoleNameTooLong,
             SharedResource.TranslateText
         );
 
         result
-            .ShouldHaveValidationErrorFor(x => x.UpdateData.Name)
+            .ShouldHaveValidationErrorFor(x => x.Name)
             .WithCustomState(expected, new ErrorReasonComparer());
     }
 
@@ -154,7 +154,7 @@ public sealed class UpdateRoleCommandValidatorTest
         );
 
         //Act
-        var result = await validator.TestValidateAsync(command);
+        var result = await validator.TestValidateAsync(command.UpdateData);
 
         //Assert
         var expected = new ErrorReason(
@@ -162,7 +162,7 @@ public sealed class UpdateRoleCommandValidatorTest
             SharedResource.TranslateText
         );
         result
-            .ShouldHaveValidationErrorFor(x => x.UpdateData.Description)
+            .ShouldHaveValidationErrorFor(x => x.Description)
             .WithCustomState(expected, new ErrorReasonComparer());
     }
 
@@ -173,10 +173,10 @@ public sealed class UpdateRoleCommandValidatorTest
         command.UpdateData.Description = "Valid description";
 
         //Act
-        var result = await validator.TestValidateAsync(command);
+        var result = await validator.TestValidateAsync(command.UpdateData);
 
         //Assert
-        result.ShouldNotHaveValidationErrorFor(x => x.UpdateData.Description);
+        result.ShouldNotHaveValidationErrorFor(x => x.Description);
     }
 
     #endregion
@@ -195,7 +195,7 @@ public sealed class UpdateRoleCommandValidatorTest
         );
 
         //Act
-        var result = await validator.TestValidateAsync(command);
+        var result = await validator.TestValidateAsync(command.UpdateData);
 
         //Assert
         var expected = new ErrorReason(
@@ -203,7 +203,7 @@ public sealed class UpdateRoleCommandValidatorTest
             SharedResource.TranslateText
         );
         result
-            .ShouldHaveValidationErrorFor(x => x.UpdateData.PermissionIds)
+            .ShouldHaveValidationErrorFor(x => x.PermissionIds)
             .WithCustomState(expected, new ErrorReasonComparer());
     }
 
@@ -220,7 +220,7 @@ public sealed class UpdateRoleCommandValidatorTest
         );
 
         //Act
-        var result = await validator.TestValidateAsync(command);
+        var result = await validator.TestValidateAsync(command.UpdateData);
 
         //Assert
         var expected = new ErrorReason(
@@ -228,7 +228,7 @@ public sealed class UpdateRoleCommandValidatorTest
             SharedResource.TranslateText
         );
         result
-            .ShouldHaveValidationErrorFor(x => x.UpdateData.PermissionIds)
+            .ShouldHaveValidationErrorFor(x => x.PermissionIds)
             .WithCustomState(expected, new ErrorReasonComparer());
     }
 
