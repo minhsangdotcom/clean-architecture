@@ -58,7 +58,7 @@ public class UpdateUserCommandValidatorTest
         FakeRoleAndPermissionFound();
 
         // Act
-        var result = await validator.TestValidateAsync(command);
+        var result = await validator.TestValidateAsync(command.UpdateData);
 
         // Assert
         var expected = new ErrorReason(
@@ -66,7 +66,7 @@ public class UpdateUserCommandValidatorTest
             SharedResource.TranslateText
         );
         result
-            .ShouldHaveValidationErrorFor(x => x.UpdateData.LastName)
+            .ShouldHaveValidationErrorFor(x => x.LastName)
             .WithCustomState(expected, new ErrorReasonComparer())
             .Only();
     }
@@ -83,7 +83,7 @@ public class UpdateUserCommandValidatorTest
         FakeRoleAndPermissionFound();
 
         // Act
-        var result = await validator.TestValidateAsync(command);
+        var result = await validator.TestValidateAsync(command.UpdateData);
 
         // Assert
         var expected = new ErrorReason(
@@ -92,7 +92,7 @@ public class UpdateUserCommandValidatorTest
         );
 
         result
-            .ShouldHaveValidationErrorFor(x => x.UpdateData.LastName)
+            .ShouldHaveValidationErrorFor(x => x.LastName)
             .WithCustomState(expected, new ErrorReasonComparer())
             .Only();
     }
@@ -104,10 +104,10 @@ public class UpdateUserCommandValidatorTest
         command.UpdateData.LastName = "Nguyen";
 
         //Act
-        var result = await validator.TestValidateAsync(command);
+        var result = await validator.TestValidateAsync(command.UpdateData);
 
         //Assert
-        result.ShouldNotHaveValidationErrorFor(x => x.UpdateData.LastName);
+        result.ShouldNotHaveValidationErrorFor(x => x.LastName);
     }
     #endregion
 
@@ -126,7 +126,7 @@ public class UpdateUserCommandValidatorTest
         FakeRoleAndPermissionFound();
 
         //Act
-        var result = await validator.TestValidateAsync(command);
+        var result = await validator.TestValidateAsync(command.UpdateData);
 
         //Assert
         var expected = new ErrorReason(
@@ -134,7 +134,7 @@ public class UpdateUserCommandValidatorTest
             SharedResource.TranslateText
         );
         result
-            .ShouldHaveValidationErrorFor(x => x.UpdateData.FirstName)
+            .ShouldHaveValidationErrorFor(x => x.FirstName)
             .WithCustomState(expected, new ErrorReasonComparer())
             .Only();
     }
@@ -151,7 +151,7 @@ public class UpdateUserCommandValidatorTest
         FakeRoleAndPermissionFound();
 
         //Act
-        var result = await validator.TestValidateAsync(command);
+        var result = await validator.TestValidateAsync(command.UpdateData);
 
         //Assert
         var expected = new ErrorReason(
@@ -159,7 +159,7 @@ public class UpdateUserCommandValidatorTest
             SharedResource.TranslateText
         );
         result
-            .ShouldHaveValidationErrorFor(x => x.UpdateData.FirstName)
+            .ShouldHaveValidationErrorFor(x => x.FirstName)
             .WithCustomState(expected, new ErrorReasonComparer())
             .Only();
     }
@@ -171,10 +171,10 @@ public class UpdateUserCommandValidatorTest
         command.UpdateData.FirstName = "Minh";
 
         //Act
-        var result = await validator.TestValidateAsync(command);
+        var result = await validator.TestValidateAsync(command.UpdateData);
 
         //Assert
-        result.ShouldNotHaveValidationErrorFor(x => x.UpdateData.FirstName);
+        result.ShouldNotHaveValidationErrorFor(x => x.FirstName);
     }
     #endregion
 
@@ -186,10 +186,10 @@ public class UpdateUserCommandValidatorTest
         command.UpdateData.PhoneNumber = null;
 
         //Act
-        var result = await validator.TestValidateAsync(command);
+        var result = await validator.TestValidateAsync(command.UpdateData);
 
         //Assert
-        result.ShouldNotHaveValidationErrorFor(x => x.UpdateData.PhoneNumber);
+        result.ShouldNotHaveValidationErrorFor(x => x.PhoneNumber);
     }
 
     [Theory]
@@ -269,7 +269,7 @@ public class UpdateUserCommandValidatorTest
         FakeRoleAndPermissionFound();
 
         // Act
-        var result = await validator.TestValidateAsync(command);
+        var result = await validator.TestValidateAsync(command.UpdateData);
 
         // Assert
         var expected = new ErrorReason(
@@ -278,7 +278,7 @@ public class UpdateUserCommandValidatorTest
         );
 
         result
-            .ShouldHaveValidationErrorFor(x => x.UpdateData.Email)
+            .ShouldHaveValidationErrorFor(x => x.Email)
             .WithCustomState(expected, new ErrorReasonComparer())
             .Only();
     }
@@ -297,7 +297,7 @@ public class UpdateUserCommandValidatorTest
         FakeRoleAndPermissionFound();
 
         // Act
-        var result = await validator.TestValidateAsync(command);
+        var result = await validator.TestValidateAsync(command.UpdateData);
 
         // Assert
         var expected = new ErrorReason(
@@ -306,7 +306,7 @@ public class UpdateUserCommandValidatorTest
         );
 
         result
-            .ShouldHaveValidationErrorFor(x => x.UpdateData.Email)
+            .ShouldHaveValidationErrorFor(x => x.Email)
             .WithCustomState(expected, new ErrorReasonComparer())
             .Only();
     }
@@ -365,10 +365,10 @@ public class UpdateUserCommandValidatorTest
         command.UpdateData.Email = "valid.user@example.com";
 
         // Act
-        var result = await validator.TestValidateAsync(command);
+        var result = await validator.TestValidateAsync(command.UpdateData);
 
         // Assert
-        result.ShouldNotHaveValidationErrorFor(x => x.UpdateData.Email);
+        result.ShouldNotHaveValidationErrorFor(x => x.Email);
     }
     #endregion
 
@@ -387,7 +387,7 @@ public class UpdateUserCommandValidatorTest
         FakeRoleAndPermissionFound();
 
         // Act
-        var result = await validator.TestValidateAsync(command);
+        var result = await validator.TestValidateAsync(command.UpdateData);
 
         // Assert
         var expected = new ErrorReason(
@@ -396,7 +396,7 @@ public class UpdateUserCommandValidatorTest
         );
 
         result
-            .ShouldHaveValidationErrorFor(x => x.UpdateData.Status)
+            .ShouldHaveValidationErrorFor(x => x.Status)
             .WithCustomState(expected, new ErrorReasonComparer())
             .Only();
     }
@@ -408,10 +408,10 @@ public class UpdateUserCommandValidatorTest
         command.UpdateData.Status = UserStatus.Active;
 
         // Act
-        var result = await validator.TestValidateAsync(command);
+        var result = await validator.TestValidateAsync(command.UpdateData);
 
         // Assert
-        result.ShouldNotHaveValidationErrorFor(x => x.UpdateData.Status);
+        result.ShouldNotHaveValidationErrorFor(x => x.Status);
     }
     #endregion
 
@@ -436,7 +436,7 @@ public class UpdateUserCommandValidatorTest
             .ReturnsAsync(command.UpdateData.Permissions!.Count);
 
         // Act
-        var result = await validator.TestValidateAsync(command);
+        var result = await validator.TestValidateAsync(command.UpdateData);
 
         // Assert
         var expected = new ErrorReason(
@@ -445,7 +445,7 @@ public class UpdateUserCommandValidatorTest
         );
 
         result
-            .ShouldHaveValidationErrorFor(x => x.UpdateData.Roles)
+            .ShouldHaveValidationErrorFor(x => x.Roles)
             .WithCustomState(expected, new ErrorReasonComparer())
             .Only();
     }
@@ -471,7 +471,7 @@ public class UpdateUserCommandValidatorTest
             .ReturnsAsync(command.UpdateData.Permissions!.Count);
 
         // Act
-        var result = await validator.TestValidateAsync(command);
+        var result = await validator.TestValidateAsync(command.UpdateData);
 
         // Assert
         var expected = new ErrorReason(
@@ -480,7 +480,7 @@ public class UpdateUserCommandValidatorTest
         );
 
         result
-            .ShouldHaveValidationErrorFor(x => x.UpdateData.Roles)
+            .ShouldHaveValidationErrorFor(x => x.Roles)
             .WithCustomState(expected, new ErrorReasonComparer())
             .Only();
     }
@@ -546,10 +546,10 @@ public class UpdateUserCommandValidatorTest
         command.UpdateData.Permissions = permissionIds;
 
         // Act
-        var result = await validator.TestValidateAsync(command);
+        var result = await validator.TestValidateAsync(command.UpdateData);
 
         // Assert
-        result.ShouldNotHaveValidationErrorFor(x => x.UpdateData.Permissions);
+        result.ShouldNotHaveValidationErrorFor(x => x.Permissions);
     }
 
     [Fact]
@@ -566,7 +566,7 @@ public class UpdateUserCommandValidatorTest
         FakeRoleAndPermissionFound();
 
         // Act
-        var result = await validator.TestValidateAsync(command);
+        var result = await validator.TestValidateAsync(command.UpdateData);
 
         // Assert
         var expected = new ErrorReason(
@@ -574,7 +574,7 @@ public class UpdateUserCommandValidatorTest
             SharedResource.TranslateText
         );
         result
-            .ShouldHaveValidationErrorFor(x => x.UpdateData.Permissions)
+            .ShouldHaveValidationErrorFor(x => x.Permissions)
             .WithCustomState(expected, new ErrorReasonComparer())
             .Only();
     }
