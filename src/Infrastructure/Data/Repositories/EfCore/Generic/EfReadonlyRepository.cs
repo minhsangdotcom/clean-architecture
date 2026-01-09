@@ -9,10 +9,9 @@ using SharedKernel.Entities;
 using Specification.Interfaces;
 using SpecificationEFCore.Evaluators;
 
-namespace Infrastructure.Data.Repositories.EfCore.Implementations;
+namespace Infrastructure.Data.Repositories.EfCore.Generic;
 
-public class EfDynamicSpecificationRepository<T>(IEfDbContext dbContext)
-    : IEfDynamicSpecificationRepository<T>
+public class EfReadonlyRepository<T>(IEfDbContext dbContext) : IEfReadonlyRepository<T>
     where T : class
 {
     public async Task<T?> FindByConditionAsync(

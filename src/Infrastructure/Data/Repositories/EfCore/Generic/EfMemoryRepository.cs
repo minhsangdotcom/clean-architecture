@@ -3,7 +3,7 @@ using Application.Common.Interfaces.Repositories.EfCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 
-namespace Infrastructure.Data.Repositories.EfCore.Implementations;
+namespace Infrastructure.Data.Repositories.EfCore.Generic;
 
 public class EfMemoryRepository<T>(IEfDbContext dbContext) : IEfMemoryRepository<T>
     where T : class
@@ -43,8 +43,6 @@ public class EfMemoryRepository<T>(IEfDbContext dbContext) : IEfMemoryRepository
         dbContext.Set<T>().AddRange(entities);
         return entities;
     }
-
-    public void Edit(T entity) => dbContext.Entry(entity).State = EntityState.Modified;
 
     public void Update(T entity) => dbContext.Set<T>().Update(entity);
 

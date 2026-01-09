@@ -309,6 +309,6 @@ public class UserSeeder(
         ];
 }
 
-record GroupedPermissionDefinition(string GroupName, List<PermissionDefinition> Permissions);
+public record GroupedPermissionDefinition(string GroupName, List<PermissionDefinition> Permissions);
 
-record PermissionDefinitionWithGroup(string GroupName, PermissionDefinition Permission);
+public record PermissionDefinitionWithGroup(string GroupName, PermissionDefinition Permission);

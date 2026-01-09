@@ -54,7 +54,7 @@ public class ListCommuneHandler(
         }
 
         var response = await unitOfWork
-            .DynamicReadOnlyRepository<Commune>()
+            .ReadonlyRepository<Commune>()
             .PagedListAsync(
                 new ListCommuneSpecification(),
                 query,

@@ -30,8 +30,6 @@ public interface IEfMemoryRepository<T>
 
     IEnumerable<T> AddRange(IEnumerable<T> entities);
 
-    void Edit(T entity);
-
     void Update(T entity);
 
     void UpdateRange(IEnumerable<T> entities);

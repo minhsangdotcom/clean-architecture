@@ -1,13 +1,12 @@
 using System.Linq.Expressions;
-using Domain.Common;
 
 namespace Application.Common.Interfaces.Repositories.EfCore;
 
 /// <summary>
-/// Normal Repository Interface with expressions support for Async operations
+/// Normal Repository Interface with expression support for Async operations
 /// </summary>
 /// <typeparam name="T"></typeparam>
-public interface IEfAsyncRepository<T>
+public interface IEfRepository<T>
     where T : class
 {
     #region Read

@@ -63,6 +63,19 @@ public static class DependencyInjection
             }
         );
 
+        services.AddDbContextFactory<TheDbContext>(
+            (sp, options) =>
+            {
+                NpgsqlDataSource npgsqlDataSource = sp.GetRequiredService<NpgsqlDataSource>();
+                options
+                    .UseNpgsql(npgsqlDataSource)
+                    .AddInterceptors(
+                        sp.GetRequiredService<UpdateAuditableEntityInterceptor>(),
+                        sp.GetRequiredService<DispatchDomainEventInterceptor>()
+                    );
+            }
+        );
+
         // queue register
         services.AddQueue(configuration);
 
@@ -74,7 +87,7 @@ public static class DependencyInjection
             .AddMail(configuration)
             .AddMemoryCaching(configuration)
             .AddDistributedCache(configuration)
-            .AddRepositories()
+            .AddSpecificRepositories()
             .Configure<HostOptions>(options =>
             {
                 options.ServicesStartConcurrently = true;

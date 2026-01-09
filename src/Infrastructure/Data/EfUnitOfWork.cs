@@ -1,7 +1,7 @@
 using Application.Common.Interfaces.Repositories.EfCore;
 using Application.Common.Interfaces.Services.Cache;
 using Application.Common.Interfaces.UnitOfWorks;
-using Infrastructure.Data.Repositories.EfCore.Implementations;
+using Infrastructure.Data.Repositories.EfCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.Logging;
@@ -14,21 +14,19 @@ public class EfUnitOfWork(
     IMemoryCacheService cache
 ) : IEfUnitOfWork
 {
-    private readonly EfRepositoryFactory factory = new(dbContext, logger, cache);
+    private readonly RepositoryFactory factory = new(dbContext, logger, cache);
     private IDbContextTransaction? currentTransaction = null;
 
     private bool disposed = false;
 
-    public IEfAsyncRepository<TEntity> Repository<TEntity>()
-        where TEntity : class => factory.CreateAsyncRepository<TEntity>();
+    public IEfRepository<TEntity> Repository<TEntity>()
+        where TEntity : class => factory.Repository<TEntity>();
 
-    public IEfDynamicSpecificationRepository<TEntity> DynamicReadOnlyRepository<TEntity>(
-        bool isCached = false
-    )
-        where TEntity : class => factory.CreateDynamicSpecRepository<TEntity>(isCached);
+    public IEfReadonlyRepository<TEntity> ReadonlyRepository<TEntity>(bool isCached = false)
+        where TEntity : class => factory.ReadOnlyRepository<TEntity>();
 
-    public IEfSpecificationRepository<TEntity> ReadOnlyRepository<TEntity>(bool isCached = false)
-        where TEntity : class => factory.CreateSpecRepository<TEntity>(isCached);
+    public IEfSpecRepository<TEntity> SpecRepository<TEntity>(bool isCached = false)
+        where TEntity : class => factory.SpecRepository<TEntity>();
 
     public async Task BeginTransactionAsync(CancellationToken cancellationToken = default)
     {

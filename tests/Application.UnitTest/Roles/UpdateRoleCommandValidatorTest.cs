@@ -29,8 +29,8 @@ public sealed class UpdateRoleCommandValidatorTest
     {
         contextProvider.Setup(x => x.GetHttpMethod()).Returns(HttpMethod.Put.ToString());
 
-        Mock<IEfAsyncRepository<Role>> roleRepo = new();
-        Mock<IEfAsyncRepository<Permission>> permissionRepo = new();
+        Mock<IEfRepository<Role>> roleRepo = new();
+        Mock<IEfRepository<Permission>> permissionRepo = new();
 
         unitOfWork.Setup(x => x.Repository<Role>()).Returns(roleRepo.Object);
         unitOfWork.Setup(x => x.Repository<Permission>()).Returns(permissionRepo.Object);

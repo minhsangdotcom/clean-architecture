@@ -4,13 +4,11 @@ namespace Application.Common.Interfaces.UnitOfWorks;
 
 public interface IEfUnitOfWork : IUnitOfWork
 {
-    IEfAsyncRepository<TEntity> Repository<TEntity>()
+    IEfRepository<TEntity> Repository<TEntity>()
         where TEntity : class;
-    IEfDynamicSpecificationRepository<TEntity> DynamicReadOnlyRepository<TEntity>(
-        bool isCached = false
-    )
+    IEfReadonlyRepository<TEntity> ReadonlyRepository<TEntity>(bool isCached = false)
         where TEntity : class;
-    IEfSpecificationRepository<TEntity> ReadOnlyRepository<TEntity>(bool isCached = false)
+    IEfSpecRepository<TEntity> SpecRepository<TEntity>(bool isCached = false)
         where TEntity : class;
 
     int ExecuteSqlCommand(string sql, params object[] parameters);

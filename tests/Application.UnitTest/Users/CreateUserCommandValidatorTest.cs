@@ -27,9 +27,9 @@ public partial class CreateUserCommandValidatorTest
     private readonly Mock<IMessageTranslatorService> translator = new();
     private readonly Mock<IEfUnitOfWork> unitOfWork = new();
 
-    private readonly Mock<IEfAsyncRepository<Role>> roleRepo = new();
-    private readonly Mock<IEfAsyncRepository<User>> userRepo = new();
-    private readonly Mock<IEfAsyncRepository<Permission>> permissionRepo = new();
+    private readonly Mock<IEfRepository<Role>> roleRepo = new();
+    private readonly Mock<IEfRepository<User>> userRepo = new();
+    private readonly Mock<IEfRepository<Permission>> permissionRepo = new();
 
     public CreateUserCommandValidatorTest()
     {

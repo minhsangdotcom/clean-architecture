@@ -48,7 +48,7 @@ public class ListQueueLogHandler(
             );
         }
         var response = await unitOfWork
-            .DynamicReadOnlyRepository<QueueLog>()
+            .ReadonlyRepository<QueueLog>()
             .PagedListAsync(
                 new ListQueueResponseSpecification(),
                 query,

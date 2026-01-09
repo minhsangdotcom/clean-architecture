@@ -8,11 +8,11 @@ using Specification.Interfaces;
 
 namespace Infrastructure.Data.Repositories.EfCore.Cached;
 
-public class CachedDynamicSpecRepository<T>(
-    IEfDynamicSpecificationRepository<T> repository,
+public class CachedReadonlyRepository<T>(
+    IEfReadonlyRepository<T> repository,
     ILogger<EfUnitOfWork> logger,
     IMemoryCacheService memoryCacheService
-) : IEfDynamicSpecificationRepository<T>
+) : IEfReadonlyRepository<T>
     where T : class
 {
     public Task<TResult?> FindByConditionAsync<TResult>(

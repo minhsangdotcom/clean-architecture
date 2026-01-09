@@ -5,9 +5,9 @@ using Microsoft.EntityFrameworkCore;
 using Specification.Interfaces;
 using SpecificationEFCore.Evaluators;
 
-namespace Infrastructure.Data.Repositories.EfCore.Implementations;
+namespace Infrastructure.Data.Repositories.EfCore.Generic;
 
-public class EfSpecificationRepository<T>(IEfDbContext dbContext) : IEfSpecificationRepository<T>
+public class EfSpecRepository<T>(IEfDbContext dbContext) : IEfSpecRepository<T>
     where T : class
 {
     public async Task<TResult?> FindByConditionAsync<TResult>(
@@ -30,7 +30,7 @@ public class EfSpecificationRepository<T>(IEfDbContext dbContext) : IEfSpecifica
     )
         where TResult : class
     {
-        var list = await ListAsync<TResult>(spec, cancellationToken);
+        var list = await ListAsync(spec, cancellationToken);
         return new PaginationResponse<TResult>(
             list,
             list.Count,

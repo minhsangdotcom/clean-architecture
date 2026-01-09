@@ -1,11 +1,11 @@
-using Domain.Common;
 using Microsoft.Extensions.DependencyInjection;
+using IRepository = Domain.Common.IRepository;
 
 namespace Infrastructure.Data.Repositories;
 
 public static class RepositoryRegisterExtension
 {
-    public static IServiceCollection AddRepositories(this IServiceCollection services)
+    public static IServiceCollection AddSpecificRepositories(this IServiceCollection services)
     {
         services.Scan(scan =>
             scan.FromAssemblyOf<TheDbContext>()

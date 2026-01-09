@@ -48,7 +48,7 @@ public class RefreshUserTokenHandler(
         }
 
         IList<UserRefreshToken> refreshTokens = await unitOfWork
-            .DynamicReadOnlyRepository<UserRefreshToken>()
+            .ReadonlyRepository<UserRefreshToken>()
             .ListAsync(
                 new ListRefreshTokenByFamilyIdSpecification(
                     decodeToken!.FamilyId!,

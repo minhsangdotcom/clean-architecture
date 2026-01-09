@@ -49,7 +49,7 @@ public class ListUserHandler(
         }
 
         var response = await unitOfWork
-            .DynamicReadOnlyRepository<User>(true)
+            .ReadonlyRepository<User>(true)
             .CursorPagedListAsync(
                 new ListUserSpecification(),
                 query,

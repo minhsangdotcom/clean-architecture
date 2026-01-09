@@ -2,11 +2,10 @@ using System.Linq.Expressions;
 using Application.Common.Interfaces.Repositories.EfCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
-using Microsoft.EntityFrameworkCore.Query;
 
-namespace Infrastructure.Data.Repositories.EfCore.Implementations;
+namespace Infrastructure.Data.Repositories.EfCore.Generic;
 
-public class EfAsyncRepository<T>(IEfDbContext dbContext) : IEfAsyncRepository<T>
+public class EfRepository<T>(IEfDbContext dbContext) : IEfRepository<T>
     where T : class
 {
     #region Read

@@ -10,7 +10,7 @@ namespace Application.Common.Interfaces.Repositories.EfCore;
 /// and Specification pattern.
 /// The <see cref="ISpecification{T}"/> here is mainly used for includes, AsNoTracking, AsSplitQuery or base filters.
 /// </summary>
-public interface IEfDynamicSpecificationRepository<T>
+public interface IEfReadonlyRepository<T>
     where T : class
 {
     Task<T?> FindByConditionAsync(

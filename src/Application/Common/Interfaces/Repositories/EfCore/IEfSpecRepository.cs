@@ -1,16 +1,17 @@
 using Application.Contracts.Dtos.Requests;
 using Application.Contracts.Dtos.Responses;
-using Domain.Common;
 using Specification.Interfaces;
 
 namespace Application.Common.Interfaces.Repositories.EfCore;
 
 /// <summary>
-/// Repository using for static, pre-defined queries.
-/// Encapsulates filter, search, sort, and pagination logic for performance and reusability.
-/// Use when queries are fixed. For better support use the IEfDynamicSpecificationRepository instead.
+/// READONLY REPOSITORY
+/// This doesn't support dynamic filter
+/// Query is gonna go with ISpecification
+/// TResult : must be a entity class
 /// </summary>
-public interface IEfSpecificationRepository<T>
+/// <typeparam name="T">The encapsulated specific query</typeparam>
+public interface IEfSpecRepository<T>
     where T : class
 {
     Task<TResult?> FindByConditionAsync<TResult>(

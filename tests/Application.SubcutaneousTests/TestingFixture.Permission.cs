@@ -3,10 +3,8 @@ using Application.SubcutaneousTests.Extensions;
 using Domain.Aggregates.Permissions;
 using Infrastructure.Constants;
 using Infrastructure.Data;
-using Infrastructure.Data.Seeds;
-using Microsoft.EntityFrameworkCore;
+using Infrastructure.Data.Seeders;
 using Microsoft.Extensions.DependencyInjection;
-using static Application.Contracts.Permissions.PermissionNames;
 
 namespace Application.SubcutaneousTests;
 

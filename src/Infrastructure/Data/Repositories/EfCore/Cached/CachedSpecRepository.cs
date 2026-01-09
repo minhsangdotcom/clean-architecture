@@ -7,11 +7,11 @@ using Specification.Interfaces;
 
 namespace Infrastructure.Data.Repositories.EfCore.Cached;
 
-public class CachedSpecificationRepository<T>(
-    IEfSpecificationRepository<T> repository,
+public class CachedSpecRepository<T>(
+    IEfSpecRepository<T> repository,
     ILogger<EfUnitOfWork> logger,
     IMemoryCacheService memoryCacheService
-) : IEfSpecificationRepository<T>
+) : IEfSpecRepository<T>
     where T : class
 {
     public Task<TResult?> FindByConditionAsync<TResult>(
