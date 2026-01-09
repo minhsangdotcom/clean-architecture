@@ -12,5 +12,6 @@ public class DbSeederRunner(IEnumerable<IDbSeeder> seeders, ILogger<DbSeederRunn
             logger.LogInformation("Running seeder: {Seeder}", seeder.GetType().Name);
             await seeder.SeedAsync(cancellationToken);
         }
+        logger.LogInformation("Seeding action has finished.");
     }
 }
