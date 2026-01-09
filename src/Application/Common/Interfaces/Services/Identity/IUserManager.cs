@@ -85,7 +85,7 @@ public interface IUserManager
 
     Task ReplacePermissionsAsync(
         User user,
-        IEnumerable<Permission> permissions,
+        IEnumerable<Permission>? permissions,
         CancellationToken cancellationToken = default
     );
 

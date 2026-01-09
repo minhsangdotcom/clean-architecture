@@ -68,16 +68,16 @@ public class UpdateUserHandler(
             await userManager.ReplaceRolesAsync(user, roles, cancellationToken);
 
             // add permissions
-            if (updateData.Permissions?.Count > 0)
-            {
-                IList<Permission> permissions = await unitOfWork
-                    .DynamicReadOnlyRepository<Permission>()
-                    .ListAsync(
-                        new ListPermissionByIdSpecification(updateData.Permissions),
-                        cancellationToken: cancellationToken
-                    );
-                await userManager.ReplacePermissionsAsync(user, permissions, cancellationToken);
-            }
+            IList<Permission> permissions =
+                updateData.Permissions != null
+                    ? await unitOfWork
+                        .DynamicReadOnlyRepository<Permission>()
+                        .ListAsync(
+                            new ListPermissionByIdSpecification(updateData.Permissions),
+                            cancellationToken: cancellationToken
+                        )
+                    : [];
+            await userManager.ReplacePermissionsAsync(user, permissions, cancellationToken);
             await unitOfWork.CommitAsync(cancellationToken);
         }
         catch (Exception)
