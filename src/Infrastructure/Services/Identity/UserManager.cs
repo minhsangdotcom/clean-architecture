@@ -268,14 +268,14 @@ public class UserManager(
         {
             await rolePermissionChecker.InvalidateUserRolesAsync(user.Id);
         }
-        // user.Roles must be included before calling this
-        dbContext.Set<UserRole>().RemoveRange(user.Roles);
+       
         List<Ulid> roleIds = await dbContext
             .Set<Role>()
             .Where(r => roleNames.Contains(r.Name))
             .Select(r => r.Id)
             .ToListAsync(cancellationToken);
-
+            
+        dbContext.Set<UserRole>().RemoveRange(user.Roles);
         await dbContext
             .Set<UserRole>()
             .AddRangeAsync(
@@ -360,38 +360,46 @@ public class UserManager(
 
     public async Task ReplacePermissionsAsync(
         User user,
-        IEnumerable<Permission> permissions,
+        IEnumerable<Permission>? permissions,
         CancellationToken cancellationToken = default
     )
     {
-        List<string> codes = [.. permissions.Select(x => x.Code)];
-        List<string> currentPermissions = await dbContext
-            .Set<UserPermission>()
-            .Where(x => x.UserId == user.Id)
-            .Select(x => x.Permission!.Code)
-            .ToListAsync(cancellationToken);
-
-        // check whether permissions of user have changed, if have, remove cache key for using cache purpose
-        if (
-            codes.Exists(code => !currentPermissions.Contains(code))
-            || currentPermissions.Exists(p => !codes.Contains(p))
-        )
+        if (permissions == null || !permissions.Any())
         {
+            dbContext.Set<UserPermission>().RemoveRange(user.Permissions);
             await rolePermissionChecker.InvalidateUserPermissionsAsync(user.Id);
         }
+        else
+        {
+            List<string> codes = [.. permissions.Select(x => x.Code)];
+            List<string> currentPermissions = await dbContext
+                .Set<UserPermission>()
+                .Where(x => x.UserId == user.Id)
+                .Select(x => x.Permission!.Code)
+                .ToListAsync(cancellationToken);
 
-        //Always include
-        dbContext.Set<UserPermission>().RemoveRange(user.Permissions);
-        List<UserPermission> userPermissions =
-        [
-            .. permissions.Select(p => new UserPermission
+            // check whether permissions of user have changed, if have, remove cache key for using cache purpose
+            if (
+                codes.Exists(code => !currentPermissions.Contains(code))
+                || currentPermissions.Exists(p => !codes.Contains(p))
+            )
             {
-                UserId = user.Id,
-                PermissionId = p.Id,
-            }),
-        ];
+                await rolePermissionChecker.InvalidateUserPermissionsAsync(user.Id);
+            }
 
-        await dbContext.Set<UserPermission>().AddRangeAsync(userPermissions, cancellationToken);
+
+            List<UserPermission> userPermissions =
+            [
+                .. permissions.Select(p => new UserPermission
+                {
+                    UserId = user.Id,
+                    PermissionId = p.Id,
+                }),
+            ];
+            dbContext.Set<UserPermission>().RemoveRange(user.Permissions);
+            await dbContext.Set<UserPermission>().AddRangeAsync(userPermissions, cancellationToken);
+        }
+
         await dbContext.SaveChangesAsync(cancellationToken);
     }
 
