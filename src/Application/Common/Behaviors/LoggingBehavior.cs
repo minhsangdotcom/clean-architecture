@@ -12,24 +12,22 @@ public class LoggingBehavior<TMessage, TResponse>(
 {
     protected override ValueTask Handle(TMessage message, CancellationToken cancellationToken)
     {
-        string requestName = typeof(TMessage).Name;
+        string commandName = typeof(TMessage).Name;
         Ulid? id = currentUser.Id;
 
         if (id == Ulid.Empty)
         {
             logger.LogInformation(
-                "\n\n Incoming request: {Name} for anonymous user  with payload \n {@Request} \n",
-                requestName,
-                message
+                "\n\n Incoming command {CommandName} from unauthenticated user \n",
+                commandName
             );
         }
         else
         {
             logger.LogInformation(
-                "\n\n Incoming request: {Name} for user {userId} with payload \n {@Request} \n",
-                requestName,
-                id,
-                message
+                "\n\n Incoming command {CommandName} from user {id} \n",
+                commandName,
+                id
             );
         }
         return default!;
