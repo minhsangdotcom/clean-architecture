@@ -2,7 +2,7 @@ using Application.Common.Interfaces.UnitOfWorks;
 using Infrastructure.Data;
 using Infrastructure.Data.Interceptors;
 using Infrastructure.Data.Repositories;
-using Infrastructure.Data.Seeds;
+using Infrastructure.Data.Seeders;
 using Infrastructure.Data.Settings;
 using Infrastructure.Services.Aws;
 using Infrastructure.Services.Cache.DistributedCache;
@@ -80,7 +80,7 @@ public static class DependencyInjection
                 options.ServicesStartConcurrently = true;
                 options.ServicesStopConcurrently = true;
             })
-            .AddHostedService<DataSeeder>();
+            .AddSeeder();
 
         return services;
     }

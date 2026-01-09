@@ -1,22 +1,21 @@
 using System.Text.Json;
+using Application.Common.Interfaces.Seeder;
 using Application.Common.Interfaces.UnitOfWorks;
 using Domain.Aggregates.Regions;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
-namespace Infrastructure.Data.Seeds;
+namespace Infrastructure.Data.Seeders;
 
-public class RegionDataInitializer
+public class RegionSeeder(IEfUnitOfWork unitOfWork, ILogger<RegionSeeder> logger) : IDbSeeder
 {
-    public static async Task InitializeAsync(IServiceProvider provider)
+    public async Task SeedAsync(CancellationToken cancellationToken = default)
     {
-        IEfUnitOfWork unitOfWork = provider.GetRequiredService<IEfUnitOfWork>();
-        ILogger logger = provider.GetRequiredService<ILogger<RegionDataInitializer>>();
-
         if (
-            await unitOfWork.Repository<Province>().AnyAsync()
-            && await unitOfWork.Repository<District>().AnyAsync()
-            && await unitOfWork.Repository<Commune>().AnyAsync()
+            await unitOfWork.Repository<Province>().AnyAsync(cancellationToken: cancellationToken)
+            && await unitOfWork
+                .Repository<District>()
+                .AnyAsync(cancellationToken: cancellationToken)
+            && await unitOfWork.Repository<Commune>().AnyAsync(cancellationToken: cancellationToken)
         )
         {
             return;
@@ -27,18 +26,18 @@ public class RegionDataInitializer
 
         string provinceFilePath = Path.Combine(fullPath, "Provinces.json");
         IEnumerable<Province>? provinces = Read<Province>(provinceFilePath);
-        await unitOfWork.Repository<Province>().AddRangeAsync(provinces ?? []);
+        await unitOfWork.Repository<Province>().AddRangeAsync(provinces ?? [], cancellationToken);
 
         string districtFilePath = Path.Combine(fullPath, "Districts.json");
         IEnumerable<District>? districts = Read<District>(districtFilePath);
-        await unitOfWork.Repository<District>().AddRangeAsync(districts ?? []);
+        await unitOfWork.Repository<District>().AddRangeAsync(districts ?? [], cancellationToken);
 
         string communeFilePath = Path.Combine(fullPath, "Wards.json");
         IEnumerable<Commune>? communes = Read<Commune>(communeFilePath);
-        await unitOfWork.Repository<Commune>().AddRangeAsync(communes ?? []);
+        await unitOfWork.Repository<Commune>().AddRangeAsync(communes ?? [], cancellationToken);
         logger.LogInformation("Seeding region data has finished....");
 
-        await unitOfWork.SaveChangesAsync();
+        await unitOfWork.SaveChangesAsync(cancellationToken);
     }
 
     private static List<T>? Read<T>(string path)

@@ -1,3 +1,4 @@
+using Application.Common.Interfaces.Seeder;
 using Application.Common.Interfaces.Services.Identity;
 using Application.Common.Interfaces.UnitOfWorks;
 using Application.Contracts.Permissions;
@@ -6,22 +7,21 @@ using Domain.Aggregates.Roles;
 using Domain.Aggregates.Users;
 using Domain.Aggregates.Users.Enums;
 using Infrastructure.Constants;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using static Application.Contracts.Permissions.PermissionNames;
 
-namespace Infrastructure.Data.Seeds;
+namespace Infrastructure.Data.Seeders;
 
-public class DbInitializer
+public class UserSeeder(
+    IEfUnitOfWork unitOfWork,
+    IUserManager userManager,
+    IRoleManager roleManager,
+    PermissionDefinitionContext permissionContext,
+    ILogger<UserSeeder> logger
+) : IDbSeeder
 {
-    public static async Task InitializeAsync(IServiceProvider provider)
+    public async Task SeedAsync(CancellationToken cancellationToken = default)
     {
-        var unitOfWork = provider.GetRequiredService<IEfUnitOfWork>();
-        var roleManager = provider.GetRequiredService<IRoleManager>();
-        var userManager = provider.GetRequiredService<IUserManager>();
-        var logger = provider.GetRequiredService<ILogger<DbInitializer>>();
-        var permissionContext = provider.GetRequiredService<PermissionDefinitionContext>();
-
         IReadOnlyDictionary<string, PermissionGroupDefinition> groups = permissionContext.Groups;
         List<GroupedPermissionDefinition> groupedPermissions =
         [
@@ -88,30 +88,36 @@ public class DbInitializer
         List<PermissionDefinitionWithGroup> allDefinitions = GetPermissionDefinitionWithGroups(
             groupedPermissions
         );
-        await unitOfWork.BeginTransactionAsync();
+        await unitOfWork.BeginTransactionAsync(cancellationToken);
         try
         {
-            if (!await unitOfWork.Repository<Permission>().AnyAsync())
+            if (
+                !await unitOfWork
+                    .Repository<Permission>()
+                    .AnyAsync(cancellationToken: cancellationToken)
+            )
             {
                 logger.LogInformation("Inserting permissions is starting.............");
-                await unitOfWork.Repository<Permission>().AddRangeAsync(permissions);
-                await unitOfWork.SaveChangesAsync();
+                await unitOfWork
+                    .Repository<Permission>()
+                    .AddRangeAsync(permissions, cancellationToken);
+                await unitOfWork.SaveChangesAsync(cancellationToken);
                 logger.LogInformation("Inserting permissions has finished.............");
             }
             else
             {
-                await UpdatePermissionAsync(allDefinitions, unitOfWork, logger);
+                await UpdatePermissionAsync(allDefinitions, unitOfWork, logger, cancellationToken);
             }
 
-            if (!await unitOfWork.Repository<Role>().AnyAsync())
+            if (!await unitOfWork.Repository<Role>().AnyAsync(cancellationToken: cancellationToken))
             {
                 logger.LogInformation("Inserting roles is starting.............");
-                await roleManager.CreateAsync(adminRole);
-                await roleManager.CreateAsync(managerRole);
+                await roleManager.CreateAsync(adminRole, cancellationToken);
+                await roleManager.CreateAsync(managerRole, cancellationToken);
                 logger.LogInformation("Inserting roles has finished.............");
             }
 
-            if (!await unitOfWork.Repository<User>().AnyAsync())
+            if (!await unitOfWork.Repository<User>().AnyAsync(cancellationToken: cancellationToken))
             {
                 logger.LogInformation("Seeding user data is starting.............");
 
@@ -147,12 +153,28 @@ public class DbInitializer
                     Ulid.Parse(Credential.ZAYDEN_CRUZ_ID),
                     Credential.CREATED_BY_SYSTEM
                 );
-                await userManager.CreateAsync(adminUser, Credential.USER_DEFAULT_PASSWORD);
-                await userManager.CreateAsync(managerUser, Credential.USER_DEFAULT_PASSWORD);
+                await userManager.CreateAsync(
+                    adminUser,
+                    Credential.USER_DEFAULT_PASSWORD,
+                    cancellationToken: cancellationToken
+                );
+                await userManager.CreateAsync(
+                    managerUser,
+                    Credential.USER_DEFAULT_PASSWORD,
+                    cancellationToken: cancellationToken
+                );
 
                 // add roles for users
-                await userManager.AddToRolesAsync(adminUser, [adminRole.Name]);
-                await userManager.AddToRolesAsync(managerUser, [managerRole.Name]);
+                await userManager.AddToRolesAsync(
+                    adminUser,
+                    [adminRole.Name],
+                    cancellationToken: cancellationToken
+                );
+                await userManager.AddToRolesAsync(
+                    managerUser,
+                    [managerRole.Name],
+                    cancellationToken: cancellationToken
+                );
                 logger.LogInformation("Seeding user data has finished.............");
             }
 
@@ -161,25 +183,28 @@ public class DbInitializer
                 adminRole.Id,
                 roleManager,
                 unitOfWork,
-                logger
+                logger,
+                cancellationToken
             );
-            await unitOfWork.CommitAsync();
+            await unitOfWork.CommitAsync(cancellationToken);
         }
         catch (Exception ex)
         {
-            await unitOfWork.RollbackAsync();
+            await unitOfWork.RollbackAsync(cancellationToken);
             logger.LogInformation("error had occurred while seeding data with {message}", ex);
-            throw;
         }
     }
 
     private static async Task UpdatePermissionAsync(
         List<PermissionDefinitionWithGroup> allDefinitions,
         IEfUnitOfWork unitOfWork,
-        ILogger logger
+        ILogger logger,
+        CancellationToken cancellationToken = default
     )
     {
-        List<Permission> permissions = await unitOfWork.Repository<Permission>().ListAsync();
+        List<Permission> permissions = await unitOfWork
+            .Repository<Permission>()
+            .ListAsync(cancellationToken);
 
         var permissionsToDelete = permissions.FindAll(rp =>
             !allDefinitions.Exists(dp => dp.Permission.Code == rp.Code)
@@ -201,7 +226,7 @@ public class DbInitializer
             await unitOfWork
                 .Repository<Permission>()
                 .ExecuteDeleteAsync(x => idsToDelete.Contains(x.Id));
-            await unitOfWork.SaveChangesAsync();
+            await unitOfWork.SaveChangesAsync(cancellationToken);
             logger.LogInformation(
                 "deleting {count} permissions include {data}",
                 permissionsToDelete.Count,
@@ -211,8 +236,10 @@ public class DbInitializer
 
         if (permissionsToInsert.Count > 0)
         {
-            await unitOfWork.Repository<Permission>().AddRangeAsync(permissionsToInsert);
-            await unitOfWork.SaveChangesAsync();
+            await unitOfWork
+                .Repository<Permission>()
+                .AddRangeAsync(permissionsToInsert, cancellationToken);
+            await unitOfWork.SaveChangesAsync(cancellationToken);
             logger.LogInformation(
                 "inserting {count} permissions include {data}",
                 permissionsToInsert.Count,
@@ -226,11 +253,14 @@ public class DbInitializer
         Ulid roleId,
         IRoleManager manager,
         IEfUnitOfWork unitOfWork,
-        ILogger logger
+        ILogger logger,
+        CancellationToken cancellationToken = default
     )
     {
-        List<Permission> permissions = await unitOfWork.Repository<Permission>().ListAsync();
-        Role? role = await manager.FindByIdAsync(roleId);
+        List<Permission> permissions = await unitOfWork
+            .Repository<Permission>()
+            .ListAsync(cancellationToken);
+        Role? role = await manager.FindByIdAsync(roleId, cancellationToken: cancellationToken);
         if (role == null)
         {
             return;
@@ -248,7 +278,7 @@ public class DbInitializer
 
         if (rolePermissionsToDelete.Count > 0)
         {
-            await manager.RemovePermissionsAsync(role, rolePermissionsToDelete);
+            await manager.RemovePermissionsAsync(role, rolePermissionsToDelete, cancellationToken);
             logger.LogInformation(
                 "deleting {count} permission of {roleName} include {data}",
                 rolePermissionsToDelete.Count,
@@ -259,7 +289,7 @@ public class DbInitializer
 
         if (rolePermissionsToInsert.Count > 0)
         {
-            await manager.AddPermissionsAsync(role, rolePermissionsToInsert);
+            await manager.AddPermissionsAsync(role, rolePermissionsToInsert, cancellationToken);
             logger.LogInformation(
                 "inserting {count} claims of {roleName} include {data}",
                 rolePermissionsToInsert.Count,
@@ -279,6 +309,6 @@ public class DbInitializer
         ];
 }
 
-public record GroupedPermissionDefinition(string GroupName, List<PermissionDefinition> Permissions);
+record GroupedPermissionDefinition(string GroupName, List<PermissionDefinition> Permissions);
 
-public record PermissionDefinitionWithGroup(string GroupName, PermissionDefinition Permission);
+record PermissionDefinitionWithGroup(string GroupName, PermissionDefinition Permission);
