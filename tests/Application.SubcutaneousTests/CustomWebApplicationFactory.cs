@@ -54,10 +54,24 @@ public class CustomWebApplicationFactory<TProgram>(
                 });
         });
 
-        string path = Path.Combine(Directory.GetCurrentDirectory(), "../../../");
-        builder
-            .UseEnvironment(environmentName)
-            .UseConfiguration(configuration)
-            .UseContentRoot(path);
+        builder.UseEnvironment(environmentName).UseConfiguration(configuration);
+
+        string? rootPath = FindProjectRoot("Application.SubcutaneousTests.csproj");
+        if (!string.IsNullOrEmpty(rootPath))
+        {
+            builder.UseContentRoot(rootPath);
+        }
+    }
+
+    static string? FindProjectRoot(string projectFileName)
+    {
+        var dir = new DirectoryInfo(AppContext.BaseDirectory);
+
+        while (dir != null && !File.Exists(Path.Combine(dir.FullName, projectFileName)))
+        {
+            dir = dir.Parent;
+        }
+
+        return dir?.FullName;
     }
 }
