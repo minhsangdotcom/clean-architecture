@@ -8,7 +8,7 @@ public abstract class FluentValidator<T> : AbstractValidator<T>
 {
     public FluentValidator(
         IRequestContextProvider contextProvider,
-        IMessageTranslatorService translator
+        IMessageTranslator translator
     )
     {
         ApplyRules(contextProvider, translator);
@@ -17,8 +17,8 @@ public abstract class FluentValidator<T> : AbstractValidator<T>
 
     protected abstract void ApplyRules(
         IRequestContextProvider contextProvider,
-        IMessageTranslatorService translator
+        IMessageTranslator translator
     );
 
-    protected abstract void ApplyRules(IMessageTranslatorService translator);
+    protected abstract void ApplyRules(IMessageTranslator translator);
 }

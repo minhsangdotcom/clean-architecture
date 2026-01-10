@@ -10,7 +10,7 @@ namespace Application.UnitTest.Users;
 
 public class RequestUserPasswordResetCommandValidatorTest
 {
-    private readonly Mock<IMessageTranslatorService> translator = new();
+    private readonly Mock<IMessageTranslator> translator = new();
     private readonly RequestUserPasswordResetCommandValidator validator;
 
     private RequestUserPasswordResetCommand command = new("admin@gmail.com");

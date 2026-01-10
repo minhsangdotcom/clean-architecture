@@ -20,7 +20,7 @@ public class UpdateUserProfileCommandValidatorTest
 
     private readonly UpdateUserProfileCommandValidator validator;
     private readonly InlineValidator<UpdateUserProfileCommand> inlineValidator = [];
-    private readonly Mock<IMessageTranslatorService> translator = new();
+    private readonly Mock<IMessageTranslator> translator = new();
     private readonly Mock<IEfRepository<User>> userRepo = new();
 
     public UpdateUserProfileCommandValidatorTest()

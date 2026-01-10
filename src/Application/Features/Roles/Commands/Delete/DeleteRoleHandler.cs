@@ -9,7 +9,7 @@ using Mediator;
 
 namespace Application.Features.Roles.Commands.Delete;
 
-public class DeleteRoleHandler(IRoleManager manager, IMessageTranslatorService translator)
+public class DeleteRoleHandler(IRoleManager manager, IMessageTranslator translator)
     : IRequestHandler<DeleteRoleCommand, Result<string>>
 {
     public async ValueTask<Result<string>> Handle(

@@ -8,10 +8,10 @@ namespace Application.Features.Users.Commands.ChangePassword;
 
 public class ChangeUserPasswordCommandValidator(
     IRequestContextProvider contextProvider,
-    IMessageTranslatorService translator
+    IMessageTranslator translator
 ) : FluentValidator<ChangeUserPasswordCommand>(contextProvider, translator)
 {
-    protected sealed override void ApplyRules(IMessageTranslatorService translator)
+    protected sealed override void ApplyRules(IMessageTranslator translator)
     {
         RuleFor(x => x.OldPassword)
             .NotEmpty()
@@ -26,6 +26,6 @@ public class ChangeUserPasswordCommandValidator(
 
     protected sealed override void ApplyRules(
         IRequestContextProvider contextProvider,
-        IMessageTranslatorService translator
+        IMessageTranslator translator
     ) { }
 }

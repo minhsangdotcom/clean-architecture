@@ -8,15 +8,15 @@ namespace Application.Features.Users.Commands.RequestPasswordReset;
 
 public class RequestUserPasswordResetCommandValidator(
     IRequestContextProvider contextProvider,
-    IMessageTranslatorService translator
+    IMessageTranslator translator
 ) : FluentValidator<RequestUserPasswordResetCommand>(contextProvider, translator)
 {
     protected override void ApplyRules(
         IRequestContextProvider contextProvider,
-        IMessageTranslatorService translator
+        IMessageTranslator translator
     ) { }
 
-    protected sealed override void ApplyRules(IMessageTranslatorService translator)
+    protected sealed override void ApplyRules(IMessageTranslator translator)
     {
         RuleFor(x => x.Email)
             .NotEmpty()

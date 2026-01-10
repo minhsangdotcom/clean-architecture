@@ -9,7 +9,7 @@ namespace Application.Features.Permissions;
 public class ListPermissionHandler(
     IPermissionRepository permissionRepository,
     PermissionDefinitionContext permissionDefinitionContext,
-    IPermissionTranslatorService translator
+    IPermissionTranslator translator
 ) : IRequestHandler<ListPermissionQuery, Result<IReadOnlyList<ListGroupPermissionResponse>>>
 {
     public async ValueTask<Result<IReadOnlyList<ListGroupPermissionResponse>>> Handle(

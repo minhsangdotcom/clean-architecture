@@ -24,7 +24,7 @@ public partial class CreateUserCommandValidatorTest
     private readonly InlineValidator<CreateUserCommand> inlineValidator;
     private readonly CreateUserCommandValidator validator;
 
-    private readonly Mock<IMessageTranslatorService> translator = new();
+    private readonly Mock<IMessageTranslator> translator = new();
     private readonly Mock<IEfUnitOfWork> unitOfWork = new();
 
     private readonly Mock<IEfRepository<Role>> roleRepo = new();

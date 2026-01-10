@@ -3,11 +3,11 @@ using Microsoft.Extensions.Localization;
 
 namespace Api.Services.Localizations;
 
-public class PermissionTranslatorService : IPermissionTranslatorService
+public class PermissionTranslator : IPermissionTranslator
 {
     private readonly IStringLocalizer<Permissions> stringLocalizer;
 
-    public PermissionTranslatorService(IServiceProvider serviceProvider)
+    public PermissionTranslator(IServiceProvider serviceProvider)
     {
         using var scope = serviceProvider.CreateScope();
         stringLocalizer = scope.ServiceProvider.GetRequiredService<IStringLocalizer<Permissions>>();

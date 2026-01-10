@@ -3,11 +3,11 @@ using Microsoft.Extensions.Localization;
 
 namespace Api.Services.Localizations;
 
-public class MessageTranslatorService : IMessageTranslatorService
+public class MessageTranslator : IMessageTranslator
 {
     private readonly IStringLocalizer<Messages> stringLocalizer;
 
-    public MessageTranslatorService(IServiceProvider serviceProvider)
+    public MessageTranslator(IServiceProvider serviceProvider)
     {
         using var scope = serviceProvider.CreateScope();
         stringLocalizer = scope.ServiceProvider.GetRequiredService<IStringLocalizer<Messages>>();

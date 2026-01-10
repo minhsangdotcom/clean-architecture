@@ -23,7 +23,7 @@ public class UpdateUserCommandValidatorTest
     private readonly InlineValidator<UpdateUserCommand> inlineValidator;
     private readonly UpdateUserCommandValidator validator;
 
-    private readonly Mock<IMessageTranslatorService> translator = new();
+    private readonly Mock<IMessageTranslator> translator = new();
     private readonly Mock<IEfUnitOfWork> unitOfWork = new();
 
     private readonly Mock<IEfRepository<Role>> roleRepo = new();

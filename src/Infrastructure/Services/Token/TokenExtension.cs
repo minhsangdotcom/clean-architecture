@@ -53,8 +53,8 @@ public static class TokenExtension
                     {
                         context.HandleResponse();
                         bool isUnauthorized = !context.Response.HasStarted;
-                        IMessageTranslatorService translator =
-                            context.HttpContext.RequestServices.GetRequiredService<IMessageTranslatorService>();
+                        IMessageTranslator translator =
+                            context.HttpContext.RequestServices.GetRequiredService<IMessageTranslator>();
 
                         string unauthorizedMessage = UserErrorMessages.UserUnauthorized;
                         string tokenExpiredMessage = UserErrorMessages.UserTokenExpired;

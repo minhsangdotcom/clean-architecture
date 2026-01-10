@@ -13,7 +13,7 @@ public class ChangeUserPasswordCommandTest
     private readonly ChangeUserPasswordCommand command =
         new() { OldPassword = "Admin@123", NewPassword = "Admin@456" };
 
-    private readonly Mock<IMessageTranslatorService> translator = new();
+    private readonly Mock<IMessageTranslator> translator = new();
     private readonly ChangeUserPasswordCommandValidator validator;
 
     public ChangeUserPasswordCommandTest()

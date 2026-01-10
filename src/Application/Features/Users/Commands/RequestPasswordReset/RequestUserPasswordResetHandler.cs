@@ -20,7 +20,7 @@ public class RequestUserPasswordResetHandler(
     IEfUnitOfWork unitOfWork,
     IMailService mailService,
     IOptions<ForgotPasswordSettings> options,
-    IMessageTranslatorService translator
+    IMessageTranslator translator
 ) : IRequestHandler<RequestUserPasswordResetCommand, Result<string>>
 {
     private readonly ForgotPasswordSettings forgotPasswordSettings = options.Value;

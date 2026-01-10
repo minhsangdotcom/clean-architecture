@@ -20,7 +20,7 @@ public class UpdateUserHandler(
     IUserManager userManager,
     IEfUnitOfWork unitOfWork,
     IMediaStorageService<User> storageService,
-    IMessageTranslatorService translator
+    IMessageTranslator translator
 ) : IRequestHandler<UpdateUserCommand, Result<UpdateUserResponse>>
 {
     public async ValueTask<Result<UpdateUserResponse>> Handle(

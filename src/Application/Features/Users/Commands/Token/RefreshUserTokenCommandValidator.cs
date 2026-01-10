@@ -8,10 +8,10 @@ namespace Application.Features.Users.Commands.Token;
 
 public class RefreshUserTokenCommandValidator(
     IRequestContextProvider contextProvider,
-    IMessageTranslatorService messageTranslator
+    IMessageTranslator messageTranslator
 ) : FluentValidator<RefreshUserTokenCommand>(contextProvider, messageTranslator)
 {
-    protected sealed override void ApplyRules(IMessageTranslatorService translator)
+    protected sealed override void ApplyRules(IMessageTranslator translator)
     {
         RuleFor(x => x.RefreshToken)
             .NotEmpty()
@@ -20,6 +20,6 @@ public class RefreshUserTokenCommandValidator(
 
     protected override void ApplyRules(
         IRequestContextProvider contextProvider,
-        IMessageTranslatorService translator
+        IMessageTranslator translator
     ) { }
 }

@@ -14,7 +14,7 @@ namespace Application.Features.Users.Commands.ChangePassword;
 public class ChangeUserPasswordHandler(
     IUserManager userManager,
     ICurrentUser currentUser,
-    IMessageTranslatorService translator
+    IMessageTranslator translator
 ) : IRequestHandler<ChangeUserPasswordCommand, Result<string>>
 {
     public async ValueTask<Result<string>> Handle(

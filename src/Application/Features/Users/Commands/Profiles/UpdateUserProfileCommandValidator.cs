@@ -11,10 +11,10 @@ public class UpdateUserProfileCommandValidator(
     IEfUnitOfWork unitOfWork,
     ICurrentUser currentUser,
     IRequestContextProvider contextProvider,
-    IMessageTranslatorService translator
+    IMessageTranslator translator
 ) : FluentValidator<UpdateUserProfileCommand>(contextProvider, translator)
 {
-    protected sealed override void ApplyRules(IMessageTranslatorService translator)
+    protected sealed override void ApplyRules(IMessageTranslator translator)
     {
         Ulid id = currentUser.Id!.Value;
         RuleFor(x => x.LastName)
@@ -51,6 +51,6 @@ public class UpdateUserProfileCommandValidator(
 
     protected sealed override void ApplyRules(
         IRequestContextProvider contextProvider,
-        IMessageTranslatorService translator
+        IMessageTranslator translator
     ) { }
 }

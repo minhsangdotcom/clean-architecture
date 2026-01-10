@@ -8,7 +8,7 @@ public static class SharedResource
     public const string TranslateText = "Translated text";
 
     public static void SetupTranslate(
-        this Mock<IMessageTranslatorService> translator,
+        this Mock<IMessageTranslator> translator,
         string code,
         string translated
     )

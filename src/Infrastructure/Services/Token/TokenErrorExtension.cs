@@ -18,8 +18,8 @@ public static class TokenErrorExtension
     {
         IProblemDetailsService problemDetailsService =
             httpContext.HttpContext.RequestServices.GetRequiredService<IProblemDetailsService>();
-        IMessageTranslatorService translator =
-            httpContext.HttpContext.RequestServices.GetRequiredService<IMessageTranslatorService>();
+        IMessageTranslator translator =
+            httpContext.HttpContext.RequestServices.GetRequiredService<IMessageTranslator>();
 
         ForbiddenError forbiddenError =
             new(Message.FORBIDDEN, new(errorMessage, translator.Translate(errorMessage)));

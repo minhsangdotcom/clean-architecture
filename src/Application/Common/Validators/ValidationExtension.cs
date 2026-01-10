@@ -71,7 +71,7 @@ public static partial class ValidationExtension
 
     public static IRuleBuilderOptions<T, TProperty> WithTranslatedError<T, TProperty>(
         this IRuleBuilderOptions<T, TProperty> rule,
-        IMessageTranslatorService translator,
+        IMessageTranslator translator,
         string key
     ) => rule.WithState(_ => new ErrorReason(key, translator.Translate(key)));
 

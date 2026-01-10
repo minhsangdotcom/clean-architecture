@@ -27,8 +27,8 @@ public static class LocalizationExtension
             var factory = option.GetRequiredService<IStringLocalizerFactory>();
             return factory.Create("", "");
         });
-        services.AddScoped<IMessageTranslatorService, MessageTranslatorService>();
-        services.AddScoped<IPermissionTranslatorService, PermissionTranslatorService>();
+        services.AddScoped<IMessageTranslator, MessageTranslator>();
+        services.AddScoped<IPermissionTranslator, PermissionTranslator>();
 
         LocalizationSettings localizationSettings = new();
         configuration.GetSection(nameof(LocalizationSettings)).Bind(localizationSettings);

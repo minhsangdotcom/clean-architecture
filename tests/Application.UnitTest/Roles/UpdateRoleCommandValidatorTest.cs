@@ -23,7 +23,7 @@ public sealed class UpdateRoleCommandValidatorTest
     private readonly Mock<IEfUnitOfWork> unitOfWork = new();
 
     private readonly Mock<IRequestContextProvider> contextProvider = new();
-    private readonly Mock<IMessageTranslatorService> translator = new();
+    private readonly Mock<IMessageTranslator> translator = new();
 
     public UpdateRoleCommandValidatorTest()
     {

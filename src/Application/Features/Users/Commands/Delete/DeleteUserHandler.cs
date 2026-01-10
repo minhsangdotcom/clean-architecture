@@ -13,7 +13,7 @@ namespace Application.Features.Users.Commands.Delete;
 public class DeleteUserHandler(
     IUserManager userManager,
     IMediaStorageService<User> mediaUpdateService,
-    IMessageTranslatorService translator
+    IMessageTranslator translator
 ) : IRequestHandler<DeleteUserCommand, Result<string>>
 {
     public async ValueTask<Result<string>> Handle(
