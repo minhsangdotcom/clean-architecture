@@ -4,11 +4,11 @@
     "net10.0": {
       "AWSSDK.S3": {
         "type": "Direct",
-        "requested": "[4.0.1.3, )",
-        "resolved": "4.0.1.3",
-        "contentHash": "0NJlSOwRbRzcQ3LXQTNpyN8SsgvuzcAiNn3cXJ0jNhEir9TdcwbCE9FMGoMgFtuQokl3bzKI/lPkzx41FDU07Q==",
+        "requested": "[4.0.17, )",
+        "resolved": "4.0.17",
+        "contentHash": "bW61dnzr1nRUWiuswge2Nq7mMmJXODrvokt1VaqqKfy9QRKBiC9qt4ogh3HV6crQRikP5mdncIWymRSxihK2Mw==",
         "dependencies": {
-          "AWSSDK.Core": "[4.0.0.7, 5.0.0)"
+          "AWSSDK.Core": "[4.0.3.8, 5.0.0)"
         }
       },
       "EFCore.NamingConventions": {
@@ -142,8 +142,8 @@
       },
       "AWSSDK.Core": {
         "type": "Transitive",
-        "resolved": "4.0.0.7",
-        "contentHash": "0MXHFU5prc2iwOQFxn+1p7tK18McvfUJKu+UOA25NBxSyS7A2XiEk51j9QL3zu+VZc7OmLI5C/JO9Z7JtJ7otg=="
+        "resolved": "4.0.3.8",
+        "contentHash": "nJyNzaz3pcD8c8hZvtJXuziJm1dkd3/BYmZvhf1TPNfMo3G3lsesGFZl1UVyQhGEfmQOS+efT0H8tf00PMmjug=="
       },
       "BCrypt.Net-Next": {
         "type": "Transitive",
