@@ -4,7 +4,7 @@
     <ProjectReference Include="..\Application\Application.csproj" />
     <Using Include="BCrypt.Net.BCrypt" Static="True" />
 
-    <None Update="Data\Seeds\Resources\*.json">
+    <None Update="Data\Seeders\Resources\*.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
