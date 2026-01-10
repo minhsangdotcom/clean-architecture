@@ -27,8 +27,8 @@ public static class LocalizationExtension
             var factory = option.GetRequiredService<IStringLocalizerFactory>();
             return factory.Create("", "");
         });
-        services.AddScoped<IMessageTranslator, MessageTranslator>();
-        services.AddScoped<IPermissionTranslator, PermissionTranslator>();
+
+        services.AddScoped(typeof(ITranslator<>), typeof(Translator<>));
 
         LocalizationSettings localizationSettings = new();
         configuration.GetSection(nameof(LocalizationSettings)).Bind(localizationSettings);
@@ -48,7 +48,7 @@ public static class LocalizationExtension
         return services;
     }
 
-    public static void AddSynchronizedLocalizationEndpoint(this WebApplication application)
+    public static void MapLocalizationEndpoint(this WebApplication application)
     {
         application
             .MapGet(

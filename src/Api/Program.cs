@@ -118,7 +118,7 @@ try
     app.MapEndpoints(EndpointVersion.One);
     if (isDevelopment)
     {
-        app.AddSynchronizedLocalizationEndpoint();
+        app.MapLocalizationEndpoint();
         Log.Logger.Information("Swagger UI is running at: {Url}", $"{url}/swagger");
     }
     Log.Logger.Information(
