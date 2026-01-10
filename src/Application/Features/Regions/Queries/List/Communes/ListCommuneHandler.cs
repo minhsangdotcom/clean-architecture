@@ -18,7 +18,7 @@ namespace Application.Features.Regions.Queries.List.Communes;
 public class ListCommuneHandler(
     IEfUnitOfWork unitOfWork,
     ILogger<ListCommuneHandler> logger,
-    IMessageTranslator translator
+    ITranslator<Messages> translator
 ) : IRequestHandler<ListCommuneQuery, Result<PaginationResponse<CommuneProjection>>>
 {
     public async ValueTask<Result<PaginationResponse<CommuneProjection>>> Handle(

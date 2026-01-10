@@ -16,7 +16,7 @@ namespace Application.Features.Regions.Queries.List.Districts;
 public class ListDistrictHandler(
     IEfUnitOfWork unitOfWork,
     ILogger<ListDistrictHandler> logger,
-    IMessageTranslator translator
+    ITranslator<Messages> translator
 ) : IRequestHandler<ListDistrictQuery, Result<PaginationResponse<DistrictProjection>>>
 {
     public async ValueTask<Result<PaginationResponse<DistrictProjection>>> Handle(

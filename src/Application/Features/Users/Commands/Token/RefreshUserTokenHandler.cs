@@ -22,7 +22,7 @@ public class RefreshUserTokenHandler(
     ITokenFactoryService tokenFactory,
     IDetectionService detectionService,
     ICurrentUser currentUser,
-    IMessageTranslator translator
+    ITranslator<Messages> translator
 ) : IRequestHandler<RefreshUserTokenCommand, Result<RefreshUserTokenResponse>>
 {
     public async ValueTask<Result<RefreshUserTokenResponse>> Handle(

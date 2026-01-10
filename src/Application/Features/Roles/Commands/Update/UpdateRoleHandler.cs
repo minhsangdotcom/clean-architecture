@@ -14,7 +14,7 @@ namespace Application.Features.Roles.Commands.Update;
 public class UpdateRoleHandler(
     IRoleManager manager,
     IEfUnitOfWork unitOfWork,
-    IMessageTranslator translator
+    ITranslator<Messages> translator
 ) : IRequestHandler<UpdateRoleCommand, Result<UpdateRoleResponse>>
 {
     public async ValueTask<Result<UpdateRoleResponse>> Handle(

@@ -22,7 +22,7 @@ public class LoginUserHandler(
     ITokenFactoryService tokenFactory,
     IDetectionService detectionService,
     ICurrentUser currentUser,
-    IMessageTranslator translator
+    ITranslator<Messages> translator
 ) : IRequestHandler<LoginUserCommand, Result<LoginUserResponse>>
 {
     public async ValueTask<Result<LoginUserResponse>> Handle(

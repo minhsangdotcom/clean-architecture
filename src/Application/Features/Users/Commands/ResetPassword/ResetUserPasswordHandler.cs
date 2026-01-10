@@ -13,7 +13,7 @@ namespace Application.Features.Users.Commands.ResetPassword;
 
 public class ResetUserPasswordHandler(
     IEfUnitOfWork unitOfWork,
-    IMessageTranslator translator
+    ITranslator<Messages> translator
 ) : IRequestHandler<ResetUserPasswordCommand, Result<string>>
 {
     public async ValueTask<Result<string>> Handle(

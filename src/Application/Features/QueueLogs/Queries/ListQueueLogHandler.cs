@@ -15,7 +15,7 @@ namespace Application.Features.QueueLogs.Queries;
 public class ListQueueLogHandler(
     IEfUnitOfWork unitOfWork,
     ILogger<ListQueueLogHandler> logger,
-    IMessageTranslator translator
+    ITranslator<Messages> translator
 ) : IRequestHandler<ListQueueLogQuery, Result<PaginationResponse<ListQueueLogResponse>>>
 {
     public async ValueTask<Result<PaginationResponse<ListQueueLogResponse>>> Handle(

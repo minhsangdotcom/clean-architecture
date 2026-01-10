@@ -9,16 +9,16 @@ namespace Application.Features.Roles.Commands.Create;
 public class CreateRoleCommandValidator(
     IEfUnitOfWork unitOfWork,
     IRequestContextProvider contextProvider,
-    IMessageTranslator translator
+    ITranslator<Messages> translator
 ) : FluentValidator<CreateRoleCommand>(contextProvider, translator)
 {
     protected sealed override void ApplyRules(
         IRequestContextProvider contextProvider,
-        IMessageTranslator translator
+        ITranslator<Messages> translator
     )
     {
         Include(new RoleValidator(unitOfWork, contextProvider, translator));
     }
 
-    protected override void ApplyRules(IMessageTranslator translator) { }
+    protected override void ApplyRules(ITranslator<Messages> translator) { }
 }

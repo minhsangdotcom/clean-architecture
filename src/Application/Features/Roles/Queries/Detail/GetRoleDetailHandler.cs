@@ -9,7 +9,7 @@ using Mediator;
 
 namespace Application.Features.Roles.Queries.Detail;
 
-public class GetRoleDetailHandler(IRoleManager manager, IMessageTranslator translator)
+public class GetRoleDetailHandler(IRoleManager manager, ITranslator<Messages> translator)
     : IRequestHandler<GetRoleDetailQuery, Result<RoleDetailResponse>>
 {
     public async ValueTask<Result<RoleDetailResponse>> Handle(

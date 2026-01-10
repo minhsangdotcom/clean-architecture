@@ -10,7 +10,7 @@ namespace Application.UnitTest.Users;
 
 public class ResetUserPasswordCommandValidatorTest
 {
-    private readonly Mock<IMessageTranslator> translator = new();
+    private readonly Mock<ITranslator<Messages>> translator = new();
     private readonly Mock<IRequestContextProvider> contextProvider = new();
     private readonly ResetUserPasswordCommand command =
         new()

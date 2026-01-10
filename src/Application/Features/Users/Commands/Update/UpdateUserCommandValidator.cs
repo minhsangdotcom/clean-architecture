@@ -9,16 +9,16 @@ namespace Application.Features.Users.Commands.Update;
 public class UpdateUserCommandValidator(
     IEfUnitOfWork unitOfWork,
     IRequestContextProvider contextProvider,
-    IMessageTranslator translator
+    ITranslator<Messages> translator
 ) : FluentValidator<UserUpdateData>(contextProvider, translator)
 {
     protected sealed override void ApplyRules(
         IRequestContextProvider contextProvider,
-        IMessageTranslator translator
+        ITranslator<Messages> translator
     )
     {
         Include(new UserValidator(unitOfWork, contextProvider, translator));
     }
 
-    protected override void ApplyRules(IMessageTranslator translator) { }
+    protected override void ApplyRules(ITranslator<Messages> translator) { }
 }

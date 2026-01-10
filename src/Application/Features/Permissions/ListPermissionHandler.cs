@@ -3,13 +3,14 @@ using Application.Contracts.ApiWrapper;
 using Application.Contracts.Permissions;
 using Domain.Aggregates.Permissions;
 using Mediator;
+using PermissionKey = Application.Common.Interfaces.Services.Localization.Permissions;
 
 namespace Application.Features.Permissions;
 
 public class ListPermissionHandler(
     IPermissionRepository permissionRepository,
     PermissionDefinitionContext permissionDefinitionContext,
-    IPermissionTranslator translator
+    ITranslator<PermissionKey> translator
 ) : IRequestHandler<ListPermissionQuery, Result<IReadOnlyList<ListGroupPermissionResponse>>>
 {
     public async ValueTask<Result<IReadOnlyList<ListGroupPermissionResponse>>> Handle(

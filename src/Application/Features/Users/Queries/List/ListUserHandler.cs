@@ -14,7 +14,7 @@ namespace Application.Features.Users.Queries.List;
 
 public class ListUserHandler(
     IEfUnitOfWork unitOfWork,
-    IMessageTranslator translator,
+    ITranslator<Messages> translator,
     ILogger<ListUserHandler> logger
 ) : IRequestHandler<ListUserQuery, Result<PaginationResponse<ListUserResponse>>>
 {

@@ -10,7 +10,7 @@ namespace Application.UnitTest.Users;
 
 public class RefreshUserTokenCommandValidatorTest
 {
-    private readonly Mock<IMessageTranslator> translator = new();
+    private readonly Mock<ITranslator<Messages>> translator = new();
     private readonly RefreshUserTokenCommandValidator validator;
 
     private readonly RefreshUserTokenCommand command =

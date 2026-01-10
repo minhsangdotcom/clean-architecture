@@ -13,7 +13,7 @@ namespace Application.Features.Users.Queries.Profiles;
 public class GetUserProfileHandler(
     IUserManager userManager,
     ICurrentUser currentUser,
-    IMessageTranslator translator
+    ITranslator<Messages> translator
 ) : IRequestHandler<GetUserProfileQuery, Result<GetUserProfileResponse>>
 {
     public async ValueTask<Result<GetUserProfileResponse>> Handle(

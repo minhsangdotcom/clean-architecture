@@ -16,7 +16,7 @@ namespace Application.Features.Regions.Queries.List.Provinces;
 public class ListProvinceHandler(
     IEfUnitOfWork unitOfWork,
     ILogger<ListProvinceHandler> logger,
-    IMessageTranslator translator
+    ITranslator<Messages> translator
 ) : IRequestHandler<ListProvinceQuery, Result<PaginationResponse<ProvinceProjection>>>
 {
     public async ValueTask<Result<PaginationResponse<ProvinceProjection>>> Handle(

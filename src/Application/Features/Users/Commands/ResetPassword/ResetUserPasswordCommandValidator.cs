@@ -8,10 +8,10 @@ namespace Application.Features.Users.Commands.ResetPassword;
 
 public class ResetUserPasswordCommandValidator(
     IRequestContextProvider contextProvider,
-    IMessageTranslator translator
+    ITranslator<Messages> translator
 ) : FluentValidator<ResetUserPasswordCommand>(contextProvider, translator)
 {
-    protected sealed override void ApplyRules(IMessageTranslator translator)
+    protected sealed override void ApplyRules(ITranslator<Messages> translator)
     {
         RuleFor(x => x.Email)
             .NotEmpty()
@@ -32,6 +32,6 @@ public class ResetUserPasswordCommandValidator(
 
     protected sealed override void ApplyRules(
         IRequestContextProvider contextProvider,
-        IMessageTranslator translator
+        ITranslator<Messages> translator
     ) { }
 }

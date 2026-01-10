@@ -13,12 +13,12 @@ namespace Application.SharedFeatures.Validators.Roles;
 public class RoleValidator(
     IEfUnitOfWork unitOfWork,
     IRequestContextProvider contextProvider,
-    IMessageTranslator translator
+    ITranslator<Messages> translator
 ) : FluentValidator<RoleUpsertCommand>(contextProvider, translator)
 {
     protected sealed override void ApplyRules(
         IRequestContextProvider contextProvider,
-        IMessageTranslator translator
+        ITranslator<Messages> translator
     )
     {
         _ = Ulid.TryParse(contextProvider.GetId(), out Ulid id);
@@ -57,7 +57,7 @@ public class RoleValidator(
             .WithTranslatedError(translator, RoleErrorMessages.RolePermissionsExistent);
     }
 
-    protected sealed override void ApplyRules(IMessageTranslator translator) { }
+    protected sealed override void ApplyRules(ITranslator<Messages> translator) { }
 
     private async Task<bool> IsNameAvailableAsync(
         string name,

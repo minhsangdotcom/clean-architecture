@@ -11,13 +11,13 @@ namespace Application.Features.Users.Commands.Create;
 
 public class CreateUserCommandValidator(
     IEfUnitOfWork unitOfWork,
-    IMessageTranslator translator,
+    ITranslator<Messages> translator,
     IRequestContextProvider contextProvider
 ) : FluentValidator<CreateUserCommand>(contextProvider, translator)
 {
     protected sealed override void ApplyRules(
         IRequestContextProvider contextProvider,
-        IMessageTranslator translator
+        ITranslator<Messages> translator
     )
     {
         Include(new UserValidator(unitOfWork, contextProvider, translator));
@@ -42,7 +42,7 @@ public class CreateUserCommandValidator(
             .WithTranslatedError(translator, UserErrorMessages.UserGenderNotInEnum);
     }
 
-    protected sealed override void ApplyRules(IMessageTranslator translator) { }
+    protected sealed override void ApplyRules(ITranslator<Messages> translator) { }
 
     private async Task<bool> IsUsernameAvailableAsync(
         string username,

@@ -9,7 +9,7 @@ using Mediator;
 
 namespace Application.Features.Users.Queries.Detail;
 
-public class GetUserDetailHandler(IUserManager userManager, IMessageTranslator translator)
+public class GetUserDetailHandler(IUserManager userManager, ITranslator<Messages> translator)
     : IRequestHandler<GetUserDetailQuery, Result<GetUserDetailResponse>>
 {
     public async ValueTask<Result<GetUserDetailResponse>> Handle(

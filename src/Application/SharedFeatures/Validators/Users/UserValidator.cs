@@ -13,12 +13,12 @@ namespace Application.SharedFeatures.Validators.Users;
 public class UserValidator(
     IEfUnitOfWork unitOfWork,
     IRequestContextProvider contextProvider,
-    IMessageTranslator translator
+    ITranslator<Messages> translator
 ) : FluentValidator<UserUpsertCommand>(contextProvider, translator)
 {
     protected sealed override void ApplyRules(
         IRequestContextProvider contextProvider,
-        IMessageTranslator translator
+        ITranslator<Messages> translator
     )
     {
         _ = Ulid.TryParse(contextProvider.GetId(), out Ulid id);
@@ -90,7 +90,7 @@ public class UserValidator(
         );
     }
 
-    protected override void ApplyRules(IMessageTranslator translator) { }
+    protected override void ApplyRules(ITranslator<Messages> translator) { }
 
     private async Task<bool> IsRolesAvailableAsync(
         List<Ulid> roles,
