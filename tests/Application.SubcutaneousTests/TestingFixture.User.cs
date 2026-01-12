@@ -73,17 +73,16 @@ public partial class TestingFixture
             string firstName = !string.IsNullOrWhiteSpace(overrideFirstName)
                 ? overrideFirstName
                 : first;
-            User user =
-                new(
-                    firstName: firstName,
-                    lastName: last,
-                    username: $"{firstName.ToLower()}.{last.ToLower()}{i}",
-                    password: Credential.USER_DEFAULT_PASSWORD,
-                    email: $"{firstName.ToLower()}.{last.ToLower()}{i}@gmail.com",
-                    phoneNumber: $"41572890{i:D3}",
-                    dateOfBirth: new DateTime(2005, 10, 1),
-                    gender: Gender.Male
-                );
+            User user = new(
+                firstName: firstName,
+                lastName: last,
+                username: $"{firstName.ToLower()}.{last.ToLower()}{i}",
+                password: Credential.USER_DEFAULT_PASSWORD,
+                email: $"{firstName.ToLower()}.{last.ToLower()}{i}@gmail.com",
+                phoneNumber: $"41572890{i:D3}",
+                dateOfBirth: new DateTime(2005, 10, 1),
+                gender: Gender.Male
+            );
 
             users.Add(user);
         }
@@ -215,22 +214,21 @@ public partial class TestingFixture
         List<Ulid> roles = roleIds ?? [];
         roles.Add(role.Id);
 
-        CreateUserCommand command =
-            new()
-            {
-                FirstName = "admin",
-                LastName = "super",
-                Username = "super.admin",
-                Password = Credential.USER_DEFAULT_PASSWORD,
-                Email = "super.amdin@gmail.com",
-                DateOfBirth = new DateTime(1990, 1, 2),
-                PhoneNumber = "0925123321",
-                Gender = Gender.Male,
-                Roles = roles,
-                Permissions = permissionId,
-                Status = UserStatus.Active,
-                Avatar = avatar,
-            };
+        CreateUserCommand command = new()
+        {
+            FirstName = "admin",
+            LastName = "super",
+            Username = "super.admin",
+            Password = Credential.USER_DEFAULT_PASSWORD,
+            Email = "super.amdin@gmail.com",
+            DateOfBirth = new DateTime(1990, 1, 2),
+            PhoneNumber = "0925123321",
+            Gender = Gender.Male,
+            Roles = roles,
+            Permissions = permissionId,
+            Status = UserStatus.Active,
+            Avatar = avatar,
+        };
 
         var user = await CreateUserAsync(command);
         UserId = user.Id;
@@ -246,22 +244,21 @@ public partial class TestingFixture
         Role role = await CreateManagerRoleAsync();
         List<Ulid> roles = roleIds ?? [];
         roles.Add(role.Id);
-        CreateUserCommand command =
-            new()
-            {
-                FirstName = "Steave",
-                LastName = "Roger",
-                Username = "steave.Roger",
-                Password = Credential.USER_DEFAULT_PASSWORD,
-                Email = "steave.roger@gmail.com",
-                DateOfBirth = new DateTime(1990, 1, 3),
-                PhoneNumber = "0925321321",
-                Gender = Gender.Male,
-                Roles = roles,
-                Permissions = permissionId,
-                Status = UserStatus.Active,
-                Avatar = avatar,
-            };
+        CreateUserCommand command = new()
+        {
+            FirstName = "Steave",
+            LastName = "Roger",
+            Username = "steave.Roger",
+            Password = Credential.USER_DEFAULT_PASSWORD,
+            Email = "steave.roger@gmail.com",
+            DateOfBirth = new DateTime(1990, 1, 3),
+            PhoneNumber = "0925321321",
+            Gender = Gender.Male,
+            Roles = roles,
+            Permissions = permissionId,
+            Status = UserStatus.Active,
+            Avatar = avatar,
+        };
 
         var user = await CreateUserAsync(command);
         UserId = user.Id;
@@ -277,22 +274,21 @@ public partial class TestingFixture
         Role role = await CreateNormalRoleAsync();
         List<Ulid> roles = roleIds ?? [];
         roles.Add(role.Id);
-        CreateUserCommand command =
-            new()
-            {
-                FirstName = "Sang",
-                LastName = "Tran",
-                Username = "sang.tran",
-                Password = Credential.USER_DEFAULT_PASSWORD,
-                Email = "sang.tran@gmail.com",
-                DateOfBirth = new DateTime(1990, 1, 4),
-                PhoneNumber = "0925123124",
-                Gender = Gender.Male,
-                Roles = roles,
-                Permissions = permissionId,
-                Status = UserStatus.Active,
-                Avatar = avatar,
-            };
+        CreateUserCommand command = new()
+        {
+            FirstName = "Sang",
+            LastName = "Tran",
+            Username = "sang.tran",
+            Password = Credential.USER_DEFAULT_PASSWORD,
+            Email = "sang.tran@gmail.com",
+            DateOfBirth = new DateTime(1990, 1, 4),
+            PhoneNumber = "0925123124",
+            Gender = Gender.Male,
+            Roles = roles,
+            Permissions = permissionId,
+            Status = UserStatus.Active,
+            Avatar = avatar,
+        };
 
         var user = await CreateUserAsync(command);
         UserId = user.Id;
@@ -343,7 +339,43 @@ public partial class TestingFixture
         await dbContext.Set<UserRefreshToken>().Where(x => x.UserId == userId).ExecuteDeleteAsync();
     }
 
-    public async Task<string> GetPasswordResetTokenAsync(Ulid userId)
+    public async Task ExpirePasswordResetTokenAsync(string token)
+    {
+        using var scope = factory!.Services.CreateScope();
+        IEfDbContext dbContext = scope.ServiceProvider.GetRequiredService<IEfDbContext>();
+        var passwordReset = await dbContext
+            .Set<UserPasswordReset>()
+            .FirstOrDefaultAsync(x => x.Token == token);
+
+        if (passwordReset == null)
+        {
+            return;
+        }
+        passwordReset.Expiry = DateTimeOffset.UtcNow.AddMinutes(-1);
+
+        dbContext.Set<UserPasswordReset>().Update(passwordReset);
+        await dbContext.SaveChangesAsync();
+    }
+
+    public async Task ExpireRefreshTokenAsync(string token)
+    {
+        using var scope = factory!.Services.CreateScope();
+        IEfDbContext dbContext = scope.ServiceProvider.GetRequiredService<IEfDbContext>();
+        var refreshToken = await dbContext
+            .Set<UserRefreshToken>()
+            .FirstOrDefaultAsync(x => x.Token == token);
+
+        if (refreshToken == null)
+        {
+            return;
+        }
+        refreshToken.ExpiredTime = DateTimeOffset.UtcNow.AddMinutes(-1);
+
+        dbContext.Set<UserRefreshToken>().Update(refreshToken);
+        await dbContext.SaveChangesAsync();
+    }
+
+    public async Task<UserPasswordReset> GetPasswordResetTokenAsync(Ulid userId)
     {
         using var scope = factory!.Services.CreateScope();
         IUserManager userManager = scope.ServiceProvider.GetRequiredService<IUserManager>();
@@ -355,10 +387,10 @@ public partial class TestingFixture
 
         if (userPasswordReset == null)
         {
-            return string.Empty;
+            return new();
         }
 
-        return userPasswordReset.Token;
+        return userPasswordReset;
     }
 
     private static AddressResult GetDefaultAddress() =>

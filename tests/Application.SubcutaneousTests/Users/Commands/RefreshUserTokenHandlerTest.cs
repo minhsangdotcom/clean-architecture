@@ -68,7 +68,7 @@ public class RefreshUserTokenHandlerTest(TestingFixture testingFixture) : IAsync
     public async Task RefreshUserToken_When_TokenExpired_ShouldReturnError()
     {
         // Arrange
-        await Task.Delay(17000);
+        await testingFixture.ExpireRefreshTokenAsync(command.RefreshToken!);
 
         //Act
         var result = await testingFixture.SendAsync(command);

@@ -30,6 +30,41 @@ public class UpdateUserHandlerTest(TestingFixture testingFixture) : IAsyncLifeti
     }
 
     [Fact]
+    public async Task UpdateUser_WhenRemoveAllPermissions_ShouldUpdateSuccessfully()
+    {
+        //Arrange
+        var role = await testingFixture.CreateNormalRoleAsync();
+        var updateData = command.UpdateData;
+        updateData.DateOfBirth = null;
+        updateData.Avatar = null;
+        updateData.Roles!.RemoveAt(0);
+        updateData.Roles.Add(role.Id);
+        updateData.Permissions!.Clear();
+
+        //act
+        Result<UpdateUserResponse> result = await testingFixture.SendAsync(command);
+
+        result.IsSuccess.ShouldBeTrue();
+        result.Error.ShouldBeNull();
+
+        var response = result.Value!;
+        var user = await testingFixture.FindUserByIdInCludeChildrenAsync(response.Id);
+        user.ShouldNotBeNull();
+
+        //Assert
+        user.FirstName.ShouldBe(updateData.FirstName);
+        user.LastName.ShouldBe(updateData.LastName);
+        user.Email.ShouldBe(updateData.Email);
+        user.PhoneNumber.ShouldBe(updateData.PhoneNumber);
+        user.Status.ShouldBe(updateData.Status);
+
+        user.DateOfBirth.ShouldBeNull();
+        user.Avatar.ShouldBeNull();
+        user.Roles.Select(r => r.RoleId).ShouldBe(updateData.Roles);
+        user.Permissions.Select(p => p.PermissionId).ShouldBe(updateData.Permissions);
+    }
+
+    [Fact]
     public async Task UpdateUser_ShouldUpdateSuccess()
     {
         //Arrange

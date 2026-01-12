@@ -48,7 +48,7 @@ public class ResetUserPasswordHandlerTest(TestingFixture testingFixture) : IAsyn
     public async Task ResetPassword_When_TokenExpired_ShouldReturnNotFoundError()
     {
         //Arrange
-        await Task.Delay(12000);
+        await testingFixture.ExpirePasswordResetTokenAsync(command.Token!);
 
         //Act
         var result = await testingFixture.SendAsync(command);
@@ -111,11 +111,11 @@ public class ResetUserPasswordHandlerTest(TestingFixture testingFixture) : IAsyn
         userId = user.Id;
         //Get token to reset password
         _ = await testingFixture.SendAsync(new RequestUserPasswordResetCommand(user.Email));
-        string token = await testingFixture.GetPasswordResetTokenAsync(user.Id);
+        var passwordReset = await testingFixture.GetPasswordResetTokenAsync(user.Id);
         command = new()
         {
             Email = user.Email,
-            Token = token,
+            Token = passwordReset.Token,
             Password = "Admin@456",
         };
     }

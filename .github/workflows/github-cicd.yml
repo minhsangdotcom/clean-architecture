@@ -51,10 +51,6 @@ jobs:
           S3_KEY: ${{ secrets.S3_KEY }}
           S3_SECRET: ${{ secrets.S3_SECRET }}
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
-          EMAIL_FROM: ${{ secrets.EMAIL_FROM }}
-          EMAIL_HOST: ${{ secrets.EMAIL_HOST }}
-          EMAIL_USERNAME: ${{ secrets.EMAIL_USERNAME }}
-          EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
         with:
           input-files: ${{ github.workspace }}/${{vars.SUBSTITUTE_FILE_PATH}}
 
