@@ -12,7 +12,7 @@ services:
     networks:
       - the-template-network
     volumes:
-      - ./db_data:/var/lib/postgresql/data/
+      - ./db_data:/var/lib/postgresql/MAJOR/docker
   
   pgadmin:
     image: dpage/pgadmin4

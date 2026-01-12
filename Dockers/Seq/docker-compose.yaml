@@ -8,6 +8,7 @@ services:
         - ./seq:/data
     environment:
       - ACCEPT_EULA=Y
+      - SEQ_FIRSTRUN_ADMINPASSWORD=${SEQ_FIRSTRUN_ADMINPASSWORD}
     ports:
       - 5341:80
     networks:
