@@ -20,13 +20,12 @@ public class ListAuditLogHandler(IElasticsearchServiceFactory? factory = null)
         }
 
         List<AuditLog> auditLogs = await factory.Get<AuditLog>().ListAsync(request);
-        PaginationResponse<ListAuditLogResponse> paginationResponse =
-            new(
-                auditLogs.ToListAuditLogResponse(),
-                auditLogs.Count,
-                request.Page,
-                request.PageSize
-            );
+        PaginationResponse<ListAuditLogResponse> paginationResponse = new(
+            auditLogs.ToListAuditLogResponse(),
+            auditLogs.Count,
+            request.Page,
+            request.PageSize
+        );
 
         return Result<PaginationResponse<ListAuditLogResponse>>.Success(paginationResponse);
     }
