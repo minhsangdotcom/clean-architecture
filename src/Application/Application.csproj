@@ -1,5 +1,4 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
   <ItemGroup>
     <ProjectReference Include="..\Domain\Domain.csproj" />
     <ProjectReference Include="..\Application.Contracts\Application.Contracts.csproj" />
@@ -26,5 +25,4 @@
     <PreserveCompilationContext>true</PreserveCompilationContext>
     <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
   </PropertyGroup>
-
 </Project>

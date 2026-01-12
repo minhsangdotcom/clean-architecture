@@ -1,5 +1,5 @@
 using Microsoft.Extensions.DependencyInjection;
-using IRepository = Domain.Common.IRepository;
+using SharedKernel.Repositories;
 
 namespace Infrastructure.Data.Repositories;
 

@@ -1,4 +1,4 @@
-using Domain.Common;
+using SharedKernel.Repositories;
 
 namespace Domain.Aggregates.Permissions;
 
