@@ -13,8 +13,10 @@ public class RefreshUserTokenCommandValidatorTest
     private readonly Mock<ITranslator<Messages>> translator = new();
     private readonly RefreshUserTokenCommandValidator validator;
 
-    private readonly RefreshUserTokenCommand command =
-        new() { RefreshToken = "valid_refresh_token_123" };
+    private readonly RefreshUserTokenCommand command = new()
+    {
+        RefreshToken = "valid_refresh_token_123",
+    };
 
     public RefreshUserTokenCommandValidatorTest()
     {
@@ -39,8 +41,10 @@ public class RefreshUserTokenCommandValidatorTest
         var result = await validator.TestValidateAsync(command);
 
         // Assert
-        ErrorReason expectedState =
-            new(UserErrorMessages.UserRefreshTokenTokenRequired, SharedResource.TranslateText);
+        ErrorReason expectedState = new(
+            UserErrorMessages.UserRefreshTokenTokenRequired,
+            SharedResource.TranslateText
+        );
 
         result
             .ShouldHaveValidationErrorFor(x => x.RefreshToken)

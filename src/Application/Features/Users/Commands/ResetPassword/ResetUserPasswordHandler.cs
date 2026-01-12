@@ -11,10 +11,8 @@ using Mediator;
 
 namespace Application.Features.Users.Commands.ResetPassword;
 
-public class ResetUserPasswordHandler(
-    IEfUnitOfWork unitOfWork,
-    ITranslator<Messages> translator
-) : IRequestHandler<ResetUserPasswordCommand, Result<string>>
+public class ResetUserPasswordHandler(IEfUnitOfWork unitOfWork, ITranslator<Messages> translator)
+    : IRequestHandler<ResetUserPasswordCommand, Result<string>>
 {
     public async ValueTask<Result<string>> Handle(
         ResetUserPasswordCommand command,

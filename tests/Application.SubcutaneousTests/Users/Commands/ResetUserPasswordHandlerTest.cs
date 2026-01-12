@@ -48,7 +48,7 @@ public class ResetUserPasswordHandlerTest(TestingFixture testingFixture) : IAsyn
     public async Task ResetPassword_When_TokenExpired_ShouldReturnNotFoundError()
     {
         //Arrange
-        await Task.Delay(17000);
+        await Task.Delay(12000);
 
         //Act
         var result = await testingFixture.SendAsync(command);

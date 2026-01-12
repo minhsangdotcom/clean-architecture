@@ -31,7 +31,7 @@ public class RequestUserPasswordResetHandler(
     )
     {
         User? user = await unitOfWork
-            .ReadonlyRepository<User>(true)
+            .ReadonlyRepository<User>()
             .FindByConditionAsync(
                 new GetUserByEmailIncludePasswordResetRequestSpecification(command.Email!),
                 cancellationToken
@@ -68,13 +68,12 @@ public class RequestUserPasswordResetHandler(
             forgotPasswordSettings.ExpiredTimeInHour
         );
 
-        UserPasswordReset userPasswordReset =
-            new()
-            {
-                Token = token,
-                UserId = user.Id,
-                Expiry = expiredTime,
-            };
+        UserPasswordReset userPasswordReset = new()
+        {
+            Token = token,
+            UserId = user.Id,
+            Expiry = expiredTime,
+        };
 
         await unitOfWork
             .Repository<UserPasswordReset>()
@@ -84,24 +83,22 @@ public class RequestUserPasswordResetHandler(
             .AddAsync(userPasswordReset, cancellationToken);
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
-        UriBuilder linkBuilder =
-            new(forgotPasswordSettings.Uri)
-            {
-                Query = $"token={Uri.EscapeDataString(userPasswordReset.Token)}&email={user.Email}",
-            };
+        UriBuilder linkBuilder = new(forgotPasswordSettings.Uri)
+        {
+            Query = $"token={Uri.EscapeDataString(userPasswordReset.Token)}&email={user.Email}",
+        };
 
         string expiry = userPasswordReset.Expiry.ToLocalTime().ToString("dd/MM/yyyy hh:mm:ss");
-        MailTemplateData mail =
-            new()
-            {
-                DisplayName = "The Template password Reset",
-                Subject = "Reset password",
-                To = [user.Email],
-                Template = new(
-                    "ForgotPassword",
-                    new ResetPasswordModel() { ResetLink = linkBuilder.ToString(), Expiry = expiry }
-                ),
-            };
+        MailTemplateData mail = new()
+        {
+            DisplayName = "The Template password Reset",
+            Subject = "Reset password",
+            To = [user.Email],
+            Template = new(
+                "ForgotPassword",
+                new ResetPasswordModel() { ResetLink = linkBuilder.ToString(), Expiry = expiry }
+            ),
+        };
 
         await mailService.SendWithTemplateAsync(mail);
         return Result<string>.Success();

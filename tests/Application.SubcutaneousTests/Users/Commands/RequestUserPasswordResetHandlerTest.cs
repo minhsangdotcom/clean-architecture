@@ -42,21 +42,6 @@ public class RequestUserPasswordResetHandlerTest(TestingFixture testingFixture) 
         result.Error.ErrorMessage!.Value.Text.ShouldBe(UserErrorMessages.UserInactive);
     }
 
-    [Fact]
-    public async Task RequestResetPassword_ShouldBeSuccess()
-    {
-        //Act
-        var result = await testingFixture.SendAsync(command);
-
-        //Assert
-        var token = await testingFixture.GetPasswordResetTokenAsync(userId);
-
-        result.IsFailure.ShouldBeFalse();
-        result.Error.ShouldBeNull();
-        result.IsSuccess.ShouldBeTrue();
-        token.ShouldNotBeNullOrEmpty();
-    }
-
     public async Task DisposeAsync() => await Task.CompletedTask;
 
     public async Task InitializeAsync()

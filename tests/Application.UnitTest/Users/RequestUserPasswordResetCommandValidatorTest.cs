@@ -44,8 +44,10 @@ public class RequestUserPasswordResetCommandValidatorTest
         var result = await validator.TestValidateAsync(command);
 
         // Assert
-        ErrorReason expectedState =
-            new(UserErrorMessages.UserEmailRequired, SharedResource.TranslateText);
+        ErrorReason expectedState = new(
+            UserErrorMessages.UserEmailRequired,
+            SharedResource.TranslateText
+        );
 
         result
             .ShouldHaveValidationErrorFor(x => x.Email)
