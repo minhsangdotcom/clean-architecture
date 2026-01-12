@@ -8,11 +8,15 @@ using Api.Middlewares;
 using Api.Services.Accessors;
 using Api.Settings;
 using Application;
+using Application.Common.Interfaces.Seeder;
 using Application.Common.Interfaces.Services.Accessors;
 using Cysharp.Serialization.Json;
+using Elastic.Clients.Elasticsearch;
 using Infrastructure;
 using Infrastructure.Data.Seeders;
+using Infrastructure.Services.Elasticsearch;
 using Microsoft.AspNetCore.Localization;
+using Microsoft.Extensions.Options;
 using Serilog;
 using Swashbuckle.AspNetCore.SwaggerUI;
 
@@ -82,8 +86,25 @@ try
     )
     {
         using var scope = app.Services.CreateScope();
-        DbSeederRunner runner = scope.ServiceProvider.GetRequiredService<DbSeederRunner>();
+        var dbSeeders = scope.ServiceProvider.GetRequiredService<IEnumerable<IDbSeeder>>();
+        var logger = scope.ServiceProvider.GetRequiredService<ILogger<DbSeederRunner>>();
+
+        var options = scope.ServiceProvider.GetRequiredService<IOptions<ElasticsearchSettings>>();
+
+        DbSeederRunner runner = new(dbSeeders, logger);
         await runner.RunAsync(CancellationToken.None);
+
+        //ELK seeding
+        if (options.Value.IsEnabled)
+        {
+            var client = scope.ServiceProvider.GetRequiredService<ElasticsearchClient>();
+            var config = scope.ServiceProvider.GetRequiredService<ElasticConfiguration>();
+
+            Log.Logger.Information("Elasticsearch initialization started.");
+            ElasticDbSeeder dbSeeder = new(client, config, options);
+            await dbSeeder.RunAsync();
+            Log.Logger.Information("Elasticsearch initialization completed successfully.");
+        }
     }
     #endregion
 

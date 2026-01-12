@@ -7,15 +7,13 @@ public static class SeederExtension
 {
     public static IServiceCollection AddSeeder(this IServiceCollection services)
     {
-        return services
-            .Scan(scan =>
-                scan.FromAssemblyOf<DbSeederRunner>()
-                    .AddClasses(classes =>
-                        classes.AssignableTo<IDbSeeder>().Where(type => !type.IsAbstract)
-                    )
-                    .AsImplementedInterfaces()
-                    .WithScopedLifetime()
-            )
-            .AddTransient<DbSeederRunner>();
+        return services.Scan(scan =>
+            scan.FromAssemblyOf<DbSeederRunner>()
+                .AddClasses(classes =>
+                    classes.AssignableTo<IDbSeeder>().Where(type => !type.IsAbstract)
+                )
+                .AsImplementedInterfaces()
+                .WithScopedLifetime()
+        );
     }
 }

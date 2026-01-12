@@ -9,7 +9,7 @@ using SharedKernel.Constants;
 
 namespace Infrastructure.Services.Elasticsearch;
 
-public static class ElasticFunctionalityExtension
+public static class ElasticsearchServiceExtension
 {
     public static SearchRequestDescriptor<T> OrderBy<T>(
         this SearchRequestDescriptor<T> sortQuery,
@@ -71,16 +71,15 @@ public static class ElasticFunctionalityExtension
                     nestedSort?.Nested = value;
                     nestedSort = nestedSort?.Nested ?? value;
                 }
-                SortOptions sortOptions =
-                    new()
+                SortOptions sortOptions = new()
+                {
+                    Field = new FieldSort()
                     {
-                        Field = new FieldSort()
-                        {
-                            Field = property.ToCamelCase(),
-                            Order = sortOrder,
-                            Nested = nestedSort,
-                        },
-                    };
+                        Field = property.ToCamelCase(),
+                        Order = sortOrder,
+                        Nested = nestedSort,
+                    },
+                };
                 results.Add(sortOptions);
             }
         }
@@ -114,13 +113,12 @@ public static class ElasticFunctionalityExtension
         List<KeyValuePair<PropertyType, string>> properties = stringProperties.FindAll(x =>
             x.Key == PropertyType.Property
         );
-        MultiMatchQuery multiMatchQuery =
-            new()
-            {
-                Query = $"{keyword}",
-                Fields = Fields.FromFields([.. properties.ConvertAll(x => new Field(x.Value))]),
-                //Fuzziness = new Fuzziness(2),
-            };
+        MultiMatchQuery multiMatchQuery = new()
+        {
+            Query = $"{keyword}",
+            Fields = Fields.FromFields([.. properties.ConvertAll(x => new Field(x.Value))]),
+            //Fuzziness = new Fuzziness(2),
+        };
         List<Query> queries = [multiMatchQuery];
 
         // //* search nested properties

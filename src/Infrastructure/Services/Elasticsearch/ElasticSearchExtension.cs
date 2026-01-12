@@ -17,10 +17,12 @@ public static class ElasticSearchExtension
         IConfiguration configuration
     )
     {
-        ElkSettings elastic =
-            configuration.GetSection(nameof(ElasticsearchSettings)).Get<ElkSettings>() ?? new();
+        bool IsEnabled = configuration.GetSection("ElasticsearchSettings:IsEnabled").Get<bool>();
+        string prefixIndex =
+            configuration.GetSection("ElasticsearchSettings:PrefixIndex").Get<string>()
+            ?? "TheTemplate";
 
-        if (!elastic.IsEnabled)
+        if (!IsEnabled)
         {
             return services;
         }
@@ -30,7 +32,7 @@ public static class ElasticSearchExtension
         [
             .. ElasticsearchRegisterHelper.GetElasticsearchConfigBuilder(
                 Assembly.GetExecutingAssembly(),
-                elastic.PrefixIndex.ToKebabCase()
+                prefixIndex.ToKebabCase()
             ),
         ];
         services.AddSingleton(new ElasticConfiguration(configurations));
@@ -52,8 +54,7 @@ public static class ElasticSearchExtension
                 >().Value;
                 return BuildElasticClient(settings, configurations);
             })
-            .AddSingleton<IElasticsearchServiceFactory, ElasticsearchServiceFactory>()
-            .AddHostedService<ElasticDataSeeder>();
+            .AddSingleton<IElasticsearchServiceFactory, ElasticsearchServiceFactory>();
 
         return services;
     }
@@ -85,11 +86,5 @@ public static class ElasticSearchExtension
         ElasticsearchRegisterHelper.ConfigureConnectionSettings(ref clientSettings, configurations);
 
         return new ElasticsearchClient(clientSettings);
-    }
-
-    private class ElkSettings
-    {
-        public bool IsEnabled { get; set; }
-        public string PrefixIndex { get; set; } = "TheTemplate";
     }
 }
