@@ -14,7 +14,7 @@ public class ElasticDbSeeder(
 
     public async Task RunAsync()
     {
-        // Apply elasticsearch config
+        // Apply elasticsearch configs and create index from defined entities
         await client.ElasticFluentConfigAsync(configuration.Configurations);
         await client.SeedingAsync(settings.PrefixIndex);
     }
