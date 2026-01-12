@@ -6,6 +6,8 @@ public interface IEfUnitOfWork : IUnitOfWork
 {
     IEfRepository<TEntity> Repository<TEntity>()
         where TEntity : class;
+    IEfMemoryRepository<TEntity> MemoryRepository<TEntity>()
+        where TEntity : class;
     IEfReadonlyRepository<TEntity> ReadonlyRepository<TEntity>(bool isCached = false)
         where TEntity : class;
     IEfSpecRepository<TEntity> SpecRepository<TEntity>(bool isCached = false)

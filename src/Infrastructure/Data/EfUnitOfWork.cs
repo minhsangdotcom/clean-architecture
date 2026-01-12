@@ -22,6 +22,9 @@ public class EfUnitOfWork(
     public IEfRepository<TEntity> Repository<TEntity>()
         where TEntity : class => factory.Repository<TEntity>();
 
+    public IEfMemoryRepository<TEntity> MemoryRepository<TEntity>()
+        where TEntity : class => factory.MemoryRepository<TEntity>();
+
     public IEfReadonlyRepository<TEntity> ReadonlyRepository<TEntity>(bool isCached = false)
         where TEntity : class => factory.ReadOnlyRepository<TEntity>();
 
