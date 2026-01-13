@@ -144,7 +144,7 @@ What makes this Clean Architecture template stand out from the rest on Github?
   │     ├── /Interfaces/             # Application-level interfaces (services, repos, abstractions)
   │     ├── /QueryStringProcessing/  # Parsing, validating & normalizing query parameters
   │     ├── /Security/               # Security helpers (permission attributes, role metadata)
-  │     └── /Validators/             # Global validators used across features
+  │     └── /Validators/             # FluentValidator custom abstract class
   │
   ├── /Features                      # Vertical slices styles (CQRS + MediatR)
   │     ├── /AuditLogs/              # Commands & queries to manage audit logs
@@ -158,10 +158,10 @@ What makes this Clean Architecture template stand out from the rest on Github?
   │     ├── /Mapping/                # Shared mapping used by multiple features.
   │     ├── /Projections/            # Common read-side DTO builders or lightweight view models.
   │     ├── /Requests/               # Shared command/query models (e.g., Upsert commands used by multiple operations).
-  │     └── /Validators/             # Reusable FluentValidation rules shared across commands/queries.
+  │     └── /Validations/             # Reusable FluentValidation rules shared across commands/queries.
   │
   ├── Application.csproj             # Application project definition
-  └── DependencyInjection.cs          # Registers all Application services into DI container
+  └── DependencyInjection.cs         # Registers all Application services into DI container
 
 ```
 
@@ -175,8 +175,8 @@ What makes this Clean Architecture template stand out from the rest on Github?
   │     ├── /Interceptors/             # EF Core interceptors (audit, logging)
   │     ├── /Migrations/               # EF Core migration files
   │     ├── /Repositories/             # Repository implementations
-  │     ├── /Seeds/                    # Seed data for database initialization
-  │     └── /Settings/                 # DbContext, UnitOfWork, factories, settings
+  │     ├── /Seeders/                  # Seed data for database initialization
+  │     └── /Settings/                 # Database IOptions
   │
   ├── /Services                         # Infrastructure service implementations
   │
@@ -191,7 +191,7 @@ What makes this Clean Architecture template stand out from the rest on Github?
   │
   ├── /Converters                       # converters for project
   │
-  ├── /Endpoints                        # HTTP endpoint definitions (minimal APIs or controllers)
+  ├── /Endpoints                        # HTTP endpoint definitions (minimal APIs)
   │
   ├── /Extensions                       # API extension methods (Swagger, CORS, routing, etc.)
   │
@@ -240,7 +240,7 @@ What makes this Clean Architecture template stand out from the rest on Github?
 
 The following prerequisites are required to build and run the solution:
 
-- [Net 8](https://dotnet.microsoft.com/en-us/download/dotnet/8.0)
+- [.NET 10](https://dotnet.microsoft.com/en-us/download/dotnet/10.0)
 - [Docker](https://www.docker.com/)
 
 The first step :point_up: :
@@ -270,15 +270,22 @@ cd Dockers/MinioS3
 
 ```
 
-change mino username and password at .env if needed and you're gonna use it for logging in Web UI Manager
+change minio username and password at .env if needed and you're gonna use it for logging in Web UI Manager
 
 ```
-MINIO_ROOT_USER=the_template_storage
-MINIO_ROOT_PASSWORD=storage@the_template1
+MINIO_ROOT_USER=minioadmin
+MINIO_ROOT_PASSWORD=Admin@123
 
 ```
 
 To Run Amazon S3 service for media file storage.
+
+```
+docker compose up -d
+
+```
+
+Old docker compose version
 
 ```
 docker-compose up -d
@@ -287,7 +294,7 @@ docker-compose up -d
 
 Access Minio S3 Web UI at http://localhost:9001 and login
 
-![S3 login](/Screenshots/S3-login.png)
+![S3 login](/Screenshots/minio-login.png)
 
 Create a pairs of key like
 
@@ -297,14 +304,14 @@ input the keys at your appsettings.json
 
 ```json
 "S3AwsSettings": {
-      "ServiceUrl": "http://localhost:9000",
-      "AccessKey": "***",
-      "SecretKey": "***",
-      "BucketName": "the-template-project",
-      "PublicUrl": "http://localhost:9000",
-      "PreSignedUrlExpirationInMinutes": 1440,
-      "Protocol": 1
-    },
+  "ServiceUrl": "http://localhost:9000",
+  "AccessKey": "***",
+  "SecretKey": "***",
+  "BucketName": "the-template-project",
+  "PublicUrl": "http://localhost:9000",
+  "PreSignedUrlExpirationInMinutes": 1440,
+  "Protocol": 1
+},
 ```
 
 The final step
@@ -547,7 +554,7 @@ I designed filter input based on [Strapi filter](https://docs.strapi.io/dev-docs
 To Apply dynamic filter, you just call any list method at
 
 ```csharp
-unitOfWork.DynamicReadOnlyRepository<User>()
+unitOfWork.ReadonlyRepository<User>()
 ```
 
 ### 8.2.5. Pagination
@@ -558,7 +565,7 @@ To Enable offset pagination just add this line
 
 ```csharp
 var response = await unitOfWork
-    .DynamicReadOnlyRepository<User>()
+    .ReadonlyRepository<User>()
     .PagedListAsync(
         new ListUserSpecification(),
         query,
@@ -571,7 +578,7 @@ To Enable cursor pagination just add this line
 
 ```csharp
 var response = await unitOfWork
-    .DynamicReadOnlyRepository<User>()
+    .ReadonlyRepository<User>()
     .CursorPagedListAsync(
         new ListUserSpecification(),
         query,
@@ -620,10 +627,8 @@ var response = await unitOfWork
 Seeding for entities center in
 
 ```
-cd Infrastructure/Data/Seeds/
+cd Infrastructure/Data/Seeders/
 ```
-
-`DataSeeder.cs` at StartAsync
 
 ### 10. Translate messages
 

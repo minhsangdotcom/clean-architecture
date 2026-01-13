@@ -156,7 +156,7 @@ Có gì đặc biệt khiến cho template này trở nên khác biệt so với
   │     ├── /ErrorCodes/             # Centralized error code definitions for the whole app
   │     ├── /Errors/                 # Error result & problem details mappings
   │     ├── /Interfaces/             # Application-level interfaces (services, repos, abstractions)
-  │     ├── /QueryStringProcessing/  # Parsing, validating & normalizing query parameters
+  │     ├── /RequestHandler/         # Parsing, validating & normalizing request
   │     ├── /Security/               # Security helpers (permission attributes, role metadata)
   │     └── /Validators/             # Global validators used across features
   │
@@ -172,7 +172,7 @@ Có gì đặc biệt khiến cho template này trở nên khác biệt so với
   │     ├── /Mapping/                # Shared mapping used by multiple features.
   │     ├── /Projections/            # Common read-side DTO builders or lightweight view models.
   │     ├── /Requests/               # Shared command/query models (e.g., Upsert commands used by multiple operations).
-  │     └── /Validators/             # Reusable FluentValidation rules shared across commands/queries.
+  │     └── /Validations/             # Reusable FluentValidation rules shared across commands/queries.
   │
   ├── Application.csproj             # Application project definition
   └── DependencyInjection.cs          # Registers all Application services into DI container
@@ -189,7 +189,7 @@ Có gì đặc biệt khiến cho template này trở nên khác biệt so với
   │     ├── /Interceptors/             # EF Core interceptors (audit, logging)
   │     ├── /Migrations/               # EF Core migration files
   │     ├── /Repositories/             # Repository implementations
-  │     ├── /Seeds/                    # Seed data for database initialization
+  │     ├── /Seeders/                  # Seed data for database initialization
   │     └── /Settings/                 # DbContext, UnitOfWork, factories, settings
   │
   ├── /Services                         # Infrastructure service implementations
@@ -254,7 +254,7 @@ Có gì đặc biệt khiến cho template này trở nên khác biệt so với
 
 Các thứ cần để chạy ứng dụng:
 
-- [Net 8](https://dotnet.microsoft.com/en-us/download/dotnet/8.0)
+- [.NET 10](https://dotnet.microsoft.com/en-us/download/dotnet/10.0)
 - [Docker](https://www.docker.com/)
 
 Bước thứ 1 :point_up: :
@@ -287,21 +287,25 @@ cd Dockers/MinioS3
 Đổi tên username và password ở file .env nếu cần thiết, lát nữa các bạn sẽ dùng nó để đăng nhập vào web manager đó.
 
 ```
-MINIO_ROOT_USER=the_template_storage
-MINIO_ROOT_PASSWORD=storage@the_template1
-
+MINIO_ROOT_USER=minioadmin
+MINIO_ROOT_PASSWORD=Admin@123
 ```
 
 Dùng lệnh sau đây để chạy Amazon S3 service
 
 ```
 docker-compose up -d
+```
 
+Phiên bản docker compose cũ
+
+```
+docker-compose up -d
 ```
 
 Truy cập http://localhost:9001 và đăng nhập
 
-![S3 login](/Screenshots/S3-login.png)
+![S3 login](/Screenshots/minio-login.png)
 
 Tạo ra cặp key
 
@@ -311,14 +315,14 @@ Chỉnh lại setting ở your appsettings.json
 
 ```json
 "S3AwsSettings": {
-      "ServiceUrl": "http://localhost:9000",
-      "AccessKey": "",
-      "SecretKey": "",
-      "BucketName": "the-template-project",
-      "PublicUrl": "http://localhost:9000",
-      "PreSignedUrlExpirationInMinutes": 1440,
-      "Protocol": 1
-    },
+  "ServiceUrl": "http://localhost:9000",
+  "AccessKey": "",
+  "SecretKey": "",
+  "BucketName": "the-template-project",
+  "PublicUrl": "http://localhost:9000",
+  "PreSignedUrlExpirationInMinutes": 1440,
+  "Protocol": 1
+},
 ```
 
 Bước cuối nha
@@ -543,7 +547,7 @@ GET /api/users/filter[$or][0][$and][0][claims][claimValue][$eq]=admin&filter[$or
 }
 ```
 
-Các bạn có thể tìm hiểu thêm ỏ một số link sau đây
+Các bạn có thể tìm hiểu thêm ở một số link sau đây
 
 [https://docs.strapi.io/dev-docs/api/rest/filters-locale-publication#filtering](https://docs.strapi.io/dev-docs/api/rest/filters-locale-publication#filtering)\
 [https://docs.strapi.io/dev-docs/api/rest/filters-locale-publication#complex-filtering](https://docs.strapi.io/dev-docs/api/rest/filters-locale-publication#complex-filtering)\
@@ -554,7 +558,7 @@ Mình thiết kế input đầu vào dựa trên [Strapi filter](https://docs.st
 Mình đã nhúng sẳn filter tự động vào tất cả các hàm lấy danh sách chỉ cần gọi
 
 ```csharp
-unitOfWork.DynamicReadOnlyRepository<User>()
+unitOfWork.ReadonlyRepository<User>()
 ```
 
 <div id='pagination'/>
@@ -567,7 +571,7 @@ Offset and cursor pagination được tích hợp sẳn trong template.
 
 ```csharp
 var response = await unitOfWork
-    .DynamicReadOnlyRepository<User>(true)
+    .ReadonlyRepository<User>(true)
     .PagedListAsync(
         new ListUserSpecification(),
         query,
@@ -580,7 +584,7 @@ var response = await unitOfWork
 
 ```csharp
 var response = await unitOfWork
-    .DynamicReadOnlyRepository<User>(true)
+    .ReadonlyRepository<User>(true)
     .CursorPagedListAsync(
         new ListUserSpecification(),
         query,
@@ -629,10 +633,8 @@ var response = await unitOfWork
 ### Khởi tạo dữ liệu mặc định
 
 ```
-cd Infrastructure/Data/Seeds/
+cd Infrastructure/Data/Seeders/
 ```
-
-Ở file `DataSeeder.cs` hàm StartAsync
 
 <div id='TranslationError'/>
 
@@ -649,7 +651,7 @@ cd Infrastructure/Data/Seeds/
    (ví dụ: `Permissions.en.json`, `Messages.vi.json`).
 
 3. **(Tùy chọn nhưng khuyến dùng) Đồng bộ hóa dữ liệu dịch**  
-   Gọi endpoint để tự động thêm các mục còn thiếu và xóa các mục không còn sử dụng:
+   Sau khi chỉnh sửa bản dịch (thêm mới hoặc xóa) gọi endpoint để tự động thêm các mục còn thiếu và xóa các mục không còn sử dụng:
 
    ```rest
    GET /api/localizations/sync
