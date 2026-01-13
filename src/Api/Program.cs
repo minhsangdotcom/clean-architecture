@@ -100,10 +100,8 @@ try
             var client = scope.ServiceProvider.GetRequiredService<ElasticsearchClient>();
             var config = scope.ServiceProvider.GetRequiredService<ElasticConfiguration>();
 
-            Log.Logger.Information("Elasticsearch initialization started.");
             ElasticDbSeeder dbSeeder = new(client, config, options);
             await dbSeeder.RunAsync();
-            Log.Logger.Information("Elasticsearch initialization completed successfully.");
         }
     }
     #endregion

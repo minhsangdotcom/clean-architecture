@@ -10,40 +10,41 @@ using Wangkanai.Extensions;
 
 namespace Infrastructure.Services.Identity;
 
-public class RolePermissionChecker(
+public class RolePermissionEvaluator(
     IMemoryCacheService cache,
     IEfDbContext dbContext,
     PermissionDefinitionContext permissionDefinitionContext,
-    IOptions<CacheSettings> options
-) : IRolePermissionChecker
+    IOptions<IdentityCacheSettings> options
+) : IRolePermissionEvaluator
 {
-    private readonly CacheSettings cacheSettings = options.Value;
+    private readonly IdentityCacheSettings cacheSettings = options.Value;
 
-    public async Task<bool> CheckAnyPermissionAsync(Ulid userId, IEnumerable<string> permissions)
+    public async Task<bool> HasAnyPermissionAsync(Ulid userId, IEnumerable<string> permissions)
     {
         IReadOnlyCollection<string> existentPermissions = await GetUserPermissionsAsync(userId);
         List<string> allPermissions = permissionDefinitionContext.GetNestedPermissions(
             existentPermissions
         );
-        return allPermissions.Any(x => permissions.Contains(x));
+        return allPermissions.Any(permission => permissions.Contains(permission));
     }
 
-    public async Task<bool> CheckAllPermissionAsync(Ulid userId, IEnumerable<string> permissions)
+    public async Task<bool> HasAllPermissionAsync(Ulid userId, IEnumerable<string> permissions)
     {
         IReadOnlyCollection<string> existentPermissions = await GetUserPermissionsAsync(userId);
         List<string> allPermissions = permissionDefinitionContext.GetNestedPermissions(
             existentPermissions
         );
-        return allPermissions.Count(x => permissions.Contains(x)) == permissions.Count();
+        return allPermissions.Count(permission => permissions.Contains(permission))
+            == permissions.Count();
     }
 
-    public async Task<bool> CheckAnyRoleAsync(Ulid userId, IEnumerable<string> roleNames)
+    public async Task<bool> HasAnyRoleAsync(Ulid userId, IEnumerable<string> roleNames)
     {
         IReadOnlyCollection<RoleResult> roles = await GetUserRolesCachedAsync(userId);
         return roles.Any(x => roleNames.Contains(x.Name));
     }
 
-    public async Task<bool> CheckAllRoleAsync(Ulid userId, IEnumerable<string> roleNames)
+    public async Task<bool> HasAllRoleAsync(Ulid userId, IEnumerable<string> roleNames)
     {
         IReadOnlyCollection<RoleResult> roles = await GetUserRolesCachedAsync(userId);
         return roles.Count(x => roleNames.Contains(x.Name)) == roleNames.Count();

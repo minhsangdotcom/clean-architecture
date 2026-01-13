@@ -10,7 +10,7 @@ namespace Infrastructure.Services.Identity;
 public class RoleManager(
     IEfDbContext dbContext,
     ILogger<RoleManager> logger,
-    IRolePermissionChecker rolePermissionChecker
+    IRolePermissionEvaluator evaluator
 ) : IRoleManager
 {
     private readonly DbSet<Role> roles = dbContext.Set<Role>();
@@ -57,7 +57,7 @@ public class RoleManager(
         {
             query = query
                 .Include(r => r.Permissions)
-                .ThenInclude(rp => rp.Permission)
+                    .ThenInclude(rp => rp.Permission)
                 .Include(r => r.Claims);
         }
         return await query
@@ -76,7 +76,7 @@ public class RoleManager(
         {
             query = query
                 .Include(r => r.Permissions)
-                .ThenInclude(rp => rp.Permission)
+                    .ThenInclude(rp => rp.Permission)
                 .Include(r => r.Claims);
         }
         return await query
@@ -182,7 +182,7 @@ public class RoleManager(
             || currentPermissions.Exists(p => !codes.Contains(p))
         )
         {
-            await rolePermissionChecker.InvalidateRolePermissionsAsync(role.Id);
+            await evaluator.InvalidateRolePermissionsAsync(role.Id);
         }
 
         dbContext.Set<RolePermission>().RemoveRange(role.Permissions);

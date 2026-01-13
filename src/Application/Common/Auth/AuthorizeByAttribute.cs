@@ -14,22 +14,42 @@ public class AuthorizeByAttribute : AuthorizeAttribute
 
     public AuthorizeByAttribute(string? roles = null, string? permissions = null)
     {
-        Value = string.Empty;
-        if (!string.IsNullOrWhiteSpace(roles) || !string.IsNullOrWhiteSpace(permissions))
+        if (string.IsNullOrWhiteSpace(roles) && string.IsNullOrWhiteSpace(permissions))
         {
-            AuthorizeModel authorizeModel =
-                new()
-                {
-                    Roles = roles
-                        ?.Trim()
-                        ?.Split(',', StringSplitOptions.RemoveEmptyEntries)
-                        ?.ToList(),
-                    Permissions = permissions
-                        ?.Trim()
-                        ?.Split(',', StringSplitOptions.RemoveEmptyEntries)
-                        ?.ToList(),
-                };
-            Value = SerializerExtension.Serialize(authorizeModel).StringJson;
+            Value = string.Empty;
+            return;
         }
+
+        AuthorizationModel model = new();
+
+        if (!string.IsNullOrWhiteSpace(roles))
+        {
+            model.Roles = ParseCsv(roles, nameof(roles));
+        }
+
+        if (!string.IsNullOrWhiteSpace(permissions))
+        {
+            model.Permissions = ParseCsv(permissions, nameof(permissions));
+        }
+
+        Value = SerializerExtension.Serialize(model).StringJson;
+    }
+
+    private static string[] ParseCsv(string input, string parameterName)
+    {
+        string[] values = input.Split(
+            ',',
+            StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries
+        );
+
+        if (values.Length == 0)
+        {
+            throw new ArgumentException(
+                $"{parameterName} contains no valid values. " + "Expected a comma-separated list.",
+                parameterName
+            );
+        }
+
+        return values;
     }
 }

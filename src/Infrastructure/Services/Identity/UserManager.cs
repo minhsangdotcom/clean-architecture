@@ -13,7 +13,7 @@ public class UserManager(
     IEfDbContext dbContext,
     PermissionDefinitionContext permissionDefinitionContext,
     ILogger<UserManager> logger,
-    IRolePermissionChecker rolePermissionChecker
+    IRolePermissionEvaluator evaluator
 ) : IUserManager
 {
     private readonly DbSet<User> users = dbContext.Set<User>();
@@ -31,11 +31,11 @@ public class UserManager(
             query = query
                 .Include(x => x.Claims)
                 .Include(x => x.Permissions)
-                .ThenInclude(x => x.Permission)
+                    .ThenInclude(x => x.Permission)
                 .Include(x => x.Roles)
-                .ThenInclude(x => x.Role!)
-                .ThenInclude(x => x.Permissions)
-                .ThenInclude(x => x.Permission);
+                    .ThenInclude(x => x.Role!)
+                        .ThenInclude(x => x.Permissions)
+                            .ThenInclude(x => x.Permission);
         }
         return await query
             .AsSplitQuery()
@@ -54,11 +54,11 @@ public class UserManager(
             query = query
                 .Include(x => x.Claims)
                 .Include(x => x.Permissions)
-                .ThenInclude(x => x.Permission)
+                    .ThenInclude(x => x.Permission)
                 .Include(x => x.Roles)
-                .ThenInclude(x => x.Role!)
-                .ThenInclude(x => x.Permissions)
-                .ThenInclude(x => x.Permission);
+                    .ThenInclude(x => x.Role!)
+                        .ThenInclude(x => x.Permissions)
+                            .ThenInclude(x => x.Permission);
         }
         return await query
             .AsSplitQuery()
@@ -77,11 +77,11 @@ public class UserManager(
             query = query
                 .Include(x => x.Claims)
                 .Include(x => x.Permissions)
-                .ThenInclude(x => x.Permission)
+                    .ThenInclude(x => x.Permission)
                 .Include(x => x.Roles)
-                .ThenInclude(x => x.Role!)
-                .ThenInclude(x => x.Permissions)
-                .ThenInclude(x => x.Permission);
+                    .ThenInclude(x => x.Role!)
+                        .ThenInclude(x => x.Permissions)
+                            .ThenInclude(x => x.Permission);
         }
         return await query
             .AsSplitQuery()
@@ -266,15 +266,15 @@ public class UserManager(
             || currentRoles.Exists(r => !names.Contains(r))
         )
         {
-            await rolePermissionChecker.InvalidateUserRolesAsync(user.Id);
+            await evaluator.InvalidateUserRolesAsync(user.Id);
         }
-       
+
         List<Ulid> roleIds = await dbContext
             .Set<Role>()
             .Where(r => roleNames.Contains(r.Name))
             .Select(r => r.Id)
             .ToListAsync(cancellationToken);
-            
+
         dbContext.Set<UserRole>().RemoveRange(user.Roles);
         await dbContext
             .Set<UserRole>()
@@ -367,7 +367,7 @@ public class UserManager(
         if (permissions == null || !permissions.Any())
         {
             dbContext.Set<UserPermission>().RemoveRange(user.Permissions);
-            await rolePermissionChecker.InvalidateUserPermissionsAsync(user.Id);
+            await evaluator.InvalidateUserPermissionsAsync(user.Id);
         }
         else
         {
@@ -384,9 +384,8 @@ public class UserManager(
                 || currentPermissions.Exists(p => !codes.Contains(p))
             )
             {
-                await rolePermissionChecker.InvalidateUserPermissionsAsync(user.Id);
+                await evaluator.InvalidateUserPermissionsAsync(user.Id);
             }
-
 
             List<UserPermission> userPermissions =
             [

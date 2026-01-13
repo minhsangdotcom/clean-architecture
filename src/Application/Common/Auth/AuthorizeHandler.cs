@@ -18,8 +18,8 @@ public class AuthorizeHandler(IServiceProvider serviceProvider, ICurrentUser cur
     {
         using var scope = serviceProvider.CreateScope();
         IUserManager userManager = scope.ServiceProvider.GetRequiredService<IUserManager>();
-        IRolePermissionChecker rolePermissionChecker =
-            scope.ServiceProvider.GetRequiredService<IRolePermissionChecker>();
+        IRolePermissionEvaluator evaluator =
+            scope.ServiceProvider.GetRequiredService<IRolePermissionEvaluator>();
 
         Ulid? userId = currentUser.Id;
         if (userId == null || userId == Ulid.Empty)
@@ -40,68 +40,35 @@ public class AuthorizeHandler(IServiceProvider serviceProvider, ICurrentUser cur
             return;
         }
 
-        string? authorize = requirement.Requirement();
-        AuthorizeModel? authorizeModel = null;
-        if (!string.IsNullOrWhiteSpace(authorize))
-        {
-            authorizeModel = SerializerExtension.Deserialize<AuthorizeModel>(authorize).Object;
-        }
-
-        if (
-            authorizeModel == null
-            || (authorizeModel!.Permissions?.Count == 0 && authorizeModel!.Roles?.Count == 0)
-        )
+        string authorizationRules = requirement.Requirement();
+        if (string.IsNullOrWhiteSpace(authorizationRules))
         {
             context.Succeed(requirement);
             return;
         }
 
-        if (authorizeModel.Roles?.Count > 0 && authorizeModel.Permissions?.Count > 0)
-        {
-            bool isGrantedAccess =
-                await rolePermissionChecker.CheckAnyPermissionAsync(
-                    user.Id,
-                    authorizeModel.Permissions
-                ) && await rolePermissionChecker.CheckAnyRoleAsync(user.Id, authorizeModel.Roles);
-            SuccessOrFailure(context, requirement, isGrantedAccess);
-            return;
-        }
+        AuthorizationModel authorization = SerializerExtension
+            .Deserialize<AuthorizationModel>(authorizationRules)
+            .Object!;
 
-        if (authorizeModel.Roles?.Count > 0)
+        bool isGranted = authorization switch
         {
-            bool hasRole = await rolePermissionChecker.CheckAnyRoleAsync(
+            { Roles.Count: > 0, Permissions.Count: > 0 } => await evaluator.HasAnyPermissionAsync(
                 user.Id,
-                authorizeModel.Roles
-            );
-            SuccessOrFailure(context, requirement, hasRole);
-            return;
-        }
+                authorization.Permissions!
+            ) && await evaluator.HasAnyRoleAsync(user.Id, authorization.Roles),
 
-        if (authorizeModel.Permissions?.Count > 0)
-        {
-            bool hasPermission = await rolePermissionChecker.CheckAnyPermissionAsync(
+            { Roles.Count: > 0 } => await evaluator.HasAnyRoleAsync(user.Id, authorization.Roles),
+
+            { Permissions.Count: > 0 } => await evaluator.HasAnyPermissionAsync(
                 user.Id,
-                authorizeModel.Permissions
-            );
-            SuccessOrFailure(context, requirement, hasPermission);
-            return;
-        }
+                authorization.Permissions
+            ),
 
+            _ => false,
+        };
+
+        isGranted.SuccessOrFailure(context, requirement);
         await Task.CompletedTask;
-    }
-
-    private static void SuccessOrFailure(
-        AuthorizationHandlerContext context,
-        AuthorizationRequirement requirement,
-        bool isSuccess = false
-    )
-    {
-        if (!isSuccess)
-        {
-            context.Fail();
-            return;
-        }
-
-        context.Succeed(requirement);
     }
 }

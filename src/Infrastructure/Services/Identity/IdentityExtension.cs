@@ -11,10 +11,12 @@ public static class IdentityExtension
         IConfiguration configuration
     )
     {
-        services.Configure<CacheSettings>(configuration.GetSection(nameof(CacheSettings)));
+        services.Configure<IdentityCacheSettings>(
+            configuration.GetSection(nameof(IdentityCacheSettings))
+        );
         return services
             .AddScoped<IRoleManager, RoleManager>()
             .AddScoped<IUserManager, UserManager>()
-            .AddScoped<IRolePermissionChecker, RolePermissionChecker>();
+            .AddScoped<IRolePermissionEvaluator, RolePermissionEvaluator>();
     }
 }
