@@ -9,16 +9,14 @@ namespace Application.Features.AuditLogs.Queries;
 public class ListAuditLogHandler(IElasticsearchServiceFactory? factory = null)
     : IRequestHandler<ListAuditLogQuery, Result<PaginationResponse<ListAuditLogResponse>>>
 {
+    private readonly IElasticsearchServiceFactory factory =
+        factory ?? throw new NotImplementedException("Elasticsearch has not enabled");
+
     public async ValueTask<Result<PaginationResponse<ListAuditLogResponse>>> Handle(
         ListAuditLogQuery request,
         CancellationToken cancellationToken
     )
     {
-        if (factory == null)
-        {
-            throw new NotImplementedException("Elasticsearch has not enabled");
-        }
-
         List<AuditLog> auditLogs = await factory.Get<AuditLog>().ListAsync(request);
         PaginationResponse<ListAuditLogResponse> paginationResponse = new(
             auditLogs.ToListAuditLogResponse(),
