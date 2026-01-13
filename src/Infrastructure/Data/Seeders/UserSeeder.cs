@@ -56,34 +56,32 @@ public class UserSeeder(
 
         Ulid adminRoleId = Ulid.Parse(Credential.ADMIN_ROLE_ID);
         Ulid managerRoleId = Ulid.Parse(Credential.MANAGER_ROLE_ID);
-        Role adminRole =
-            new(
-                adminRoleId,
-                Credential.ADMIN_ROLE,
-                [
-                    .. permissions.Select(p => new RolePermission
-                    {
-                        PermissionId = p.Id,
-                        RoleId = adminRoleId,
-                    }),
-                ],
-                null,
-                Credential.CREATED_BY_SYSTEM
-            );
-        Role managerRole =
-            new(
-                managerRoleId,
-                Credential.MANAGER_ROLE,
-                [
-                    .. specificPermissions.Select(p => new RolePermission
-                    {
-                        PermissionId = p.Id,
-                        RoleId = managerRoleId,
-                    }),
-                ],
-                null,
-                Credential.CREATED_BY_SYSTEM
-            );
+        Role adminRole = new(
+            adminRoleId,
+            Credential.ADMIN_ROLE,
+            [
+                .. permissions.Select(p => new RolePermission
+                {
+                    PermissionId = p.Id,
+                    RoleId = adminRoleId,
+                }),
+            ],
+            null,
+            Credential.CREATED_BY_SYSTEM
+        );
+        Role managerRole = new(
+            managerRoleId,
+            Credential.MANAGER_ROLE,
+            [
+                .. specificPermissions.Select(p => new RolePermission
+                {
+                    PermissionId = p.Id,
+                    RoleId = managerRoleId,
+                }),
+            ],
+            null,
+            Credential.CREATED_BY_SYSTEM
+        );
 
         List<PermissionDefinitionWithGroup> allDefinitions = GetPermissionDefinitionWithGroups(
             groupedPermissions
@@ -122,33 +120,31 @@ public class UserSeeder(
                 logger.LogInformation("Seeding user data is starting.............");
 
                 // Create default admin user
-                User adminUser =
-                    new(
-                        "Chloe",
-                        "Kim",
-                        "chloe.kim",
-                        Credential.USER_DEFAULT_PASSWORD,
-                        "chloe.kim@naver.kr",
-                        "01039247816",
-                        new DateTime(2002, 10, 1),
-                        Gender.Female
-                    );
+                User adminUser = new(
+                    "Chloe",
+                    "Kim",
+                    "chloe.kim",
+                    Credential.USER_DEFAULT_PASSWORD,
+                    "chloe.kim@naver.kr",
+                    "01039247816",
+                    new DateTime(2002, 10, 1),
+                    Gender.Female
+                );
                 adminUser.InitializeIdentity(
                     Ulid.Parse(Credential.CHLOE_KIM_ID),
                     Credential.CREATED_BY_SYSTEM
                 );
 
-                User managerUser =
-                    new(
-                        "Zayden",
-                        "Cruz",
-                        "zayden.cruz",
-                        Credential.USER_DEFAULT_PASSWORD,
-                        "zayden.cruz@gmail.com",
-                        "4157289034",
-                        new DateTime(2005, 10, 1),
-                        Gender.Female
-                    );
+                User managerUser = new(
+                    "Zayden",
+                    "Cruz",
+                    "zayden.cruz",
+                    Credential.USER_DEFAULT_PASSWORD,
+                    "zayden.cruz@gmail.com",
+                    "4157289034",
+                    new DateTime(2005, 10, 1),
+                    Gender.Female
+                );
                 managerUser.InitializeIdentity(
                     Ulid.Parse(Credential.ZAYDEN_CRUZ_ID),
                     Credential.CREATED_BY_SYSTEM
