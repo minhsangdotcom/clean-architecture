@@ -6,11 +6,11 @@ using DotNetCoreExtension.Extensions.Reflections;
 using DotNetCoreExtension.Results;
 using Microsoft.Extensions.Logging;
 
-namespace Application.Common.QueryStringProcessing;
+namespace Application.Common.RequestHandler.Query;
 
-public static partial class QueryParamValidator
+public static class QueryParamValidator
 {
-    public static ValidationRequestResult<T> ValidateQuery<T>(this T request)
+    public static QueryValidationResult<T> ValidateQuery<T>(this T request)
         where T : QueryParamRequest
     {
         if (!string.IsNullOrWhiteSpace(request.Before) && !string.IsNullOrWhiteSpace(request.After))
@@ -21,7 +21,7 @@ public static partial class QueryParamValidator
         return new(request);
     }
 
-    public static ValidationRequestResult<TRequest> ValidateFilter<TRequest, TResponse>(
+    public static QueryValidationResult<TRequest> ValidateFilter<TRequest, TResponse>(
         this TRequest request,
         ILogger logger
     )

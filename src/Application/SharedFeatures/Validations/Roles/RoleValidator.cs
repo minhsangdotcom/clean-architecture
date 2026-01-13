@@ -8,7 +8,7 @@ using Domain.Aggregates.Permissions;
 using Domain.Aggregates.Roles;
 using FluentValidation;
 
-namespace Application.SharedFeatures.Validators.Roles;
+namespace Application.SharedFeatures.Validations.Roles;
 
 public class RoleValidator(
     IEfUnitOfWork unitOfWork,

@@ -1,7 +1,7 @@
 using Application.Common.Errors;
 using Application.Common.Interfaces.Services.Localization;
 using Application.Common.Interfaces.UnitOfWorks;
-using Application.Common.QueryStringProcessing;
+using Application.Common.RequestHandler.Query;
 using Application.Contracts.ApiWrapper;
 using Application.Contracts.Constants;
 using Application.Contracts.Dtos.Responses;
