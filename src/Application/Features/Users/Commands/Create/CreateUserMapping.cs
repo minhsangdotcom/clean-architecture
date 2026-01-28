@@ -1,11 +1,13 @@
 using Domain.Aggregates.Users;
+using Domain.Aggregates.Users.Enums;
 
 namespace Application.Features.Users.Commands.Create;
 
 public static class CreateUserMapping
 {
-    public static User ToUser(this CreateUserCommand command) =>
-        new(
+    public static User ToUser(this CreateUserCommand command)
+    {
+        User user = new(
             command.FirstName!,
             command.LastName!,
             command.Username!,
@@ -15,6 +17,12 @@ public static class CreateUserMapping
             command.DateOfBirth,
             command.Gender
         );
+        if (command.Status == UserStatus.Inactive)
+        {
+            user.Deactivate();
+        }
+        return user;
+    }
 
     public static CreateUserResponse ToCreateUserResponse(this User user)
     {
