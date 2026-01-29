@@ -6,7 +6,7 @@ using Mediator;
 
 namespace Application.Features.AuditLogs.Queries;
 
-public class ListAuditLogHandler(IElasticsearchService<AuditLog>? elasticsearch)
+public class ListAuditLogHandler(IElasticsearchService<AuditLog>? elasticsearch = null)
     : IRequestHandler<ListAuditLogQuery, Result<PaginationResponse<ListAuditLogResponse>>>
 {
     private readonly IElasticsearchService<AuditLog> elasticsearch =

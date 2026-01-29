@@ -12,8 +12,8 @@ public static class QueueRegisterExtension
         IConfiguration configuration
     )
     {
-        RedisDatabaseSettings databaseSettings =
-            configuration.GetSection(nameof(RedisDatabaseSettings)).Get<RedisDatabaseSettings>()
+        RedisSettings databaseSettings =
+            configuration.GetSection(nameof(RedisSettings)).Get<RedisSettings>()
             ?? new();
 
         if (databaseSettings.IsEnabled)
@@ -35,8 +35,8 @@ public static class QueueRegisterExtension
         where TRequest : class
         where TResponse : class
     {
-        RedisDatabaseSettings databaseSettings =
-            configuration.GetSection(nameof(RedisDatabaseSettings)).Get<RedisDatabaseSettings>()
+        RedisSettings databaseSettings =
+            configuration.GetSection(nameof(RedisSettings)).Get<RedisSettings>()
             ?? new();
 
         if (databaseSettings.IsEnabled)

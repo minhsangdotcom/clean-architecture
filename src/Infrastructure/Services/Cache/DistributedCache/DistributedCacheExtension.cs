@@ -1,6 +1,8 @@
 using Application.Common.Interfaces.Services.Cache;
+using Infrastructure.common.validator;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using StackExchange.Redis;
 
 namespace Infrastructure.Services.Cache.DistributedCache;
@@ -12,19 +14,22 @@ public static class DistributedCacheExtension
         IConfiguration configuration
     )
     {
-        RedisDatabaseSettings databaseSettings =
-            configuration.GetSection(nameof(RedisDatabaseSettings)).Get<RedisDatabaseSettings>()
-            ?? new();
+        bool IsEnabled = configuration
+            .GetSection($"{nameof(RedisSettings)}:{nameof(RedisSettings.IsEnabled)}")
+            .Get<bool>();
 
-        if (databaseSettings.IsEnabled)
+        if (IsEnabled)
         {
+            services.AddOptionsWithFluentValidation<RedisSettings>(
+                configuration.GetSection(nameof(RedisSettings))
+            );
+
             services
-                .AddOptions<RedisDatabaseSettings>()
-                .Bind(configuration.GetSection(nameof(RedisDatabaseSettings)))
-                .ValidateDataAnnotations()
-                .ValidateOnStart()
-                .Services.AddSingleton<IConnectionMultiplexer>(_ =>
+                .AddSingleton<IConnectionMultiplexer>(provider =>
                 {
+                    var databaseSettings = provider
+                        .GetRequiredService<IOptions<RedisSettings>>()
+                        .Value;
                     ConfigurationOptions options = new() { Password = databaseSettings.Password };
                     options.EndPoints.Add(databaseSettings.Host, databaseSettings.Port);
 

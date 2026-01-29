@@ -8,7 +8,7 @@ services:
       - S3AwsSettings__SecretKey=${S3_SECRET_KEY}
       - S3AwsSettings__ServiceUrl=${S3_SERVICE_URL}
       - S3AwsSettings__PublicUrl=${S3_PUBLIC_URL}
-      - RedisDatabaseSettings__Password=${REDIS_PASSWORD}
+      - RedisSettings__Password=${REDIS_PASSWORD}
       - ElasticsearchSettings__Password=${ELASTICSEARCH_PASSWORD}
       - DatabaseSettings__DatabaseConnection=${DATABASE_CONNECTION}
       - SecuritySettings__JwtSettings__SecretKey=${JWT_SECRET_KEY}

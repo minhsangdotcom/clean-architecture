@@ -18,7 +18,11 @@ public static class ElasticSearchExtension
         IConfiguration configuration
     )
     {
-        bool IsEnabled = configuration.GetSection("ElasticsearchSettings:IsEnabled").Get<bool>();
+        bool IsEnabled = configuration
+            .GetSection(
+                $"{nameof(ElasticsearchSettings)}:{nameof(ElasticsearchSettings.IsEnabled)}"
+            )
+            .Get<bool>();
         if (!IsEnabled)
         {
             return services;

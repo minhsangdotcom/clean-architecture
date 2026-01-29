@@ -8,11 +8,11 @@ namespace Infrastructure.Services.Cache.DistributedCache;
 
 public class RedisCacheService(
     IDatabase redis,
-    IOptions<RedisDatabaseSettings> options,
+    IOptions<RedisSettings> options,
     ILogger<RedisCacheService> logger
 ) : IDistributedCacheService
 {
-    private readonly RedisDatabaseSettings redisDatabaseSettings = options.Value;
+    private readonly RedisSettings RedisSettings = options.Value;
 
     public T? GetOrSet<T>(string key, Func<T> func, CacheOptions? options = null)
     {
@@ -24,7 +24,7 @@ public class RedisCacheService(
                 {
                     ExpirationType = CacheExpirationType.Absolute,
                     Expiration = TimeSpan.FromMinutes(
-                        redisDatabaseSettings.DefaultCacheExpirationInMinute
+                        RedisSettings.DefaultCacheExpirationInMinute
                     ),
                 }
         );
@@ -44,7 +44,7 @@ public class RedisCacheService(
                 {
                     ExpirationType = CacheExpirationType.Absolute,
                     Expiration = TimeSpan.FromMinutes(
-                        redisDatabaseSettings.DefaultCacheExpirationInMinute
+                        RedisSettings.DefaultCacheExpirationInMinute
                     ),
                 }
         );
@@ -110,7 +110,7 @@ public class RedisCacheService(
         {
             expiry =
                 options.Expiration
-                ?? TimeSpan.FromMinutes(redisDatabaseSettings.DefaultCacheExpirationInMinute);
+                ?? TimeSpan.FromMinutes(RedisSettings.DefaultCacheExpirationInMinute);
         }
 
         await redis.StringSetAsync(key, json, expiry);
@@ -163,7 +163,7 @@ public class RedisCacheService(
         {
             expiry =
                 options.Expiration
-                ?? TimeSpan.FromMinutes(redisDatabaseSettings.DefaultCacheExpirationInMinute);
+                ?? TimeSpan.FromMinutes(RedisSettings.DefaultCacheExpirationInMinute);
         }
 
         redis.StringSet(key, json, expiry);
