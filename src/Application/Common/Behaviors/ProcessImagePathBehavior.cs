@@ -102,15 +102,13 @@ public class ProcessImagePathBehavior<TMessage, TResponse>(
     // Updates the property value if the key does not already have http url
     private void UpdatePropertyIfNotPublicUrl(object target, PropertyInfo property, object key)
     {
-        string? imageKeyStr = key?.ToString();
-        if (imageKeyStr?.StartsWith(storageService.PublicUrl) is false)
-        {
-            string fullPath = storageService.GetFullPath(imageKeyStr);
-            string publicPath = storageService.GetPublicPath(fullPath);
-            logger.LogInformation("image path {value}", publicPath);
+        string imageKey =
+            key.ToString()
+            ?? throw new ArgumentNullException(nameof(key), "Image key must be not null");
+        string path = storageService.GetPath(imageKey);
+        logger.LogInformation("image path {value}", path);
 
-            property.SetValue(target, fullPath);
-        }
+        property.SetValue(target, path);
     }
 
     // Retrieves all properties with the [File] attribute from the given type

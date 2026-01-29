@@ -8,18 +8,16 @@ using Microsoft.Extensions.Options;
 
 namespace Infrastructure.Services.Aws;
 
-public class AmazonS3Service(IAmazonS3 amazonS3, IOptions<S3AwsSettings> awsSetting)
+public class AmazonS3Service(IAmazonS3 amazonS3, IOptions<AmazonS3Settings> awsSetting)
     : IStorageService
 {
-    private readonly S3AwsSettings s3AwsSettings = awsSetting.Value;
-
-    public string PublicUrl => s3AwsSettings.PublicUrl;
+    private readonly AmazonS3Settings amazonS3Settings = awsSetting.Value;
 
     public async Task<StorageResponse> UploadAsync(Stream stream, string key) =>
         await UploadAsync(
             new PutObjectRequest
             {
-                BucketName = s3AwsSettings.BucketName,
+                BucketName = amazonS3Settings.BucketName,
                 Key = key,
                 InputStream = stream,
             }
@@ -29,7 +27,7 @@ public class AmazonS3Service(IAmazonS3 amazonS3, IOptions<S3AwsSettings> awsSett
         await UploadAsync(
             new PutObjectRequest
             {
-                BucketName = s3AwsSettings.BucketName,
+                BucketName = amazonS3Settings.BucketName,
                 Key = key,
                 FilePath = path,
             }
@@ -61,8 +59,11 @@ public class AmazonS3Service(IAmazonS3 amazonS3, IOptions<S3AwsSettings> awsSett
     {
         List<UploadPartResponse> uploadResponses = [];
 
-        InitiateMultipartUploadRequest initiateRequest =
-            new() { BucketName = s3AwsSettings.BucketName, Key = request.Key };
+        InitiateMultipartUploadRequest initiateRequest = new()
+        {
+            BucketName = amazonS3Settings.BucketName,
+            Key = request.Key,
+        };
 
         InitiateMultipartUploadResponse initResponse = await amazonS3.InitiateMultipartUploadAsync(
             initiateRequest
@@ -78,16 +79,15 @@ public class AmazonS3Service(IAmazonS3 amazonS3, IOptions<S3AwsSettings> awsSett
             {
                 partSize = Math.Min(partSize, request.ContentLength - filePosition);
 
-                UploadPartRequest uploadRequest =
-                    new()
-                    {
-                        BucketName = s3AwsSettings.BucketName,
-                        Key = request.Key,
-                        UploadId = initResponse.UploadId,
-                        PartNumber = i,
-                        PartSize = request.PartSize,
-                        FilePosition = filePosition,
-                    };
+                UploadPartRequest uploadRequest = new()
+                {
+                    BucketName = amazonS3Settings.BucketName,
+                    Key = request.Key,
+                    UploadId = initResponse.UploadId,
+                    PartNumber = i,
+                    PartSize = request.PartSize,
+                    FilePosition = filePosition,
+                };
 
                 if (string.IsNullOrWhiteSpace(request.Path))
                 {
@@ -103,13 +103,12 @@ public class AmazonS3Service(IAmazonS3 amazonS3, IOptions<S3AwsSettings> awsSett
                 filePosition += request.PartSize;
             }
 
-            CompleteMultipartUploadRequest completeRequest =
-                new()
-                {
-                    BucketName = s3AwsSettings.BucketName,
-                    Key = request.Key,
-                    UploadId = initResponse.UploadId,
-                };
+            CompleteMultipartUploadRequest completeRequest = new()
+            {
+                BucketName = amazonS3Settings.BucketName,
+                Key = request.Key,
+                UploadId = initResponse.UploadId,
+            };
             completeRequest.AddPartETags(uploadResponses);
 
             await amazonS3.CompleteMultipartUploadAsync(completeRequest);
@@ -123,13 +122,12 @@ public class AmazonS3Service(IAmazonS3 amazonS3, IOptions<S3AwsSettings> awsSett
         {
             Console.WriteLine($"An AmazonS3Exception was thrown: {ex.Message}");
 
-            AbortMultipartUploadRequest abortMPURequest =
-                new()
-                {
-                    BucketName = s3AwsSettings.BucketName,
-                    Key = request.Key,
-                    UploadId = initResponse.UploadId,
-                };
+            AbortMultipartUploadRequest abortMPURequest = new()
+            {
+                BucketName = amazonS3Settings.BucketName,
+                Key = request.Key,
+                UploadId = initResponse.UploadId,
+            };
             await amazonS3.AbortMultipartUploadAsync(abortMPURequest);
 
             storageResponse.Error = ex.Message;
@@ -145,7 +143,7 @@ public class AmazonS3Service(IAmazonS3 amazonS3, IOptions<S3AwsSettings> awsSett
         {
             var request = new DeleteObjectRequest
             {
-                BucketName = s3AwsSettings.BucketName,
+                BucketName = amazonS3Settings.BucketName,
                 Key = key,
             };
 
@@ -160,39 +158,25 @@ public class AmazonS3Service(IAmazonS3 amazonS3, IOptions<S3AwsSettings> awsSett
         return storage;
     }
 
-    public string UniqueFileName(string fileName)
+    public string GenerateUniqueFileName(string fileName)
     {
         string name = Path.GetFileNameWithoutExtension(fileName).SpecialCharacterRemoving();
         string extension = Path.GetExtension(fileName);
         return $"{name}.{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}{extension}";
     }
 
-    public string GetFullPath(string key) => GeneratePreSignedURL(key);
-
-    public string GetPublicPath(string originalPath)
-    {
-        if (string.IsNullOrWhiteSpace(originalPath))
-        {
-            return string.Empty;
-        }
-
-        return originalPath.Replace(
-            s3AwsSettings.ServiceUrl,
-            s3AwsSettings.PublicUrl,
-            StringComparison.OrdinalIgnoreCase
-        );
-    }
+    public string GetPath(string key) => GeneratePreSignedURL(key);
 
     private string GeneratePreSignedURL(string key)
     {
         var request = new GetPreSignedUrlRequest
         {
-            BucketName = s3AwsSettings.BucketName,
+            BucketName = amazonS3Settings.BucketName,
             Key = key,
             Expires = DateTime.UtcNow.AddMinutes(
-                double.Parse(s3AwsSettings.PreSignedUrlExpirationInMinutes!)
+                double.Parse(amazonS3Settings.PreSignedUrlExpirationInMinutes)
             ),
-            Protocol = s3AwsSettings.Protocol,
+            Protocol = amazonS3Settings.Protocol,
         };
 
         return amazonS3.GetPreSignedURL(request);

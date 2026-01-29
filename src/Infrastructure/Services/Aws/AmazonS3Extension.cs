@@ -1,5 +1,6 @@
 using Amazon.S3;
 using Application.Common.Interfaces.Services.Storage;
+using Infrastructure.common.validator;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
@@ -13,23 +14,26 @@ public static class AmazonS3Extension
         IConfiguration configuration
     )
     {
-        services
-            .AddOptions<S3AwsSettings>()
-            .Bind(configuration.GetSection(nameof(S3AwsSettings)))
-            .ValidateOnStart();
-        services.AddSingleton<IValidateOptions<S3AwsSettings>, ValidateS3AwsSettings>();
+        services.AddOptionsWithFluentValidation<AmazonS3Settings>(
+            configuration.GetSection(nameof(AmazonS3Settings))
+        );
 
         services
             .AddSingleton<IAmazonS3>(sp =>
             {
-                S3AwsSettings settings = sp.GetRequiredService<IOptions<S3AwsSettings>>().Value;
-                AmazonS3Config clientConfig =
-                    new() { ServiceURL = settings.ServiceUrl, ForcePathStyle = true };
+                AmazonS3Settings settings = sp.GetRequiredService<
+                    IOptions<AmazonS3Settings>
+                >().Value;
+                AmazonS3Config clientConfig = new()
+                {
+                    ServiceURL = settings.ServiceUrl,
+                    ForcePathStyle = true,
+                };
 
                 return new AmazonS3Client(settings.AccessKey, settings.SecretKey, clientConfig);
             })
             .AddSingleton<IStorageService, AmazonS3Service>()
-            .AddSingleton(typeof(IMediaStorageService<>), typeof(MediaStorageService<>));
+            .AddScoped(typeof(IMediaStorageService<>), typeof(MediaStorageService<>));
 
         return services;
     }

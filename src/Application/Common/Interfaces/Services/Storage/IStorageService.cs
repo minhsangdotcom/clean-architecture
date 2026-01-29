@@ -5,8 +5,6 @@ namespace Application.Common.Interfaces.Services.Storage;
 
 public interface IStorageService
 {
-    public string PublicUrl { get; }
-
     Task<StorageResponse> UploadAsync(Stream stream, string key);
 
     Task<StorageResponse> UploadAsync(string path, string key);
@@ -15,9 +13,7 @@ public interface IStorageService
 
     Task<StorageResponse> DeleteAsync(string key);
 
-    string GetFullPath(string key);
+    string GetPath(string key);
 
-    string GetPublicPath(string originalPath);
-
-    string UniqueFileName(string fileName);
+    string GenerateUniqueFileName(string fileName);
 }

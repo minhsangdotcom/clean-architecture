@@ -11,7 +11,7 @@ public class MediaStorageService<T>(
 ) : IMediaStorageService<T>
     where T : class
 {
-    private readonly string Directory = $"{typeof(T).Name}s";
+    private readonly string directory = $"{typeof(T).Name}s";
 
     public async Task DeleteAsync(string? key)
     {
@@ -37,7 +37,7 @@ public class MediaStorageService<T>(
             return null;
         }
 
-        return $"{Directory}/{storageService.UniqueFileName(file.FileName)}";
+        return $"{directory}/{storageService.GenerateUniqueFileName(file.FileName)}";
     }
 
     public async Task<string?> UploadAsync(IFormFile? file, string? key)
