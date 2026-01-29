@@ -303,7 +303,7 @@ Create a pairs of key like
 input the keys at your appsettings.json
 
 ```json
-"S3AwsSettings": {
+"AmazonS3Settings": {
   "ServiceUrl": "http://localhost:9000",
   "AccessKey": "***",
   "SecretKey": "***",

@@ -314,7 +314,7 @@ Tạo ra cặp key
 Chỉnh lại setting ở your appsettings.json
 
 ```json
-"S3AwsSettings": {
+"AmazonS3Settings": {
   "ServiceUrl": "http://localhost:9000",
   "AccessKey": "",
   "SecretKey": "",
