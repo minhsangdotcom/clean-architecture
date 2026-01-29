@@ -108,9 +108,9 @@ try
         if (options.Value.IsEnabled)
         {
             var client = scope.ServiceProvider.GetRequiredService<ElasticsearchClient>();
-            var config = scope.ServiceProvider.GetRequiredService<ElasticConfiguration>();
+            var config = scope.ServiceProvider.GetRequiredService<IndexTypeConfiguration>();
 
-            ElasticDbSeeder dbSeeder = new(client, config, options);
+            ElasticsearchDbSeeder dbSeeder = new(client, config, options);
             await dbSeeder.RunAsync();
         }
     }

@@ -2,6 +2,7 @@ using Api.Settings;
 using Infrastructure.Data.Settings;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
+using Microsoft.Extensions.Options;
 
 namespace Api.Extensions;
 
@@ -12,9 +13,6 @@ public static class HealthCheckExtension
         IConfiguration configuration
     )
     {
-        DatabaseSettings settings =
-            configuration.GetSection(nameof(DatabaseSettings)).Get<DatabaseSettings>() ?? new();
-
         services.Configure<HealthCheckSettings>(options =>
             configuration.GetSection(nameof(HealthCheckSettings)).Bind(options)
         );
@@ -25,7 +23,11 @@ public static class HealthCheckExtension
         services
             .AddHealthChecks()
             .AddNpgSql(
-                connectionString: settings.DatabaseConnection!,
+                provider =>
+                {
+                    var databaseSetting = provider.GetRequiredService<IOptions<DatabaseSettings>>();
+                    return databaseSetting.Value.DatabaseConnection;
+                },
                 name: "postgres",
                 failureStatus: HealthStatus.Unhealthy,
                 tags: ["db", "postgres"],

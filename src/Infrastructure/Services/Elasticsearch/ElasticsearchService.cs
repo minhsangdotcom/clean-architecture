@@ -15,7 +15,7 @@ public class ElasticsearchService<T>(
 ) : IElasticsearchService<T>
     where T : class
 {
-    private readonly string indexName = ElkIndexGenerator.GetName<T>(options.Value.PrefixIndex);
+    private readonly string indexName = IndexGenerator.GetName<T>(options.Value.PrefixIndex);
 
     #region Queries
     public async Task<T?> GetAsync(string id)

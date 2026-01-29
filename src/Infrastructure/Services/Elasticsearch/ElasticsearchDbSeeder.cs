@@ -4,9 +4,9 @@ using Microsoft.Extensions.Options;
 
 namespace Infrastructure.Services.Elasticsearch;
 
-public class ElasticDbSeeder(
+public class ElasticsearchDbSeeder(
     ElasticsearchClient client,
-    ElasticConfiguration configuration,
+    IndexTypeConfiguration configuration,
     IOptions<ElasticsearchSettings> options
 )
 {

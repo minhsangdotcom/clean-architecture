@@ -78,7 +78,7 @@ public static class DataSeeding
 
         var response = await elasticsearchClient.IndexManyAsync(
             logs,
-            ElkIndexGenerator.GetName<AuditLog>(prefix)
+            IndexGenerator.GetName<AuditLog>(prefix)
         );
 
         if (response.IsSuccess())

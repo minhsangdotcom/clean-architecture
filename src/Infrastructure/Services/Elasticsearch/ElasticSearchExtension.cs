@@ -4,6 +4,7 @@ using CaseConverter;
 using Elastic.Clients.Elasticsearch;
 using Elastic.Transport;
 using FluentConfiguration;
+using Infrastructure.common.validator;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
@@ -18,33 +19,26 @@ public static class ElasticSearchExtension
     )
     {
         bool IsEnabled = configuration.GetSection("ElasticsearchSettings:IsEnabled").Get<bool>();
-        string prefixIndex =
-            configuration.GetSection("ElasticsearchSettings:PrefixIndex").Get<string>()
-            ?? "TheTemplate";
-
         if (!IsEnabled)
         {
             return services;
         }
 
-        // Load all elasticsearch entity configs
-        List<ElasticConfigureResult> configurations =
-        [
-            .. ElasticsearchRegisterHelper.GetElasticsearchConfigBuilder(
-                Assembly.GetExecutingAssembly(),
-                prefixIndex.ToKebabCase()
-            ),
-        ];
-        services.AddSingleton(new ElasticConfiguration(configurations));
+        // Load all elasticsearch index configuration
+        services.AddSingleton(provider =>
+        {
+            var settings = provider.GetRequiredService<IOptions<ElasticsearchSettings>>().Value;
+            return new IndexTypeConfiguration([
+                .. ElasticsearchRegisterHelper.GetElasticsearchConfigBuilder(
+                    Assembly.GetExecutingAssembly(),
+                    settings.PrefixIndex.ToKebabCase()
+                ),
+            ]);
+        });
 
-        services
-            .AddOptions<ElasticsearchSettings>()
-            .Bind(configuration.GetSection(nameof(ElasticsearchSettings)))
-            .Validate(
-                opts => opts.Nodes?.Count > 0,
-                $"{nameof(ElasticsearchSettings)} {nameof(ElasticsearchSettings.Nodes)} is not empty or null"
-            )
-            .ValidateOnStart();
+        services.AddOptionsWithFluentValidation<ElasticsearchSettings>(
+            configuration.GetSection(nameof(ElasticsearchSettings))
+        );
 
         services
             .AddSingleton(sp =>
@@ -52,14 +46,15 @@ public static class ElasticSearchExtension
                 ElasticsearchSettings settings = sp.GetRequiredService<
                     IOptions<ElasticsearchSettings>
                 >().Value;
-                return BuildElasticClient(settings, configurations);
+                IndexTypeConfiguration indexType = sp.GetRequiredService<IndexTypeConfiguration>();
+                return CreateElasticClient(settings, indexType.Configurations);
             })
-            .AddSingleton<IElasticsearchServiceFactory, ElasticsearchServiceFactory>();
+            .AddScoped(typeof(IElasticsearchService<>), typeof(ElasticsearchService<>));
 
         return services;
     }
 
-    private static ElasticsearchClient BuildElasticClient(
+    private static ElasticsearchClient CreateElasticClient(
         ElasticsearchSettings settings,
         List<ElasticConfigureResult> configurations
     )

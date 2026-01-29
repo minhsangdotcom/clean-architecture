@@ -1,4 +1,7 @@
+using System.Reflection;
 using Application.Common.Interfaces.UnitOfWorks;
+using FluentValidation;
+using Infrastructure.common.validator;
 using Infrastructure.Data;
 using Infrastructure.Data.Interceptors;
 using Infrastructure.Data.Repositories;
@@ -30,12 +33,12 @@ public static class DependencyInjection
     {
         services.AddDetection();
         AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
+        // for IOption validation
+        services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
 
-        services
-            .AddOptions<DatabaseSettings>()
-            .Bind(configuration.GetSection(nameof(DatabaseSettings)))
-            .ValidateOnStart();
-        services.AddSingleton<IValidateOptions<DatabaseSettings>, ValidateDatabaseSetting>();
+        services.AddOptionsWithFluentValidation<DatabaseSettings>(
+            configuration.GetSection(nameof(DatabaseSettings))
+        );
 
         services.AddSingleton(sp =>
         {
@@ -43,13 +46,11 @@ public static class DependencyInjection
             string connectionString = databaseSettings.DatabaseConnection;
             return new NpgsqlDataSourceBuilder(connectionString).EnableDynamicJson().Build();
         });
-
         services
             .AddScoped<IEfDbContext, TheDbContext>()
             .AddScoped<IEfUnitOfWork, EfUnitOfWork>()
             .AddSingleton<UpdateAuditableEntityInterceptor>()
             .AddSingleton<DispatchDomainEventInterceptor>();
-
         services.AddDbContextPool<TheDbContext>(
             (sp, options) =>
             {

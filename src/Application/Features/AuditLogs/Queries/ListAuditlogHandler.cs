@@ -6,18 +6,18 @@ using Mediator;
 
 namespace Application.Features.AuditLogs.Queries;
 
-public class ListAuditLogHandler(IElasticsearchServiceFactory? factory = null)
+public class ListAuditLogHandler(IElasticsearchService<AuditLog>? elasticsearch)
     : IRequestHandler<ListAuditLogQuery, Result<PaginationResponse<ListAuditLogResponse>>>
 {
-    private readonly IElasticsearchServiceFactory factory =
-        factory ?? throw new NotImplementedException("Elasticsearch has not enabled");
+    private readonly IElasticsearchService<AuditLog> elasticsearch =
+        elasticsearch ?? throw new NotImplementedException("Elasticsearch has not enabled");
 
     public async ValueTask<Result<PaginationResponse<ListAuditLogResponse>>> Handle(
         ListAuditLogQuery request,
         CancellationToken cancellationToken
     )
     {
-        List<AuditLog> auditLogs = await factory.Get<AuditLog>().ListAsync(request);
+        List<AuditLog> auditLogs = await elasticsearch.ListAsync(request);
         PaginationResponse<ListAuditLogResponse> paginationResponse = new(
             auditLogs.ToListAuditLogResponse(),
             auditLogs.Count,
