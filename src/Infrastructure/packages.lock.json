@@ -115,9 +115,9 @@
       },
       "TranMinhSang.DynamicQueryExtension.EntityFrameworkCore": {
         "type": "Direct",
-        "requested": "[1.0.3, )",
-        "resolved": "1.0.3",
-        "contentHash": "zwAynXctS9CrnG63i+2LxmRbZB5t5rOWnhZ973rLq6g/ND3lr6qUWVjuPNwG/+HniBCLCxna1AQlUIqbuFic1w==",
+        "requested": "[1.0.4, )",
+        "resolved": "1.0.4",
+        "contentHash": "d5/0hF6hlds+2O8/fNTT8+d6P8JZmXD9g/OLuN08GC8Dzvk6ubKeh3g+oOp0ASguPC2+gW2t4I/80iBZcZ4S5Q==",
         "dependencies": {
           "Newtonsoft.Json": "13.0.4",
           "Npgsql.EntityFrameworkCore.PostgreSQL": "10.0.0",
