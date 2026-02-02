@@ -615,8 +615,8 @@
       },
       "TranMinhSang.DynamicQueryExtension.EntityFrameworkCore": {
         "type": "Transitive",
-        "resolved": "1.0.4",
-        "contentHash": "d5/0hF6hlds+2O8/fNTT8+d6P8JZmXD9g/OLuN08GC8Dzvk6ubKeh3g+oOp0ASguPC2+gW2t4I/80iBZcZ4S5Q==",
+        "resolved": "1.0.5",
+        "contentHash": "bdEJfFcG6xBjJYIgcTdJe+iKXtxX2AFYf8ecfgSONgMkTtm162LtrgD5Zp0eR5FkhwjGZ/n9Gkb094ViyEVn5Q==",
         "dependencies": {
           "Newtonsoft.Json": "13.0.4",
           "Npgsql.EntityFrameworkCore.PostgreSQL": "10.0.0",
@@ -701,7 +701,7 @@
           "RazorLight": "[2.3.1, )",
           "Scrutor": "[6.1.0, )",
           "StackExchange.Redis": "[2.9.32, )",
-          "TranMinhSang.DynamicQueryExtension.EntityFrameworkCore": "[1.0.4, )",
+          "TranMinhSang.DynamicQueryExtension.EntityFrameworkCore": "[1.0.5, )",
           "TranMinhSang.Specification.EntityFrameworkCore": "[0.1.0, )",
           "minhsangdotcom.TheTemplate.ElasticsearchFluentConfig": "[1.0.1, )"
         }

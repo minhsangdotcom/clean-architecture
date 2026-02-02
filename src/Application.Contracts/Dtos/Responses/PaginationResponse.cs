@@ -47,11 +47,12 @@ public class Paging<T>
 
     public long TotalPage { get; set; }
 
-    public long TotalItemCount { get; set; }
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public long? TotalItemCount { get; set; }
 
-    public bool? HasNextPage { get; set; }
+    public bool HasNextPage { get; set; }
 
-    public bool? HasPreviousPage { get; set; }
+    public bool HasPreviousPage { get; set; }
 
     public string? Before { get; set; }
 
@@ -76,7 +77,6 @@ public class Paging<T>
     {
         PageSize = pageSize;
         TotalPage = (long)Math.Ceiling(totalItemCount / (double)pageSize);
-        TotalItemCount = totalItemCount;
         After = nextCursor;
         HasNextPage = nextCursor != null;
         Before = previousCursor;
@@ -84,13 +84,14 @@ public class Paging<T>
     }
 
     public Paging(
-        long? currentPage,
         long pageSize,
         long totalPage,
-        bool? hasNext,
-        bool? hasPrevious,
+        bool hasNext,
+        bool hasPrevious,
         string? before = null,
-        string? after = null
+        string? after = null,
+        long? currentPage = null,
+        long? totalCount = null
     )
     {
         CurrentPage = currentPage;
@@ -100,5 +101,6 @@ public class Paging<T>
         HasPreviousPage = hasPrevious;
         Before = before;
         After = after;
+        TotalItemCount = totalCount;
     }
 }

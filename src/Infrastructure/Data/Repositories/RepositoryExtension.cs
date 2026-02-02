@@ -68,13 +68,14 @@ public static class RepositoryExtension
         return new PaginationResponse<T>(
             source.Data ?? [],
             new Paging<T>(
-                metadata.CurrentPage,
                 metadata.PageSize,
                 metadata.TotalPage,
                 metadata.HasNextPage,
                 metadata.HasPreviousPage,
                 metadata.Before,
-                metadata.After
+                metadata.After,
+                metadata.CurrentPage,
+                metadata.TotalItems
             )
         );
     }

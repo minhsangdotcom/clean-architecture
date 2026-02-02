@@ -108,7 +108,8 @@ public class EfReadonlyRepository<T>(IEfDbContext dbContext) : IEfReadonlyReposi
                         queryParam.PageSize,
                         queryParam.Sort.GetDefaultSort(),
                         uniqueSort ?? nameof(AuditableEntity.Id)
-                    )
+                    ),
+                    cancellationToken
                 )
         ).ToPaginationResponse();
 
