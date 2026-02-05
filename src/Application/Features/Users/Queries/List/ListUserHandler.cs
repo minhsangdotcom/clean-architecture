@@ -50,7 +50,7 @@ public class ListUserHandler(
 
         var response = await unitOfWork
             .ReadonlyRepository<User>(true)
-            .PagedListAsync(
+            .CursorPagedListAsync(
                 new ListUserSpecification(),
                 query,
                 ListUserMapping.Selector(),
