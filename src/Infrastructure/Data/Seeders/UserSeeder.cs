@@ -1,4 +1,3 @@
-using System.Text.Json;
 using Application.Common.Interfaces.Seeder;
 using Application.Common.Interfaces.Services.Identity;
 using Application.Common.Interfaces.UnitOfWorks;
@@ -183,49 +182,6 @@ public class UserSeeder(
                 logger,
                 cancellationToken
             );
-
-            //!
-            if (
-                await unitOfWork.Repository<User>().CountAsync(cancellationToken: cancellationToken)
-                < 20
-            )
-            {
-                IReadOnlyList<UserSeedDto> seedUsers = await GetListUser();
-                List<(User User, UserSeedDto Seed)> usersToCreate = seedUsers
-                    .Select(dto =>
-                    {
-                        User user = new(
-                            dto.FirstName,
-                            dto.LastName,
-                            dto.Username,
-                            dto.Password,
-                            dto.Email,
-                            dto.PhoneNumber,
-                            dto.DateOfBirth,
-                            dto.Gender
-                        );
-
-                        user.InitializeIdentity(user.Id, dto.CreatedBy);
-
-                        return (user, dto);
-                    })
-                    .ToList();
-
-                await unitOfWork
-                    .Repository<User>()
-                    .AddRangeAsync(usersToCreate.Select(x => x.User), cancellationToken);
-
-                foreach ((User user, UserSeedDto seed) in usersToCreate)
-                {
-                    string roleName =
-                        seed.RoleId == Credential.ADMIN_ROLE_ID
-                            ? Credential.ADMIN_ROLE
-                            : Credential.MANAGER_ROLE;
-
-                    await userManager.AddToRolesAsync(user, new[] { roleName }, cancellationToken);
-                }
-            }
-
             await unitOfWork.CommitAsync(cancellationToken);
         }
         catch (Exception ex)
@@ -347,46 +303,6 @@ public class UserSeeder(
                 g.Permissions.Select(p => new PermissionDefinitionWithGroup(g.GroupName, p))
             ),
         ];
-
-    private async Task<List<UserSeedDto>> GetListUser()
-    {
-        string jsonPath = Path.Combine(
-            AppContext.BaseDirectory,
-            "Data",
-            "Seeders",
-            "Resources",
-            "User.json"
-        );
-
-        string json = await File.ReadAllTextAsync(jsonPath);
-
-        List<UserSeedDto>? seedUsers = JsonSerializer.Deserialize<List<UserSeedDto>>(
-            json,
-            new JsonSerializerOptions { PropertyNameCaseInsensitive = true }
-        );
-
-        if (seedUsers == null || seedUsers.Count == 0)
-        {
-            logger.LogWarning("No user seed data found.");
-            return [];
-        }
-        return seedUsers;
-    }
-}
-
-public sealed class UserSeedDto
-{
-    public string Id { get; set; } = string.Empty;
-    public string FirstName { get; set; } = string.Empty;
-    public string LastName { get; set; } = string.Empty;
-    public string Username { get; set; } = string.Empty;
-    public string Password { get; set; } = string.Empty;
-    public string Email { get; set; } = string.Empty;
-    public string PhoneNumber { get; set; } = string.Empty;
-    public DateTime DateOfBirth { get; set; }
-    public Gender Gender { get; set; }
-    public string RoleId { get; set; } = string.Empty;
-    public string CreatedBy { get; set; } = string.Empty;
 }
 
 public record GroupedPermissionDefinition(string GroupName, List<PermissionDefinition> Permissions);
