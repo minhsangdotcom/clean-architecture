@@ -7,7 +7,6 @@ services:
       - AmazonS3Settings__AccessKey=${S3_ACCESS_KEY}
       - AmazonS3Settings__SecretKey=${S3_SECRET_KEY}
       - AmazonS3Settings__ServiceUrl=${S3_SERVICE_URL}
-      - AmazonS3Settings__PublicUrl=${S3_PUBLIC_URL}
       - RedisSettings__Password=${REDIS_PASSWORD}
       - ElasticsearchSettings__Password=${ELASTICSEARCH_PASSWORD}
       - DatabaseSettings__DatabaseConnection=${DATABASE_CONNECTION}
