@@ -50,14 +50,6 @@ public class SystemPermissionDefinitionProvider : PermissionDefinitionProvider
             "Delete Role"
         );
         deleteRole.AddChild(listRole);
-
-        PermissionDefinition testTole = roleGroup.AddPermission(
-            PermissionNames.PermissionGenerator.Generate(
-                PermissionNames.PermissionResource.Role,
-                PermissionNames.PermissionAction.Test
-            ),
-            "Test Role"
-        );
         #endregion
 
         #region User permission
