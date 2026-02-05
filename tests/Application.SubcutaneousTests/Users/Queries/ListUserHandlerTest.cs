@@ -46,8 +46,8 @@ public class ListUserHandlerTest(TestingFixture testingFixture) : IAsyncLifetime
         response.Paging.ShouldNotBeNull();
         response.Paging!.PageSize.ShouldBe(10);
         response.Paging.TotalPage.ShouldBe(1);
-        response.Paging.HasNextPage!.Value.ShouldBeFalse();
-        response.Paging.HasPreviousPage!.Value.ShouldBeFalse();
+        response.Paging.HasNextPage.ShouldBeFalse();
+        response.Paging.HasPreviousPage.ShouldBeFalse();
     }
 
     [Fact]
