@@ -54,10 +54,45 @@ public class User : AggregateRoot
         Avatar = avatar;
     }
 
-    public void InitializeIdentity(Ulid id, string createdBy)
+    public User(
+        Ulid id,
+        string firstName,
+        string lastName,
+        string username,
+        string password,
+        string email,
+        IEnumerable<Ulid> roles,
+        string createdBy,
+        IEnumerable<Ulid>? permissions = null,
+        string? phoneNumber = null,
+        DateTime? dateOfBirth = null,
+        Gender? gender = null,
+        string? avatar = null
+    )
     {
         Id = id;
+        FirstName = Guard.Against.NullOrEmpty(firstName, nameof(FirstName));
+        LastName = Guard.Against.NullOrEmpty(lastName, nameof(LastName));
+        Username = Guard.Against.NullOrEmpty(username, nameof(Username));
+        Password = Guard.Against.NullOrEmpty(password, nameof(Password));
+        Email = Guard.Against.NullOrEmpty(email, nameof(Email));
+        PhoneNumber = phoneNumber;
+        DateOfBirth = dateOfBirth;
+        Gender = gender;
+        Avatar = avatar;
         CreatedBy = createdBy;
+        Roles = [.. roles.Select(id => new UserRole() { RoleId = id, UserId = Id })];
+        if (permissions?.Any() == true)
+        {
+            Permissions =
+            [
+                .. permissions.Select(id => new UserPermission()
+                {
+                    PermissionId = id,
+                    UserId = Id,
+                }),
+            ];
+        }
     }
 
     public void HasPasswordAsync(string password) =>

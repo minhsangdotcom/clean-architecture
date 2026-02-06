@@ -1,25 +1,29 @@
 using Application.Common.Interfaces.Seeder;
 using Application.Common.Interfaces.Services.Identity;
-using Application.Common.Interfaces.UnitOfWorks;
 using Application.Contracts.Permissions;
 using Domain.Aggregates.Permissions;
 using Domain.Aggregates.Roles;
 using Domain.Aggregates.Users;
 using Domain.Aggregates.Users.Enums;
 using Infrastructure.Constants;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using static Application.Contracts.Permissions.PermissionNames;
 
 namespace Infrastructure.Data.Seeders;
 
 public class UserSeeder(
-    IEfUnitOfWork unitOfWork,
+    IEfDbContext dbContext,
     IUserManager userManager,
     IRoleManager roleManager,
     PermissionDefinitionContext permissionContext,
     ILogger<UserSeeder> logger
 ) : IDbSeeder
 {
+    private readonly DbSet<User> Users = dbContext.Set<User>();
+    private readonly DbSet<Role> Roles = dbContext.Set<Role>();
+    private readonly DbSet<Permission> Permissions = dbContext.Set<Permission>();
+
     public async Task SeedAsync(CancellationToken cancellationToken = default)
     {
         IReadOnlyDictionary<string, PermissionGroupDefinition> groups = permissionContext.Groups;
@@ -31,124 +35,144 @@ public class UserSeeder(
             )),
         ];
 
-        List<Permission> permissions =
-        [
-            .. groupedPermissions.SelectMany(g =>
-                g.Permissions.Select(p => new Permission(
-                    p.Code,
-                    p.Name,
-                    p.Description,
-                    g.GroupName,
-                    createdBy: Credential.CREATED_BY_SYSTEM
-                ))
-            ),
-        ];
-
-        List<Permission> specificPermissions = permissions.FindAll(p =>
-            p.Code == PermissionGenerator.Generate(PermissionResource.Role, PermissionAction.Detail)
-            || p.Code
-                == PermissionGenerator.Generate(PermissionResource.Role, PermissionAction.Create)
-            || p.Code
-                == PermissionGenerator.Generate(PermissionResource.User, PermissionAction.Detail)
-            || p.Code
-                == PermissionGenerator.Generate(PermissionResource.User, PermissionAction.Create)
-        );
-
         Ulid adminRoleId = Ulid.Parse(Credential.ADMIN_ROLE_ID);
         Ulid managerRoleId = Ulid.Parse(Credential.MANAGER_ROLE_ID);
-        Role adminRole = new(
-            adminRoleId,
-            Credential.ADMIN_ROLE,
-            [
-                .. permissions.Select(p => new RolePermission
-                {
-                    PermissionId = p.Id,
-                    RoleId = adminRoleId,
-                }),
-            ],
-            null,
-            Credential.CREATED_BY_SYSTEM
-        );
-        Role managerRole = new(
-            managerRoleId,
-            Credential.MANAGER_ROLE,
-            [
-                .. specificPermissions.Select(p => new RolePermission
-                {
-                    PermissionId = p.Id,
-                    RoleId = managerRoleId,
-                }),
-            ],
-            null,
-            Credential.CREATED_BY_SYSTEM
-        );
+        Ulid adminId = Ulid.Parse(Credential.CHLOE_KIM_ID);
+        Ulid managerId = Ulid.Parse(Credential.ZAYDEN_CRUZ_ID);
 
-        List<PermissionDefinitionWithGroup> allDefinitions = GetPermissionDefinitionWithGroups(
-            groupedPermissions
-        );
-        await unitOfWork.BeginTransactionAsync(cancellationToken);
+        List<FlattenedPermissionDefinition> flattenedPermissions =
+            ToListFlattenedPermissionDefinition(groupedPermissions);
+
+        await dbContext.BeginTransactionAsync(cancellationToken);
+        List<Permission> currentPermissions = [];
         try
         {
-            if (
-                !await unitOfWork
-                    .Repository<Permission>()
-                    .AnyAsync(cancellationToken: cancellationToken)
-            )
+            if (!await Permissions.AnyAsync(cancellationToken: cancellationToken))
             {
+                List<Permission> permissions =
+                [
+                    .. groupedPermissions.SelectMany(g =>
+                        g.Permissions.Select(p => new Permission(
+                            p.Code,
+                            p.Name,
+                            p.Description,
+                            g.GroupName,
+                            createdBy: Credential.CREATED_BY_SYSTEM
+                        ))
+                    ),
+                ];
                 logger.LogInformation("Inserting permissions is starting.............");
-                await unitOfWork
-                    .Repository<Permission>()
-                    .AddRangeAsync(permissions, cancellationToken);
-                await unitOfWork.SaveChangesAsync(cancellationToken);
+                await Permissions.AddRangeAsync(permissions, cancellationToken);
+                currentPermissions.AddRange(permissions);
+                await dbContext.SaveChangesAsync(cancellationToken);
                 logger.LogInformation("Inserting permissions has finished.............");
             }
             else
             {
-                await UpdatePermissionAsync(allDefinitions, unitOfWork, logger, cancellationToken);
+                logger.LogInformation("Updating permissions is starting.............");
+                currentPermissions.AddRange(
+                    await UpdatePermissionAsync(flattenedPermissions, cancellationToken)
+                );
+                logger.LogInformation("Updating permissions has finished.............");
             }
 
-            if (!await unitOfWork.Repository<Role>().AnyAsync(cancellationToken: cancellationToken))
+            if (!await Roles.AnyAsync(cancellationToken: cancellationToken))
             {
+                Role adminRole = new(
+                    adminRoleId,
+                    Credential.ADMIN_ROLE,
+                    null,
+                    Credential.CREATED_BY_SYSTEM
+                );
+                Role managerRole = new(
+                    managerRoleId,
+                    Credential.MANAGER_ROLE,
+                    null,
+                    Credential.CREATED_BY_SYSTEM
+                );
                 logger.LogInformation("Inserting roles is starting.............");
-                await roleManager.CreateAsync(adminRole, cancellationToken);
-                await roleManager.CreateAsync(managerRole, cancellationToken);
+                bool isCreatedAdminRole = await roleManager.CreateAsync(
+                    adminRole,
+                    cancellationToken
+                );
+                bool isCreatedManagerRole = await roleManager.CreateAsync(
+                    managerRole,
+                    cancellationToken
+                );
+                if (isCreatedAdminRole)
+                {
+                    await roleManager.AddPermissionsAsync(
+                        adminRole,
+                        currentPermissions,
+                        cancellationToken
+                    );
+                }
+                if (isCreatedManagerRole)
+                {
+                    List<string> specificPermissions =
+                    [
+                        PermissionGenerator.Generate(
+                            PermissionResource.Role,
+                            PermissionAction.Detail
+                        ),
+                        PermissionGenerator.Generate(
+                            PermissionResource.Role,
+                            PermissionAction.Create
+                        ),
+                        PermissionGenerator.Generate(
+                            PermissionResource.User,
+                            PermissionAction.Detail
+                        ),
+                        PermissionGenerator.Generate(
+                            PermissionResource.User,
+                            PermissionAction.Create
+                        ),
+                    ];
+                    List<Permission> managerPermissions = currentPermissions.FindAll(p =>
+                        specificPermissions.Contains(p.Code)
+                    );
+                    await roleManager.AddPermissionsAsync(
+                        managerRole,
+                        managerPermissions,
+                        cancellationToken
+                    );
+                }
                 logger.LogInformation("Inserting roles has finished.............");
             }
 
-            if (!await unitOfWork.Repository<User>().AnyAsync(cancellationToken: cancellationToken))
+            if (!await Users.AnyAsync(cancellationToken: cancellationToken))
             {
                 logger.LogInformation("Seeding user data is starting.............");
 
                 // Create default admin user
                 User adminUser = new(
+                    adminId,
                     "Chloe",
                     "Kim",
                     "chloe.kim",
                     Credential.USER_DEFAULT_PASSWORD,
                     "chloe.kim@naver.kr",
-                    "01039247816",
-                    new DateTime(2002, 10, 1),
-                    Gender.Female
-                );
-                adminUser.InitializeIdentity(
-                    Ulid.Parse(Credential.CHLOE_KIM_ID),
-                    Credential.CREATED_BY_SYSTEM
+                    [adminRoleId],
+                    Credential.CREATED_BY_SYSTEM,
+                    phoneNumber: "01039247816",
+                    dateOfBirth: new DateTime(2002, 10, 1),
+                    gender: Gender.Female
                 );
 
                 User managerUser = new(
+                    managerId,
                     "Zayden",
                     "Cruz",
                     "zayden.cruz",
                     Credential.USER_DEFAULT_PASSWORD,
                     "zayden.cruz@gmail.com",
-                    "4157289034",
-                    new DateTime(2005, 10, 1),
-                    Gender.Female
+                    [managerRoleId],
+                    Credential.CREATED_BY_SYSTEM,
+                    phoneNumber: "4157289034",
+                    dateOfBirth: new DateTime(2005, 10, 1),
+                    gender: Gender.Female
                 );
-                managerUser.InitializeIdentity(
-                    Ulid.Parse(Credential.ZAYDEN_CRUZ_ID),
-                    Credential.CREATED_BY_SYSTEM
-                );
+
                 await userManager.CreateAsync(
                     adminUser,
                     Credential.USER_DEFAULT_PASSWORD,
@@ -160,53 +184,36 @@ public class UserSeeder(
                     cancellationToken: cancellationToken
                 );
 
-                // add roles for users
-                await userManager.AddToRolesAsync(
-                    adminUser,
-                    [adminRole.Name],
-                    cancellationToken: cancellationToken
-                );
-                await userManager.AddToRolesAsync(
-                    managerUser,
-                    [managerRole.Name],
-                    cancellationToken: cancellationToken
-                );
                 logger.LogInformation("Seeding user data has finished.............");
             }
 
             await UpdatePermissionToRoleAsync(
-                allDefinitions,
-                adminRole.Id,
-                roleManager,
-                unitOfWork,
-                logger,
+                flattenedPermissions,
+                currentPermissions,
+                adminRoleId,
                 cancellationToken
             );
-            await unitOfWork.CommitAsync(cancellationToken);
+            await dbContext.DatabaseFacade.CommitTransactionAsync(cancellationToken);
         }
         catch (Exception ex)
         {
-            await unitOfWork.RollbackAsync(cancellationToken);
+            await dbContext.DatabaseFacade.RollbackTransactionAsync(cancellationToken);
             logger.LogInformation("error had occurred while seeding data with {message}", ex);
         }
     }
 
-    private static async Task UpdatePermissionAsync(
-        List<PermissionDefinitionWithGroup> allDefinitions,
-        IEfUnitOfWork unitOfWork,
-        ILogger logger,
+    private async Task<List<Permission>> UpdatePermissionAsync(
+        List<FlattenedPermissionDefinition> permissionDefinitions,
         CancellationToken cancellationToken = default
     )
     {
-        List<Permission> permissions = await unitOfWork
-            .Repository<Permission>()
-            .ListAsync(cancellationToken);
+        List<Permission> permissions = await Permissions.ToListAsync(cancellationToken);
 
         var permissionsToDelete = permissions.FindAll(rp =>
-            !allDefinitions.Exists(dp => dp.Permission.Code == rp.Code)
+            !permissionDefinitions.Exists(dp => dp.Permission.Code == rp.Code)
         );
 
-        var permissionsToInsert = allDefinitions
+        var permissionsToInsert = permissionDefinitions
             .FindAll(dp => !permissions.Exists(rp => rp.Code == dp.Permission.Code))
             .ConvertAll(dp => new Permission(
                 code: dp.Permission.Code,
@@ -215,14 +222,14 @@ public class UserSeeder(
                 group: dp.GroupName,
                 createdBy: Credential.CREATED_BY_SYSTEM
             ));
+        if (permissionsToDelete.Count == 0 && permissionsToInsert.Count == 0)
+        {
+            return permissions;
+        }
 
         if (permissionsToDelete.Count > 0)
         {
-            List<Ulid> idsToDelete = permissionsToDelete.ConvertAll(x => x.Id);
-            await unitOfWork
-                .Repository<Permission>()
-                .ExecuteDeleteAsync(x => idsToDelete.Contains(x.Id));
-            await unitOfWork.SaveChangesAsync(cancellationToken);
+            Permissions.RemoveRange(permissionsToDelete);
             logger.LogInformation(
                 "deleting {count} permissions include {data}",
                 permissionsToDelete.Count,
@@ -232,31 +239,28 @@ public class UserSeeder(
 
         if (permissionsToInsert.Count > 0)
         {
-            await unitOfWork
-                .Repository<Permission>()
-                .AddRangeAsync(permissionsToInsert, cancellationToken);
-            await unitOfWork.SaveChangesAsync(cancellationToken);
+            await Permissions.AddRangeAsync(permissionsToInsert, cancellationToken);
             logger.LogInformation(
                 "inserting {count} permissions include {data}",
                 permissionsToInsert.Count,
                 string.Join(',', permissionsToInsert.Select(x => x.Code))
             );
         }
+        await dbContext.SaveChangesAsync(cancellationToken);
+        return await Permissions.ToListAsync(cancellationToken);
     }
 
-    private static async Task UpdatePermissionToRoleAsync(
-        List<PermissionDefinitionWithGroup> allDefinitions,
+    private async Task UpdatePermissionToRoleAsync(
+        List<FlattenedPermissionDefinition> permissionDefinitions,
+        List<Permission> permissions,
         Ulid roleId,
-        IRoleManager manager,
-        IEfUnitOfWork unitOfWork,
-        ILogger logger,
         CancellationToken cancellationToken = default
     )
     {
-        List<Permission> permissions = await unitOfWork
-            .Repository<Permission>()
-            .ListAsync(cancellationToken);
-        Role? role = await manager.FindByIdAsync(roleId, cancellationToken: cancellationToken);
+        Role? role = await dbContext
+            .Set<Role>()
+            .Include(x => x.Permissions)
+            .FirstOrDefaultAsync(x => x.Id == roleId, cancellationToken);
         if (role == null)
         {
             return;
@@ -264,17 +268,23 @@ public class UserSeeder(
         List<RolePermission> rolePermissions = (List<RolePermission>)role.Permissions;
 
         var rolePermissionsToDelete = rolePermissions
-            .FindAll(rp => !allDefinitions.Exists(dp => dp.Permission.Code == rp.Permission!.Code))
+            .FindAll(rp =>
+                !permissionDefinitions.Exists(dp => dp.Permission.Code == rp.Permission!.Code)
+            )
             .ConvertAll(x => x.Permission!);
 
-        var rolePermissionsToInsert = allDefinitions
+        var rolePermissionsToInsert = permissionDefinitions
             .FindAll(dp => !rolePermissions.Exists(rp => rp.Permission!.Code == dp.Permission.Code))
             .ConvertAll(dp => permissions.Find(p => p.Code == dp.Permission.Code)!)
             .FindAll(p => p != null);
 
         if (rolePermissionsToDelete.Count > 0)
         {
-            await manager.RemovePermissionsAsync(role, rolePermissionsToDelete, cancellationToken);
+            await roleManager.RemovePermissionsAsync(
+                role,
+                rolePermissionsToDelete,
+                cancellationToken
+            );
             logger.LogInformation(
                 "deleting {count} permission of {roleName} include {data}",
                 rolePermissionsToDelete.Count,
@@ -285,7 +295,7 @@ public class UserSeeder(
 
         if (rolePermissionsToInsert.Count > 0)
         {
-            await manager.AddPermissionsAsync(role, rolePermissionsToInsert, cancellationToken);
+            await roleManager.AddPermissionsAsync(role, rolePermissionsToInsert, cancellationToken);
             logger.LogInformation(
                 "inserting {count} claims of {roleName} include {data}",
                 rolePermissionsToInsert.Count,
@@ -295,16 +305,16 @@ public class UserSeeder(
         }
     }
 
-    private static List<PermissionDefinitionWithGroup> GetPermissionDefinitionWithGroups(
+    private static List<FlattenedPermissionDefinition> ToListFlattenedPermissionDefinition(
         List<GroupedPermissionDefinition> groupedPermissions
     ) =>
         [
             .. groupedPermissions.SelectMany(g =>
-                g.Permissions.Select(p => new PermissionDefinitionWithGroup(g.GroupName, p))
+                g.Permissions.Select(p => new FlattenedPermissionDefinition(g.GroupName, p))
             ),
         ];
 }
 
 public record GroupedPermissionDefinition(string GroupName, List<PermissionDefinition> Permissions);
 
-public record PermissionDefinitionWithGroup(string GroupName, PermissionDefinition Permission);
+public record FlattenedPermissionDefinition(string GroupName, PermissionDefinition Permission);
