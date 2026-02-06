@@ -142,7 +142,7 @@ What makes this Clean Architecture template stand out from the rest on Github?
   │     ├── /ErrorCodes/             # Centralized error code definitions for the whole app
   │     ├── /Errors/                 # Error result & problem details mappings
   │     ├── /Interfaces/             # Application-level interfaces (services, repos, abstractions)
-  │     ├── /QueryStringProcessing/  # Parsing, validating & normalizing query parameters
+  │     ├── /RequestHandler/         # Parsing, validating & normalizing query parameters
   │     ├── /Security/               # Security helpers (permission attributes, role metadata)
   │     └── /Validators/             # FluentValidator custom abstract class
   │
@@ -308,7 +308,6 @@ input the keys at your appsettings.json
   "AccessKey": "***",
   "SecretKey": "***",
   "BucketName": "the-template-project",
-  "PublicUrl": "http://localhost:9000",
   "PreSignedUrlExpirationInMinutes": 1440,
   "Protocol": 1
 },
