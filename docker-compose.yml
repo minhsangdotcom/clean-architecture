@@ -1,6 +1,6 @@
 services:
   webapi:
-    image: ghcr.io/${GITHUB_USER_NAME}/${IMAGE_NAME}:latest
+    image: ghcr.io/${GITHUB_USER_NAME}/${IMAGE_NAME}:${IMAGE_TAG}
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
       - urls=http://0.0.0.0:8080
@@ -14,7 +14,7 @@ services:
     networks:
       - the-template-network
     deploy:
-      replicas: 3
+      replicas: 2
     healthcheck:
       test: ["CMD", "curl", "-f", "http://127.0.0.1:8080/health"]
       interval: 30s

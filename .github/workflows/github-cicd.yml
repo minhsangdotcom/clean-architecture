@@ -100,8 +100,8 @@ jobs:
         with:
           images: ${{ vars.REGISTRY }}/${{ github.actor }}/${{ vars.IMAGE_NAME }}
           tags: |
-            type=sha,format=long
-            type=raw,value=latest,enable={{is_default_branch}}
+            type=raw,value=${{ github.ref_name }}-${{ github.sha }}
+            type=raw,value=${{ github.ref_name }}
       - name: Build and push
         uses: docker/build-push-action@v6
         with:
@@ -128,7 +128,8 @@ jobs:
           port: 22
           script: |
             echo "${{ secrets.PWD_TOKEN }}" | docker login ${{ vars.REGISTRY }} -u ${{ github.actor }} --password-stdin
-            docker pull ${{ vars.REGISTRY }}/${{ github.actor }}/${{ vars.IMAGE_NAME }}:latest
+            docker pull ${{ vars.REGISTRY }}/${{ github.actor }}/${{ vars.IMAGE_NAME }}:${{ github.ref_name }}
             cd ${{ secrets.APP_PATH }}
-            docker compose down
-            docker compose up -d --build
+            docker compose up -d
+            docker image prune -f
+            docker logout ${{ vars.REGISTRY }}

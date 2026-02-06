@@ -144,85 +144,83 @@ Có gì đặc biệt khiến cho template này trở nên khác biệt so với
 
 ```
 /Domain
-  ├── /Aggregates/           # Domain aggregates (entities with business rules)
-  └── /Common/               # Shared domain logic
+  ├── /Aggregates/           # Các Aggregate trong Domain (entity chứa quy tắc nghiệp vụ)
+  └── /Common/               # Logic domain dùng chung
 ```
 
 ```
 /Application
   ├── /Common
-  │     ├── /Auth/                   # Authentication & authorization helpers (policy builders, claim extractors)
+  │     ├── /Auth/                   # Tiện ích xác thực & phân quyền (xây dựng policy, trích xuất claim)
   │     ├── /Behaviors/              # MediatR pipeline behaviors (logging, validation, transaction, caching)
-  │     ├── /ErrorCodes/             # Centralized error code definitions for the whole app
-  │     ├── /Errors/                 # Error result & problem details mappings
-  │     ├── /Interfaces/             # Application-level interfaces (services, repos, abstractions)
-  │     ├── /RequestHandler/         # Parsing, validating & normalizing request
-  │     ├── /Security/               # Security helpers (permission attributes, role metadata)
-  │     └── /Validators/             # Global validators used across features
+  │     ├── /ErrorCodes/             # Định nghĩa mã lỗi tập trung cho toàn bộ ứng dụng
+  │     ├── /Errors/                 # Ánh xạ kết quả lỗi & problem details
+  │     ├── /Interfaces/             # Interface tầng Application (service, repository, abstraction)
+  │     ├── /RequestHandler/         # Phân tích, validate & chuẩn hóa query parameters
+  │     ├── /Security/               # Tiện ích bảo mật (attribute phân quyền, metadata role)
+  │     └── /Validators/             # Lớp abstract FluentValidation dùng chung
   │
-  ├── /Features                      # Vertical slices styles (CQRS + MediatR)
-  │     ├── /AuditLogs/              # Commands & queries to manage audit logs
-  │     ├── /Permissions/            # Permission management
-  │     ├── /QueueLogs/              # Query logs for background queue jobs
-  │     ├── /Regions/                # Region-based CQRS handlers
-  │     ├── /Roles/                  # Role CRUD + role-permission commands
-  │     └── /Users/                  # User CRUD + account actions
+  ├── /Features                      # Phong cách Vertical Slice (CQRS + MediatR)
+  │     ├── /AuditLogs/              # Command & Query quản lý audit log
+  │     ├── /Permissions/            # Quản lý permission
+  │     ├── /QueueLogs/              # Log truy vấn cho background queue jobs
+  │     ├── /Regions/                # CQRS xử lý theo khu vực (region)
+  │     ├── /Roles/                  # CRUD role + command role-permission
+  │     └── /Users/                  # CRUD user + các thao tác tài khoản
   │
-  ├── /SharedFeatures                # Common CQRS components reused across multiple features.
-  │     ├── /Mapping/                # Shared mapping used by multiple features.
-  │     ├── /Projections/            # Common read-side DTO builders or lightweight view models.
-  │     ├── /Requests/               # Shared command/query models (e.g., Upsert commands used by multiple operations).
-  │     └── /Validations/             # Reusable FluentValidation rules shared across commands/queries.
+  ├── /SharedFeatures                # Các thành phần CQRS dùng chung cho nhiều feature
+  │     ├── /Mapping/                # Mapping dùng chung giữa nhiều feature
+  │     ├── /Projections/            # DTO phía read-side hoặc view model nhẹ dùng chung
+  │     ├── /Requests/               # Command/Query dùng chung (ví dụ: Upsert dùng cho nhiều nghiệp vụ)
+  │     └── /Validations/            # Rule FluentValidation tái sử dụng giữa nhiều command/query
   │
-  ├── Application.csproj             # Application project definition
-  └── DependencyInjection.cs          # Registers all Application services into DI container
-
+  ├── Application.csproj             # File project Application
+  └── DependencyInjection.cs         # Đăng ký toàn bộ service tầng Application vào DI container
 ```
 
 ```
 /Infrastructure
-  ├── /Constants                       # Static constants for Infrastructure layer
+  ├── /Constants                       # Hằng số tĩnh cho tầng Infrastructure
   │
-  ├── /Data                            # EF Core + persistence layer
-  │     ├── /Configurations/           # Fluent API entity configurations
-  │     ├── /Converters/               # Type converters (e.g., Ulid ↔ string)
-  │     ├── /Interceptors/             # EF Core interceptors (audit, logging)
-  │     ├── /Migrations/               # EF Core migration files
-  │     ├── /Repositories/             # Repository implementations
-  │     ├── /Seeders/                  # Seed data for database initialization
-  │     └── /Settings/                 # DbContext, UnitOfWork, factories, settings
+  ├── /Data                            # EF Core + tầng persistence
+  │     ├── /Configurations/           # Cấu hình entity bằng Fluent API
+  │     ├── /Converters/               # Bộ chuyển đổi kiểu (vd: Ulid ↔ string)
+  │     ├── /Interceptors/             # EF Core interceptor (audit, logging)
+  │     ├── /Migrations/               # File migration của EF Core
+  │     ├── /Repositories/             # Triển khai repository
+  │     ├── /Seeders/                  # Seed dữ liệu khởi tạo database
+  │     └── /Settings/                 # IOptions cho database
   │
-  ├── /Services                         # Infrastructure service implementations
+  ├── /Services                         # Triển khai service tầng Infrastructure
   │
-  ├── DependencyInjection.cs            # Registers Infrastructure services into DI
-  └── Infrastructure.csproj             # Project file
-
+  ├── DependencyInjection.cs            # Đăng ký service Infrastructure vào DI
+  └── Infrastructure.csproj             # File project Infrastructure
 ```
 
 ```
 /Api
-  ├── /common                           # Shared helpers/utilities for the API layer
+  ├── /common                           # Helper / tiện ích dùng chung cho tầng API
   │
-  ├── /Converters                       # converters for project
+  ├── /Converters                       # Các converter cho project
   │
-  ├── /Endpoints                        # HTTP endpoint definitions (minimal APIs or controllers)
+  ├── /Endpoints                        # Định nghĩa HTTP endpoint (Minimal API)
   │
-  ├── /Extensions                       # API extension methods (Swagger, CORS, routing, etc.)
+  ├── /Extensions                       # Extension methods cho API (Swagger, CORS, routing, ...)
   │
-  ├── /Middlewares                      # Custom middlewares (exception handling, logging, etc.)
+  ├── /Middlewares                      # Middleware custom (xử lý exception, logging, ...)
   │
-  ├── /Resources                        # Localization resources for message translation
-  │     ├── /Messages/                  # Localized message files (e.g., en.json, vi.json)
-  │     └── /Permissions/               # Permission translation files
+  ├── /Resources                        # Tài nguyên localization cho message
+  │     ├── /Messages/                  # File message đa ngôn ngữ (vd: en.json, vi.json)
+  │     └── /Permissions/               # File dịch permission
   │
-  ├── /Services                         # API-layer services (if any API-specific logic is needed)
+  ├── /Services                         # Service riêng cho tầng API (nếu có logic đặc thù API)
   │
-  ├── /Settings                         # Settings for IOption
+  ├── /Settings                         # Setting cho IOptions
   │
-  ├── /wwwroot/Templates                # Static template files (email templates, exports, etc.)
+  ├── /wwwroot/Templates                # File template tĩnh (email, export, ...)
   │
-  ├── Api.csproj                        # Project file
-  └── Program.cs                        # Application startup
+  ├── Api.csproj                        # File project API
+  └── Program.cs                        # Điểm khởi động ứng dụng
 ```
 
 ```
@@ -319,7 +317,6 @@ Chỉnh lại setting ở your appsettings.json
   "AccessKey": "",
   "SecretKey": "",
   "BucketName": "the-template-project",
-  "PublicUrl": "http://localhost:9000",
   "PreSignedUrlExpirationInMinutes": 1440,
   "Protocol": 1
 },
