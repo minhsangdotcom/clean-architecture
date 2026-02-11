@@ -26,8 +26,8 @@ public static class TokenExtension
             ?? new();
 
         return services
-            .AddSingleton<ITokenService, TokenService>()
-            .AddSingleton<TokenGenerator>()
+            .AddTransient<ITokenService, DefaultTokenService>()
+            .AddTransient<TokenGenerator>()
             .AddAuthentication(authentication =>
             {
                 authentication.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;

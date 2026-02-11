@@ -5,7 +5,7 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace Infrastructure.Services.Token;
 
-public class TokenService(TokenGenerator tokenGenerator, IOptions<JwtSettings> options)
+public class DefaultTokenService(TokenGenerator tokenGenerator, IOptions<JwtSettings> options)
     : ITokenService
 {
     private readonly JwtSettings jwtSettings = options.Value;

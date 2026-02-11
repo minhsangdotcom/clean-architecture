@@ -47,7 +47,7 @@ public static class QueueRegisterExtension
                         classes.AssignableTo<IQueueHandler<TRequest, TResponse>>()
                     )
                     .AsImplementedInterfaces()
-                    .WithScopedLifetime()
+                    .WithTransientLifetime()
             );
             services.AddHostedService<QueueWorker<TRequest, TResponse>>();
         }
