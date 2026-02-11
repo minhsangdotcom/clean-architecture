@@ -72,7 +72,7 @@ public class LoginUserHandler(
             );
         }
 
-        DateTime refreshExpireTime = tokenService.RefreshTokenExpiredTime;
+        DateTime refreshExpireTime = tokenService.RefreshTokenExpirationTime;
         string familyId = StringExtension.GenerateRandomString(32);
         string userAgent = detectionService.UserAgent.ToString();
 
@@ -85,17 +85,18 @@ public class LoginUserHandler(
             ClientIp = currentUser.ClientIp,
         };
 
-        DateTime accessTokenExpiredTime = tokenService.AccessTokenExpiredTime;
-        string accessToken = tokenService.Create(
+        DateTime accessTokenExpiredTime = tokenService.AccessTokenExpirationTime;
+        string accessToken = tokenService.Generate(
             new Dictionary<string, object>() { { ClaimTypes.Sub, user.Id.ToString() } },
             accessTokenExpiredTime
         );
 
-        string refreshToken = tokenService.Create(
+        string refreshToken = tokenService.Generate(
             new Dictionary<string, object>
             {
                 { ClaimTypes.TokenFamilyId, familyId },
                 { ClaimTypes.Sub, user.Id.ToString() },
+                { "jti", Guid.NewGuid().ToString() },
             }
         );
 

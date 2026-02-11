@@ -1,23 +1,25 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using System.Text;
+using Application.Common.Interfaces.Services.Token;
 using DotNetCoreExtension.Extensions;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 
 namespace Infrastructure.Services.Token;
 
-public class TokenGenerator(ILogger<TokenGenerator> logger)
+public class TokenGenerator(ILogger<TokenGenerator> logger) : ITokenGenerator
 {
     private readonly JwtSecurityTokenHandler tokenHandler = new();
 
-    public string Create(
-        SymmetricSecurityKey key,
+    public string Generate(
+        string key,
         IDictionary<string, object> claims,
         DateTime? expirationTime = null
     )
     {
-        SigningCredentials credentials = new(key, SecurityAlgorithms.HmacSha256);
-
+        SymmetricSecurityKey securityKey = new(Encoding.UTF8.GetBytes(key));
+        SigningCredentials credentials = new(securityKey, SecurityAlgorithms.HmacSha256);
         SecurityTokenDescriptor tokenDescriptor = new()
         {
             Claims = claims,

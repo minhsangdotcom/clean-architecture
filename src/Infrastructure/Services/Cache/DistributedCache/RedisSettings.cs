@@ -1,5 +1,3 @@
-using System.ComponentModel.DataAnnotations;
-
 namespace Infrastructure.Services.Cache.DistributedCache;
 
 public class RedisSettings
@@ -10,7 +8,7 @@ public class RedisSettings
 
     public string? Password { get; set; }
 
-    public int DefaultCacheExpirationInMinute { get; set; }
+    public int DefaultExpirationInMinutes { get; set; }
 
     public bool IsEnabled { get; set; }
 }

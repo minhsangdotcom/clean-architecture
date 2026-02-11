@@ -27,5 +27,5 @@ public class LocalizationSettings
             _supportedCultures = cleaned;
         }
     }
-    public int TranslationCacheInMinutes { get; set; } = 30;
+    public int TranslationCacheDurationInMinutes { get; set; } = 30;
 }

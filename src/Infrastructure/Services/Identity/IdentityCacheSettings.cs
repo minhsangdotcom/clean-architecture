@@ -2,14 +2,14 @@ namespace Infrastructure.Services.Identity;
 
 public class IdentityCacheSettings
 {
-    public RolePermissionCacheSettings UserRoles { get; set; } = new() { ExpirationMinutes = 30 };
+    public RolePermissionCacheSettings UserRoles { get; set; } = new() { ExpirationInMinutes = 30 };
     public RolePermissionCacheSettings RolePermissions { get; set; } =
-        new() { ExpirationMinutes = 60 };
+        new() { ExpirationInMinutes = 60 };
     public RolePermissionCacheSettings UserPermissions { get; set; } =
-        new() { ExpirationMinutes = 60 };
+        new() { ExpirationInMinutes = 60 };
 }
 
 public class RolePermissionCacheSettings
 {
-    public int ExpirationMinutes { get; set; }
+    public int ExpirationInMinutes { get; set; }
 }

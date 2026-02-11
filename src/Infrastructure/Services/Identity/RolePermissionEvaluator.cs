@@ -102,7 +102,7 @@ public class RolePermissionEvaluator(
                 new CacheOptions()
                 {
                     ExpirationType = CacheExpirationType.Sliding,
-                    Expiration = TimeSpan.FromMinutes(cacheSettings.UserRoles.ExpirationMinutes),
+                    Expiration = TimeSpan.FromMinutes(cacheSettings.UserRoles.ExpirationInMinutes),
                 }
             ) ?? [];
     }
@@ -124,7 +124,7 @@ public class RolePermissionEvaluator(
                 {
                     ExpirationType = CacheExpirationType.Sliding,
                     Expiration = TimeSpan.FromMinutes(
-                        cacheSettings.RolePermissions.ExpirationMinutes
+                        cacheSettings.RolePermissions.ExpirationInMinutes
                     ),
                 }
             ) ?? [];
@@ -147,7 +147,7 @@ public class RolePermissionEvaluator(
                 {
                     ExpirationType = CacheExpirationType.Absolute,
                     Expiration = TimeSpan.FromMinutes(
-                        cacheSettings.UserPermissions.ExpirationMinutes
+                        cacheSettings.UserPermissions.ExpirationInMinutes
                     ),
                 }
             ) ?? [];

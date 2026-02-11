@@ -23,7 +23,7 @@ public class MemoryCacheService(
                 ?? new CacheOptions()
                 {
                     ExpirationType = CacheExpirationType.Absolute,
-                    Expiration = TimeSpan.FromMinutes(cacheSettings.DefaultCacheExpirationInMinute),
+                    Expiration = TimeSpan.FromMinutes(cacheSettings.DefaultExpirationInMinutes),
                 }
         );
     }
@@ -41,7 +41,7 @@ public class MemoryCacheService(
                 ?? new CacheOptions()
                 {
                     ExpirationType = CacheExpirationType.Absolute,
-                    Expiration = TimeSpan.FromMinutes(cacheSettings.DefaultCacheExpirationInMinute),
+                    Expiration = TimeSpan.FromMinutes(cacheSettings.DefaultExpirationInMinutes),
                 }
         );
     }

@@ -24,10 +24,11 @@ public static class TokenExtension
         JwtSettings jwtSettings =
             config.GetSection($"SecuritySettings:{nameof(JwtSettings)}").Get<JwtSettings>()
             ?? new();
+        JwtType jwtType = jwtSettings.Default;
 
         return services
             .AddTransient<ITokenService, DefaultTokenService>()
-            .AddTransient<TokenGenerator>()
+            .AddTransient<ITokenGenerator, TokenGenerator>()
             .AddAuthentication(authentication =>
             {
                 authentication.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -39,7 +40,7 @@ public static class TokenExtension
                 {
                     ValidateIssuerSigningKey = true,
                     IssuerSigningKey = new SymmetricSecurityKey(
-                        Encoding.ASCII.GetBytes(jwtSettings.SecretKey)
+                        Encoding.ASCII.GetBytes(jwtType.SecretKey)
                     ),
                     ValidateIssuer = false,
                     ValidateAudience = false,

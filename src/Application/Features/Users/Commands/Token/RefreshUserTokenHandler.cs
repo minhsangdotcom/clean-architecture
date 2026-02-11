@@ -58,7 +58,7 @@ public class RefreshUserTokenHandler(
                 queryParam: new()
                 {
                     Sort =
-                        $"{nameof(UserRefreshToken.CreatedAt)}{OrderTerm.DELIMITER}{OrderTerm.DESC}",
+                        $"{nameof(UserRefreshToken.CreatedAt)}{OrderTerm.DELIMITER}{OrderTerm.DESC},{nameof(UserRefreshToken.Id)}{OrderTerm.DELIMITER}{OrderTerm.DESC}",
                 },
                 deep: 0,
                 cancellationToken: cancellationToken
@@ -122,17 +122,18 @@ public class RefreshUserTokenHandler(
             );
         }
 
-        DateTime accessTokenExpiredTime = tokenService.AccessTokenExpiredTime;
-        string accessToken = tokenService.Create(
+        DateTime accessTokenExpiredTime = tokenService.AccessTokenExpirationTime;
+        string accessToken = tokenService.Generate(
             new Dictionary<string, object>() { { ClaimTypes.Sub, decodedToken.Sub } },
             accessTokenExpiredTime
         );
 
-        string refreshToken = tokenService.Create(
+        string refreshToken = tokenService.Generate(
             new Dictionary<string, object>
             {
                 { ClaimTypes.TokenFamilyId, decodedToken.FamilyId },
                 { ClaimTypes.Sub, decodedToken.Sub },
+                { "jti", Guid.NewGuid().ToString() },
             }
         );
 
@@ -144,7 +145,7 @@ public class RefreshUserTokenHandler(
             Browser = detectionService.Browser.Name,
             Engine = detectionService.Engine.Name,
         };
-        DateTimeOffset refreshTokenExpiredTime = tokenService.RefreshTokenExpiredTime;
+        DateTimeOffset refreshTokenExpiredTime = tokenService.RefreshTokenExpirationTime;
         UserRefreshToken userRefreshToken = new()
         {
             FamilyId = decodedToken.FamilyId,

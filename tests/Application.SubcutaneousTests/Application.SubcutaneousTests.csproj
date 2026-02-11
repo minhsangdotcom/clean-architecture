@@ -25,7 +25,7 @@
     <Using Include="Xunit" />
     <ProjectReference Include="..\..\src\Api\Api.csproj" />
 
-    <None Include="wwwroot\Templates\ForgotPassword.cshtml">
+    <None Include="wwwroot\Templates\ForgotPassword.html">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
 

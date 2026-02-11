@@ -1,16 +1,8 @@
 services:
-  webapi:
+  api: 
     image: ghcr.io/${GITHUB_USER_NAME}/${IMAGE_NAME}:${IMAGE_TAG}
-    environment:
-      - ASPNETCORE_ENVIRONMENT=Production
-      - urls=http://0.0.0.0:8080
-      - AmazonS3Settings__AccessKey=${S3_ACCESS_KEY}
-      - AmazonS3Settings__SecretKey=${S3_SECRET_KEY}
-      - AmazonS3Settings__ServiceUrl=${S3_SERVICE_URL}
-      - RedisSettings__Password=${REDIS_PASSWORD}
-      - ElasticsearchSettings__Password=${ELASTICSEARCH_PASSWORD}
-      - DatabaseSettings__DatabaseConnection=${DATABASE_CONNECTION}
-      - SecuritySettings__JwtSettings__SecretKey=${JWT_SECRET_KEY}
+    env_file:
+      - .env
     networks:
       - the-template-network
     deploy:
@@ -28,7 +20,7 @@ services:
     ports:
       - "80:80"
     networks:
-       - the-template-network
+      - the-template-network
     depends_on:
       - webapi
 networks:

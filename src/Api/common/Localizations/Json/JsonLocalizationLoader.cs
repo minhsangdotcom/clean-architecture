@@ -26,7 +26,7 @@ public class JsonLocalizationLoader(
             new CacheOptions()
             {
                 ExpirationType = CacheExpirationType.Sliding,
-                Expiration = TimeSpan.FromMinutes(settings.TranslationCacheInMinutes),
+                Expiration = TimeSpan.FromMinutes(settings.TranslationCacheDurationInMinutes),
             }
         );
     }
