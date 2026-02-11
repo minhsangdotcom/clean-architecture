@@ -23,9 +23,7 @@ public class RedisCacheService(
                 ?? new CacheOptions()
                 {
                     ExpirationType = CacheExpirationType.Absolute,
-                    Expiration = TimeSpan.FromMinutes(
-                        RedisSettings.DefaultCacheExpirationInMinute
-                    ),
+                    Expiration = TimeSpan.FromMinutes(RedisSettings.DefaultCacheExpirationInMinute),
                 }
         );
     }
@@ -43,9 +41,7 @@ public class RedisCacheService(
                 ?? new CacheOptions()
                 {
                     ExpirationType = CacheExpirationType.Absolute,
-                    Expiration = TimeSpan.FromMinutes(
-                        RedisSettings.DefaultCacheExpirationInMinute
-                    ),
+                    Expiration = TimeSpan.FromMinutes(RedisSettings.DefaultCacheExpirationInMinute),
                 }
         );
     }

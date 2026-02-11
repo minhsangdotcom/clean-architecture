@@ -19,7 +19,7 @@ namespace Application.Features.Users.Commands.Token;
 
 public class RefreshUserTokenHandler(
     IEfUnitOfWork unitOfWork,
-    ITokenFactoryService tokenFactory,
+    ITokenService tokenService,
     IDetectionService detectionService,
     ICurrentUser currentUser,
     ITranslator<Messages> translator
@@ -30,11 +30,12 @@ public class RefreshUserTokenHandler(
         CancellationToken cancellationToken
     )
     {
-        bool isValid = DecodeRefreshToken(
-            command.RefreshToken!,
-            out DecodeTokenResponse? decodeToken
-        );
-        if (!isValid)
+        DecodedToken? decodedToken = tokenService.Decode<DecodedToken>(command.RefreshToken!);
+        if (
+            decodedToken == null
+            || string.IsNullOrWhiteSpace(decodedToken.FamilyId)
+            || string.IsNullOrWhiteSpace(decodedToken.Sub)
+        )
         {
             return Result<RefreshUserTokenResponse>.Failure(
                 new BadRequestError(
@@ -51,8 +52,8 @@ public class RefreshUserTokenHandler(
             .ReadonlyRepository<UserRefreshToken>()
             .ListAsync(
                 new ListRefreshTokenByFamilyIdSpecification(
-                    decodeToken!.FamilyId!,
-                    Ulid.Parse(decodeToken.Sub!)
+                    decodedToken.FamilyId,
+                    Ulid.Parse(decodedToken.Sub)
                 ),
                 queryParam: new()
                 {
@@ -121,17 +122,18 @@ public class RefreshUserTokenHandler(
             );
         }
 
-        DateTime accessTokenExpiredTime = tokenFactory.AccessTokenExpiredTime;
-        string accessToken = tokenFactory.CreateToken(
-            [new(ClaimTypes.Sub, decodeToken.Sub!)],
+        DateTime accessTokenExpiredTime = tokenService.AccessTokenExpiredTime;
+        string accessToken = tokenService.Create(
+            new Dictionary<string, object>() { { ClaimTypes.Sub, decodedToken.Sub } },
             accessTokenExpiredTime
         );
 
-        string refreshToken = tokenFactory.CreateToken(
-            [
-                new(ClaimTypes.Sub, decodeToken.Sub!),
-                new(ClaimTypes.TokenFamilyId, decodeToken.FamilyId!),
-            ]
+        string refreshToken = tokenService.Create(
+            new Dictionary<string, object>
+            {
+                { ClaimTypes.TokenFamilyId, decodedToken.FamilyId },
+                { ClaimTypes.Sub, decodedToken.Sub },
+            }
         );
 
         var userAgent = new
@@ -142,17 +144,16 @@ public class RefreshUserTokenHandler(
             Browser = detectionService.Browser.Name,
             Engine = detectionService.Engine.Name,
         };
-
-        UserRefreshToken userRefreshToken =
-            new()
-            {
-                FamilyId = decodeToken.FamilyId,
-                UserId = Ulid.Parse(decodeToken.Sub!),
-                ExpiredTime = tokenFactory.RefreshTokenExpiredTime,
-                Token = refreshToken,
-                UserAgent = SerializerExtension.Serialize(userAgent).StringJson,
-                ClientIp = currentUser.ClientIp,
-            };
+        DateTimeOffset refreshTokenExpiredTime = tokenService.RefreshTokenExpiredTime;
+        UserRefreshToken userRefreshToken = new()
+        {
+            FamilyId = decodedToken.FamilyId,
+            UserId = Ulid.Parse(decodedToken.Sub),
+            ExpiredTime = refreshTokenExpiredTime,
+            Token = refreshToken,
+            UserAgent = SerializerExtension.Serialize(userAgent).StringJson,
+            ClientIp = currentUser.ClientIp,
+        };
 
         await unitOfWork
             .Repository<UserRefreshToken>()
@@ -162,19 +163,5 @@ public class RefreshUserTokenHandler(
         return Result<RefreshUserTokenResponse>.Success(
             new() { Token = accessToken, RefreshToken = refreshToken }
         );
-    }
-
-    private bool DecodeRefreshToken(string token, out DecodeTokenResponse? decodeTokenResponse)
-    {
-        try
-        {
-            decodeTokenResponse = tokenFactory.DecodeToken(token);
-            return true;
-        }
-        catch (Exception)
-        {
-            decodeTokenResponse = null!;
-            return false;
-        }
     }
 }

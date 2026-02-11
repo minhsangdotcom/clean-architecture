@@ -23,7 +23,7 @@
       Include="minhsangdotcom.TheTemplate.ElasticsearchFluentConfig"
       Version="1.0.1"
     />
-    <PackageReference Include="RazorLight" Version="2.3.1" />
+    <PackageReference Include="Scriban" Version="6.5.2" />
     <PackageReference Include="Scrutor" Version="6.1.0" />
     <PackageReference Include="StackExchange.Redis" Version="2.9.32" />
     <PackageReference

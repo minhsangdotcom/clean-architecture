@@ -33,7 +33,7 @@ public static class AmazonS3Extension
                 return new AmazonS3Client(settings.AccessKey, settings.SecretKey, clientConfig);
             })
             .AddSingleton<IStorageService, AmazonS3Service>()
-            .AddScoped(typeof(IMediaStorageService<>), typeof(MediaStorageService<>));
+            .AddSingleton(typeof(IMediaStorageService<>), typeof(MediaStorageService<>));
 
         return services;
     }

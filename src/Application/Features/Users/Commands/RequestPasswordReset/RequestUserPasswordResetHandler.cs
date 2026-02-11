@@ -88,15 +88,22 @@ public class RequestUserPasswordResetHandler(
             Query = $"token={Uri.EscapeDataString(userPasswordReset.Token)}&email={user.Email}",
         };
 
-        string expiry = userPasswordReset.Expiry.ToLocalTime().ToString("dd/MM/yyyy hh:mm:ss");
         MailTemplateData mail = new()
         {
             DisplayName = "The Template password Reset",
             Subject = "Reset password",
             To = [user.Email],
             Template = new(
-                "ForgotPassword",
-                new ResetPasswordModel() { ResetLink = linkBuilder.ToString(), Expiry = expiry }
+                forgotPasswordSettings.TemplateName,
+                new ResetPasswordModel()
+                {
+                    ResetLink = linkBuilder.ToString(),
+                    ExpiredTimeInHour = forgotPasswordSettings.ExpiredTimeInHour,
+                    UserEmail = user.Email,
+                    SupportEmail = "minhsang.work25@gmail.com",
+                    UserName = user.Username,
+                    Year = DateTimeOffset.UtcNow.Year,
+                }
             ),
         };
 

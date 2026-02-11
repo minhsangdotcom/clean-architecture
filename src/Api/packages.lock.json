@@ -489,6 +489,11 @@
           "Microsoft.Extensions.DependencyModel": "6.0.0"
         }
       },
+      "Scriban": {
+        "type": "Transitive",
+        "resolved": "6.5.2",
+        "contentHash": "JXli/Sh1WVZs/pqnPPRJTlwEsZHPJtndzxiaPnrteXDpAqVqHxh4ifhx4puTaYKVMPJUMOp9bnCpEVBpYlt/eQ=="
+      },
       "Scrutor": {
         "type": "Transitive",
         "resolved": "6.1.0",
@@ -699,6 +704,7 @@
           "MailKit": "[4.12.1, )",
           "Microsoft.AspNetCore.Authentication.JwtBearer": "[10.0.0, )",
           "RazorLight": "[2.3.1, )",
+          "Scriban": "[6.5.2, )",
           "Scrutor": "[6.1.0, )",
           "StackExchange.Redis": "[2.9.32, )",
           "TranMinhSang.DynamicQueryExtension.EntityFrameworkCore": "[1.0.5, )",

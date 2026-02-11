@@ -53,7 +53,7 @@ public static class ElasticSearchExtension
                 IndexTypeConfiguration indexType = sp.GetRequiredService<IndexTypeConfiguration>();
                 return CreateElasticClient(settings, indexType.Configurations);
             })
-            .AddScoped(typeof(IElasticsearchService<>), typeof(ElasticsearchService<>));
+            .AddSingleton(typeof(IElasticsearchService<>), typeof(ElasticsearchService<>));
 
         return services;
     }

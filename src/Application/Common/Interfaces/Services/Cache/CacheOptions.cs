@@ -1,3 +1,5 @@
+using Microsoft.Extensions.Primitives;
+
 namespace Application.Common.Interfaces.Services.Cache;
 
 public enum CacheExpirationType
@@ -11,4 +13,5 @@ public class CacheOptions
 {
     public CacheExpirationType ExpirationType { get; set; } = CacheExpirationType.Absolute;
     public TimeSpan? Expiration { get; set; }
+    public IChangeToken? ChangeToken { get; set; }
 }

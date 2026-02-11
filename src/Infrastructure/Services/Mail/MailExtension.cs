@@ -1,4 +1,5 @@
 using Application.Common.Interfaces.Services.Mail;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -12,7 +13,14 @@ public static class MailExtension
     )
     {
         services.AddOptions<EmailSettings>().Bind(configuration.GetSection(nameof(EmailSettings)));
-        services.AddScoped<IMailService, MailService>().AddSingleton<RazorViewToStringRenderer>();
+        services
+            .AddScoped<IMailService, MailService>()
+            .AddSingleton<TemplateRenderer>()
+            .AddSingleton(sp =>
+            {
+                var env = sp.GetRequiredService<IWebHostEnvironment>();
+                return env.WebRootFileProvider;
+            });
 
         return services;
     }

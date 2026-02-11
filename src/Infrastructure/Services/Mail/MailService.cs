@@ -2,6 +2,7 @@ using Application.Common.Interfaces.Services.Mail;
 using Application.Contracts.Dtos.Requests;
 using MailKit.Net.Smtp;
 using MailKit.Security;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MimeKit;
@@ -10,7 +11,7 @@ namespace Infrastructure.Services.Mail;
 
 public class MailService(
     IOptions<EmailSettings> options,
-    RazorViewToStringRenderer razorView,
+    IServiceProvider serviceProvider,
     ILogger<MailService> logger
 ) : IMailService
 {
@@ -32,7 +33,10 @@ public class MailService(
 
     public async Task<bool> SendWithTemplateAsync(MailTemplateData metaData)
     {
-        string template = await razorView.RenderViewToStringAsync(metaData.Template!);
+        using var scope = serviceProvider.CreateScope();
+        TemplateRenderer templateRenderer =
+            scope.ServiceProvider.GetRequiredService<TemplateRenderer>();
+        string template = await templateRenderer.RenderViewToStringAsync(metaData.Template!);
         MimeMessage message = CreateEmailMessage(
             new MailData()
             {

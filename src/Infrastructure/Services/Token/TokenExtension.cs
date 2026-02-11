@@ -26,7 +26,8 @@ public static class TokenExtension
             ?? new();
 
         return services
-            .AddSingleton<ITokenFactoryService, TokenFactoryService>()
+            .AddSingleton<ITokenService, TokenService>()
+            .AddSingleton<TokenGenerator>()
             .AddAuthentication(authentication =>
             {
                 authentication.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -54,7 +55,9 @@ public static class TokenExtension
                         context.HandleResponse();
                         bool isUnauthorized = !context.Response.HasStarted;
                         ITranslator<Messages> translator =
-                            context.HttpContext.RequestServices.GetRequiredService<ITranslator<Messages>>();
+                            context.HttpContext.RequestServices.GetRequiredService<
+                                ITranslator<Messages>
+                            >();
 
                         string unauthorizedMessage = UserErrorMessages.UserUnauthorized;
                         string tokenExpiredMessage = UserErrorMessages.UserTokenExpired;

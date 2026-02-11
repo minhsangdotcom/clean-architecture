@@ -7,7 +7,7 @@ public class JwtSettings
     [Required]
     public string SecretKey { get; set; } = string.Empty;
 
-    public string ExpireTimeAccessTokenInMinute { get; set; } = "1440";
+    public double ExpireTimeAccessTokenInMinute { get; set; } = 1440;
 
-    public string ExpireTimeRefreshTokenInDay { get; set; } = "7";
+    public double ExpireTimeRefreshTokenInDay { get; set; } = 7;
 }

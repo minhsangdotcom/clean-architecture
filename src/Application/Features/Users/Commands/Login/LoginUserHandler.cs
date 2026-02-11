@@ -19,7 +19,7 @@ namespace Application.Features.Users.Commands.Login;
 
 public class LoginUserHandler(
     IEfUnitOfWork unitOfWork,
-    ITokenFactoryService tokenFactory,
+    ITokenService tokenService,
     IDetectionService detectionService,
     ICurrentUser currentUser,
     ITranslator<Messages> translator
@@ -72,28 +72,31 @@ public class LoginUserHandler(
             );
         }
 
-        DateTime refreshExpireTime = tokenFactory.RefreshTokenExpiredTime;
+        DateTime refreshExpireTime = tokenService.RefreshTokenExpiredTime;
         string familyId = StringExtension.GenerateRandomString(32);
         string userAgent = detectionService.UserAgent.ToString();
 
-        UserRefreshToken userRefreshToken =
-            new()
-            {
-                ExpiredTime = refreshExpireTime,
-                UserId = user.Id,
-                FamilyId = familyId,
-                UserAgent = userAgent,
-                ClientIp = currentUser.ClientIp,
-            };
+        UserRefreshToken userRefreshToken = new()
+        {
+            ExpiredTime = refreshExpireTime,
+            UserId = user.Id,
+            FamilyId = familyId,
+            UserAgent = userAgent,
+            ClientIp = currentUser.ClientIp,
+        };
 
-        DateTime accessTokenExpiredTime = tokenFactory.AccessTokenExpiredTime;
-        string accessToken = tokenFactory.CreateToken(
-            [new(ClaimTypes.Sub, user.Id.ToString())],
+        DateTime accessTokenExpiredTime = tokenService.AccessTokenExpiredTime;
+        string accessToken = tokenService.Create(
+            new Dictionary<string, object>() { { ClaimTypes.Sub, user.Id.ToString() } },
             accessTokenExpiredTime
         );
 
-        string refreshToken = tokenFactory.CreateToken(
-            [new(ClaimTypes.TokenFamilyId, familyId), new(ClaimTypes.Sub, user.Id.ToString())]
+        string refreshToken = tokenService.Create(
+            new Dictionary<string, object>
+            {
+                { ClaimTypes.TokenFamilyId, familyId },
+                { ClaimTypes.Sub, user.Id.ToString() },
+            }
         );
 
         userRefreshToken.Token = refreshToken;

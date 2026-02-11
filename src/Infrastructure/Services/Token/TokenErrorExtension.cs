@@ -21,24 +21,25 @@ public static class TokenErrorExtension
         ITranslator<Messages> translator =
             httpContext.HttpContext.RequestServices.GetRequiredService<ITranslator<Messages>>();
 
-        ForbiddenError forbiddenError =
-            new(Message.FORBIDDEN, new(errorMessage, translator.Translate(errorMessage)));
+        ForbiddenError forbiddenError = new(
+            Message.FORBIDDEN,
+            new(errorMessage, translator.Translate(errorMessage))
+        );
 
         int statusCode = forbiddenError.Status;
         httpContext.Response.StatusCode = statusCode;
 
-        ProblemDetails problemDetails =
-            new()
+        ProblemDetails problemDetails = new()
+        {
+            Title = forbiddenError.Title,
+            Type = forbiddenError.Type,
+            Status = forbiddenError.Status,
+            Detail = forbiddenError.Detail,
+            Extensions = new Dictionary<string, object?>()
             {
-                Title = forbiddenError.Title,
-                Type = forbiddenError.Type,
-                Status = forbiddenError.Status,
-                Detail = forbiddenError.Detail,
-                Extensions = new Dictionary<string, object?>()
-                {
-                    { ProblemDetailCustomField.Message, forbiddenError.ErrorMessage },
-                },
-            };
+                { ProblemDetailCustomField.Message, forbiddenError.ErrorMessage },
+            },
+        };
 
         await problemDetailsService.TryWriteAsync(
             new() { ProblemDetails = problemDetails, HttpContext = httpContext.HttpContext }
@@ -56,18 +57,17 @@ public static class TokenErrorExtension
         int statusCode = unauthorizedError.Status;
         httpContext.Response.StatusCode = statusCode;
 
-        ProblemDetails problemDetails =
-            new()
+        ProblemDetails problemDetails = new()
+        {
+            Title = unauthorizedError.Title,
+            Type = unauthorizedError.Type,
+            Detail = unauthorizedError.Detail,
+            Status = unauthorizedError.Status,
+            Extensions = new Dictionary<string, object?>()
             {
-                Title = unauthorizedError.Title,
-                Type = unauthorizedError.Type,
-                Detail = unauthorizedError.Detail,
-                Status = unauthorizedError.Status,
-                Extensions = new Dictionary<string, object?>()
-                {
-                    { ProblemDetailCustomField.Message, unauthorizedError.ErrorMessage },
-                },
-            };
+                { ProblemDetailCustomField.Message, unauthorizedError.ErrorMessage },
+            },
+        };
 
         await problemDetailsService.TryWriteAsync(
             new() { ProblemDetails = problemDetails, HttpContext = httpContext.HttpContext }

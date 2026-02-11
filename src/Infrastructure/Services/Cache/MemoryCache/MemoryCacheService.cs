@@ -2,6 +2,7 @@ using Application.Common.Interfaces.Services.Cache;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Microsoft.Extensions.Primitives;
 
 namespace Infrastructure.Services.Cache.MemoryCache;
 
@@ -68,6 +69,10 @@ public class MemoryCacheService(
         if (options.ExpirationType == CacheExpirationType.Sliding && options.Expiration.HasValue)
         {
             entryOptions.SetSlidingExpiration(options.Expiration.Value);
+        }
+        if (options.ChangeToken != null)
+        {
+            entryOptions.AddExpirationToken(options.ChangeToken);
         }
 
         return cache.GetOrCreateAsync(

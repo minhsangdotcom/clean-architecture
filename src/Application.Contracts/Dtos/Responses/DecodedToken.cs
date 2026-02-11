@@ -1,13 +1,14 @@
 using System.Text.Json.Serialization;
-using SharedKernel.Constants;
+using ClaimTypes = SharedKernel.Constants.ClaimTypes;
+using SecurityClaimTypes = System.Security.Claims.ClaimTypes;
 
 namespace Application.Contracts.Dtos.Responses;
 
-public class DecodeTokenResponse
+public class DecodedToken
 {
-    [JsonPropertyName("sub")]
+    [JsonPropertyName(SecurityClaimTypes.NameIdentifier)]
     public string? Sub { get; set; }
 
     [JsonPropertyName(ClaimTypes.TokenFamilyId)]
     public string? FamilyId { get; set; }
-}
+};
