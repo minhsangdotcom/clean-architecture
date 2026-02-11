@@ -29,7 +29,7 @@
   "user_inactive": "User is inactive.",
   "user-password-reset_token_invalid": "Password reset token is invalid.",
   "user-refresh-token_token_invalid": "Refresh token is invalid",
-  "user-refresh-token_token_not_identical_the-current-one": "Refresh token is stolen",
+  "user-refresh-token_token_not_identical_the-current-one": "Refresh token is stolen or being used",
   "user-refresh-token_token_expired": "Refresh token expires",
   "role_name_required": "Role name is required.",
   "role_name_too-long": "Role name is too long.",

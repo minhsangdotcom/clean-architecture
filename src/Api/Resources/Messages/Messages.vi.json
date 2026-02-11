@@ -29,7 +29,7 @@
   "user_inactive": "Người dùng đang bị vô hiệu hóa.",
   "user-password-reset_token_invalid": "Mã đặt lại mật khẩu không hợp lệ.",
   "user-refresh-token_token_invalid": "Refresh token không hợp lệ",
-  "user-refresh-token_token_not_identical_the-current-one": "Refresh token có thể đã bị lấy cắp! vui lòng kiểm tra lại.",
+  "user-refresh-token_token_not_identical_the-current-one": "Refresh token có thể đã bị lấy cắp hoặc đã được sử dụng trước đó! vui lòng kiểm tra lại.",
   "user-refresh-token_token_expired": "Refresh token đã quá hạn",
   "role_name_required": "Tên vai trò không được để trống.",
   "role_name_too-long": "Tên vai trò quá dài.",
