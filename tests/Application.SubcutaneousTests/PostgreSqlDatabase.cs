@@ -42,9 +42,7 @@ public class PostgreSqlDatabase : IDatabase
             Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Development";
 
         IConfiguration configuration = GetConfiguration();
-        connectionString = configuration[
-            "DatabaseSettings:Relational:PostgreSQL:DatabaseConnection"
-        ];
+        connectionString = configuration["DatabaseSettings:Relational:PostgreSQL:ConnectionString"];
         Guard.Against.Null(connectionString);
 
         connection = new NpgsqlConnection(connectionString);
