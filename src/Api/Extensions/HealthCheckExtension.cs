@@ -1,5 +1,6 @@
 using Api.Settings;
-using Infrastructure.Data.Settings;
+using Infrastructure.Constants;
+using Infrastructure.Data;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Options;
@@ -25,8 +26,38 @@ public static class HealthCheckExtension
             .AddNpgSql(
                 provider =>
                 {
-                    var databaseSetting = provider.GetRequiredService<IOptions<DatabaseSettings>>();
-                    return databaseSetting.Value.DatabaseConnection;
+                    var databaseSetting = provider
+                        .GetRequiredService<IOptions<DatabaseSettings>>()
+                        .Value;
+                    CurrentProvider currentProvider = databaseSetting.Provider;
+
+                    if (
+                        DatabaseConfiguration.relationalProviders.Contains(
+                            currentProvider.ToString()
+                        )
+                    )
+                    {
+                        return currentProvider switch
+                        {
+                            CurrentProvider.PostgreSQL => databaseSetting
+                                .Relational!
+                                .PostgreSQL!
+                                .ConnectionString,
+                            _ => throw new NotSupportedException(
+                                $"Database provider {currentProvider} is not supported."
+                            ),
+                        };
+                    }
+                    return currentProvider switch
+                    {
+                        CurrentProvider.PostgreSQL => databaseSetting
+                            .NonRelational!
+                            .MongoDB!
+                            .ConnectionString,
+                        _ => throw new NotSupportedException(
+                            $"Database provider {currentProvider} is not supported."
+                        ),
+                    };
                 },
                 name: "postgres",
                 failureStatus: HealthStatus.Unhealthy,

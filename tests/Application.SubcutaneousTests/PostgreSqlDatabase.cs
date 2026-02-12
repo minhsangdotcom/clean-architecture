@@ -42,14 +42,16 @@ public class PostgreSqlDatabase : IDatabase
             Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Development";
 
         IConfiguration configuration = GetConfiguration();
-        connectionString = configuration["DatabaseSettings:DatabaseConnection"];
+        connectionString = configuration[
+            "DatabaseSettings:Relational:PostgreSQL:DatabaseConnection"
+        ];
         Guard.Against.Null(connectionString);
 
         connection = new NpgsqlConnection(connectionString);
-
         var options = new DbContextOptionsBuilder<TheDbContext>()
             .UseNpgsql(connectionString)
             .Options;
+
         TheDbContext context = new(options);
         context.Database.EnsureDeleted();
         context.Database.Migrate();
