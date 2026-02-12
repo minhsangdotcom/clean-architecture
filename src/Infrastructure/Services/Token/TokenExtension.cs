@@ -4,6 +4,7 @@ using Application.Common.Errors;
 using Application.Common.Interfaces.Services.Localization;
 using Application.Common.Interfaces.Services.Token;
 using Application.Contracts.Messages;
+using Infrastructure.common.validator;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -15,16 +16,14 @@ public static class TokenExtension
 {
     public static IServiceCollection AddJwt(this IServiceCollection services, IConfiguration config)
     {
-        services
-            .AddOptions<JwtSettings>()
-            .Bind(config.GetSection($"SecuritySettings:{nameof(JwtSettings)}"))
-            .ValidateDataAnnotations()
-            .ValidateOnStart();
+        services.AddOptionsWithFluentValidation<JwtSettings>(
+            config.GetSection($"SecuritySettings:{nameof(JwtSettings)}")
+        );
 
         JwtSettings jwtSettings =
             config.GetSection($"SecuritySettings:{nameof(JwtSettings)}").Get<JwtSettings>()
             ?? new();
-        JwtType jwtType = jwtSettings.Default;
+        JwtType jwtType = jwtSettings.Default!;
 
         return services
             .AddTransient<ITokenService, DefaultTokenService>()
@@ -34,50 +33,58 @@ public static class TokenExtension
                 authentication.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
                 authentication.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
             })
-            .AddJwtBearer(bearer =>
-            {
-                bearer.TokenValidationParameters = new TokenValidationParameters
+            .AddJwtBearer(
+                (bearer) =>
                 {
-                    ValidateIssuerSigningKey = true,
-                    IssuerSigningKey = new SymmetricSecurityKey(
-                        Encoding.ASCII.GetBytes(jwtType.SecretKey)
-                    ),
-                    ValidateIssuer = false,
-                    ValidateAudience = false,
-                    ValidateLifetime = true,
-                    ClockSkew = TimeSpan.Zero,
-                };
-
-                bearer.IncludeErrorDetails = true;
-                bearer.Events = new JwtBearerEvents
-                {
-                    OnChallenge = context =>
+                    bearer.TokenValidationParameters = new TokenValidationParameters
                     {
-                        context.HandleResponse();
-                        bool isUnauthorized = !context.Response.HasStarted;
-                        ITranslator<Messages> translator =
-                            context.HttpContext.RequestServices.GetRequiredService<
-                                ITranslator<Messages>
-                            >();
+                        ValidateIssuerSigningKey = true,
+                        IssuerSigningKey = new SymmetricSecurityKey(
+                            Encoding.ASCII.GetBytes(jwtType.SecretKey)
+                        ),
+                        ValidateIssuer = false,
+                        ValidateAudience = false,
+                        ValidateLifetime = true,
+                        ClockSkew = TimeSpan.Zero,
+                    };
 
-                        string unauthorizedMessage = UserErrorMessages.UserUnauthorized;
-                        string tokenExpiredMessage = UserErrorMessages.UserTokenExpired;
+                    bearer.IncludeErrorDetails = true;
+                    bearer.Events = new JwtBearerEvents
+                    {
+                        OnChallenge = context =>
+                        {
+                            context.HandleResponse();
+                            bool isUnauthorized = !context.Response.HasStarted;
+                            ITranslator<Messages> translator =
+                                context.HttpContext.RequestServices.GetRequiredService<
+                                    ITranslator<Messages>
+                                >();
 
-                        UnauthorizedError unauthorizedError = isUnauthorized
-                            ? new UnauthorizedError(
-                                Message.UNAUTHORIZED,
-                                new(unauthorizedMessage, translator.Translate(unauthorizedMessage))
-                            )
-                            : new UnauthorizedError(
-                                Message.TOKEN_EXPIRED,
-                                new(tokenExpiredMessage, translator.Translate(tokenExpiredMessage))
-                            );
-                        return context.UnauthorizedException(unauthorizedError);
-                    },
-                    OnForbidden = context =>
-                        context.ForbiddenException(UserErrorMessages.UserForbidden),
-                };
-            })
+                            string unauthorizedMessage = UserErrorMessages.UserUnauthorized;
+                            string tokenExpiredMessage = UserErrorMessages.UserTokenExpired;
+
+                            UnauthorizedError unauthorizedError = isUnauthorized
+                                ? new UnauthorizedError(
+                                    Message.UNAUTHORIZED,
+                                    new(
+                                        unauthorizedMessage,
+                                        translator.Translate(unauthorizedMessage)
+                                    )
+                                )
+                                : new UnauthorizedError(
+                                    Message.TOKEN_EXPIRED,
+                                    new(
+                                        tokenExpiredMessage,
+                                        translator.Translate(tokenExpiredMessage)
+                                    )
+                                );
+                            return context.UnauthorizedException(unauthorizedError);
+                        },
+                        OnForbidden = context =>
+                            context.ForbiddenException(UserErrorMessages.UserForbidden),
+                    };
+                }
+            )
             .Services;
     }
 }

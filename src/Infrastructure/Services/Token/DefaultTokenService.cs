@@ -6,7 +6,7 @@ namespace Infrastructure.Services.Token;
 public class DefaultTokenService(ITokenGenerator tokenGenerator, IOptions<JwtSettings> options)
     : ITokenService
 {
-    private readonly JwtType jwtSettings = options.Value.Default;
+    private readonly JwtType jwtSettings = options.Value.Default!;
 
     public DateTime AccessTokenExpirationTime =>
         DateTime.UtcNow.AddMinutes(jwtSettings.AccessTokenExpirationInMinutes);

@@ -8,14 +8,14 @@ public class OpenTelemetrySettings
 
     public string Endpoint { get; set; } = string.Empty;
 
-    public string Options { get; set; } = OpenTelemetryTracingOption.None;
+    public OpenTelemetryTracingOption Options { get; set; } = OpenTelemetryTracingOption.None;
 
     public bool IsEnabled { get; set; }
 }
 
-public class OpenTelemetryTracingOption
+public enum OpenTelemetryTracingOption
 {
-    public const string Distribution = nameof(Distribution);
-    public const string Console = nameof(Console);
-    public const string None = nameof(None);
+    Distribution = 1,
+    Console = 2,
+    None = 3,
 }
