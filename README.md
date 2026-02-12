@@ -167,21 +167,22 @@ What makes this Clean Architecture template stand out from the rest on Github?
 
 ```
 /Infrastructure
+  ├── /Common                          # Shared infrastructure-level components
+  │
   ├── /Constants                       # Static constants for Infrastructure layer
   │
   ├── /Data                            # EF Core + persistence layer
   │     ├── /Configurations/           # Fluent API entity configurations
   │     ├── /Converters/               # Type converters (e.g., Ulid ↔ string)
   │     ├── /Interceptors/             # EF Core interceptors (audit, logging)
-  │     ├── /Migrations/               # EF Core migration files
+  │     ├── /Migrators/                # EF Core migration files
   │     ├── /Repositories/             # Repository implementations
-  │     ├── /Seeders/                  # Seed data for database initialization
-  │     └── /Settings/                 # Database IOptions
+  │     └── /Seeders/                  # Seed data for database initialization
   │
-  ├── /Services                         # Infrastructure service implementations
+  ├── /Services                        # Infrastructure service implementations
   │
-  ├── DependencyInjection.cs            # Registers Infrastructure services into DI
-  └── Infrastructure.csproj             # Project file
+  ├── DependencyInjection.cs           # Registers Infrastructure services into DI
+  └── Infrastructure.csproj            # Project file
 
 ```
 
@@ -247,12 +248,19 @@ The first step :point_up: :
 
 Create a appsettings.Development.json file at root of Api layer and just copy the content of appsettings.example.json to the file then Modify configurations in your case.
 
-Modify PostgreSQL connection string (this template is using PostgreSQL currently).
+This template supports **multiple relational database providers** and allows switching between them via configuration.
+
+Currently, the default provider is **PostgreSQL**.
 
 ```json
 "DatabaseSettings": {
-    "DatabaseConnection": "Host=localhost;Username=[your_username];Password=[your_password];Database=example"
-},
+  "Provider": "PostgreSQL",
+  "Relational": {
+    "PostgreSQL": {
+      "ConnectionString": "Host=localhost;Port=5432;Username=postgres;Password=1;Database=the_database"
+    }
+  }
+}
 ```
 
 Update migrations to your own database.

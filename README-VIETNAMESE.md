@@ -180,21 +180,23 @@ Có gì đặc biệt khiến cho template này trở nên khác biệt so với
 
 ```
 /Infrastructure
-  ├── /Constants                       # Hằng số tĩnh cho tầng Infrastructure
+  ├── /Common                          # Các thành phần dùng chung ở tầng Infrastructure
   │
-  ├── /Data                            # EF Core + tầng persistence
+  ├── /Constants                       # Các hằng số tĩnh cho tầng Infrastructure
+  │
+  ├── /Data                            # EF Core + tầng lưu trữ dữ liệu (persistence)
   │     ├── /Configurations/           # Cấu hình entity bằng Fluent API
-  │     ├── /Converters/               # Bộ chuyển đổi kiểu (vd: Ulid ↔ string)
-  │     ├── /Interceptors/             # EF Core interceptor (audit, logging)
-  │     ├── /Migrations/               # File migration của EF Core
+  │     ├── /Converters/               # Bộ chuyển đổi kiểu (ví dụ: Ulid ↔ string)
+  │     ├── /Interceptors/             # Interceptor của EF Core (audit, logging)
+  │     ├── /Migrators/                # Các file migration của EF Core
   │     ├── /Repositories/             # Triển khai repository
-  │     ├── /Seeders/                  # Seed dữ liệu khởi tạo database
-  │     └── /Settings/                 # IOptions cho database
+  │     └── /Seeders/                  # Dữ liệu seed để khởi tạo cơ sở dữ liệu
   │
-  ├── /Services                         # Triển khai service tầng Infrastructure
+  ├── /Services                        # Các triển khai service ở tầng Infrastructure
   │
-  ├── DependencyInjection.cs            # Đăng ký service Infrastructure vào DI
-  └── Infrastructure.csproj             # File project Infrastructure
+  ├── DependencyInjection.cs           # Đăng ký các service của Infrastructure vào DI
+  └── Infrastructure.csproj            # File project
+
 ```
 
 ```
@@ -259,12 +261,19 @@ Bước thứ 1 :point_up: :
 
 Tạo 1 file tên appsettings.Development.json ở ngoài cùng của tầng Api, Sao chép nội dung của appsettings.example.json vào file mới tạo và sau đó điều chỉnh lại các cấu hình theo cách của bạn.
 
-Chỉnh sửa connection string của PostgreSQL (Bởi vì template này đang sử dụng PostgreSQL).
+Template hỗ trợ **nhiều hệ quản trị cơ sở dữ liệu quan hệ** và cho phép chuyển đổi giữa chúng thông qua cấu hình.
+
+Hiện tại, provider mặc định là **PostgreSQL**.
 
 ```json
 "DatabaseSettings": {
-    "DatabaseConnection": "Host=localhost;Username=[your_username];Password=[your_password];Database=example"
-},
+  "Provider": "PostgreSQL",
+  "Relational": {
+    "PostgreSQL": {
+      "ConnectionString": "Host=localhost;Port=5432;Username=postgres;Password=1;Database=the_database"
+    }
+  }
+}
 ```
 
 Cập nhật migration lên database
