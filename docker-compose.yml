@@ -22,7 +22,7 @@ services:
     networks:
       - the-template-network
     depends_on:
-      - webapi
+      - api
 networks:
   the-template-network:
     external: true
