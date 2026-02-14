@@ -23,13 +23,12 @@ public static class ClientExtension
     {
         ArgumentNullException.ThrowIfNull(client);
 
-        using HttpRequestMessage httpRequest =
-            new()
-            {
-                Method = request.Method,
-                RequestUri = new Uri(request.Uri),
-                Content = CreateContent(request),
-            };
+        using HttpRequestMessage httpRequest = new()
+        {
+            Method = request.Method,
+            RequestUri = new Uri(request.Uri),
+            Content = CreateContent(request),
+        };
 
         // Add Bearer token per request (not globally on client)
         if (!string.IsNullOrWhiteSpace(request.Token))

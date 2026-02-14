@@ -14,7 +14,7 @@ public static class MailExtension
     {
         services.AddOptions<EmailSettings>().Bind(configuration.GetSection(nameof(EmailSettings)));
         services
-            .AddScoped<IMailService, MailService>()
+            .AddTransient<IMailService, MailService>()
             .AddSingleton<TemplateRenderer>()
             .AddSingleton(sp =>
             {

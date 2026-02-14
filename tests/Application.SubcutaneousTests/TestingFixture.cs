@@ -2,41 +2,43 @@ using Application.SubcutaneousTests.Extensions;
 using Mediator;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.WebUtilities;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Application.SubcutaneousTests;
 
 public partial class TestingFixture : IAsyncLifetime
 {
-    private CustomWebApplicationFactory<Program>? factory;
-    private readonly PostgreSqlDatabase database = new();
+    private CustomWebApplicationFactory<Program> factory = null!;
+    private PostgreSqlDatabase database = null!;
 
-    private const string BASE_URL = "http://localhost:8080/api/v1";
+    private string BASE_URL = string.Empty;
 
-    private HttpClient? client;
+    private HttpClient client = null!;
     private static Ulid UserId;
+
+    public async Task InitializeAsync()
+    {
+        string env = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Development";
+        string environmentName = GetEnvironment(env);
+        IConfiguration configuration = GetConfiguration(environmentName);
+        database = new(configuration);
+        await database.InitializeAsync();
+
+        string connectionString = database.ConnectionString;
+        factory = new(connectionString, environmentName, configuration);
+        BASE_URL = configuration["urls"] ?? "http://localhost:8080/api/v1";
+        client = factory.CreateClient();
+    }
 
     public async Task DisposeAsync()
     {
         await database.DisposeAsync();
         if (factory != null)
         {
-            await factory!.DisposeAsync();
+            await factory.DisposeAsync();
         }
-
-        if (client != null)
-        {
-            client!.Dispose();
-        }
-    }
-
-    public async Task InitializeAsync()
-    {
-        await database.InitializeAsync();
-        var connection = database.Connection;
-        string environmentName = database.EnvironmentVariable;
-        factory = new(connection, environmentName, database.GetConfiguration());
-        CreateClient();
+        client?.Dispose();
     }
 
     public async Task ResetAsync()
@@ -50,15 +52,9 @@ public partial class TestingFixture : IAsyncLifetime
     public async Task<TResponse> SendAsync<TResponse>(IRequest<TResponse> request)
     {
         factory.ThrowIfNull();
-        using var scope = factory!.Services.CreateScope();
+        using var scope = factory.Services.CreateScope();
         ISender sender = scope.ServiceProvider.GetRequiredService<ISender>();
         return await sender.Send(request);
-    }
-
-    private void CreateClient()
-    {
-        factory.ThrowIfNull();
-        client = factory!.CreateClient();
     }
 
     public HttpContext SetHttpContextQuery(string rawQuery)
@@ -69,8 +65,7 @@ public partial class TestingFixture : IAsyncLifetime
         var parsed = QueryHelpers.ParseQuery(rawQuery);
         context.Request.Query = new QueryCollection(parsed);
 
-        factory.ThrowIfNull();
-        using var scope = factory!.Services.CreateScope();
+        using var scope = factory.Services.CreateScope();
         var accessor = scope.ServiceProvider.GetRequiredService<IHttpContextAccessor>();
         context.RequestServices = scope.ServiceProvider;
         accessor.HttpContext = context;
@@ -81,4 +76,15 @@ public partial class TestingFixture : IAsyncLifetime
     public static Ulid GetUserId() => UserId;
 
     public static void RemoveUserId() => UserId = Ulid.Empty;
+
+    private static IConfiguration GetConfiguration(string envName)
+    {
+        string path = AppContext.BaseDirectory;
+        return new ConfigurationBuilder()
+            .SetBasePath(path)
+            .AddJsonFile($"appsettings.{envName}.json", optional: false, reloadOnChange: true)
+            .Build();
+    }
+
+    private static string GetEnvironment(string env) => env == "Development" ? "Test" : env;
 }

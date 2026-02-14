@@ -16,7 +16,7 @@ public partial class TestingFixture
     public async Task<Role?> FindRoleByIdAsync(Ulid id)
     {
         factory.ThrowIfNull();
-        using var scope = factory!.Services.CreateScope();
+        using var scope = factory.Services.CreateScope();
         var roleManager = scope.ServiceProvider.GetRequiredService<IRoleManager>();
         return await roleManager.FindByIdAsync(id, false);
     }
@@ -24,7 +24,7 @@ public partial class TestingFixture
     public async Task<Role?> FindRoleByIdIncludeChildrenAsync(Ulid id)
     {
         factory.ThrowIfNull();
-        using var scope = factory!.Services.CreateScope();
+        using var scope = factory.Services.CreateScope();
         var roleManager = scope.ServiceProvider.GetRequiredService<IRoleManager>();
         return await roleManager.FindByIdAsync(id);
     }
@@ -32,7 +32,7 @@ public partial class TestingFixture
     public async Task<Role> CreateAdminRoleAsync()
     {
         factory.ThrowIfNull();
-        using var scope = factory!.Services.CreateScope();
+        using var scope = factory.Services.CreateScope();
         var dbContext = scope.ServiceProvider.GetRequiredService<IEfDbContext>();
         var permissionIds = await dbContext
             .Set<Permission>()
@@ -45,7 +45,7 @@ public partial class TestingFixture
     public async Task<Role> CreateManagerRoleAsync()
     {
         factory.ThrowIfNull();
-        using var scope = factory!.Services.CreateScope();
+        using var scope = factory.Services.CreateScope();
         var dbContext = scope.ServiceProvider.GetRequiredService<IEfDbContext>();
         string[] permissionCodes =
         [
@@ -66,7 +66,7 @@ public partial class TestingFixture
     public async Task<Role> CreateNormalRoleAsync()
     {
         factory.ThrowIfNull();
-        using var scope = factory!.Services.CreateScope();
+        using var scope = factory.Services.CreateScope();
         var dbContext = scope.ServiceProvider.GetRequiredService<IEfDbContext>();
         string[] permissionCodes =
         [
@@ -84,14 +84,12 @@ public partial class TestingFixture
 
     public async Task<Role> CreateRoleAsync(string roleName, List<Ulid> permissionIds)
     {
-        CreateRoleCommand role =
-            new()
-            {
-                Name = roleName,
-                Description = $"Create {roleName}",
-                PermissionIds = permissionIds,
-            };
-        factory.ThrowIfNull();
+        CreateRoleCommand role = new()
+        {
+            Name = roleName,
+            Description = $"Create {roleName}",
+            PermissionIds = permissionIds,
+        };
         Result<CreateRoleResponse> result = await SendAsync(role);
         CreateRoleResponse response = result.Value!;
         return (await FindRoleByIdIncludeChildrenAsync(response.Id))!;
