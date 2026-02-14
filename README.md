@@ -42,10 +42,10 @@
     - [8.2.5. Pagination](#825-pagination)
 - [9. Seeding ](#9-seeding)
 - [10. Translate messages ](#10-translate-messages)
-- [11. Technology](#9-technology)
-- [12. Support](#10-support)
-- [13. Credits](#11-credits)
-- [14. Licence](#12-licence)
+- [11. Technology](#11-technology)
+- [12. Support](#12-support)
+- [13. Credits](#13-credits)
+- [14. Licence](#14-licence)
 
 # 2. Introduction
 
