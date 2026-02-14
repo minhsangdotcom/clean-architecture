@@ -14,7 +14,7 @@ using Moq;
 namespace Application.SubcutaneousTests;
 
 public class CustomWebApplicationFactory<TProgram>(
-    DbConnection dbConnection,
+    string connectionString,
     string environmentName,
     IConfiguration configuration
 ) : WebApplicationFactory<TProgram>
@@ -35,7 +35,7 @@ public class CustomWebApplicationFactory<TProgram>(
             services.Remove(dbConnectionDescriptor!);
 
             services.AddDbContext<TheDbContext>(
-                (container, options) => options.UseNpgsql(dbConnection)
+                (container, options) => options.UseNpgsql(connectionString)
             );
 
             services

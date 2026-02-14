@@ -1,4 +1,3 @@
-using System.Data.Common;
 using Ardalis.GuardClauses;
 using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
@@ -8,41 +7,18 @@ using Respawn;
 
 namespace Application.SubcutaneousTests;
 
-public class PostgreSqlDatabase : IDatabase
+public class PostgreSqlDatabase(IConfiguration configuration) : IDatabase
 {
-    private NpgsqlConnection? connection;
+    private NpgsqlConnection connection = null!;
+    private Respawner respawner = null!;
+    private string connectionString = null!;
 
-    private string? connectionString;
-    private Respawner? respawner;
-
-    private string? environmentName;
-
-    public DbConnection Connection => connection!;
-
-    public string ConnectionString => connectionString!;
-
-    public string EnvironmentVariable => GetEnvironment(environmentName!);
-
-    public IConfiguration GetConfiguration()
-    {
-        string path = Directory.GetCurrentDirectory();
-        return new ConfigurationBuilder()
-            .SetBasePath(path)
-            .AddJsonFile(
-                $"appsettings.{GetEnvironment(environmentName!)}.json",
-                optional: false,
-                reloadOnChange: true
-            )
-            .Build();
-    }
+    public string ConnectionString => connectionString;
 
     public async Task InitializeAsync()
     {
-        environmentName =
-            Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Development";
-
-        IConfiguration configuration = GetConfiguration();
-        connectionString = configuration["DatabaseSettings:Relational:PostgreSQL:ConnectionString"];
+        connectionString =
+            configuration["DatabaseSettings:Relational:PostgreSQL:ConnectionString"] ?? null!;
         Guard.Against.Null(connectionString);
 
         connection = new NpgsqlConnection(connectionString);
@@ -51,8 +27,8 @@ public class PostgreSqlDatabase : IDatabase
             .Options;
 
         TheDbContext context = new(options);
-        context.Database.EnsureDeleted();
-        context.Database.Migrate();
+        await context.Database.EnsureDeletedAsync();
+        await context.Database.MigrateAsync();
 
         await connection.OpenAsync();
         respawner = await Respawner.CreateAsync(
@@ -85,14 +61,5 @@ public class PostgreSqlDatabase : IDatabase
             await connection.CloseAsync();
             await connection.DisposeAsync();
         }
-    }
-
-    private static string GetEnvironment(string env)
-    {
-        if (env == "Development")
-        {
-            return "Test";
-        }
-        return env;
     }
 }

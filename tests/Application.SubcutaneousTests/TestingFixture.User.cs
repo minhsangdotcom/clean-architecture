@@ -3,6 +3,7 @@ using Application.Common.Interfaces.Services.Identity;
 using Application.Common.Interfaces.UnitOfWorks;
 using Application.Contracts.ApiWrapper;
 using Application.Features.Users.Commands.Create;
+using Application.SubcutaneousTests.Extensions;
 using Domain.Aggregates.Regions;
 using Domain.Aggregates.Roles;
 using Domain.Aggregates.Users;
@@ -19,9 +20,9 @@ public partial class TestingFixture
 {
     public async Task<AddressResult> SeedingRegionsAsync()
     {
-        using var scope = factory!.Services.CreateScope();
-        var provider = scope.ServiceProvider;
-        IEfUnitOfWork unitOfWork = provider.GetRequiredService<IEfUnitOfWork>();
+        factory.ThrowIfNull();
+        using var scope = factory.Services.CreateScope();
+        IEfUnitOfWork unitOfWork = scope.ServiceProvider.GetRequiredService<IEfUnitOfWork>();
 
         if (
             await unitOfWork.Repository<Province>().AnyAsync()
@@ -63,7 +64,8 @@ public partial class TestingFixture
 
     public async Task<List<User>> SeedingUsersAsync(int count, string? overrideFirstName = null)
     {
-        using var scope = factory!.Services.CreateScope();
+        factory.ThrowIfNull();
+        using var scope = factory.Services.CreateScope();
         IEfDbContext dbContext = scope.ServiceProvider.GetRequiredService<IEfDbContext>();
 
         List<User> users = [];
@@ -94,7 +96,8 @@ public partial class TestingFixture
 
     public async Task<List<User>> SeedingUserForFilterTesting()
     {
-        using var scope = factory!.Services.CreateScope();
+        factory.ThrowIfNull();
+        using var scope = factory.Services.CreateScope();
         IEfDbContext dbContext = scope.ServiceProvider.GetRequiredService<IEfDbContext>();
 
         List<User> users = [];
@@ -304,21 +307,24 @@ public partial class TestingFixture
 
     public async Task<User?> FindUserByIdAsync(Ulid userId)
     {
-        using var scope = factory!.Services.CreateScope();
+        factory.ThrowIfNull();
+        using var scope = factory.Services.CreateScope();
         IUserManager userManager = scope.ServiceProvider.GetRequiredService<IUserManager>();
         return await userManager.FindByIdAsync(userId, false);
     }
 
     public async Task<User?> FindUserByIdInCludeChildrenAsync(Ulid userId)
     {
-        using var scope = factory!.Services.CreateScope();
+        factory.ThrowIfNull();
+        using var scope = factory.Services.CreateScope();
         IUserManager userManager = scope.ServiceProvider.GetRequiredService<IUserManager>();
         return await userManager.FindByIdAsync(userId);
     }
 
     public async Task DeactivateUserAsync(Ulid userId)
     {
-        using var scope = factory!.Services.CreateScope();
+        factory.ThrowIfNull();
+        using var scope = factory.Services.CreateScope();
         IUserManager userManager = scope.ServiceProvider.GetRequiredService<IUserManager>();
         User? user = await userManager.FindByIdAsync(userId, false);
 
@@ -332,7 +338,8 @@ public partial class TestingFixture
 
     public async Task ClearRefreshTokenAsync(Ulid userId)
     {
-        using var scope = factory!.Services.CreateScope();
+        factory.ThrowIfNull();
+        using var scope = factory.Services.CreateScope();
         IUserManager userManager = scope.ServiceProvider.GetRequiredService<IUserManager>();
         IEfDbContext dbContext = scope.ServiceProvider.GetRequiredService<IEfDbContext>();
 
@@ -341,7 +348,8 @@ public partial class TestingFixture
 
     public async Task ExpirePasswordResetTokenAsync(string token)
     {
-        using var scope = factory!.Services.CreateScope();
+        factory.ThrowIfNull();
+        using var scope = factory.Services.CreateScope();
         IEfDbContext dbContext = scope.ServiceProvider.GetRequiredService<IEfDbContext>();
         var passwordReset = await dbContext
             .Set<UserPasswordReset>()
@@ -359,7 +367,8 @@ public partial class TestingFixture
 
     public async Task ExpireRefreshTokenAsync(string token)
     {
-        using var scope = factory!.Services.CreateScope();
+        factory.ThrowIfNull();
+        using var scope = factory.Services.CreateScope();
         IEfDbContext dbContext = scope.ServiceProvider.GetRequiredService<IEfDbContext>();
         var refreshToken = await dbContext
             .Set<UserRefreshToken>()
@@ -377,7 +386,8 @@ public partial class TestingFixture
 
     public async Task<UserPasswordReset> GetPasswordResetTokenAsync(Ulid userId)
     {
-        using var scope = factory!.Services.CreateScope();
+        factory.ThrowIfNull();
+        using var scope = factory.Services.CreateScope();
         IUserManager userManager = scope.ServiceProvider.GetRequiredService<IUserManager>();
         IEfDbContext dbContext = scope.ServiceProvider.GetRequiredService<IEfDbContext>();
 
