@@ -1,5 +1,4 @@
 using Api.Settings;
-using Infrastructure.Constants;
 using Infrastructure.Data;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
@@ -21,56 +20,43 @@ public static class HealthCheckExtension
         HealthCheckSettings healthCheckSettings =
             configuration.GetSection(nameof(HealthCheckSettings)).Get<HealthCheckSettings>()
             ?? new();
-        services
-            .AddHealthChecks()
-            .AddNpgSql(
-                provider =>
-                {
-                    var databaseSetting = provider
-                        .GetRequiredService<IOptions<DatabaseSettings>>()
-                        .Value;
-                    CurrentProvider currentProvider = databaseSetting.Provider;
+        IHealthChecksBuilder builder = services.AddHealthChecks();
 
-                    if (
-                        DatabaseConfiguration.relationalProviders.Contains(
-                            currentProvider.ToString()
-                        )
-                    )
+        CurrentProvider? provider = configuration
+            .GetSection($"{nameof(DatabaseSettings)}:{nameof(DatabaseSettings.Provider)}")
+            .Get<CurrentProvider>();
+
+        switch (provider)
+        {
+            case CurrentProvider.PostgreSQL:
+                builder.AddNpgSql(
+                    (sp) =>
                     {
-                        return currentProvider switch
-                        {
-                            CurrentProvider.PostgreSQL => databaseSetting
-                                .Relational!
-                                .PostgreSQL!
-                                .ConnectionString,
-                            _ => throw new NotSupportedException(
-                                $"Database provider {currentProvider} is not supported."
-                            ),
-                        };
-                    }
-                    return currentProvider switch
-                    {
-                        CurrentProvider.PostgreSQL => databaseSetting
-                            .NonRelational!
-                            .MongoDB!
-                            .ConnectionString,
-                        _ => throw new NotSupportedException(
-                            $"Database provider {currentProvider} is not supported."
-                        ),
-                    };
-                },
-                name: "postgres",
-                failureStatus: HealthStatus.Unhealthy,
-                tags: ["db", "postgres"],
-                timeout: TimeSpan.FromSeconds(healthCheckSettings.TimeoutSeconds)
-            );
+                        var databaseSetting = sp.GetRequiredService<
+                            IOptions<DatabaseSettings>
+                        >().Value;
+                        return databaseSetting.Relational!.PostgreSQL!.ConnectionString;
+                    },
+                    name: "postgres",
+                    failureStatus: HealthStatus.Unhealthy,
+                    tags: ["db", "postgres"],
+                    timeout: TimeSpan.FromSeconds(healthCheckSettings.TimeoutSeconds)
+                );
+                break;
+
+            case CurrentProvider.MongoDB:
+                //
+                break;
+            default:
+                throw new NotSupportedException($"Database provider {provider} is not supported.");
+        }
     }
 
-    public static void UseHealthCheck(this WebApplication app, IConfiguration configuration)
+    public static void UseHealthCheck(this WebApplication app)
     {
-        HealthCheckSettings healthCheckSettings =
-            configuration.GetSection(nameof(HealthCheckSettings)).Get<HealthCheckSettings>()
-            ?? new();
+        HealthCheckSettings healthCheckSettings = app
+            .Services.GetRequiredService<IOptions<HealthCheckSettings>>()
+            .Value;
         app.MapHealthChecks(
             healthCheckSettings.Path,
             new HealthCheckOptions
@@ -84,13 +70,13 @@ public static class HealthCheckExtension
                     {
                         status = report.Status.ToString(),
                         totalDuration = report.TotalDuration.ToString(),
-                        entries = report.Entries.Select(x => new
+                        entries = report.Entries.Select(entry => new
                         {
-                            key = x.Key,
-                            status = x.Value.Status.ToString(),
-                            description = x.Value.Description,
-                            duration = x.Value.Duration.ToString(),
-                            data = x.Value.Data,
+                            name = entry.Key,
+                            status = entry.Value.Status.ToString(),
+                            description = entry.Value.Description,
+                            duration = entry.Value.Duration.ToString(),
+                            data = entry.Value.Data,
                         }),
                     };
 

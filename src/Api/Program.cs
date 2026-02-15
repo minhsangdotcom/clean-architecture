@@ -52,8 +52,9 @@ services.AddLocalizationConfigurations(configuration);
 services.AddHttpContextAccessor();
 services.AddScoped<IRequestContextProvider, RequestContextProvider>();
 
-// I set it Singleton because it's called inside many singleton services, but if u want, set it Scoped for the standard.
+// I set it Singleton because it's called inside many singleton services.
 services.AddSingleton<ICurrentUser, CurrentUser>();
+
 services.AddCors(options =>
     options.AddPolicy(
         allowedCors.Name,
@@ -67,7 +68,6 @@ services.AddCors(options =>
         }
     )
 );
-
 services.AddCors(options =>
     options.AddPolicy(
         "allowedDev",
@@ -128,7 +128,7 @@ try
         });
     }
 
-    app.UseHealthCheck(configuration);
+    app.UseHealthCheck();
     if (isDevelopment)
     {
         app.UseCors("allowedDev");

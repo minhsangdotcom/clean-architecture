@@ -70,27 +70,17 @@ public static class OpenTelemetryExtensions
                         })
                         .AddEntityFrameworkCoreInstrumentation(opt =>
                         {
-                            opt.SetDbStatementForText = true;
-                            opt.SetDbStatementForStoredProcedure = true;
                             opt.EnrichWithIDbCommand = (activity, command) =>
                             {
                                 if (activity == null)
                                 {
                                     return;
                                 }
-                                // Extract SQL operation name: SELECT / INSERT / UPDATE / DELETE / EXEC...
-                                string operation =
-                                    command.CommandType == CommandType.StoredProcedure
-                                        ? "EXEC"
-                                        : command.CommandText.Split(
-                                            ' ',
-                                            StringSplitOptions.RemoveEmptyEntries
-                                        )[0];
-
-                                activity.SetTag("db.system", command.Connection?.GetType().Name);
-                                activity.SetTag("db.name", command.Connection?.Database);
-                                activity.SetTag("db.operation", operation);
-                                activity.SetTag("db.command_type", command.CommandType.ToString());
+                                var dbName = command.Connection?.Database;
+                                if (!string.IsNullOrEmpty(dbName))
+                                {
+                                    activity.SetTag("db.name", dbName);
+                                }
                             };
                         })
                         .AddHttpClientInstrumentation();

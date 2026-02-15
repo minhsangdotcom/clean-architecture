@@ -1,5 +1,7 @@
 using System.Reflection;
 using FluentValidation;
+using Infrastructure.common.validator;
+using Infrastructure.Constants;
 using Infrastructure.Data;
 using Infrastructure.Data.Repositories;
 using Infrastructure.Data.Seeders;
@@ -30,8 +32,26 @@ public static class DependencyInjection
         ValidatorOptions.Global.DefaultRuleLevelCascadeMode = CascadeMode.Stop;
         ValidatorOptions.Global.DefaultClassLevelCascadeMode = CascadeMode.Stop;
         services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
+        services.AddOptionsWithFluentValidation<DatabaseSettings>(
+            configuration.GetSection(nameof(DatabaseSettings))
+        );
 
-        services.AddRelationalDatabase(configuration);
+        CurrentProvider? provider = configuration
+            .GetSection($"{nameof(DatabaseSettings)}:{nameof(DatabaseSettings.Provider)}")
+            .Get<CurrentProvider>();
+
+        if (
+            provider != null
+            && DatabaseConfiguration.relationalProviders.Contains(provider.ToString()!)
+        )
+        {
+            // EFCore register
+            services.AddEfCoreRelationalDatabase(provider.Value);
+        }
+        else
+        {
+            // non-relational db register
+        }
 
         // queue register
         services.AddQueue(configuration);
