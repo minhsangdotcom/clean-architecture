@@ -46,7 +46,7 @@ services.AddAuthorization();
 services.AddErrorDetails();
 services.AddOpenApiConfiguration(configuration);
 services.AddApiVersion();
-services.AddOpenTelemetryTracing(configuration);
+services.AddOpenTelemetryTracing(configuration, builder.Environment.EnvironmentName);
 services.AddHealthCheck(configuration);
 services.AddLocalizationConfigurations(configuration);
 services.AddHttpContextAccessor();

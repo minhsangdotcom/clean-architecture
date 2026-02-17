@@ -18,7 +18,6 @@ public class TheDbContext(DbContextOptions<TheDbContext> options) : DbContext(op
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
-        modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
 
         if (Database.ProviderName == "Npgsql.EntityFrameworkCore.PostgreSQL")
         {

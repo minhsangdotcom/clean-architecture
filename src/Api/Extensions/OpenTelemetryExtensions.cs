@@ -1,4 +1,3 @@
-using System.Data;
 using System.Diagnostics;
 using Api.Settings;
 using Application.Contracts.Constants;
@@ -12,7 +11,8 @@ public static class OpenTelemetryExtensions
 {
     public static IServiceCollection AddOpenTelemetryTracing(
         this IServiceCollection services,
-        IConfiguration configuration
+        IConfiguration configuration,
+        string environmentName
     )
     {
         services.Configure<OpenTelemetrySettings>(
@@ -70,18 +70,11 @@ public static class OpenTelemetryExtensions
                         })
                         .AddEntityFrameworkCoreInstrumentation(opt =>
                         {
-                            opt.EnrichWithIDbCommand = (activity, command) =>
+                            if (environmentName != "Production")
                             {
-                                if (activity == null)
-                                {
-                                    return;
-                                }
-                                var dbName = command.Connection?.Database;
-                                if (!string.IsNullOrEmpty(dbName))
-                                {
-                                    activity.SetTag("db.name", dbName);
-                                }
-                            };
+                                opt.SetDbStatementForText = true;
+                                opt.SetDbStatementForStoredProcedure = true;
+                            }
                         })
                         .AddHttpClientInstrumentation();
 
