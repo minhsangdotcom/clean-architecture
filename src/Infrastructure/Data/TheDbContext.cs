@@ -19,16 +19,12 @@ public class TheDbContext(DbContextOptions<TheDbContext> options) : DbContext(op
     {
         modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
 
-        if (Database.ProviderName == "Npgsql.EntityFrameworkCore.PostgreSQL")
-        {
-            modelBuilder.HasPostgresExtension("citext");
-
-            modelBuilder.HasDbFunction(
-                typeof(PostgresDbFunctionExtensions).GetMethod(
-                    nameof(PostgresDbFunctionExtensions.Unaccent)
-                )!
-            );
-        }
+        modelBuilder.HasPostgresExtension("citext");
+        modelBuilder.HasDbFunction(
+            typeof(PostgresDbFunctionExtensions).GetMethod(
+                nameof(PostgresDbFunctionExtensions.Unaccent)
+            )!
+        );
     }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder) =>
