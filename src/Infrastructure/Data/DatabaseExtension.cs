@@ -33,8 +33,6 @@ public static class DatabaseExtension
         {
             // EFCore register
             services.AddEfCoreRelationalDatabase(provider.Value);
-
-            //Dapper register
         }
         else
         {
