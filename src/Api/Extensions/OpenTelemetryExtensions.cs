@@ -75,6 +75,7 @@ public static class OpenTelemetryExtensions
                                 opt.SetDbStatementForText = true;
                                 opt.SetDbStatementForStoredProcedure = true;
                             }
+                            opt.EnrichWithIDbCommand = (activity, command) => { };
                         })
                         .AddHttpClientInstrumentation();
 
