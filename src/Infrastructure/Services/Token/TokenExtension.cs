@@ -26,8 +26,8 @@ public static class TokenExtension
         JwtType jwtType = jwtSettings.Default!;
 
         return services
-            .AddTransient<ITokenService, DefaultTokenService>()
-            .AddTransient<ITokenGenerator, TokenGenerator>()
+            .AddSingleton<ITokenService, DefaultTokenService>()
+            .AddSingleton<ITokenGenerator, TokenGenerator>()
             .AddAuthentication(authentication =>
             {
                 authentication.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
