@@ -21,7 +21,7 @@
     </PackageReference>
     <PackageReference
       Include="minhsangdotcom.TheTemplate.ElasticsearchFluentConfig"
-      Version="1.0.1"
+      Version="1.0.4"
     />
     <PackageReference Include="Scriban" Version="6.5.2" />
     <PackageReference Include="Scrutor" Version="6.1.0" />

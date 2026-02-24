@@ -276,51 +276,6 @@
           "Microsoft.IdentityModel.Protocols.OpenIdConnect": "8.0.1"
         }
       },
-      "Microsoft.AspNetCore.Mvc.Razor.Extensions": {
-        "type": "Transitive",
-        "resolved": "6.0.0",
-        "contentHash": "M0h+ChPgydX2xY17agiphnAVa/Qh05RAP8eeuqGGhQKT10claRBlLNO6d2/oSV8zy0RLHzwLnNZm5xuC/gckGA==",
-        "dependencies": {
-          "Microsoft.AspNetCore.Razor.Language": "6.0.0",
-          "Microsoft.CodeAnalysis.Razor": "6.0.0"
-        }
-      },
-      "Microsoft.AspNetCore.Razor.Language": {
-        "type": "Transitive",
-        "resolved": "6.0.0",
-        "contentHash": "yCtBr1GSGzJrrp1NJUb4ltwFYMKHw/tJLnIDvg9g/FnkGIEzmE19tbCQqXARIJv5kdtBgsoVIdGLL+zmjxvM/A=="
-      },
-      "Microsoft.CodeAnalysis.Analyzers": {
-        "type": "Transitive",
-        "resolved": "3.3.2",
-        "contentHash": "7xt6zTlIEizUgEsYAIgm37EbdkiMmr6fP6J9pDoKEpiGM4pi32BCPGr/IczmSJI9Zzp0a6HOzpr9OvpMP+2veA=="
-      },
-      "Microsoft.CodeAnalysis.Common": {
-        "type": "Transitive",
-        "resolved": "4.0.0",
-        "contentHash": "d02ybMhUJl1r/dI6SkJPHrTiTzXBYCZeJdOLMckV+jyoMU/GGkjqFX/sRbv1K0QmlpwwKuLTiYVQvfYC+8ox2g==",
-        "dependencies": {
-          "Microsoft.CodeAnalysis.Analyzers": "3.3.2"
-        }
-      },
-      "Microsoft.CodeAnalysis.CSharp": {
-        "type": "Transitive",
-        "resolved": "4.0.0",
-        "contentHash": "2UVTGtyQGgTCazvnT6t82f+7AV2L+kqJdyb61rT9GQed4yK+tVh5IkaKcsm70VqyZQhBbDqsfZFNHnY65xhrRw==",
-        "dependencies": {
-          "Microsoft.CodeAnalysis.Common": "[4.0.0]"
-        }
-      },
-      "Microsoft.CodeAnalysis.Razor": {
-        "type": "Transitive",
-        "resolved": "6.0.0",
-        "contentHash": "uqdzuQXxD7XrJCbIbbwpI/LOv0PBJ9VIR0gdvANTHOfK5pjTaCir+XcwvYvBZ5BIzd0KGzyiamzlEWw1cK1q0w==",
-        "dependencies": {
-          "Microsoft.AspNetCore.Razor.Language": "6.0.0",
-          "Microsoft.CodeAnalysis.CSharp": "4.0.0",
-          "Microsoft.CodeAnalysis.Common": "4.0.0"
-        }
-      },
       "Microsoft.EntityFrameworkCore": {
         "type": "Transitive",
         "resolved": "10.0.0",
@@ -420,8 +375,8 @@
       },
       "minhsangdotcom.TheTemplate.ElasticsearchFluentConfig": {
         "type": "Transitive",
-        "resolved": "1.0.1",
-        "contentHash": "n13R8CzNvNFJjOZfB3zRcEFCiUGk3HR8Q4O21DMBzikgWADfTzyaK4UjKwjjHElvR9cgWy0RXq3ZnZgwtIm/3Q==",
+        "resolved": "1.0.4",
+        "contentHash": "T9Fe0tXqQx97u5EPCZyp56ZWdxp8VokXt2aYC02Cfp+1Z8Is5Ontq3yf7c3PpF1hYG4M9LCKvgaSRZxtNiz7vw==",
         "dependencies": {
           "CaseConverter": "2.0.1",
           "Elastic.Clients.Elasticsearch": "9.2.2"
@@ -438,8 +393,8 @@
       },
       "minhsangdotcom.TheTemplate.SpecificationPattern": {
         "type": "Transitive",
-        "resolved": "1.0.8",
-        "contentHash": "MZTU1ZsIdBLWI2/ehTDEZzh5Y/Khd63t/R472ziwnjuw502bmwRl654QRiIAC1dXAPleWW+Y5QYXzAK0R/G9qQ=="
+        "resolved": "1.0.9",
+        "contentHash": "dxSc1LeoXOqnNrkX/NTo3s+qs3mht4bB61gIeC1PinpyFyjSQnAJpvHJkWGmzep0+87gSK1/xbhKUmIYH6jT5A=="
       },
       "Newtonsoft.Json": {
         "type": "Transitive",
@@ -478,16 +433,6 @@
         "type": "Transitive",
         "resolved": "2.2.8",
         "contentHash": "zG2FApP5zxSx6OcdJQLbZDk2AVlN2BNQD6MorwIfV6gVj0RRxWPEp2LXAxqDGZqeNV1Zp0BNPcNaey/GXmTdvQ=="
-      },
-      "RazorLight": {
-        "type": "Transitive",
-        "resolved": "2.3.1",
-        "contentHash": "Eegx5xEQ2AvydJB5lHTZgIQQyCZJ6NLJb1ePinAGmv5S42rvj8o/FRZFxrB0jQhXmA4uu93x+J/ZVE1qBv4dLw==",
-        "dependencies": {
-          "Microsoft.AspNetCore.Mvc.Razor.Extensions": "6.0.0",
-          "Microsoft.CodeAnalysis.Razor": "6.0.0",
-          "Microsoft.Extensions.DependencyModel": "6.0.0"
-        }
       },
       "Scriban": {
         "type": "Transitive",
@@ -690,7 +635,7 @@
         "dependencies": {
           "Ardalis.GuardClauses": "[5.0.0, )",
           "minhsangdotcom.TheTemplate.SharedKernel": "[2.0.1, )",
-          "minhsangdotcom.TheTemplate.SpecificationPattern": "[1.0.8, )"
+          "minhsangdotcom.TheTemplate.SpecificationPattern": "[1.0.9, )"
         }
       },
       "infrastructure": {
@@ -703,13 +648,12 @@
           "JWT": "[11.0.0, )",
           "MailKit": "[4.12.1, )",
           "Microsoft.AspNetCore.Authentication.JwtBearer": "[10.0.0, )",
-          "RazorLight": "[2.3.1, )",
           "Scriban": "[6.5.2, )",
           "Scrutor": "[6.1.0, )",
           "StackExchange.Redis": "[2.9.32, )",
           "TranMinhSang.DynamicQueryExtension.EntityFrameworkCore": "[1.0.5, )",
           "TranMinhSang.Specification.EntityFrameworkCore": "[0.1.0, )",
-          "minhsangdotcom.TheTemplate.ElasticsearchFluentConfig": "[1.0.1, )"
+          "minhsangdotcom.TheTemplate.ElasticsearchFluentConfig": "[1.0.4, )"
         }
       }
     }

@@ -109,8 +109,11 @@ try
         {
             var client = scope.ServiceProvider.GetRequiredService<ElasticsearchClient>();
             var config = scope.ServiceProvider.GetRequiredService<IndexTypeConfiguration>();
+            var elkLogger = scope.ServiceProvider.GetRequiredService<
+                ILogger<ElasticsearchDbSeeder>
+            >();
 
-            ElasticsearchDbSeeder dbSeeder = new(client, config, options);
+            ElasticsearchDbSeeder dbSeeder = new(client, config, elkLogger, options);
             await dbSeeder.RunAsync();
         }
     }
