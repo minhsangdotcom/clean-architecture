@@ -5,7 +5,6 @@ using Specification.Interfaces;
 namespace Application.Common.Interfaces.Repositories.EfCore;
 
 /// <summary>
-/// READONLY REPOSITORY
 /// This doesn't support dynamic filter
 /// Query is gonna go with ISpecification
 /// TResult : must be a entity class
