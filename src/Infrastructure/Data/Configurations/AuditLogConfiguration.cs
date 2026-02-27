@@ -6,11 +6,7 @@ namespace Infrastructure.Data.Configurations;
 
 public class AuditLogConfiguration : IElasticsearchDocumentConfigure<AuditLog>
 {
-    public void Configure(
-        ref ElasticsearchConfigBuilder<AuditLog> builder,
-        string? prefix = null,
-        string? delimiter = null
-    )
+    public void Configure(ref ElasticsearchConfigBuilder<AuditLog> builder, string? prefix = null)
     {
         builder.ToIndex(prefix: prefix);
         builder.HasKey(key => key.Id);

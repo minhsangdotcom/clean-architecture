@@ -10,10 +10,10 @@ public class RepositoryFactory(IEfDbContext dbContext, ILogger logger, IMemoryCa
 {
     private readonly Dictionary<string, object> repositories = [];
 
-    public IEfRepository<T> Repository<T>()
+    public IEfRepository<T> Create<T>()
         where T : class
     {
-        string key = GenerateKey(typeof(T), nameof(Repository));
+        string key = GenerateKey(typeof(T), $"{nameof(RepositoryFactory)}.{nameof(Create)}");
         if (repositories.TryGetValue(key, out var repo))
         {
             return (IEfRepository<T>)repo;
@@ -25,10 +25,10 @@ public class RepositoryFactory(IEfDbContext dbContext, ILogger logger, IMemoryCa
         return (IEfRepository<T>)instance;
     }
 
-    public IEfMemoryRepository<T> MemoryRepository<T>()
+    public IEfMemoryRepository<T> CreateMemory<T>()
         where T : class
     {
-        string key = GenerateKey(typeof(T), nameof(Repository));
+        string key = GenerateKey(typeof(T), $"{nameof(RepositoryFactory)}.{nameof(CreateMemory)}");
         if (repositories.TryGetValue(key, out var repo))
         {
             return (IEfMemoryRepository<T>)repo;
@@ -40,10 +40,14 @@ public class RepositoryFactory(IEfDbContext dbContext, ILogger logger, IMemoryCa
         return (IEfMemoryRepository<T>)instance;
     }
 
-    public IEfReadonlyRepository<T> ReadOnlyRepository<T>(bool isCached = false)
+    public IEfReadonlyRepository<T> CreateReadOnly<T>(bool isCached = false)
         where T : class
     {
-        string key = GenerateKey(typeof(T), nameof(ReadOnlyRepository), isCached);
+        string key = GenerateKey(
+            typeof(T),
+            $"{nameof(RepositoryFactory)}.{nameof(CreateReadOnly)}",
+            isCached
+        );
         if (repositories.TryGetValue(key, out var repo))
         {
             return (IEfReadonlyRepository<T>)repo;
@@ -61,10 +65,14 @@ public class RepositoryFactory(IEfDbContext dbContext, ILogger logger, IMemoryCa
         return (IEfReadonlyRepository<T>)repository;
     }
 
-    public IEfSpecRepository<T> SpecRepository<T>(bool isCached = false)
+    public IEfSpecRepository<T> CreateSpecification<T>(bool isCached = false)
         where T : class
     {
-        string key = GenerateKey(typeof(T), nameof(SpecRepository), isCached);
+        string key = GenerateKey(
+            typeof(T),
+            $"{nameof(RepositoryFactory)}.{nameof(CreateSpecification)}",
+            isCached
+        );
         if (repositories.TryGetValue(key, out var repo))
         {
             return (IEfSpecRepository<T>)repo;
@@ -81,8 +89,6 @@ public class RepositoryFactory(IEfDbContext dbContext, ILogger logger, IMemoryCa
         repositories[key] = repository;
         return (IEfSpecRepository<T>)repository;
     }
-
-    public void Clear() => repositories.Clear();
 
     private static string GenerateKey(Type entityType, string repoName, bool? isCached = null) =>
         isCached == null

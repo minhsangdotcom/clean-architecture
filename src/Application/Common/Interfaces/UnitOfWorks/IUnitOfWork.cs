@@ -1,6 +1,6 @@
 namespace Application.Common.Interfaces.UnitOfWorks;
 
-public interface IUnitOfWork : IDisposable
+public interface IUnitOfWork
 {
     Task BeginTransactionAsync(CancellationToken cancellationToken = default);
     Task CommitAsync(CancellationToken cancellationToken = default);

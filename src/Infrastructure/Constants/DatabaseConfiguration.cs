@@ -7,6 +7,6 @@ public class DatabaseConfiguration
         "PostgreSQL",
         "MySQL",
         "SQLServer",
-        "MongoDB",
+        "Oracle",
     ];
 }

@@ -17,19 +17,17 @@ public class EfUnitOfWork(
     private readonly RepositoryFactory factory = new(dbContext, logger, cache);
     private IDbContextTransaction? currentTransaction = null;
 
-    private bool disposed = false;
-
     public IEfRepository<TEntity> Repository<TEntity>()
-        where TEntity : class => factory.Repository<TEntity>();
+        where TEntity : class => factory.Create<TEntity>();
 
     public IEfMemoryRepository<TEntity> MemoryRepository<TEntity>()
-        where TEntity : class => factory.MemoryRepository<TEntity>();
+        where TEntity : class => factory.CreateMemory<TEntity>();
 
     public IEfReadonlyRepository<TEntity> ReadonlyRepository<TEntity>(bool isCached = false)
-        where TEntity : class => factory.ReadOnlyRepository<TEntity>();
+        where TEntity : class => factory.CreateReadOnly<TEntity>();
 
     public IEfSpecRepository<TEntity> SpecRepository<TEntity>(bool isCached = false)
-        where TEntity : class => factory.SpecRepository<TEntity>();
+        where TEntity : class => factory.CreateSpecification<TEntity>();
 
     public async Task BeginTransactionAsync(CancellationToken cancellationToken = default)
     {
@@ -59,7 +57,7 @@ public class EfUnitOfWork(
         }
         finally
         {
-            await DisposeAsync();
+            await DisposeTransactionAsync();
         }
     }
 
@@ -70,33 +68,24 @@ public class EfUnitOfWork(
             logger.LogWarning("There is no transaction started.");
             return;
         }
-        await currentTransaction.RollbackAsync(cancellationToken);
-    }
 
-    public int ExecuteSqlCommand(string sql, params object[] parameters) =>
-        dbContext.DatabaseFacade.ExecuteSqlRaw(sql, parameters);
+        try
+        {
+            await currentTransaction.RollbackAsync(cancellationToken);
+        }
+        finally
+        {
+            await DisposeTransactionAsync();
+        }
+    }
 
     public async Task SaveChangesAsync(CancellationToken cancellationToken = default) =>
         await dbContext.SaveChangesAsync(cancellationToken);
 
-    public void Dispose()
-    {
-        Dispose(true);
-        factory.Clear();
-        GC.SuppressFinalize(this);
-    }
+    public int ExecuteSqlCommand(string sql, params object[] parameters) =>
+        dbContext.DatabaseFacade.ExecuteSqlRaw(sql, parameters);
 
-    protected virtual void Dispose(bool disposing)
-    {
-        if (!disposed && disposing)
-        {
-            dbContext.Dispose();
-        }
-
-        disposed = true;
-    }
-
-    private async Task DisposeAsync()
+    private async Task DisposeTransactionAsync()
     {
         if (currentTransaction != null)
         {

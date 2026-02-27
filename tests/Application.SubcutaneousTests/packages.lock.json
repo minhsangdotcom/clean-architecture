@@ -760,8 +760,8 @@
       },
       "minhsangdotcom.TheTemplate.ElasticsearchFluentConfig": {
         "type": "Transitive",
-        "resolved": "1.0.1",
-        "contentHash": "n13R8CzNvNFJjOZfB3zRcEFCiUGk3HR8Q4O21DMBzikgWADfTzyaK4UjKwjjHElvR9cgWy0RXq3ZnZgwtIm/3Q==",
+        "resolved": "1.0.4",
+        "contentHash": "T9Fe0tXqQx97u5EPCZyp56ZWdxp8VokXt2aYC02Cfp+1Z8Is5Ontq3yf7c3PpF1hYG4M9LCKvgaSRZxtNiz7vw==",
         "dependencies": {
           "CaseConverter": "2.0.1",
           "Elastic.Clients.Elasticsearch": "9.2.2"
@@ -778,8 +778,8 @@
       },
       "minhsangdotcom.TheTemplate.SpecificationPattern": {
         "type": "Transitive",
-        "resolved": "1.0.8",
-        "contentHash": "MZTU1ZsIdBLWI2/ehTDEZzh5Y/Khd63t/R472ziwnjuw502bmwRl654QRiIAC1dXAPleWW+Y5QYXzAK0R/G9qQ=="
+        "resolved": "1.0.9",
+        "contentHash": "dxSc1LeoXOqnNrkX/NTo3s+qs3mht4bB61gIeC1PinpyFyjSQnAJpvHJkWGmzep0+87gSK1/xbhKUmIYH6jT5A=="
       },
       "Newtonsoft.Json": {
         "type": "Transitive",
@@ -1220,7 +1220,7 @@
         "dependencies": {
           "Ardalis.GuardClauses": "[5.0.0, )",
           "minhsangdotcom.TheTemplate.SharedKernel": "[2.0.1, )",
-          "minhsangdotcom.TheTemplate.SpecificationPattern": "[1.0.8, )"
+          "minhsangdotcom.TheTemplate.SpecificationPattern": "[1.0.9, )"
         }
       },
       "infrastructure": {
@@ -1238,7 +1238,7 @@
           "StackExchange.Redis": "[2.9.32, )",
           "TranMinhSang.DynamicQueryExtension.EntityFrameworkCore": "[1.0.5, )",
           "TranMinhSang.Specification.EntityFrameworkCore": "[0.1.0, )",
-          "minhsangdotcom.TheTemplate.ElasticsearchFluentConfig": "[1.0.1, )"
+          "minhsangdotcom.TheTemplate.ElasticsearchFluentConfig": "[1.0.4, )"
         }
       }
     }

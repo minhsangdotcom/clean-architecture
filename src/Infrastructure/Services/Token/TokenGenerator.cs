@@ -10,8 +10,6 @@ namespace Infrastructure.Services.Token;
 
 public class TokenGenerator(ILogger<TokenGenerator> logger) : ITokenGenerator
 {
-    private readonly JwtSecurityTokenHandler tokenHandler = new();
-
     public string Generate(
         string key,
         IDictionary<string, object> claims,
@@ -30,7 +28,7 @@ public class TokenGenerator(ILogger<TokenGenerator> logger) : ITokenGenerator
         {
             tokenDescriptor.Expires = expirationTime;
         }
-
+        JwtSecurityTokenHandler tokenHandler = new();
         SecurityToken token = tokenHandler.CreateToken(tokenDescriptor);
         return tokenHandler.WriteToken(token);
     }

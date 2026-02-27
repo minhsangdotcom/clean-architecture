@@ -12,7 +12,8 @@ public enum CurrentProvider
     PostgreSQL = 1,
     MySQL = 2,
     SQLServer = 3,
-    MongoDB = 4,
+    Oracle = 4,
+    MongoDB = 5,
 }
 
 public class RelationalProvider

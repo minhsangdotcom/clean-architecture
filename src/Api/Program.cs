@@ -46,14 +46,15 @@ services.AddAuthorization();
 services.AddErrorDetails();
 services.AddOpenApiConfiguration(configuration);
 services.AddApiVersion();
-services.AddOpenTelemetryTracing(configuration);
+services.AddOpenTelemetryTracing(configuration, builder.Environment.EnvironmentName);
 services.AddHealthCheck(configuration);
 services.AddLocalizationConfigurations(configuration);
 services.AddHttpContextAccessor();
 services.AddScoped<IRequestContextProvider, RequestContextProvider>();
 
-// I set it Singleton because it's called inside many singleton services, but if u want, set it Scoped for the standard.
+// I set it Singleton because it's called inside many singleton services.
 services.AddSingleton<ICurrentUser, CurrentUser>();
+
 services.AddCors(options =>
     options.AddPolicy(
         allowedCors.Name,
@@ -67,7 +68,6 @@ services.AddCors(options =>
         }
     )
 );
-
 services.AddCors(options =>
     options.AddPolicy(
         "allowedDev",
@@ -109,8 +109,11 @@ try
         {
             var client = scope.ServiceProvider.GetRequiredService<ElasticsearchClient>();
             var config = scope.ServiceProvider.GetRequiredService<IndexTypeConfiguration>();
+            var elkLogger = scope.ServiceProvider.GetRequiredService<
+                ILogger<ElasticsearchDbSeeder>
+            >();
 
-            ElasticsearchDbSeeder dbSeeder = new(client, config, options);
+            ElasticsearchDbSeeder dbSeeder = new(client, config, elkLogger, options);
             await dbSeeder.RunAsync();
         }
     }
@@ -128,7 +131,7 @@ try
         });
     }
 
-    app.UseHealthCheck(configuration);
+    app.UseHealthCheck();
     if (isDevelopment)
     {
         app.UseCors("allowedDev");

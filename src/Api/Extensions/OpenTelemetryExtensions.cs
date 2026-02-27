@@ -1,4 +1,3 @@
-using System.Data;
 using System.Diagnostics;
 using Api.Settings;
 using Application.Contracts.Constants;
@@ -12,7 +11,8 @@ public static class OpenTelemetryExtensions
 {
     public static IServiceCollection AddOpenTelemetryTracing(
         this IServiceCollection services,
-        IConfiguration configuration
+        IConfiguration configuration,
+        string environmentName
     )
     {
         services.Configure<OpenTelemetrySettings>(
@@ -70,28 +70,12 @@ public static class OpenTelemetryExtensions
                         })
                         .AddEntityFrameworkCoreInstrumentation(opt =>
                         {
-                            opt.SetDbStatementForText = true;
-                            opt.SetDbStatementForStoredProcedure = true;
-                            opt.EnrichWithIDbCommand = (activity, command) =>
+                            if (environmentName != "Production")
                             {
-                                if (activity == null)
-                                {
-                                    return;
-                                }
-                                // Extract SQL operation name: SELECT / INSERT / UPDATE / DELETE / EXEC...
-                                string operation =
-                                    command.CommandType == CommandType.StoredProcedure
-                                        ? "EXEC"
-                                        : command.CommandText.Split(
-                                            ' ',
-                                            StringSplitOptions.RemoveEmptyEntries
-                                        )[0];
-
-                                activity.SetTag("db.system", command.Connection?.GetType().Name);
-                                activity.SetTag("db.name", command.Connection?.Database);
-                                activity.SetTag("db.operation", operation);
-                                activity.SetTag("db.command_type", command.CommandType.ToString());
-                            };
+                                opt.SetDbStatementForText = true;
+                                opt.SetDbStatementForStoredProcedure = true;
+                            }
+                            opt.EnrichWithIDbCommand = (activity, command) => { };
                         })
                         .AddHttpClientInstrumentation();
 

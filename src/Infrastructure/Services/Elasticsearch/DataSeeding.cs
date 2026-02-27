@@ -1,5 +1,6 @@
 using Domain.Aggregates.AuditLogs;
 using Elastic.Clients.Elasticsearch;
+using Microsoft.Extensions.Logging;
 
 namespace Infrastructure.Services.Elasticsearch;
 
@@ -12,7 +13,8 @@ public static class DataSeeding
     /// <returns></returns>
     public static async Task SeedingAsync(
         this ElasticsearchClient elasticsearchClient,
-        string prefix
+        string prefix,
+        ILogger logger
     )
     {
         var auditLog = await elasticsearchClient.CountAsync<AuditLog>();
@@ -75,7 +77,6 @@ public static class DataSeeding
                 },
             },
         ];
-
         var response = await elasticsearchClient.IndexManyAsync(
             logs,
             IndexGenerator.GetName<AuditLog>(prefix)
@@ -83,12 +84,13 @@ public static class DataSeeding
 
         if (response.IsSuccess())
         {
-            Console.WriteLine("Elasticsearch has seeded.");
+            logger.LogInformation("Elasticsearch has seeded.");
         }
         else
         {
-            Console.WriteLine(
-                $"Elasticsearch has been failed in seeding with {response.DebugInformation}"
+            logger.LogInformation(
+                "Elasticsearch has been failed in seeding with error {error}",
+                response.DebugInformation
             );
         }
     }

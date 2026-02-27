@@ -31,7 +31,7 @@ public static class DependencyInjection
         ValidatorOptions.Global.DefaultClassLevelCascadeMode = CascadeMode.Stop;
         services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
 
-        services.AddRelationalDatabase(configuration);
+        services.AddDatabases(configuration);
 
         // queue register
         services.AddQueue(configuration);

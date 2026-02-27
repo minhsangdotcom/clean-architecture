@@ -1,5 +1,6 @@
 using Application.Common.Interfaces.UnitOfWorks;
 using Infrastructure.common.validator;
+using Infrastructure.Constants;
 using Infrastructure.Data.Interceptors;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -11,7 +12,7 @@ namespace Infrastructure.Data;
 
 public static class DatabaseExtension
 {
-    public static IServiceCollection AddRelationalDatabase(
+    public static IServiceCollection AddDatabases(
         this IServiceCollection services,
         IConfiguration configuration
     )
@@ -19,11 +20,33 @@ public static class DatabaseExtension
         services.AddOptionsWithFluentValidation<DatabaseSettings>(
             configuration.GetSection(nameof(DatabaseSettings))
         );
-
         CurrentProvider? provider = configuration
             .GetSection($"{nameof(DatabaseSettings)}:{nameof(DatabaseSettings.Provider)}")
             .Get<CurrentProvider>();
 
+        if (provider == null)
+        {
+            return services;
+        }
+
+        if (DatabaseConfiguration.relationalProviders.Contains(provider.Value.ToString()))
+        {
+            // EFCore register
+            services.AddEfCoreRelationalDatabase(provider.Value);
+        }
+        else
+        {
+            // non-relational db register
+        }
+
+        return services;
+    }
+
+    public static IServiceCollection AddEfCoreRelationalDatabase(
+        this IServiceCollection services,
+        CurrentProvider provider
+    )
+    {
         if (provider == CurrentProvider.PostgreSQL)
         {
             services.AddSingleton(sp =>
