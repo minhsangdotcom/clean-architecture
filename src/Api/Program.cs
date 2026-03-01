@@ -10,6 +10,7 @@ using Api.Settings;
 using Application;
 using Application.Common.Interfaces.Seeder;
 using Application.Common.Interfaces.Services.Accessors;
+using ByteAether.Ulid;
 using Elastic.Clients.Elasticsearch;
 using Infrastructure;
 using Infrastructure.Data.Seeders;
@@ -18,6 +19,7 @@ using Microsoft.AspNetCore.Localization;
 using Microsoft.Extensions.Options;
 using Serilog;
 using Swashbuckle.AspNetCore.SwaggerUI;
+using static ByteAether.Ulid.Ulid.GenerationOptions;
 
 var builder = WebApplication.CreateBuilder(args);
 var services = builder.Services;
@@ -37,7 +39,6 @@ services.ConfigureHttpJsonOptions(options =>
 {
     options.SerializerOptions.Converters.Add(new DateTimeJsonConverter());
     options.SerializerOptions.Converters.Add(new DateTimeOffsetJsonConverter());
-    //options.SerializerOptions.Converters.Add(new UlidJsonConverter());
 });
 
 builder.AddSerilog();
@@ -48,8 +49,13 @@ services.AddApiVersion();
 services.AddOpenTelemetryTracing(configuration, builder.Environment.EnvironmentName);
 services.AddHealthCheck(configuration);
 services.AddLocalizationConfigurations(configuration);
+
 services.AddHttpContextAccessor();
 services.AddScoped<IRequestContextProvider, RequestContextProvider>();
+Ulid.DefaultGenerationOptions = new Ulid.GenerationOptions
+{
+    Monotonicity = MonotonicityOptions.MonotonicRandom2Byte,
+};
 
 // I set it Singleton because it's called inside many singleton services.
 services.AddSingleton<ICurrentUser, CurrentUser>();
