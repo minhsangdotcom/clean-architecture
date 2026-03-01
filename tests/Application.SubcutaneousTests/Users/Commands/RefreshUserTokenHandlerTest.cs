@@ -3,6 +3,7 @@ using Application.Common.ErrorCodes;
 using Application.Contracts.ApiWrapper;
 using Application.Features.Users.Commands.Login;
 using Application.Features.Users.Commands.Token;
+using ByteAether.Ulid;
 using Infrastructure.Constants;
 using Shouldly;
 using Xunit.Abstractions;

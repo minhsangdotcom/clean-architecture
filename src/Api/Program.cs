@@ -10,7 +10,6 @@ using Api.Settings;
 using Application;
 using Application.Common.Interfaces.Seeder;
 using Application.Common.Interfaces.Services.Accessors;
-using Cysharp.Serialization.Json;
 using Elastic.Clients.Elasticsearch;
 using Infrastructure;
 using Infrastructure.Data.Seeders;
@@ -38,7 +37,7 @@ services.ConfigureHttpJsonOptions(options =>
 {
     options.SerializerOptions.Converters.Add(new DateTimeJsonConverter());
     options.SerializerOptions.Converters.Add(new DateTimeOffsetJsonConverter());
-    options.SerializerOptions.Converters.Add(new UlidJsonConverter());
+    //options.SerializerOptions.Converters.Add(new UlidJsonConverter());
 });
 
 builder.AddSerilog();

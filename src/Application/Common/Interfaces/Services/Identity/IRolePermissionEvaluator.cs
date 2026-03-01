@@ -1,3 +1,5 @@
+using ByteAether.Ulid;
+
 namespace Application.Common.Interfaces.Services.Identity;
 
 public interface IRolePermissionEvaluator

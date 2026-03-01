@@ -4,6 +4,7 @@ using Application.Common.Interfaces.Services.Localization;
 using Application.Common.Interfaces.UnitOfWorks;
 using Application.Common.Validators;
 using Application.SharedFeatures.Requests.Roles;
+using ByteAether.Ulid;
 using Domain.Aggregates.Permissions;
 using Domain.Aggregates.Roles;
 using FluentValidation;
@@ -21,7 +22,7 @@ public class RoleValidator(
         ITranslator<Messages> translator
     )
     {
-        _ = Ulid.TryParse(contextProvider.GetId(), out Ulid id);
+        _ = Ulid.TryParse(contextProvider.GetId(), null, out Ulid id);
 
         RuleFor(x => x.Name)
             .NotEmpty()

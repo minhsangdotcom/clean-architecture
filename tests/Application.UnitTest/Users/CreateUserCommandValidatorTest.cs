@@ -8,6 +8,7 @@ using Application.Common.Interfaces.UnitOfWorks;
 using Application.Contracts.ApiWrapper;
 using Application.Features.Users.Commands.Create;
 using Bogus;
+using ByteAether.Ulid;
 using Domain.Aggregates.Permissions;
 using Domain.Aggregates.Roles;
 using Domain.Aggregates.Users;
@@ -454,7 +455,7 @@ public partial class CreateUserCommandValidatorTest
     public async Task Validate_When_RolesNotUnique_Should_HaveError()
     {
         // Arrange
-        Ulid id = Ulid.NewUlid();
+        Ulid id = Ulid.New();
         command.Roles = [id, id];
 
         translator.SetupTranslate(
@@ -504,7 +505,7 @@ public partial class CreateUserCommandValidatorTest
             .When(_ => true)
             .WithState(_ => expected);
 
-        command.Roles = [Ulid.NewUlid()];
+        command.Roles = [Ulid.New()];
 
         // Act
         var result = await inlineValidator.TestValidateAsync(command);
@@ -525,7 +526,7 @@ public partial class CreateUserCommandValidatorTest
             .MustAsync((ids, _) => Task.FromResult(true))
             .When(_ => true);
 
-        command.Roles = [Ulid.NewUlid()];
+        command.Roles = [Ulid.New()];
 
         // Act
         var result = await inlineValidator.TestValidateAsync(command);
@@ -556,7 +557,7 @@ public partial class CreateUserCommandValidatorTest
     public async Task Validate_When_PermissionsNotUnique_Should_HaveError()
     {
         // Arrange
-        Ulid id = Ulid.NewUlid();
+        Ulid id = Ulid.New();
         command.Permissions = [id, id];
 
         translator.SetupTranslate(
@@ -583,7 +584,7 @@ public partial class CreateUserCommandValidatorTest
     public async Task Validate_When_PermissionsUnique_Should_Pass()
     {
         // Arrange
-        Ulid id = Ulid.NewUlid();
+        Ulid id = Ulid.New();
         command.Permissions = [id];
         inlineValidator.RuleFor(x => x.Permissions).Must((x, ct) => true);
 
@@ -598,7 +599,7 @@ public partial class CreateUserCommandValidatorTest
     public async Task Validate_When_PermissionsNotFoundInDb_Should_HaveError()
     {
         // Arrange
-        command.Permissions = [Ulid.NewUlid()];
+        command.Permissions = [Ulid.New()];
         var expected = new ErrorReason(
             UserErrorMessages.UserPermissionsNotFound,
             SharedResource.TranslateText
@@ -613,7 +614,7 @@ public partial class CreateUserCommandValidatorTest
             .MustAsync((p, _) => Task.FromResult(false))
             .WithState(_ => expected);
 
-        command.Permissions = [Ulid.NewUlid()];
+        command.Permissions = [Ulid.New()];
 
         // Act
         var result = await inlineValidator.TestValidateAsync(command);
@@ -631,7 +632,7 @@ public partial class CreateUserCommandValidatorTest
         // Arrange
         inlineValidator.RuleFor(x => x.Permissions).MustAsync((p, _) => Task.FromResult(true));
 
-        command.Permissions = [Ulid.NewUlid()];
+        command.Permissions = [Ulid.New()];
 
         // Act
         var result = await inlineValidator.TestValidateAsync(command);
@@ -669,8 +670,8 @@ public partial class CreateUserCommandValidatorTest
             .RuleFor(x => x.DateOfBirth, f => f.Date.Past(30))
             .RuleFor(x => x.Avatar, _ => null)
             .RuleFor(x => x.Status, f => f.PickRandom<UserStatus>())
-            .RuleFor(x => x.Roles, f => [Ulid.NewUlid()])
-            .RuleFor(x => x.Permissions, f => [Ulid.NewUlid()])
+            .RuleFor(x => x.Roles, f => [Ulid.New()])
+            .RuleFor(x => x.Permissions, f => [Ulid.New()])
             .RuleFor(x => x.Username, f => f.Internet.UserName())
             .RuleFor(x => x.Email, f => f.Internet.Email())
             .RuleFor(x => x.Password, "Admin@123")

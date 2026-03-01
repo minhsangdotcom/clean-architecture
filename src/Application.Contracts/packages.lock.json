@@ -23,23 +23,22 @@
       },
       "minhsangdotcom.TheTemplate.SharedKernel": {
         "type": "Direct",
-        "requested": "[2.0.1, )",
-        "resolved": "2.0.1",
-        "contentHash": "MZsbEZN5v91Kdb50ZfsOygqoej2Egqjk4EFlWSVi5271yHXJdcim1ULqyU9KHaCfvHofkdzQAbKx69WJmHvr9w==",
+        "requested": "[2.0.2, )",
+        "resolved": "2.0.2",
+        "contentHash": "+fglbjwEaAod0IiEynJ8lJx/40vRqg+M/g2RatHLYpiR0cuQQrYwpv6KF3K0hQtMavOnK3gtPePk4r5hjYF51A==",
         "dependencies": {
-          "Mediator.Abstractions": "3.0.1",
-          "Ulid": "1.4.1"
+          "Mediator.Abstractions": "3.0.1"
         }
       },
       "TranMinhSang.AspNetCore.Extensions": {
         "type": "Direct",
-        "requested": "[1.0.1, )",
-        "resolved": "1.0.1",
-        "contentHash": "o1IEeW0XXEDfS/S0KskDtjq9jqt2td0Mc+mVTkULmHhSs7buPZduJcmTqikGGmo8oHKm9orF2CH95oisEerRsQ==",
+        "requested": "[1.0.2, )",
+        "resolved": "1.0.2",
+        "contentHash": "zmLPHryThIp+BxvvQTyvhU8wZFjZTA9uveSvxMOGnOv8vvfTL64YR9xpjg5i1JZohOEB8N6VyOqk64xPWC4kyg==",
         "dependencies": {
           "BouncyCastle.Cryptography": "2.6.2",
+          "ByteAether.Ulid": "1.3.5",
           "Microsoft.AspNetCore.WebUtilities": "8.0.21",
-          "Ulid": "1.4.1",
           "deniszykov.TypeConversion": "3.2.3"
         }
       },
@@ -47,6 +46,11 @@
         "type": "Transitive",
         "resolved": "2.6.2",
         "contentHash": "7oWOcvnntmMKNzDLsdxAYqApt+AjpRpP2CShjMfIa3umZ42UQMvH0tl1qAliYPNYO6vTdcGMqnRrCPmsfzTI1w=="
+      },
+      "ByteAether.Ulid": {
+        "type": "Transitive",
+        "resolved": "1.3.5",
+        "contentHash": "zVtzPQq510rnBYXgq6HEImeEtA8ihhC/rP6qrzdNjdh/tsrr1h+so18ZkiZRrUrnGlP3CmdKab0If4CJQJ3lYA=="
       },
       "deniszykov.TypeConversion": {
         "type": "Transitive",
@@ -119,11 +123,6 @@
         "dependencies": {
           "Microsoft.Extensions.Primitives": "8.0.0"
         }
-      },
-      "Ulid": {
-        "type": "Transitive",
-        "resolved": "1.4.1",
-        "contentHash": "V6crLJ8a29raWeNwxYGfH9RTKA3H0nR0D9LAGzN3KtEsbiiaWkUjDor6OT5Oz7pxCK+NaY2hu2FLoYEOa8oCkA=="
       }
     }
   }

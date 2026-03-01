@@ -1,3 +1,5 @@
+using ByteAether.Ulid;
+
 namespace Domain.Aggregates.Users.Exceptions;
 
 public sealed class UserAlreadyInactiveException(Ulid userId)

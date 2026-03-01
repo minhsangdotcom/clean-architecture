@@ -1,3 +1,5 @@
+using ByteAether.Ulid;
+
 namespace Application.Contracts.Dtos.Responses;
 
 public class EntityResponse<T>

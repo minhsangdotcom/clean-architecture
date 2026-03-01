@@ -6,6 +6,7 @@ using Application.Common.Interfaces.UnitOfWorks;
 using Application.Contracts.ApiWrapper;
 using Application.Features.Roles.Commands.Update;
 using Bogus;
+using ByteAether.Ulid;
 using Domain.Aggregates.Permissions;
 using Domain.Aggregates.Roles;
 using FluentValidation;
@@ -45,7 +46,7 @@ public sealed class UpdateRoleCommandValidatorTest
         var updateDataFaker = new Faker<RoleUpdateData>()
             .RuleFor(x => x.Name, f => f.Commerce.Department())
             .RuleFor(x => x.Description, f => f.Lorem.Sentence(8))
-            .RuleFor(x => x.PermissionIds, f => [Ulid.NewUlid(), Ulid.NewUlid(), Ulid.NewUlid()]);
+            .RuleFor(x => x.PermissionIds, f => [Ulid.New(), Ulid.New(), Ulid.New()]);
         var faker = new Faker<UpdateRoleCommand>().RuleFor(
             x => x.UpdateData,
             f => updateDataFaker.Generate()
@@ -211,7 +212,7 @@ public sealed class UpdateRoleCommandValidatorTest
     public async Task Validate_When_PermissionIdsNotUnique_Should_HaveError()
     {
         //Arrange
-        var id = Ulid.NewUlid();
+        var id = Ulid.New();
         command.UpdateData.PermissionIds = [id, id];
 
         translator.SetupTranslate(

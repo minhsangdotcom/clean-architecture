@@ -1,8 +1,9 @@
 using Ardalis.GuardClauses;
+using ByteAether.Ulid;
 using Domain.Aggregates.Users.Enums;
 using Domain.Aggregates.Users.Exceptions;
+using Domain.Common;
 using SharedKernel.DomainEvents;
-using SharedKernel.Entities;
 
 namespace Domain.Aggregates.Users;
 

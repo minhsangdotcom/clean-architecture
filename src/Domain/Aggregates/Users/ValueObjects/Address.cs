@@ -1,4 +1,5 @@
 using Ardalis.GuardClauses;
+using ByteAether.Ulid;
 using SharedKernel.ValueObject;
 
 namespace Domain.Aggregates.Users.ValueObjects;

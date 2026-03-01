@@ -2,6 +2,7 @@ using Application.Common.ErrorCodes;
 using Application.Contracts.ApiWrapper;
 using Application.Features.Users.Commands.Update;
 using Application.SubcutaneousTests.Extensions;
+using ByteAether.Ulid;
 using Microsoft.AspNetCore.Http;
 using Shouldly;
 
@@ -17,7 +18,7 @@ public class UpdateUserHandlerTest(TestingFixture testingFixture) : IAsyncLifeti
     public async Task UpdateUser_WhenIdNotfound_ShouldReturnNotFoundResult()
     {
         //Arrange
-        command.UserId = Ulid.NewUlid().ToString();
+        command.UserId = Ulid.New().ToString();
 
         //Act
         Result<UpdateUserResponse> result = await testingFixture.SendAsync(command);

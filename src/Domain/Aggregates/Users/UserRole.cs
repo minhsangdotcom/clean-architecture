@@ -1,3 +1,4 @@
+using ByteAether.Ulid;
 using Domain.Aggregates.Roles;
 
 namespace Domain.Aggregates.Users;

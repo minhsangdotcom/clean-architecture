@@ -1,4 +1,4 @@
-using SharedKernel.Entities;
+using Domain.Common;
 
 namespace Domain.Aggregates.Permissions;
 
@@ -11,12 +11,6 @@ public class Permission : AuditableEntity
     public string? Description { get; private set; }
 
     public string? Group { get; private set; }
-
-    // public DateTimeOffset? EffectiveFrom { get; private set; }
-
-    // public DateTimeOffset? EffectiveTo { get; private set; }
-
-    // public PermissionStatus Status { get; private set; } = PermissionStatus.Active;
 
     private Permission() { }
 

@@ -6,6 +6,7 @@ using Application.Common.Interfaces.UnitOfWorks;
 using Application.Contracts.ApiWrapper;
 using Application.Features.Users.Commands.Profiles;
 using Bogus;
+using ByteAether.Ulid;
 using Domain.Aggregates.Users;
 using Domain.Aggregates.Users.Enums;
 using FluentValidation;
@@ -30,7 +31,7 @@ public class UpdateUserProfileCommandValidatorTest
 
         Mock<IRequestContextProvider> contextProvider = new();
         Mock<ICurrentUser> currentUser = new();
-        currentUser.Setup(x => x.Id).Returns(Ulid.NewUlid());
+        currentUser.Setup(x => x.Id).Returns(Ulid.New());
         validator = new(
             unitOfWork.Object,
             currentUser.Object,

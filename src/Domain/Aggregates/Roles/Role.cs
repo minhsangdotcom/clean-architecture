@@ -1,7 +1,8 @@
 using Ardalis.GuardClauses;
+using ByteAether.Ulid;
 using Domain.Aggregates.Users;
+using Domain.Common;
 using SharedKernel.DomainEvents;
-using SharedKernel.Entities;
 
 namespace Domain.Aggregates.Roles;
 

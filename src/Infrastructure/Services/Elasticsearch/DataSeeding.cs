@@ -1,3 +1,4 @@
+using ByteAether.Ulid;
 using Domain.Aggregates.AuditLogs;
 using Elastic.Clients.Elasticsearch;
 using Microsoft.Extensions.Logging;
@@ -44,7 +45,7 @@ public static class DataSeeding
             },
             new AuditLog
             {
-                Id = Ulid.NewUlid().ToString(),
+                Id = Ulid.New().ToString(),
                 Entity = "Order",
                 Type = 2,
                 OldValue = new { Status = "Pending" },
@@ -61,7 +62,7 @@ public static class DataSeeding
             },
             new AuditLog
             {
-                Id = Ulid.NewUlid().ToString(),
+                Id = Ulid.New().ToString(),
                 Entity = "Product",
                 Type = 1,
                 OldValue = new { Price = 999, Name = "iPhone 13" },

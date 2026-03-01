@@ -2,6 +2,7 @@
 using Application.Common.Interfaces.Services.Localization;
 using Application.Common.Interfaces.UnitOfWorks;
 using Application.Contracts.ApiWrapper;
+using ByteAether.Ulid;
 using Domain.Aggregates.Users;
 using FluentValidation;
 

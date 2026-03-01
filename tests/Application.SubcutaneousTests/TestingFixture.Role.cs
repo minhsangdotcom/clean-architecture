@@ -2,6 +2,7 @@ using Application.Common.Interfaces.Services.Identity;
 using Application.Contracts.ApiWrapper;
 using Application.Features.Roles.Commands.Create;
 using Application.SubcutaneousTests.Extensions;
+using ByteAether.Ulid;
 using Domain.Aggregates.Permissions;
 using Domain.Aggregates.Roles;
 using Infrastructure.Data;

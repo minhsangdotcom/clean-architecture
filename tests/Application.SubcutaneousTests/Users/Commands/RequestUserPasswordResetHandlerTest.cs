@@ -1,5 +1,6 @@
 using Application.Common.ErrorCodes;
 using Application.Features.Users.Commands.RequestPasswordReset;
+using ByteAether.Ulid;
 using Shouldly;
 
 namespace Application.SubcutaneousTests.Users.Commands;

@@ -1,5 +1,4 @@
 using Application.Contracts.Dtos.Responses;
-using Application.SharedFeatures.Projections.Permissions;
 
 namespace Application.Features.Permissions;
 

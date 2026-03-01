@@ -1,3 +1,5 @@
+using ByteAether.Ulid;
+
 namespace Application.SharedFeatures.Requests.Roles;
 
 public class RoleUpsertCommand
