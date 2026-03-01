@@ -233,14 +233,6 @@
           "Microsoft.Extensions.Dependencyinjection.Abstractions": "2.1.0"
         }
       },
-      "JWT": {
-        "type": "Transitive",
-        "resolved": "11.0.0",
-        "contentHash": "jOT1PA95jgf78CqWsKt8hz9Uzv4J39vukzf5nYtfky9N6wl1W4vIXT1CdkQI7zG20HnApEMtmpC/pMtCKr4rvw==",
-        "dependencies": {
-          "Newtonsoft.Json": "13.0.3"
-        }
-      },
       "MailKit": {
         "type": "Transitive",
         "resolved": "4.12.1",
@@ -1230,7 +1222,6 @@
           "Application": "[1.0.0, )",
           "EFCore.NamingConventions": "[10.0.0-rc.2, )",
           "Elastic.Clients.Elasticsearch": "[9.2.2, )",
-          "JWT": "[11.0.0, )",
           "MailKit": "[4.12.1, )",
           "Microsoft.AspNetCore.Authentication.JwtBearer": "[10.0.0, )",
           "Scriban": "[6.5.2, )",

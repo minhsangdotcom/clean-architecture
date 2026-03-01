@@ -31,15 +31,6 @@
           "Elastic.Transport": "0.10.1"
         }
       },
-      "JWT": {
-        "type": "Direct",
-        "requested": "[11.0.0, )",
-        "resolved": "11.0.0",
-        "contentHash": "jOT1PA95jgf78CqWsKt8hz9Uzv4J39vukzf5nYtfky9N6wl1W4vIXT1CdkQI7zG20HnApEMtmpC/pMtCKr4rvw==",
-        "dependencies": {
-          "Newtonsoft.Json": "13.0.3"
-        }
-      },
       "MailKit": {
         "type": "Direct",
         "requested": "[4.12.1, )",
