@@ -133,6 +133,11 @@
           "Microsoft.Extensions.Diagnostics.HealthChecks": "8.0.11"
         }
       },
+      "AspNetCore.Scalar": {
+        "type": "Transitive",
+        "resolved": "1.2.0",
+        "contentHash": "DVdi1d+7nyke9pX4Jq1Gws+8CCHoVVQ+7RJeEWBtV5WlyV5q+bzIoA8g2m1vctLTweaQEGAtHyHOBAzkuAYzAw=="
+      },
       "AWSSDK.Core": {
         "type": "Transitive",
         "resolved": "4.0.3.8",
@@ -886,6 +891,11 @@
         "resolved": "2.2.8",
         "contentHash": "zG2FApP5zxSx6OcdJQLbZDk2AVlN2BNQD6MorwIfV6gVj0RRxWPEp2LXAxqDGZqeNV1Zp0BNPcNaey/GXmTdvQ=="
       },
+      "Scalar.AspNetCore": {
+        "type": "Transitive",
+        "resolved": "2.13.1",
+        "contentHash": "HxkQC71kWUQBdj/51GFyETO21pqmK5hfNpovAdIi4d/XEv/HIoMCNw3CGSwT0h5E8rG3CuaSm/Wz0xk7eLbu9A=="
+      },
       "Scriban": {
         "type": "Transitive",
         "resolved": "6.5.2",
@@ -1179,6 +1189,7 @@
           "Asp.Versioning.Mvc.ApiExplorer": "[8.1.0, )",
           "AspNetCore.HealthChecks.NpgSql": "[9.0.0, )",
           "AspNetCore.HealthChecks.UI.Client": "[9.0.0, )",
+          "AspNetCore.Scalar": "[1.2.0, )",
           "Infrastructure": "[1.0.0, )",
           "Microsoft.AspNetCore.OpenApi": "[10.0.0, )",
           "OpenTelemetry": "[1.12.0, )",
@@ -1188,6 +1199,7 @@
           "OpenTelemetry.Instrumentation.AspNetCore": "[1.12.0, )",
           "OpenTelemetry.Instrumentation.EntityFrameworkCore": "[1.12.0-beta.1, )",
           "OpenTelemetry.Instrumentation.Http": "[1.12.0, )",
+          "Scalar.AspNetCore": "[2.13.1, )",
           "Serilog.AspNetCore": "[10.0.0, )",
           "Serilog.Enrichers.Environment": "[3.0.1, )",
           "Serilog.Sinks.Seq": "[9.0.0, )",

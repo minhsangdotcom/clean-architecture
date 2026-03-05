@@ -17,8 +17,8 @@ using Infrastructure.Data.Seeders;
 using Infrastructure.Services.Elasticsearch;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.Extensions.Options;
+using Scalar.AspNetCore;
 using Serilog;
-using Swashbuckle.AspNetCore.SwaggerUI;
 
 var builder = WebApplication.CreateBuilder(args);
 var services = builder.Services;
@@ -123,12 +123,13 @@ try
     if (isDevelopment)
     {
         app.MapOpenApi("openapi/{documentName}.json");
-        app.UseSwaggerUI(configs =>
-        {
-            configs.SwaggerEndpoint("/openapi/v1.json", $"API v1");
-            configs.ConfigObject.PersistAuthorization = true;
-            configs.DocExpansion(DocExpansion.None);
-        });
+        app.MapScalarApiReference(
+            "docs",
+            options =>
+            {
+                options.PersistentAuthentication = true;
+            }
+        );
     }
 
     app.UseHealthCheck();
