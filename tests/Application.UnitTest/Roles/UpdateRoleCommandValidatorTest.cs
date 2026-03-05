@@ -1,5 +1,5 @@
 using Application.Common.ErrorCodes;
-using Application.Common.Interfaces.Repositories.EfCore;
+using Application.Common.Interfaces.Repositories;
 using Application.Common.Interfaces.Services.Accessors;
 using Application.Common.Interfaces.Services.Localization;
 using Application.Common.Interfaces.UnitOfWorks;
@@ -30,11 +30,11 @@ public sealed class UpdateRoleCommandValidatorTest
     {
         contextProvider.Setup(x => x.GetHttpMethod()).Returns(HttpMethod.Put.ToString());
 
-        Mock<IEfRepository<Role>> roleRepo = new();
-        Mock<IEfRepository<Permission>> permissionRepo = new();
+        Mock<ISpecificationReadRepository<Role>> roleRepo = new();
+        Mock<ISpecificationReadRepository<Permission>> permissionRepo = new();
 
-        unitOfWork.Setup(x => x.Repository<Role>()).Returns(roleRepo.Object);
-        unitOfWork.Setup(x => x.Repository<Permission>()).Returns(permissionRepo.Object);
+        unitOfWork.Setup(x => x.ReadRepository<Role>()).Returns(roleRepo.Object);
+        unitOfWork.Setup(x => x.ReadRepository<Permission>()).Returns(permissionRepo.Object);
 
         validator = new(unitOfWork.Object, contextProvider.Object, translator.Object);
         inlineValidator = [];

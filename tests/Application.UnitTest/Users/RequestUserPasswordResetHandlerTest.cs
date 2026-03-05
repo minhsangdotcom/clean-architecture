@@ -1,4 +1,4 @@
-using Application.Common.Interfaces.Repositories.EfCore;
+using Application.Common.Interfaces.Repositories;
 using Application.Common.Interfaces.Services.Localization;
 using Application.Common.Interfaces.Services.Mail;
 using Application.Common.Interfaces.UnitOfWorks;
@@ -29,10 +29,10 @@ public class RequestUserPasswordResetHandlerTest
 
         // ---- Mocks ----
         var unitOfWorkMock = new Mock<IEfUnitOfWork>();
-        var readonlyRepoMock = new Mock<IEfReadonlyRepository<User>>();
-        var passwordResetRepoMock = new Mock<IEfRepository<UserPasswordReset>>();
+        var readonlyRepoMock = new Mock<ISpecificationReadRepository<User>>();
+        var passwordResetRepoMock = new Mock<IRepository<UserPasswordReset>>();
 
-        unitOfWorkMock.Setup(x => x.ReadonlyRepository<User>()).Returns(readonlyRepoMock.Object);
+        unitOfWorkMock.Setup(x => x.ReadRepository<User>()).Returns(readonlyRepoMock.Object);
         unitOfWorkMock
             .Setup(x => x.Repository<UserPasswordReset>())
             .Returns(passwordResetRepoMock.Object);

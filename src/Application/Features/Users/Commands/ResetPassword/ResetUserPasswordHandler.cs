@@ -20,7 +20,7 @@ public class ResetUserPasswordHandler(IEfUnitOfWork unitOfWork, ITranslator<Mess
     )
     {
         User? user = await unitOfWork
-            .ReadonlyRepository<User>()
+            .ReadRepository<User>()
             .FindByConditionAsync(
                 new GetUserByEmailIncludePasswordResetRequestSpecification(command.Email!),
                 cancellationToken

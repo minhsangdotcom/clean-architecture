@@ -26,9 +26,9 @@ public partial class TestingFixture
         IEfUnitOfWork unitOfWork = scope.ServiceProvider.GetRequiredService<IEfUnitOfWork>();
 
         if (
-            await unitOfWork.Repository<Province>().AnyAsync()
-            && await unitOfWork.Repository<District>().AnyAsync()
-            && await unitOfWork.Repository<Commune>().AnyAsync()
+            await unitOfWork.ReadRepository<Province>().AnyAsync()
+            && await unitOfWork.ReadRepository<District>().AnyAsync()
+            && await unitOfWork.ReadRepository<Commune>().AnyAsync()
         )
         {
             return GetDefaultAddress();

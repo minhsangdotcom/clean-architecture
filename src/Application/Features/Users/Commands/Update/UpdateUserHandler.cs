@@ -61,8 +61,8 @@ public class UpdateUserHandler(
 
             // add roles
             IList<string> roles = await unitOfWork
-                .SpecRepository<Role>()
-                .ListAsync(
+                .ReadRepository<Role>()
+                .ListAsync<string>(
                     new GetRoleNameByListRoleIdSpecification(updateData.Roles!),
                     cancellationToken
                 );
@@ -72,9 +72,9 @@ public class UpdateUserHandler(
             IList<Permission> permissions =
                 updateData.Permissions != null
                     ? await unitOfWork
-                        .ReadonlyRepository<Permission>()
+                        .ReadRepository<Permission>()
                         .ListAsync(
-                            new ListPermissionByIdSpecification(updateData.Permissions),
+                            new GetPermissionByIdSpecification(updateData.Permissions),
                             cancellationToken: cancellationToken
                         )
                     : [];

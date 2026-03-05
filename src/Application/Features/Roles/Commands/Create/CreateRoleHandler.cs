@@ -2,6 +2,7 @@ using Application.Common.Interfaces.Services.Identity;
 using Application.Common.Interfaces.UnitOfWorks;
 using Application.Contracts.ApiWrapper;
 using Domain.Aggregates.Permissions;
+using Domain.Aggregates.Permissions.Specifications;
 using Domain.Aggregates.Roles;
 using Mediator;
 
@@ -19,8 +20,11 @@ public class CreateRoleHandler(IRoleManager manager, IEfUnitOfWork unitOfWork)
         List<Permission> permissions =
         [
             .. await unitOfWork
-                .Repository<Permission>()
-                .ListAsync(x => command.PermissionIds!.Contains(x.Id), cancellationToken),
+                .ReadRepository<Permission>()
+                .ListAsync(
+                    new GetPermissionByIdSpecification(command.PermissionIds!),
+                    cancellationToken
+                ),
         ];
 
         await unitOfWork.BeginTransactionAsync(cancellationToken);

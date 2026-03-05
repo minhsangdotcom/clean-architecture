@@ -1,6 +1,6 @@
 using System.Linq.Expressions;
 using Application.Common.ErrorCodes;
-using Application.Common.Interfaces.Repositories.EfCore;
+using Application.Common.Interfaces.Repositories;
 using Application.Common.Interfaces.Services.Accessors;
 using Application.Common.Interfaces.Services.Localization;
 using Application.Common.Interfaces.UnitOfWorks;
@@ -9,7 +9,9 @@ using Application.Features.Users.Commands.Update;
 using Bogus;
 using ByteAether.Ulid;
 using Domain.Aggregates.Permissions;
+using Domain.Aggregates.Permissions.Specifications;
 using Domain.Aggregates.Roles;
+using Domain.Aggregates.Roles.Specifications;
 using Domain.Aggregates.Users;
 using Domain.Aggregates.Users.Enums;
 using FluentValidation;
@@ -27,15 +29,15 @@ public class UpdateUserCommandValidatorTest
     private readonly Mock<ITranslator<Messages>> translator = new();
     private readonly Mock<IEfUnitOfWork> unitOfWork = new();
 
-    private readonly Mock<IEfRepository<Role>> roleRepo = new();
-    private readonly Mock<IEfRepository<User>> userRepo = new();
-    private readonly Mock<IEfRepository<Permission>> permissionRepo = new();
+    private readonly Mock<ISpecificationReadRepository<Role>> roleRepo = new();
+    private readonly Mock<ISpecificationReadRepository<User>> userRepo = new();
+    private readonly Mock<ISpecificationReadRepository<Permission>> permissionRepo = new();
 
     public UpdateUserCommandValidatorTest()
     {
-        unitOfWork.Setup(x => x.Repository<Role>()).Returns(roleRepo.Object);
-        unitOfWork.Setup(x => x.Repository<User>()).Returns(userRepo.Object);
-        unitOfWork.Setup(x => x.Repository<Permission>()).Returns(permissionRepo.Object);
+        unitOfWork.Setup(x => x.ReadRepository<Role>()).Returns(roleRepo.Object);
+        unitOfWork.Setup(x => x.ReadRepository<User>()).Returns(userRepo.Object);
+        unitOfWork.Setup(x => x.ReadRepository<Permission>()).Returns(permissionRepo.Object);
 
         Mock<IRequestContextProvider> contextProvider = new();
         validator = new(unitOfWork.Object, contextProvider.Object, translator.Object);
@@ -430,7 +432,7 @@ public class UpdateUserCommandValidatorTest
         permissionRepo
             .Setup(r =>
                 r.CountAsync(
-                    It.IsAny<Expression<Func<Permission, bool>>>(),
+                    It.IsAny<GetPermissionByIdSpecification>(),
                     It.IsAny<CancellationToken>()
                 )
             )
@@ -465,7 +467,7 @@ public class UpdateUserCommandValidatorTest
         permissionRepo
             .Setup(r =>
                 r.CountAsync(
-                    It.IsAny<Expression<Func<Permission, bool>>>(),
+                    It.IsAny<GetPermissionByIdSpecification>(),
                     It.IsAny<CancellationToken>()
                 )
             )
@@ -649,16 +651,13 @@ public class UpdateUserCommandValidatorTest
     {
         roleRepo
             .Setup(r =>
-                r.CountAsync(
-                    It.IsAny<Expression<Func<Role, bool>>>(),
-                    It.IsAny<CancellationToken>()
-                )
+                r.CountAsync(It.IsAny<GetRoleByIdSpecification>(), It.IsAny<CancellationToken>())
             )
             .ReturnsAsync(command.UpdateData.Roles!.Count);
         permissionRepo
             .Setup(r =>
                 r.CountAsync(
-                    It.IsAny<Expression<Func<Permission, bool>>>(),
+                    It.IsAny<GetPermissionByIdSpecification>(),
                     It.IsAny<CancellationToken>()
                 )
             )

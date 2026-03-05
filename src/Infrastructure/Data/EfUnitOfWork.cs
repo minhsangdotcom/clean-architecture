@@ -1,4 +1,4 @@
-using Application.Common.Interfaces.Repositories.EfCore;
+using Application.Common.Interfaces.Repositories;
 using Application.Common.Interfaces.Services.Cache;
 using Application.Common.Interfaces.UnitOfWorks;
 using Infrastructure.Data.Repositories.EfCore;
@@ -17,17 +17,17 @@ public class EfUnitOfWork(
     private readonly RepositoryFactory factory = new(dbContext, logger, cache);
     private IDbContextTransaction? currentTransaction = null;
 
-    public IEfRepository<TEntity> Repository<TEntity>()
+    public IRepository<TEntity> Repository<TEntity>()
         where TEntity : class => factory.Create<TEntity>();
 
-    public IEfMemoryRepository<TEntity> MemoryRepository<TEntity>()
-        where TEntity : class => factory.CreateMemory<TEntity>();
+    public ISpecificationReadRepository<TEntity> ReadRepository<TEntity>(bool isCached = false)
+        where TEntity : class => factory.CreateRead<TEntity>();
 
-    public IEfReadonlyRepository<TEntity> ReadonlyRepository<TEntity>(bool isCached = false)
-        where TEntity : class => factory.CreateReadOnly<TEntity>();
+    public ISyncRepository<TEntity> SyncRepository<TEntity>()
+        where TEntity : class => factory.CreateSync<TEntity>();
 
-    public IEfSpecRepository<TEntity> SpecRepository<TEntity>(bool isCached = false)
-        where TEntity : class => factory.CreateSpecification<TEntity>();
+    public ISyncSpecificationReadRepository<TEntity> SyncReadRepository<TEntity>()
+        where TEntity : class => factory.CreateSyncRead<TEntity>();
 
     public async Task BeginTransactionAsync(CancellationToken cancellationToken = default)
     {

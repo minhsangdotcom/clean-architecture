@@ -1,16 +1,17 @@
-using Application.Common.Interfaces.Repositories.EfCore;
+using Application.Common.Interfaces.Repositories;
 
 namespace Application.Common.Interfaces.UnitOfWorks;
 
 public interface IEfUnitOfWork : IUnitOfWork
 {
-    IEfRepository<TEntity> Repository<TEntity>()
+    IRepository<TEntity> Repository<TEntity>()
         where TEntity : class;
-    IEfMemoryRepository<TEntity> MemoryRepository<TEntity>()
+    ISpecificationReadRepository<TEntity> ReadRepository<TEntity>(bool isCached = false)
         where TEntity : class;
-    IEfReadonlyRepository<TEntity> ReadonlyRepository<TEntity>(bool isCached = false)
+
+    ISyncRepository<TEntity> SyncRepository<TEntity>()
         where TEntity : class;
-    IEfSpecRepository<TEntity> SpecRepository<TEntity>(bool isCached = false)
+    ISyncSpecificationReadRepository<TEntity> SyncReadRepository<TEntity>()
         where TEntity : class;
 
     int ExecuteSqlCommand(string sql, params object[] parameters);

@@ -7,6 +7,7 @@ using Application.Contracts.ApiWrapper;
 using Application.Contracts.Constants;
 using ByteAether.Ulid;
 using Domain.Aggregates.Permissions;
+using Domain.Aggregates.Permissions.Specifications;
 using Domain.Aggregates.Roles;
 using Mediator;
 
@@ -44,9 +45,9 @@ public class UpdateRoleHandler(
         List<Permission> permissions =
         [
             .. await unitOfWork
-                .Repository<Permission>()
+                .ReadRepository<Permission>()
                 .ListAsync(
-                    x => command.UpdateData.PermissionIds!.Contains(x.Id),
+                    new GetPermissionByIdSpecification(command.UpdateData.PermissionIds!),
                     cancellationToken
                 ),
         ];

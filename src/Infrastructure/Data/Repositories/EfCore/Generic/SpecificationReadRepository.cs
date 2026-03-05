@@ -1,20 +1,44 @@
 using System.Linq.Expressions;
-using Application.Common.Interfaces.Repositories.EfCore;
+using Application.Common.Interfaces.Repositories;
 using Application.Contracts.Dtos.Requests;
 using Application.Contracts.Dtos.Responses;
 using Domain.Common;
 using DynamicQuery.Extensions;
 using DynamicQuery.Models;
 using Microsoft.EntityFrameworkCore;
-using SharedKernel.Entities;
 using Specification.Interfaces;
 using SpecificationEFCore.Evaluators;
 
 namespace Infrastructure.Data.Repositories.EfCore.Generic;
 
-public class EfReadonlyRepository<T>(IEfDbContext dbContext) : IEfReadonlyRepository<T>
+public class SpecificationReadRepository<T>(IEfDbContext dbContext)
+    : ISpecificationReadRepository<T>
     where T : class
 {
+    public async Task<bool> AnyAsync(
+        ISpecification<T>? spec = null,
+        CancellationToken cancellationToken = default
+    )
+    {
+        if (spec != null)
+        {
+            return await ApplySpecification(spec).AnyAsync(cancellationToken);
+        }
+        return await dbContext.Set<T>().AnyAsync(cancellationToken);
+    }
+
+    public async Task<int> CountAsync(
+        ISpecification<T>? spec = null,
+        CancellationToken cancellationToken = default
+    )
+    {
+        if (spec != null)
+        {
+            return await ApplySpecification(spec).CountAsync(cancellationToken);
+        }
+        return await dbContext.Set<T>().CountAsync(cancellationToken);
+    }
+
     public async Task<T?> FindByConditionAsync(
         ISpecification<T> spec,
         CancellationToken cancellationToken = default
@@ -28,10 +52,24 @@ public class EfReadonlyRepository<T>(IEfDbContext dbContext) : IEfReadonlyReposi
         where TResult : class =>
         await ApplySpecification(spec).Select(selector).FirstOrDefaultAsync(cancellationToken);
 
+    public async Task<TResult?> FindByConditionAsync<TResult>(
+        ISpecification<T, TResult> spec,
+        CancellationToken cancellationToken = default
+    )
+        where TResult : class =>
+        await ApplySelectorSpecification(spec).FirstOrDefaultAsync(cancellationToken);
+
     public async Task<IList<T>> ListAsync(
         ISpecification<T> spec,
         CancellationToken cancellationToken = default
     ) => await ApplySpecification(spec).ToListAsync(cancellationToken);
+
+    public async Task<IList<TResult>> ListAsync<TResult>(
+        ISpecification<T, TResult> spec,
+        CancellationToken cancellationToken = default
+    )
+        where TResult : class =>
+        await ApplySelectorSpecification(spec).ToListAsync(cancellationToken);
 
     public async Task<IList<T>> ListAsync(
         ISpecification<T> spec,
@@ -116,4 +154,8 @@ public class EfReadonlyRepository<T>(IEfDbContext dbContext) : IEfReadonlyReposi
 
     private IQueryable<T> ApplySpecification(ISpecification<T> spec) =>
         SpecificationEvaluator.GetQuery(dbContext.Set<T>().AsQueryable(), spec);
+
+    private IQueryable<TResult> ApplySelectorSpecification<TResult>(ISpecification<T, TResult> spec)
+        where TResult : class =>
+        SelectorSpecificationEvaluator.GetQuery(dbContext.Set<T>().AsQueryable(), spec);
 }

@@ -1,4 +1,4 @@
-using Application.Common.Interfaces.Repositories.EfCore;
+using Application.Common.Interfaces.Repositories;
 using Application.Common.Interfaces.Services.Cache;
 using Infrastructure.Data.Repositories.EfCore.Cached;
 using Infrastructure.Data.Repositories.EfCore.Generic;
@@ -10,84 +10,77 @@ public class RepositoryFactory(IEfDbContext dbContext, ILogger logger, IMemoryCa
 {
     private readonly Dictionary<string, object> repositories = [];
 
-    public IEfRepository<T> Create<T>()
+    public IRepository<T> Create<T>()
         where T : class
     {
         string key = GenerateKey(typeof(T), $"{nameof(RepositoryFactory)}.{nameof(Create)}");
         if (repositories.TryGetValue(key, out var repo))
         {
-            return (IEfRepository<T>)repo;
+            return (IRepository<T>)repo;
         }
 
         Type baseType = typeof(EfRepository<>).MakeGenericType(typeof(T));
         object instance = EnsureCreated(CreateInstance(baseType, dbContext), baseType);
         repositories[key] = instance;
-        return (IEfRepository<T>)instance;
+        return (IRepository<T>)instance;
     }
 
-    public IEfMemoryRepository<T> CreateMemory<T>()
+    public ISyncRepository<T> CreateSync<T>()
         where T : class
     {
-        string key = GenerateKey(typeof(T), $"{nameof(RepositoryFactory)}.{nameof(CreateMemory)}");
+        string key = GenerateKey(typeof(T), $"{nameof(RepositoryFactory)}.{nameof(CreateSync)}");
         if (repositories.TryGetValue(key, out var repo))
         {
-            return (IEfMemoryRepository<T>)repo;
+            return (ISyncRepository<T>)repo;
         }
 
-        Type baseType = typeof(EfMemoryRepository<>).MakeGenericType(typeof(T));
+        Type baseType = typeof(EfSyncRepository<>).MakeGenericType(typeof(T));
         object instance = EnsureCreated(CreateInstance(baseType, dbContext), baseType);
         repositories[key] = instance;
-        return (IEfMemoryRepository<T>)instance;
+        return (EfSyncRepository<T>)instance;
     }
 
-    public IEfReadonlyRepository<T> CreateReadOnly<T>(bool isCached = false)
+    public ISyncSpecificationReadRepository<T> CreateSyncRead<T>()
         where T : class
     {
         string key = GenerateKey(
             typeof(T),
-            $"{nameof(RepositoryFactory)}.{nameof(CreateReadOnly)}",
+            $"{nameof(RepositoryFactory)}.{nameof(CreateSyncRead)}"
+        );
+        if (repositories.TryGetValue(key, out var repo))
+        {
+            return (ISyncSpecificationReadRepository<T>)repo;
+        }
+
+        Type baseType = typeof(SyncSpecificationReadRepository<>).MakeGenericType(typeof(T));
+        object instance = EnsureCreated(CreateInstance(baseType, dbContext), baseType);
+        repositories[key] = instance;
+        return (ISyncSpecificationReadRepository<T>)instance;
+    }
+
+    public ISpecificationReadRepository<T> CreateRead<T>(bool isCached = false)
+        where T : class
+    {
+        string key = GenerateKey(
+            typeof(T),
+            $"{nameof(RepositoryFactory)}.{nameof(CreateRead)}",
             isCached
         );
         if (repositories.TryGetValue(key, out var repo))
         {
-            return (IEfReadonlyRepository<T>)repo;
+            return (ISpecificationReadRepository<T>)repo;
         }
 
-        Type baseType = typeof(EfReadonlyRepository<>).MakeGenericType(typeof(T));
+        Type baseType = typeof(SpecificationReadRepository<>).MakeGenericType(typeof(T));
         object baseRepo = EnsureCreated(CreateInstance(baseType, dbContext), baseType);
 
-        Type cachedType = typeof(CachedReadonlyRepository<>).MakeGenericType(typeof(T));
+        Type cachedType = typeof(CachedReadRepository<>).MakeGenericType(typeof(T));
         object repository = isCached
             ? EnsureCreated(CreateInstance(cachedType, baseRepo, logger, cache), cachedType)
             : baseRepo;
 
         repositories[key] = repository;
-        return (IEfReadonlyRepository<T>)repository;
-    }
-
-    public IEfSpecRepository<T> CreateSpecification<T>(bool isCached = false)
-        where T : class
-    {
-        string key = GenerateKey(
-            typeof(T),
-            $"{nameof(RepositoryFactory)}.{nameof(CreateSpecification)}",
-            isCached
-        );
-        if (repositories.TryGetValue(key, out var repo))
-        {
-            return (IEfSpecRepository<T>)repo;
-        }
-
-        Type baseType = typeof(EfSpecRepository<>).MakeGenericType(typeof(T));
-        var baseRepo = EnsureCreated(CreateInstance(baseType, dbContext), baseType);
-
-        var cachedType = typeof(CachedSpecRepository<>).MakeGenericType(typeof(T));
-        object repository = isCached
-            ? EnsureCreated(CreateInstance(cachedType, baseRepo, logger, cache), cachedType)
-            : baseRepo;
-
-        repositories[key] = repository;
-        return (IEfSpecRepository<T>)repository;
+        return (ISpecificationReadRepository<T>)repository;
     }
 
     private static string GenerateKey(Type entityType, string repoName, bool? isCached = null) =>

@@ -4,6 +4,8 @@ using Application.Common.Interfaces.Services.Localization;
 using Application.Common.Interfaces.UnitOfWorks;
 using Application.Common.Validators;
 using ByteAether.Ulid;
+using Domain.Aggregates.Users;
+using Domain.Aggregates.Users.Specifications;
 using FluentValidation;
 
 namespace Application.Features.Users.Commands.Profiles;
@@ -41,7 +43,7 @@ public class UpdateUserProfileCommandValidator(
             .WithTranslatedError(translator, UserErrorMessages.UserEmailRequired)
             .BeValidEmail()
             .WithTranslatedError(translator, UserErrorMessages.UserEmailInvalid)
-            .BeUniqueUserEmail(unitOfWork, id)
+            .MustAsync((x, cancellationToken) => IsAvailableEmailAsync(x!, id, cancellationToken))
             .WithTranslatedError(translator, UserErrorMessages.UserEmailExistent);
 
         RuleFor(x => x.Gender)
@@ -54,4 +56,17 @@ public class UpdateUserProfileCommandValidator(
         IRequestContextProvider contextProvider,
         ITranslator<Messages> translator
     ) { }
+
+    private async Task<bool> IsAvailableEmailAsync(
+        string email,
+        Ulid? excludeId = null,
+        CancellationToken cancellationToken = default
+    )
+    {
+        return !(
+            await unitOfWork
+                .ReadRepository<User>()
+                .AnyAsync(new GetUserByEmailSpecification(email, excludeId), cancellationToken)
+        );
+    }
 }

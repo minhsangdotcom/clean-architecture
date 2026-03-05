@@ -561,7 +561,7 @@ I designed filter input based on [Strapi filter](https://docs.strapi.io/dev-docs
 To Apply dynamic filter, you just call any list method at
 
 ```csharp
-unitOfWork.ReadonlyRepository<User>()
+unitOfWork.ReadRepository<User>()
 ```
 
 ### 8.2.5. Pagination
@@ -572,7 +572,7 @@ To Enable offset pagination just add this line
 
 ```csharp
 var response = await unitOfWork
-    .ReadonlyRepository<User>()
+    .ReadRepository<User>()
     .PagedListAsync(
         new ListUserSpecification(),
         query,
@@ -585,7 +585,7 @@ To Enable cursor pagination just add this line
 
 ```csharp
 var response = await unitOfWork
-    .ReadonlyRepository<User>()
+    .ReadRepository<User>()
     .CursorPagedListAsync(
         new ListUserSpecification(),
         query,

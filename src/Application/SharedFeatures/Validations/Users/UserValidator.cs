@@ -6,7 +6,11 @@ using Application.Common.Validators;
 using Application.SharedFeatures.Requests.Users;
 using ByteAether.Ulid;
 using Domain.Aggregates.Permissions;
+using Domain.Aggregates.Permissions.Specifications;
 using Domain.Aggregates.Roles;
+using Domain.Aggregates.Roles.Specifications;
+using Domain.Aggregates.Users;
+using Domain.Aggregates.Users.Specifications;
 using FluentValidation;
 
 namespace Application.SharedFeatures.Validations.Users;
@@ -48,14 +52,14 @@ public class UserValidator(
             .BeValidEmail()
             .WithTranslatedError(translator, UserErrorMessages.UserEmailInvalid)
             // POST
-            .BeUniqueUserEmail(unitOfWork)
+            .MustAsync((x, cancellationToken) => IsAvailableEmailAsync(x!, null, cancellationToken))
             .When(
                 _ => contextProvider.GetHttpMethod() == HttpMethod.Post.ToString(),
                 ApplyConditionTo.CurrentValidator
             )
             .WithTranslatedError(translator, UserErrorMessages.UserEmailExistent)
             // PUT
-            .BeUniqueUserEmail(unitOfWork, id)
+            .MustAsync((x, cancellationToken) => IsAvailableEmailAsync(x!, id, cancellationToken))
             .When(
                 _ => contextProvider.GetHttpMethod() == HttpMethod.Put.ToString(),
                 ApplyConditionTo.CurrentValidator
@@ -97,14 +101,29 @@ public class UserValidator(
         List<Ulid> roles,
         CancellationToken cancellationToken = default
     ) =>
-        await unitOfWork.Repository<Role>().CountAsync(x => roles.Contains(x.Id), cancellationToken)
-        == roles.Count;
+        await unitOfWork
+            .ReadRepository<Role>()
+            .CountAsync(new GetRoleByIdSpecification(roles), cancellationToken) == roles.Count;
 
     private async Task<bool> IsPermissionsAvailableAsync(
         List<Ulid> permissions,
         CancellationToken cancellationToken
     ) =>
         await unitOfWork
-            .Repository<Permission>()
-            .CountAsync(x => permissions.Contains(x.Id), cancellationToken) == permissions.Count;
+            .ReadRepository<Permission>()
+            .CountAsync(new GetPermissionByIdSpecification(permissions), cancellationToken)
+        == permissions.Count;
+
+    private async Task<bool> IsAvailableEmailAsync(
+        string email,
+        Ulid? excludeId = null,
+        CancellationToken cancellationToken = default
+    )
+    {
+        return !(
+            await unitOfWork
+                .ReadRepository<User>()
+                .AnyAsync(new GetUserByEmailSpecification(email, excludeId), cancellationToken)
+        );
+    }
 }

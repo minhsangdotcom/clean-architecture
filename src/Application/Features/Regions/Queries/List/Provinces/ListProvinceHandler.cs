@@ -49,7 +49,7 @@ public class ListProvinceHandler(
             );
         }
         var response = await unitOfWork
-            .ReadonlyRepository<Province>()
+            .ReadRepository<Province>()
             .PagedListAsync(
                 new ListProvinceSpecification(),
                 query,
