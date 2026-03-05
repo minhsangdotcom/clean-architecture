@@ -27,7 +27,7 @@
     <PackageReference Include="StackExchange.Redis" Version="2.9.32" />
     <PackageReference
       Include="TranMinhSang.DynamicQueryExtension.EntityFrameworkCore"
-      Version="1.0.6"
+      Version="1.0.8"
     />
     <PackageReference Include="TranMinhSang.Specification.EntityFrameworkCore" Version="0.1.0" />
   </ItemGroup>

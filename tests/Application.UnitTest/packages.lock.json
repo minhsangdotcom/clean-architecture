@@ -238,8 +238,8 @@
       },
       "TranMinhSang.AspNetCore.Extensions": {
         "type": "Transitive",
-        "resolved": "1.0.2",
-        "contentHash": "zmLPHryThIp+BxvvQTyvhU8wZFjZTA9uveSvxMOGnOv8vvfTL64YR9xpjg5i1JZohOEB8N6VyOqk64xPWC4kyg==",
+        "resolved": "1.0.3",
+        "contentHash": "/95o+yOGAE2O0/7XVA34CwH7jxiGD6feQq5brqy55d/7KH5lkSfSvPL+fPuTtdK456L26YQFAUVUXdQW4rT8gw==",
         "dependencies": {
           "BouncyCastle.Cryptography": "2.6.2",
           "ByteAether.Ulid": "1.3.5",
@@ -326,7 +326,7 @@
         "dependencies": {
           "CaseConverter": "[2.0.1, )",
           "Microsoft.AspNetCore.Http": "[2.3.0, )",
-          "TranMinhSang.AspNetCore.Extensions": "[1.0.2, )",
+          "TranMinhSang.AspNetCore.Extensions": "[1.0.3, )",
           "minhsangdotcom.TheTemplate.SharedKernel": "[2.0.2, )"
         }
       },

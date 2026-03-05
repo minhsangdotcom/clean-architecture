@@ -1070,8 +1070,8 @@
       },
       "TranMinhSang.AspNetCore.Extensions": {
         "type": "Transitive",
-        "resolved": "1.0.2",
-        "contentHash": "zmLPHryThIp+BxvvQTyvhU8wZFjZTA9uveSvxMOGnOv8vvfTL64YR9xpjg5i1JZohOEB8N6VyOqk64xPWC4kyg==",
+        "resolved": "1.0.3",
+        "contentHash": "/95o+yOGAE2O0/7XVA34CwH7jxiGD6feQq5brqy55d/7KH5lkSfSvPL+fPuTtdK456L26YQFAUVUXdQW4rT8gw==",
         "dependencies": {
           "BouncyCastle.Cryptography": "2.6.2",
           "ByteAether.Ulid": "1.3.5",
@@ -1081,12 +1081,12 @@
       },
       "TranMinhSang.DynamicQueryExtension.EntityFrameworkCore": {
         "type": "Transitive",
-        "resolved": "1.0.6",
-        "contentHash": "quX/lj7WCN7h3LkUxh2tmbWD0LHM0QTS2SBIy+fY4qrOqkPxcQFaKo+J9/LIMSUsICEXMfW75d2J6mn6B2/pjQ==",
+        "resolved": "1.0.8",
+        "contentHash": "mVYftRVjk8/z03+3kGuokfjqOL7libAKv+VhRx090ZMn0tVGjl4N6ghqAWnql9EMggpKpZORRuaPB02YVj8ATA==",
         "dependencies": {
           "Newtonsoft.Json": "13.0.4",
           "Npgsql.EntityFrameworkCore.PostgreSQL": "10.0.0",
-          "TranMinhSang.AspNetCore.Extensions": "1.0.2"
+          "TranMinhSang.AspNetCore.Extensions": "1.0.3"
         }
       },
       "TranMinhSang.Specification.EntityFrameworkCore": {
@@ -1202,7 +1202,7 @@
         "dependencies": {
           "CaseConverter": "[2.0.1, )",
           "Microsoft.AspNetCore.Http": "[2.3.0, )",
-          "TranMinhSang.AspNetCore.Extensions": "[1.0.2, )",
+          "TranMinhSang.AspNetCore.Extensions": "[1.0.3, )",
           "minhsangdotcom.TheTemplate.SharedKernel": "[2.0.2, )"
         }
       },
@@ -1227,7 +1227,7 @@
           "Scriban": "[6.5.2, )",
           "Scrutor": "[6.1.0, )",
           "StackExchange.Redis": "[2.9.32, )",
-          "TranMinhSang.DynamicQueryExtension.EntityFrameworkCore": "[1.0.6, )",
+          "TranMinhSang.DynamicQueryExtension.EntityFrameworkCore": "[1.0.8, )",
           "TranMinhSang.Specification.EntityFrameworkCore": "[0.1.0, )",
           "minhsangdotcom.TheTemplate.ElasticsearchFluentConfig": "[1.0.4, )"
         }
