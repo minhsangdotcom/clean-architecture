@@ -317,7 +317,7 @@ Phiên bản docker compose cũ
 docker-compose up -d
 ```
 
-Truy cập http://localhost:9001 và đăng nhập
+Truy cập [http://localhost:9001](http://localhost:9001) và đăng nhập
 
 ![S3 login](/Screenshots/minio-login.png)
 
@@ -346,7 +346,7 @@ dotnet run
 
 ```
 
-vào swagger ui ở http://localhost:8080/swagger
+Truy cập Scalar UI ở [http://localhost:8080/docs](http://localhost:8080/docs)
 
 Tài khoản admin mặc định là <ins>username:</ins> <b>chloe.kim</b>, <ins>password</ins>: <b>Admin@123</b>
 

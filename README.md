@@ -307,7 +307,7 @@ docker-compose up -d
 
 ```
 
-Access Minio S3 Web UI at http://localhost:9001 and login
+Access Minio S3 Web UI at [http://localhost:9001](http://localhost:9001) and login
 
 ![S3 login](/Screenshots/minio-login.png)
 
@@ -335,7 +335,7 @@ cd src/Api
 dotnet run
 ```
 
-http://localhost:8080/swagger is swagger UI path
+Scalar UI is available at [http://localhost:8080/docs](http://localhost:8080/docs)
 
 The default admin account <ins>username:</ins> <b>chloe.kim</b>, <ins>password</ins>: <b>Admin@123</b>
 

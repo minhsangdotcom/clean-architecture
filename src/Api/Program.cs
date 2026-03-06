@@ -123,16 +123,22 @@ try
     if (isDevelopment)
     {
         app.MapOpenApi("openapi/{documentName}.json");
+        const string prefix = "docs";
         app.MapScalarApiReference(
-            "docs",
+            prefix,
             options =>
             {
                 options.PersistentAuthentication = true;
             }
         );
+        Log.Logger.Information("Scalar UI is running at: {Url}", $"{url}/{prefix}");
     }
 
-    app.UseHealthCheck();
+    app.UseExceptionHandler();
+    app.UseStatusCodePages();
+    app.UseStaticFiles();
+
+    //CQRS
     if (isDevelopment)
     {
         app.UseCors("allowedDev");
@@ -142,9 +148,12 @@ try
         app.UseCors(allowedCors.Name);
     }
 
-    app.UseExceptionHandler();
-    app.UseStatusCodePages();
-    app.UseStaticFiles();
+    //Health check
+    app.UseHealthCheck();
+    Log.Logger.Information(
+        "Application health check is running at: {Url}",
+        $"{url}{healthCheckPath}"
+    );
     app.UseRequestLocalization(
         new RequestLocalizationOptions
         {
@@ -160,12 +169,7 @@ try
     if (isDevelopment)
     {
         app.MapLocalizationEndpoint();
-        Log.Logger.Information("Swagger UI is running at: {Url}", $"{url}/swagger");
     }
-    Log.Logger.Information(
-        "Application health check is running at: {Url}",
-        $"{url}{healthCheckPath}"
-    );
     Log.Logger.Information("Application is hosted on {os}", RuntimeInformation.OSDescription);
     app.Run();
 }
