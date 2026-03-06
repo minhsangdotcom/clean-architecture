@@ -1,7 +1,7 @@
 using Domain.Aggregates.Permissions;
 using SharedKernel.Repositories;
 
-namespace Application.Common.Interfaces.Repositories.EfCore;
+namespace Application.Common.Interfaces.Repositories;
 
 public interface IPermissionRepository : IRepository
 {

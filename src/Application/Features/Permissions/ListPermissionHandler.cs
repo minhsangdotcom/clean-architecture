@@ -1,4 +1,4 @@
-using Application.Common.Interfaces.Repositories.EfCore;
+using Application.Common.Interfaces.Repositories;
 using Application.Common.Interfaces.Services.Localization;
 using Application.Contracts.ApiWrapper;
 using Application.Contracts.Permissions;
