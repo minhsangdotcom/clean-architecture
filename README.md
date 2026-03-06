@@ -112,19 +112,29 @@ What makes this Clean Architecture template stand out from the rest on Github?
 
 ### 6.0.1. API
 
-![User Apis](/Screenshots/user-api.png)
+<p align="center">
+  <img src="Screenshots/user.png" width="900"/>
+</p>
 
-![Role Apis](/Screenshots/role-api.png)
-
-![Other Apis](/Screenshots/others.png)
+<p align="center">
+  <img src="Screenshots/role.png" width="900"/>
+  <img src="Screenshots/region.png" width="900"/>
+  <img src="Screenshots/queue.png" width="900"/>
+  <img src="Screenshots/permission.png" width="900"/>
+  <img src="Screenshots/audit-log.png" width="900"/>
+</p>
 
 ### 6.0.2. Tracing
 
-![Tracing](/Screenshots/trace.png)
+<p align="center">
+  <img src="Screenshots/trace.png" width="900"/>
+</p>
 
 ### 6.0.3. AWS S3 by Minio
 
-![AWS s3 feature](Screenshots/AWS_S3_Feature.png)
+<p align="center">
+  <img src="Screenshots/AWS_S3_Feature.png" width="900"/>
+</p>
 
 # 7. Structure Overview
 
