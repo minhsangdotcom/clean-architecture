@@ -81,7 +81,7 @@ public class MailService(
         MimeMessage mailMessage = new();
         mailMessage.From.Add(new MailboxAddress(mailData.DisplayName, emailSettings.From));
         mailMessage.To.AddRange(mailData.To.Select(recipient => new MailboxAddress("", recipient)));
-        mailMessage.Subject = mailData.Subject;
+        mailMessage.Subject = mailData.Subject ?? string.Empty;
         mailMessage.Body = new BodyBuilder { HtmlBody = body }.ToMessageBody();
         return mailMessage;
     }
