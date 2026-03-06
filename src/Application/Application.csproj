@@ -24,5 +24,7 @@
     <Nullable>enable</Nullable>
     <PreserveCompilationContext>true</PreserveCompilationContext>
     <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <NoWarn>$(NoWarn);1591</NoWarn>
   </PropertyGroup>
 </Project>
