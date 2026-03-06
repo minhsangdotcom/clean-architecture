@@ -22,14 +22,12 @@ public class QueueWorker<TRequest, TResponse>(
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        using IServiceScope scope = serviceProvider.CreateScope();
-        var handler = scope.ServiceProvider.GetService<IQueueHandler<TRequest, TResponse>>();
-
         while (!stoppingToken.IsCancellationRequested)
         {
             if (!await queueService.PingAsync())
             {
                 logger.LogWarning("Redis server is unavailable!");
+                await Task.Delay(5000, stoppingToken);
                 continue;
             }
 
@@ -40,12 +38,14 @@ public class QueueWorker<TRequest, TResponse>(
                 continue;
             }
 
+            using IServiceScope scope = serviceProvider.CreateScope();
+            var handler = scope.ServiceProvider.GetService<IQueueHandler<TRequest, TResponse>>();
             if (handler == null)
             {
                 logger.LogWarning("No handler registered for {JobType}", typeof(TRequest).FullName);
+                await Task.Delay(5000, stoppingToken);
                 continue;
             }
-
             await ProcessWithRetryAsync(request, handler, stoppingToken);
 
             await Task.Delay(TimeSpan.FromSeconds(10), stoppingToken);
