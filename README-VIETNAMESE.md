@@ -120,23 +120,30 @@ Có gì đặc biệt khiến cho template này trở nên khác biệt so với
 
 ### API
 
-![User Apis](/Screenshots/user-api.png)
-
-![Role Apis](/Screenshots/role-api.png)
-
-![Other Apis](/Screenshots/others.png)
+<p align="center">
+  <img src="Screenshots/user.png" width="900"/>
+  <img src="Screenshots/role.png" width="900"/>
+  <img src="Screenshots/region.png" width="900"/>
+  <img src="Screenshots/queue.png" width="900"/>
+  <img src="Screenshots/permission.png" width="900"/>
+  <img src="Screenshots/audit-log.png" width="900"/>
+</p>
 
 <div id='truy-vet'/>
 
 ### Truy Vết
 
-![Tracing](/Screenshots/trace.png)
+<p align="center">
+  <img src="Screenshots/trace.png" width="900"/>
+</p>
 
 <div id='minio-storage'/>
 
 ### Lưu trử file media bằng Minio
 
-![AWS s3 feature](Screenshots/AWS_S3_Feature.png)
+<p align="center">
+  <img src="Screenshots/AWS_S3_Feature.png" width="900"/>
+</p>
 
 <div id='so-luot-ve-cau-truc'/>
 
@@ -310,7 +317,7 @@ Phiên bản docker compose cũ
 docker-compose up -d
 ```
 
-Truy cập http://localhost:9001 và đăng nhập
+Truy cập [http://localhost:9001](http://localhost:9001) và đăng nhập
 
 ![S3 login](/Screenshots/minio-login.png)
 
@@ -339,7 +346,7 @@ dotnet run
 
 ```
 
-vào swagger ui ở http://localhost:8080/swagger
+Truy cập Scalar UI ở [http://localhost:8080/docs](http://localhost:8080/docs)
 
 Tài khoản admin mặc định là <ins>username:</ins> <b>chloe.kim</b>, <ins>password</ins>: <b>Admin@123</b>
 

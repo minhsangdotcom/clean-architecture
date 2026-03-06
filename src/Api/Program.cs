@@ -17,9 +17,8 @@ using Infrastructure.Data.Seeders;
 using Infrastructure.Services.Elasticsearch;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.Extensions.Options;
+using Scalar.AspNetCore;
 using Serilog;
-using Swashbuckle.AspNetCore.SwaggerUI;
-using static ByteAether.Ulid.Ulid.GenerationOptions;
 
 var builder = WebApplication.CreateBuilder(args);
 var services = builder.Services;
@@ -128,15 +127,22 @@ try
     if (isDevelopment)
     {
         app.MapOpenApi("openapi/{documentName}.json");
-        app.UseSwaggerUI(configs =>
-        {
-            configs.SwaggerEndpoint("/openapi/v1.json", $"API v1");
-            configs.ConfigObject.PersistAuthorization = true;
-            configs.DocExpansion(DocExpansion.None);
-        });
+        const string prefix = "docs";
+        app.MapScalarApiReference(
+            prefix,
+            options =>
+            {
+                options.PersistentAuthentication = true;
+            }
+        );
+        Log.Logger.Information("Scalar UI is running at: {Url}", $"{url}/{prefix}");
     }
 
-    app.UseHealthCheck();
+    app.UseExceptionHandler();
+    app.UseStatusCodePages();
+    app.UseStaticFiles();
+
+    //CQRS
     if (isDevelopment)
     {
         app.UseCors("allowedDev");
@@ -146,9 +152,12 @@ try
         app.UseCors(allowedCors.Name);
     }
 
-    app.UseExceptionHandler();
-    app.UseStatusCodePages();
-    app.UseStaticFiles();
+    //Health check
+    app.UseHealthCheck();
+    Log.Logger.Information(
+        "Application health check is running at: {Url}",
+        $"{url}{healthCheckPath}"
+    );
     app.UseRequestLocalization(
         new RequestLocalizationOptions
         {
@@ -164,12 +173,7 @@ try
     if (isDevelopment)
     {
         app.MapLocalizationEndpoint();
-        Log.Logger.Information("Swagger UI is running at: {Url}", $"{url}/swagger");
     }
-    Log.Logger.Information(
-        "Application health check is running at: {Url}",
-        $"{url}{healthCheckPath}"
-    );
     Log.Logger.Information("Application is hosted on {os}", RuntimeInformation.OSDescription);
     app.Run();
 }

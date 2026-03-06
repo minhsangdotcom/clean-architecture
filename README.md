@@ -112,19 +112,26 @@ What makes this Clean Architecture template stand out from the rest on Github?
 
 ### 6.0.1. API
 
-![User Apis](/Screenshots/user-api.png)
-
-![Role Apis](/Screenshots/role-api.png)
-
-![Other Apis](/Screenshots/others.png)
+<p align="center">
+  <img src="Screenshots/user.png" width="900"/>
+  <img src="Screenshots/role.png" width="900"/>
+  <img src="Screenshots/region.png" width="900"/>
+  <img src="Screenshots/queue.png" width="900"/>
+  <img src="Screenshots/permission.png" width="900"/>
+  <img src="Screenshots/audit-log.png" width="900"/>
+</p>
 
 ### 6.0.2. Tracing
 
-![Tracing](/Screenshots/trace.png)
+<p align="center">
+  <img src="Screenshots/trace.png" width="900"/>
+</p>
 
 ### 6.0.3. AWS S3 by Minio
 
-![AWS s3 feature](Screenshots/AWS_S3_Feature.png)
+<p align="center">
+  <img src="Screenshots/AWS_S3_Feature.png" width="900"/>
+</p>
 
 # 7. Structure Overview
 
@@ -300,7 +307,7 @@ docker-compose up -d
 
 ```
 
-Access Minio S3 Web UI at http://localhost:9001 and login
+Access Minio S3 Web UI at [http://localhost:9001](http://localhost:9001) and login
 
 ![S3 login](/Screenshots/minio-login.png)
 
@@ -328,7 +335,7 @@ cd src/Api
 dotnet run
 ```
 
-http://localhost:8080/swagger is swagger UI path
+Scalar UI is available at [http://localhost:8080/docs](http://localhost:8080/docs)
 
 The default admin account <ins>username:</ins> <b>chloe.kim</b>, <ins>password</ins>: <b>Admin@123</b>
 
