@@ -120,23 +120,30 @@ Có gì đặc biệt khiến cho template này trở nên khác biệt so với
 
 ### API
 
-![User Apis](/Screenshots/user-api.png)
-
-![Role Apis](/Screenshots/role-api.png)
-
-![Other Apis](/Screenshots/others.png)
+<p align="center">
+  <img src="Screenshots/user.png" width="900"/>
+  <img src="Screenshots/role.png" width="900"/>
+  <img src="Screenshots/region.png" width="900"/>
+  <img src="Screenshots/queue.png" width="900"/>
+  <img src="Screenshots/permission.png" width="900"/>
+  <img src="Screenshots/audit-log.png" width="900"/>
+</p>
 
 <div id='truy-vet'/>
 
 ### Truy Vết
 
-![Tracing](/Screenshots/trace.png)
+<p align="center">
+  <img src="Screenshots/trace.png" width="900"/>
+</p>
 
 <div id='minio-storage'/>
 
 ### Lưu trử file media bằng Minio
 
-![AWS s3 feature](Screenshots/AWS_S3_Feature.png)
+<p align="center">
+  <img src="Screenshots/AWS_S3_Feature.png" width="900"/>
+</p>
 
 <div id='so-luot-ve-cau-truc'/>
 

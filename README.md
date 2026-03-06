@@ -114,9 +114,6 @@ What makes this Clean Architecture template stand out from the rest on Github?
 
 <p align="center">
   <img src="Screenshots/user.png" width="900"/>
-</p>
-
-<p align="center">
   <img src="Screenshots/role.png" width="900"/>
   <img src="Screenshots/region.png" width="900"/>
   <img src="Screenshots/queue.png" width="900"/>
