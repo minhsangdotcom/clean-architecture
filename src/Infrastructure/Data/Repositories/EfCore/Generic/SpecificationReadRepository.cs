@@ -57,7 +57,7 @@ public class SpecificationReadRepository<T>(IEfDbContext dbContext)
         CancellationToken cancellationToken = default
     )
         where TResult : class =>
-        await ApplySelectorSpecification(spec).FirstOrDefaultAsync(cancellationToken);
+        await ApplySpecification(spec).FirstOrDefaultAsync(cancellationToken);
 
     public async Task<IList<T>> ListAsync(
         ISpecification<T> spec,
@@ -68,8 +68,7 @@ public class SpecificationReadRepository<T>(IEfDbContext dbContext)
         ISpecification<T, TResult> spec,
         CancellationToken cancellationToken = default
     )
-        where TResult : class =>
-        await ApplySelectorSpecification(spec).ToListAsync(cancellationToken);
+        where TResult : class => await ApplySpecification(spec).ToListAsync(cancellationToken);
 
     public async Task<IList<T>> ListAsync(
         ISpecification<T> spec,
@@ -155,7 +154,7 @@ public class SpecificationReadRepository<T>(IEfDbContext dbContext)
     private IQueryable<T> ApplySpecification(ISpecification<T> spec) =>
         SpecificationEvaluator.GetQuery(dbContext.Set<T>().AsQueryable(), spec);
 
-    private IQueryable<TResult> ApplySelectorSpecification<TResult>(ISpecification<T, TResult> spec)
+    private IQueryable<TResult> ApplySpecification<TResult>(ISpecification<T, TResult> spec)
         where TResult : class =>
-        SelectorSpecificationEvaluator.GetQuery(dbContext.Set<T>().AsQueryable(), spec);
+        ProjectionSpecificationEvaluator.GetQuery(dbContext.Set<T>().AsQueryable(), spec);
 }

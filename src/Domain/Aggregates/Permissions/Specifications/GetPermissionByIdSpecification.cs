@@ -8,6 +8,6 @@ public class GetPermissionByIdSpecification : Specification<Permission>
 {
     public GetPermissionByIdSpecification(List<Ulid> ids)
     {
-        Query.Where(permission => ids.Contains(permission.Id)).AsNoTracking();
+        Query.Where(permission => ids.Contains(permission.Id));
     }
 }

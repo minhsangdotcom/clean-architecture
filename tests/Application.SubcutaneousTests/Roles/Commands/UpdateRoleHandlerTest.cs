@@ -29,17 +29,16 @@ public class UpdateRoleHandlerTest(TestingFixture testingFixture) : IAsyncLifeti
         //Arrange
         var permissions = await testingFixture.SeedingPermissionAsync();
         var role = await testingFixture.CreateManagerRoleAsync();
-        UpdateRoleCommand command =
-            new()
+        UpdateRoleCommand command = new()
+        {
+            RoleId = role.Id.ToString(),
+            UpdateData = new RoleUpdateData()
             {
-                RoleId = role.Id.ToString(),
-                UpdateData = new RoleUpdateData()
-                {
-                    Name = role.Name,
-                    Description = role.Description,
-                    PermissionIds = [.. role.Permissions.Select(x => x.PermissionId)],
-                },
-            };
+                Name = role.Name,
+                Description = role.Description,
+                PermissionIds = [.. role.Permissions.Select(x => x.PermissionId)],
+            },
+        };
         command.UpdateData.Description = "^^";
         command.UpdateData.PermissionIds.RemoveAt(0);
         command.UpdateData.PermissionIds.Add(
