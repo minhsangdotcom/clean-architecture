@@ -605,7 +605,6 @@
           "Application": "[1.0.0, )",
           "EFCore.NamingConventions": "[10.0.0-rc.2, )",
           "Elastic.Clients.Elasticsearch": "[9.2.2, )",
-          "JWT": "[11.0.0, )",
           "MailKit": "[4.15.1, )",
           "Microsoft.AspNetCore.Authentication.JwtBearer": "[10.0.0, )",
           "Scriban": "[6.5.2, )",

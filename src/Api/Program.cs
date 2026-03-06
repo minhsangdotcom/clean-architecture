@@ -19,6 +19,7 @@ using Microsoft.AspNetCore.Localization;
 using Microsoft.Extensions.Options;
 using Scalar.AspNetCore;
 using Serilog;
+using static ByteAether.Ulid.Ulid.GenerationOptions;
 
 var builder = WebApplication.CreateBuilder(args);
 var services = builder.Services;
