@@ -1,5 +1,6 @@
 using Application.Common.ErrorCodes;
 using Application.Features.Roles.Queries.Detail;
+using ByteAether.Ulid;
 using Shouldly;
 
 namespace Application.SubcutaneousTests.Roles.Queries;

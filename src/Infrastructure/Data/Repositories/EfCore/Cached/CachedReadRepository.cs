@@ -1,5 +1,5 @@
 using System.Linq.Expressions;
-using Application.Common.Interfaces.Repositories.EfCore;
+using Application.Common.Interfaces.Repositories;
 using Application.Common.Interfaces.Services.Cache;
 using Application.Contracts.Dtos.Requests;
 using Application.Contracts.Dtos.Responses;
@@ -8,13 +8,57 @@ using Specification.Interfaces;
 
 namespace Infrastructure.Data.Repositories.EfCore.Cached;
 
-public class CachedReadonlyRepository<T>(
-    IEfReadonlyRepository<T> repository,
+public class CachedReadRepository<T>(
+    ISpecificationReadRepository<T> repository,
     ILogger<EfUnitOfWork> logger,
     IMemoryCacheService memoryCacheService
-) : IEfReadonlyRepository<T>
+) : ISpecificationReadRepository<T>
     where T : class
 {
+    public Task<bool> AnyAsync(
+        ISpecification<T>? spec = null,
+        CancellationToken cancellationToken = default
+    )
+    {
+        if (spec is not null && spec.CacheEnabled)
+        {
+            string key = $"{spec.CacheKey}-{nameof(AnyAsync)}";
+            string hashingKey = RepositoryExtension.HashKey(key);
+
+            logger.LogInformation("checking cache for {key}", hashingKey);
+
+            return memoryCacheService.GetOrSetAsync(
+                hashingKey,
+                () => repository.AnyAsync(spec, cancellationToken),
+                options: null
+            );
+        }
+
+        return repository.AnyAsync(spec, cancellationToken);
+    }
+
+    public Task<int> CountAsync(
+        ISpecification<T>? spec = null,
+        CancellationToken cancellationToken = default
+    )
+    {
+        if (spec is not null && spec.CacheEnabled)
+        {
+            string key = $"{spec.CacheKey}-{nameof(CountAsync)}";
+            string hashingKey = RepositoryExtension.HashKey(key);
+
+            logger.LogInformation("checking cache for {key}", hashingKey);
+
+            return memoryCacheService.GetOrSetAsync(
+                hashingKey,
+                () => repository.CountAsync(spec, cancellationToken),
+                options: null
+            );
+        }
+
+        return repository.CountAsync(spec, cancellationToken);
+    }
+
     public Task<TResult?> FindByConditionAsync<TResult>(
         ISpecification<T> spec,
         Expression<Func<T, TResult>> selector,
@@ -54,6 +98,29 @@ public class CachedReadonlyRepository<T>(
                 options: null
             );
         }
+        return repository.FindByConditionAsync(spec, cancellationToken);
+    }
+
+    public Task<TResult?> FindByConditionAsync<TResult>(
+        ISpecification<T, TResult> spec,
+        CancellationToken cancellationToken = default
+    )
+        where TResult : class
+    {
+        if (spec.CacheEnabled)
+        {
+            string key = $"{spec.CacheKey}-{nameof(FindByConditionAsync)}";
+            string hashingKey = RepositoryExtension.HashKey(key);
+
+            logger.LogInformation("checking cache for {key}", hashingKey);
+
+            return memoryCacheService.GetOrSetAsync(
+                hashingKey,
+                () => repository.FindByConditionAsync(spec, cancellationToken),
+                options: null
+            );
+        }
+
         return repository.FindByConditionAsync(spec, cancellationToken);
     }
 
@@ -122,6 +189,29 @@ public class CachedReadonlyRepository<T>(
             )!;
         }
         return repository.ListAsync(spec, queryParam, selector, deep, cancellationToken);
+    }
+
+    public Task<IList<TResult>> ListAsync<TResult>(
+        ISpecification<T, TResult> spec,
+        CancellationToken cancellationToken = default
+    )
+        where TResult : class
+    {
+        if (spec.CacheEnabled)
+        {
+            string key = $"{spec.CacheKey}-{nameof(ListAsync)}";
+            string hashingKey = RepositoryExtension.HashKey(key);
+
+            logger.LogInformation("checking cache for {key}", hashingKey);
+
+            return memoryCacheService.GetOrSetAsync(
+                hashingKey,
+                () => repository.ListAsync(spec, cancellationToken),
+                options: null
+            )!;
+        }
+
+        return repository.ListAsync(spec, cancellationToken);
     }
 
     public Task<PaginationResponse<TResult>> PagedListAsync<TResult>(

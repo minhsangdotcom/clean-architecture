@@ -3,16 +3,21 @@ using Application.Contracts.Dtos.Requests;
 using Application.Contracts.Dtos.Responses;
 using Specification.Interfaces;
 
-namespace Application.Common.Interfaces.Repositories.EfCore;
+namespace Application.Common.Interfaces.Repositories;
 
-/// <summary>
-/// Repository that supports dynamic filter, search, sort, and pagination logic
-/// and Specification pattern.
-/// The <see cref="ISpecification{T}"/> here is mainly used for includes, AsNoTracking, AsSplitQuery or base filters.
-/// </summary>
-public interface IEfReadonlyRepository<T>
+public interface ISpecificationReadRepository<T>
     where T : class
 {
+    Task<bool> AnyAsync(
+        ISpecification<T>? spec = null,
+        CancellationToken cancellationToken = default
+    );
+
+    Task<int> CountAsync(
+        ISpecification<T>? spec = null,
+        CancellationToken cancellationToken = default
+    );
+
     Task<T?> FindByConditionAsync(
         ISpecification<T> spec,
         CancellationToken cancellationToken = default
@@ -25,6 +30,12 @@ public interface IEfReadonlyRepository<T>
     )
         where TResult : class;
 
+    Task<TResult?> FindByConditionAsync<TResult>(
+        ISpecification<T, TResult> spec,
+        CancellationToken cancellationToken = default
+    )
+        where TResult : class;
+
     Task<IList<T>> ListAsync(ISpecification<T> spec, CancellationToken cancellationToken = default);
 
     Task<IList<T>> ListAsync(
@@ -33,6 +44,12 @@ public interface IEfReadonlyRepository<T>
         int deep = 1,
         CancellationToken cancellationToken = default
     );
+
+    Task<IList<TResult>> ListAsync<TResult>(
+        ISpecification<T, TResult> spec,
+        CancellationToken cancellationToken = default
+    )
+        where TResult : class;
 
     Task<IList<TResult>> ListAsync<TResult>(
         ISpecification<T> spec,

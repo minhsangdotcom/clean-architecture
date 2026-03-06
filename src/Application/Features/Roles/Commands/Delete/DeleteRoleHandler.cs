@@ -4,6 +4,7 @@ using Application.Common.Interfaces.Services.Identity;
 using Application.Common.Interfaces.Services.Localization;
 using Application.Contracts.ApiWrapper;
 using Application.Contracts.Constants;
+using ByteAether.Ulid;
 using Domain.Aggregates.Roles;
 using Mediator;
 

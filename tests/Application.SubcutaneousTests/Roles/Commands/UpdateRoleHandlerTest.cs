@@ -1,6 +1,7 @@
 using Application.Common.ErrorCodes;
 using Application.Contracts.Permissions;
 using Application.Features.Roles.Commands.Update;
+using ByteAether.Ulid;
 using Shouldly;
 
 namespace Application.SubcutaneousTests.Roles.Commands;

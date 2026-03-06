@@ -564,7 +564,7 @@ Mình thiết kế input đầu vào dựa trên [Strapi filter](https://docs.st
 Mình đã nhúng sẳn filter tự động vào tất cả các hàm lấy danh sách chỉ cần gọi
 
 ```csharp
-unitOfWork.ReadonlyRepository<User>()
+unitOfWork.ReadRepository<User>()
 ```
 
 <div id='pagination'/>
@@ -577,7 +577,7 @@ Offset and cursor pagination được tích hợp sẳn trong template.
 
 ```csharp
 var response = await unitOfWork
-    .ReadonlyRepository<User>(true)
+    .ReadRepository<User>(true)
     .PagedListAsync(
         new ListUserSpecification(),
         query,
@@ -590,7 +590,7 @@ var response = await unitOfWork
 
 ```csharp
 var response = await unitOfWork
-    .ReadonlyRepository<User>(true)
+    .ReadRepository<User>(true)
     .CursorPagedListAsync(
         new ListUserSpecification(),
         query,

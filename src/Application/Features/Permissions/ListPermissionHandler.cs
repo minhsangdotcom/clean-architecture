@@ -2,6 +2,7 @@ using Application.Common.Interfaces.Repositories.EfCore;
 using Application.Common.Interfaces.Services.Localization;
 using Application.Contracts.ApiWrapper;
 using Application.Contracts.Permissions;
+using ByteAether.Ulid;
 using Domain.Aggregates.Permissions;
 using Mediator;
 using PermissionKey = Application.Common.Interfaces.Services.Localization.Permissions;

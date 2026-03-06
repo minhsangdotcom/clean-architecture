@@ -1,10 +1,10 @@
-using SharedKernel.Entities;
+using ByteAether.Ulid;
 
 namespace Domain.Aggregates.AuditLogs;
 
 public class AuditLog
 {
-    public string Id { get; set; } = Ulid.NewUlid().ToString();
+    public string Id { get; set; } = Ulid.New().ToString();
 
     public string Entity { get; set; } = string.Empty;
 

@@ -4,6 +4,7 @@ using Application.Common.Interfaces.UnitOfWorks;
 using Application.Contracts.ApiWrapper;
 using Application.Features.Users.Commands.Create;
 using Application.SubcutaneousTests.Extensions;
+using ByteAether.Ulid;
 using Domain.Aggregates.Regions;
 using Domain.Aggregates.Roles;
 using Domain.Aggregates.Users;
@@ -25,9 +26,9 @@ public partial class TestingFixture
         IEfUnitOfWork unitOfWork = scope.ServiceProvider.GetRequiredService<IEfUnitOfWork>();
 
         if (
-            await unitOfWork.Repository<Province>().AnyAsync()
-            && await unitOfWork.Repository<District>().AnyAsync()
-            && await unitOfWork.Repository<Commune>().AnyAsync()
+            await unitOfWork.ReadRepository<Province>().AnyAsync()
+            && await unitOfWork.ReadRepository<District>().AnyAsync()
+            && await unitOfWork.ReadRepository<Commune>().AnyAsync()
         )
         {
             return GetDefaultAddress();

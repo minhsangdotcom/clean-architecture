@@ -1,4 +1,5 @@
-using SharedKernel.Entities;
+using ByteAether.Ulid;
+using Domain.Common;
 
 namespace Domain.Aggregates.Users;
 

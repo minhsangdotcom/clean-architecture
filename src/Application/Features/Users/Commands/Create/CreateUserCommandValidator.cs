@@ -4,7 +4,9 @@ using Application.Common.Interfaces.Services.Localization;
 using Application.Common.Interfaces.UnitOfWorks;
 using Application.Common.Validators;
 using Application.SharedFeatures.Validations.Users;
+using ByteAether.Ulid;
 using Domain.Aggregates.Users;
+using Domain.Aggregates.Users.Specifications;
 using FluentValidation;
 
 namespace Application.Features.Users.Commands.Create;
@@ -50,9 +52,6 @@ public class CreateUserCommandValidator(
         CancellationToken cancellationToken = default
     ) =>
         !await unitOfWork
-            .Repository<User>()
-            .AnyAsync(
-                x => x.Username == username && (!excludeId.HasValue || x.Id != excludeId),
-                cancellationToken
-            );
+            .ReadRepository<User>()
+            .AnyAsync(new GetUserByUsernameSpecification(username, excludeId), cancellationToken);
 }

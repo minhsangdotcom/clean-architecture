@@ -6,6 +6,7 @@ using Application.Common.Interfaces.Services.Storage;
 using Application.Common.Interfaces.UnitOfWorks;
 using Application.Contracts.ApiWrapper;
 using Application.Contracts.Constants;
+using ByteAether.Ulid;
 using Domain.Aggregates.Permissions;
 using Domain.Aggregates.Permissions.Specifications;
 using Domain.Aggregates.Roles;
@@ -60,8 +61,8 @@ public class UpdateUserHandler(
 
             // add roles
             IList<string> roles = await unitOfWork
-                .SpecRepository<Role>()
-                .ListAsync(
+                .ReadRepository<Role>()
+                .ListAsync<string>(
                     new GetRoleNameByListRoleIdSpecification(updateData.Roles!),
                     cancellationToken
                 );
@@ -71,9 +72,9 @@ public class UpdateUserHandler(
             IList<Permission> permissions =
                 updateData.Permissions != null
                     ? await unitOfWork
-                        .ReadonlyRepository<Permission>()
+                        .ReadRepository<Permission>()
                         .ListAsync(
-                            new ListPermissionByIdSpecification(updateData.Permissions),
+                            new GetPermissionByIdSpecification(updateData.Permissions),
                             cancellationToken: cancellationToken
                         )
                     : [];

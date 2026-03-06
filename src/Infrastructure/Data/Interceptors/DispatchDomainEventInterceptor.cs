@@ -1,3 +1,4 @@
+using Domain.Common;
 using Mediator;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;

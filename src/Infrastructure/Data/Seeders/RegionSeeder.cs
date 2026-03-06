@@ -11,11 +11,15 @@ public class RegionSeeder(IEfUnitOfWork unitOfWork, ILogger<RegionSeeder> logger
     public async Task SeedAsync(CancellationToken cancellationToken = default)
     {
         if (
-            await unitOfWork.Repository<Province>().AnyAsync(cancellationToken: cancellationToken)
-            && await unitOfWork
-                .Repository<District>()
+            await unitOfWork
+                .ReadRepository<Province>()
                 .AnyAsync(cancellationToken: cancellationToken)
-            && await unitOfWork.Repository<Commune>().AnyAsync(cancellationToken: cancellationToken)
+            && await unitOfWork
+                .ReadRepository<District>()
+                .AnyAsync(cancellationToken: cancellationToken)
+            && await unitOfWork
+                .ReadRepository<Commune>()
+                .AnyAsync(cancellationToken: cancellationToken)
         )
         {
             return;

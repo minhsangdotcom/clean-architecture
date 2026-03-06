@@ -1,32 +1,12 @@
 ﻿using System.Text.RegularExpressions;
 using Application.Common.Interfaces.Services.Localization;
-using Application.Common.Interfaces.UnitOfWorks;
 using Application.Contracts.ApiWrapper;
-using Domain.Aggregates.Users;
 using FluentValidation;
 
 namespace Application.Common.Validators;
 
 public static partial class ValidationExtension
 {
-    public static IRuleBuilderOptions<T, string?> BeUniqueUserEmail<T>(
-        this IRuleBuilder<T, string?> ruleBuilder,
-        IEfUnitOfWork unitOfWork,
-        Ulid? excludeId = null
-    ) =>
-        ruleBuilder.MustAsync(
-            (entity, email, context, ct) =>
-            {
-                return unitOfWork
-                    .Repository<User>()
-                    .AnyAsync(
-                        x => x.Email == email && (!excludeId.HasValue || x.Id != excludeId.Value),
-                        ct
-                    )
-                    .ContinueWith(t => t.Result == false, ct);
-            }
-        );
-
     public static IRuleBuilderOptions<T, string?> BeValidUsername<T>(
         this IRuleBuilder<T, string?> ruleBuilder
     ) =>

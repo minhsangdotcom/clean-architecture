@@ -36,8 +36,8 @@ public class CreateUserHandler(
             userAvatar = user.Avatar;
 
             IList<string> roles = await unitOfWork
-                .SpecRepository<Role>()
-                .ListAsync(
+                .ReadRepository<Role>()
+                .ListAsync<string>(
                     new GetRoleNameByListRoleIdSpecification(command.Roles!),
                     cancellationToken
                 );
@@ -47,9 +47,9 @@ public class CreateUserHandler(
             if (command.Permissions?.Count > 0)
             {
                 IList<Permission> permissions = await unitOfWork
-                    .ReadonlyRepository<Permission>()
+                    .ReadRepository<Permission>()
                     .ListAsync(
-                        new ListPermissionByIdSpecification(command.Permissions),
+                        new GetPermissionByIdSpecification(command.Permissions),
                         cancellationToken: cancellationToken
                     );
                 await userManager.AddPermissionsAsync(user, permissions, cancellationToken);

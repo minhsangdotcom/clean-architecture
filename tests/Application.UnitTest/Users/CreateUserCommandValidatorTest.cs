@@ -1,15 +1,17 @@
 using System.Linq.Expressions;
-using System.Runtime.CompilerServices;
 using Application.Common.ErrorCodes;
-using Application.Common.Interfaces.Repositories.EfCore;
+using Application.Common.Interfaces.Repositories;
 using Application.Common.Interfaces.Services.Accessors;
 using Application.Common.Interfaces.Services.Localization;
 using Application.Common.Interfaces.UnitOfWorks;
 using Application.Contracts.ApiWrapper;
 using Application.Features.Users.Commands.Create;
 using Bogus;
+using ByteAether.Ulid;
 using Domain.Aggregates.Permissions;
+using Domain.Aggregates.Permissions.Specifications;
 using Domain.Aggregates.Roles;
+using Domain.Aggregates.Roles.Specifications;
 using Domain.Aggregates.Users;
 using Domain.Aggregates.Users.Enums;
 using FluentValidation;
@@ -27,15 +29,15 @@ public partial class CreateUserCommandValidatorTest
     private readonly Mock<ITranslator<Messages>> translator = new();
     private readonly Mock<IEfUnitOfWork> unitOfWork = new();
 
-    private readonly Mock<IEfRepository<Role>> roleRepo = new();
-    private readonly Mock<IEfRepository<User>> userRepo = new();
-    private readonly Mock<IEfRepository<Permission>> permissionRepo = new();
+    private readonly Mock<ISpecificationReadRepository<Role>> roleRepo = new();
+    private readonly Mock<ISpecificationReadRepository<User>> userRepo = new();
+    private readonly Mock<ISpecificationReadRepository<Permission>> permissionRepo = new();
 
     public CreateUserCommandValidatorTest()
     {
-        unitOfWork.Setup(x => x.Repository<Role>()).Returns(roleRepo.Object);
-        unitOfWork.Setup(x => x.Repository<User>()).Returns(userRepo.Object);
-        unitOfWork.Setup(x => x.Repository<Permission>()).Returns(permissionRepo.Object);
+        unitOfWork.Setup(x => x.ReadRepository<Role>()).Returns(roleRepo.Object);
+        unitOfWork.Setup(x => x.ReadRepository<User>()).Returns(userRepo.Object);
+        unitOfWork.Setup(x => x.ReadRepository<Permission>()).Returns(permissionRepo.Object);
 
         Mock<IRequestContextProvider> contextProvider = new();
         validator = new(unitOfWork.Object, translator.Object, contextProvider.Object);
@@ -429,7 +431,7 @@ public partial class CreateUserCommandValidatorTest
         permissionRepo
             .Setup(r =>
                 r.CountAsync(
-                    It.IsAny<Expression<Func<Permission, bool>>>(),
+                    It.IsAny<GetPermissionByIdSpecification>(),
                     It.IsAny<CancellationToken>()
                 )
             )
@@ -454,7 +456,7 @@ public partial class CreateUserCommandValidatorTest
     public async Task Validate_When_RolesNotUnique_Should_HaveError()
     {
         // Arrange
-        Ulid id = Ulid.NewUlid();
+        Ulid id = Ulid.New();
         command.Roles = [id, id];
 
         translator.SetupTranslate(
@@ -464,7 +466,7 @@ public partial class CreateUserCommandValidatorTest
         permissionRepo
             .Setup(r =>
                 r.CountAsync(
-                    It.IsAny<Expression<Func<Permission, bool>>>(),
+                    It.IsAny<GetPermissionByIdSpecification>(),
                     It.IsAny<CancellationToken>()
                 )
             )
@@ -504,7 +506,7 @@ public partial class CreateUserCommandValidatorTest
             .When(_ => true)
             .WithState(_ => expected);
 
-        command.Roles = [Ulid.NewUlid()];
+        command.Roles = [Ulid.New()];
 
         // Act
         var result = await inlineValidator.TestValidateAsync(command);
@@ -525,7 +527,7 @@ public partial class CreateUserCommandValidatorTest
             .MustAsync((ids, _) => Task.FromResult(true))
             .When(_ => true);
 
-        command.Roles = [Ulid.NewUlid()];
+        command.Roles = [Ulid.New()];
 
         // Act
         var result = await inlineValidator.TestValidateAsync(command);
@@ -556,7 +558,7 @@ public partial class CreateUserCommandValidatorTest
     public async Task Validate_When_PermissionsNotUnique_Should_HaveError()
     {
         // Arrange
-        Ulid id = Ulid.NewUlid();
+        Ulid id = Ulid.New();
         command.Permissions = [id, id];
 
         translator.SetupTranslate(
@@ -583,7 +585,7 @@ public partial class CreateUserCommandValidatorTest
     public async Task Validate_When_PermissionsUnique_Should_Pass()
     {
         // Arrange
-        Ulid id = Ulid.NewUlid();
+        Ulid id = Ulid.New();
         command.Permissions = [id];
         inlineValidator.RuleFor(x => x.Permissions).Must((x, ct) => true);
 
@@ -598,7 +600,7 @@ public partial class CreateUserCommandValidatorTest
     public async Task Validate_When_PermissionsNotFoundInDb_Should_HaveError()
     {
         // Arrange
-        command.Permissions = [Ulid.NewUlid()];
+        command.Permissions = [Ulid.New()];
         var expected = new ErrorReason(
             UserErrorMessages.UserPermissionsNotFound,
             SharedResource.TranslateText
@@ -613,7 +615,7 @@ public partial class CreateUserCommandValidatorTest
             .MustAsync((p, _) => Task.FromResult(false))
             .WithState(_ => expected);
 
-        command.Permissions = [Ulid.NewUlid()];
+        command.Permissions = [Ulid.New()];
 
         // Act
         var result = await inlineValidator.TestValidateAsync(command);
@@ -631,7 +633,7 @@ public partial class CreateUserCommandValidatorTest
         // Arrange
         inlineValidator.RuleFor(x => x.Permissions).MustAsync((p, _) => Task.FromResult(true));
 
-        command.Permissions = [Ulid.NewUlid()];
+        command.Permissions = [Ulid.New()];
 
         // Act
         var result = await inlineValidator.TestValidateAsync(command);
@@ -645,16 +647,13 @@ public partial class CreateUserCommandValidatorTest
     {
         roleRepo
             .Setup(r =>
-                r.CountAsync(
-                    It.IsAny<Expression<Func<Role, bool>>>(),
-                    It.IsAny<CancellationToken>()
-                )
+                r.CountAsync(It.IsAny<GetRoleByIdSpecification>(), It.IsAny<CancellationToken>())
             )
             .ReturnsAsync(command.Roles!.Count);
         permissionRepo
             .Setup(r =>
                 r.CountAsync(
-                    It.IsAny<Expression<Func<Permission, bool>>>(),
+                    It.IsAny<GetPermissionByIdSpecification>(),
                     It.IsAny<CancellationToken>()
                 )
             )
@@ -669,8 +668,8 @@ public partial class CreateUserCommandValidatorTest
             .RuleFor(x => x.DateOfBirth, f => f.Date.Past(30))
             .RuleFor(x => x.Avatar, _ => null)
             .RuleFor(x => x.Status, f => f.PickRandom<UserStatus>())
-            .RuleFor(x => x.Roles, f => [Ulid.NewUlid()])
-            .RuleFor(x => x.Permissions, f => [Ulid.NewUlid()])
+            .RuleFor(x => x.Roles, f => [Ulid.New()])
+            .RuleFor(x => x.Permissions, f => [Ulid.New()])
             .RuleFor(x => x.Username, f => f.Internet.UserName())
             .RuleFor(x => x.Email, f => f.Internet.Email())
             .RuleFor(x => x.Password, "Admin@123")

@@ -1,14 +1,17 @@
 using System.Linq.Expressions;
 using Application.Common.ErrorCodes;
-using Application.Common.Interfaces.Repositories.EfCore;
+using Application.Common.Interfaces.Repositories;
 using Application.Common.Interfaces.Services.Accessors;
 using Application.Common.Interfaces.Services.Localization;
 using Application.Common.Interfaces.UnitOfWorks;
 using Application.Contracts.ApiWrapper;
 using Application.Features.Users.Commands.Update;
 using Bogus;
+using ByteAether.Ulid;
 using Domain.Aggregates.Permissions;
+using Domain.Aggregates.Permissions.Specifications;
 using Domain.Aggregates.Roles;
+using Domain.Aggregates.Roles.Specifications;
 using Domain.Aggregates.Users;
 using Domain.Aggregates.Users.Enums;
 using FluentValidation;
@@ -26,15 +29,15 @@ public class UpdateUserCommandValidatorTest
     private readonly Mock<ITranslator<Messages>> translator = new();
     private readonly Mock<IEfUnitOfWork> unitOfWork = new();
 
-    private readonly Mock<IEfRepository<Role>> roleRepo = new();
-    private readonly Mock<IEfRepository<User>> userRepo = new();
-    private readonly Mock<IEfRepository<Permission>> permissionRepo = new();
+    private readonly Mock<ISpecificationReadRepository<Role>> roleRepo = new();
+    private readonly Mock<ISpecificationReadRepository<User>> userRepo = new();
+    private readonly Mock<ISpecificationReadRepository<Permission>> permissionRepo = new();
 
     public UpdateUserCommandValidatorTest()
     {
-        unitOfWork.Setup(x => x.Repository<Role>()).Returns(roleRepo.Object);
-        unitOfWork.Setup(x => x.Repository<User>()).Returns(userRepo.Object);
-        unitOfWork.Setup(x => x.Repository<Permission>()).Returns(permissionRepo.Object);
+        unitOfWork.Setup(x => x.ReadRepository<Role>()).Returns(roleRepo.Object);
+        unitOfWork.Setup(x => x.ReadRepository<User>()).Returns(userRepo.Object);
+        unitOfWork.Setup(x => x.ReadRepository<Permission>()).Returns(permissionRepo.Object);
 
         Mock<IRequestContextProvider> contextProvider = new();
         validator = new(unitOfWork.Object, contextProvider.Object, translator.Object);
@@ -429,7 +432,7 @@ public class UpdateUserCommandValidatorTest
         permissionRepo
             .Setup(r =>
                 r.CountAsync(
-                    It.IsAny<Expression<Func<Permission, bool>>>(),
+                    It.IsAny<GetPermissionByIdSpecification>(),
                     It.IsAny<CancellationToken>()
                 )
             )
@@ -454,7 +457,7 @@ public class UpdateUserCommandValidatorTest
     public async Task Validate_When_RolesNotUnique_Should_HaveError()
     {
         // Arrange
-        Ulid id = Ulid.NewUlid();
+        Ulid id = Ulid.New();
         command.UpdateData.Roles = [id, id];
 
         translator.SetupTranslate(
@@ -464,7 +467,7 @@ public class UpdateUserCommandValidatorTest
         permissionRepo
             .Setup(r =>
                 r.CountAsync(
-                    It.IsAny<Expression<Func<Permission, bool>>>(),
+                    It.IsAny<GetPermissionByIdSpecification>(),
                     It.IsAny<CancellationToken>()
                 )
             )
@@ -504,7 +507,7 @@ public class UpdateUserCommandValidatorTest
             .When(_ => true)
             .WithState(_ => expected);
 
-        command.UpdateData.Roles = [Ulid.NewUlid()];
+        command.UpdateData.Roles = [Ulid.New()];
 
         // Act
         var result = await inlineValidator.TestValidateAsync(command);
@@ -525,7 +528,7 @@ public class UpdateUserCommandValidatorTest
             .MustAsync((ids, _) => Task.FromResult(true))
             .When(_ => true);
 
-        command.UpdateData.Roles = [Ulid.NewUlid()];
+        command.UpdateData.Roles = [Ulid.New()];
 
         // Act
         var result = await inlineValidator.TestValidateAsync(command);
@@ -556,7 +559,7 @@ public class UpdateUserCommandValidatorTest
     public async Task Validate_When_PermissionsNotUnique_Should_HaveError()
     {
         // Arrange
-        Ulid id = Ulid.NewUlid();
+        Ulid id = Ulid.New();
         command.UpdateData.Permissions = [id, id];
 
         translator.SetupTranslate(
@@ -583,7 +586,7 @@ public class UpdateUserCommandValidatorTest
     public async Task Validate_When_PermissionsUnique_Should_Pass()
     {
         // Arrange
-        Ulid id = Ulid.NewUlid();
+        Ulid id = Ulid.New();
         command.UpdateData.Permissions = [id];
         inlineValidator.RuleFor(x => x.UpdateData.Permissions).Must((x, ct) => true);
 
@@ -599,7 +602,7 @@ public class UpdateUserCommandValidatorTest
     public async Task Validate_When_PermissionsNotFoundInDb_Should_HaveError()
     {
         // Arrange
-        command.UpdateData.Permissions = [Ulid.NewUlid()];
+        command.UpdateData.Permissions = [Ulid.New()];
         var expected = new ErrorReason(
             UserErrorMessages.UserPermissionsNotFound,
             SharedResource.TranslateText
@@ -614,7 +617,7 @@ public class UpdateUserCommandValidatorTest
             .MustAsync((p, _) => Task.FromResult(false))
             .WithState(_ => expected);
 
-        command.UpdateData.Permissions = [Ulid.NewUlid()];
+        command.UpdateData.Permissions = [Ulid.New()];
 
         // Act
         var result = await inlineValidator.TestValidateAsync(command);
@@ -634,7 +637,7 @@ public class UpdateUserCommandValidatorTest
             .RuleFor(x => x.UpdateData.Permissions)
             .MustAsync((p, _) => Task.FromResult(true));
 
-        command.UpdateData.Permissions = [Ulid.NewUlid()];
+        command.UpdateData.Permissions = [Ulid.New()];
 
         // Act
         var result = await inlineValidator.TestValidateAsync(command);
@@ -648,16 +651,13 @@ public class UpdateUserCommandValidatorTest
     {
         roleRepo
             .Setup(r =>
-                r.CountAsync(
-                    It.IsAny<Expression<Func<Role, bool>>>(),
-                    It.IsAny<CancellationToken>()
-                )
+                r.CountAsync(It.IsAny<GetRoleByIdSpecification>(), It.IsAny<CancellationToken>())
             )
             .ReturnsAsync(command.UpdateData.Roles!.Count);
         permissionRepo
             .Setup(r =>
                 r.CountAsync(
-                    It.IsAny<Expression<Func<Permission, bool>>>(),
+                    It.IsAny<GetPermissionByIdSpecification>(),
                     It.IsAny<CancellationToken>()
                 )
             )
@@ -674,11 +674,11 @@ public class UpdateUserCommandValidatorTest
             .RuleFor(x => x.DateOfBirth, f => f.Date.Past(30))
             .RuleFor(x => x.Avatar, _ => null)
             .RuleFor(x => x.Status, f => f.PickRandom<UserStatus>())
-            .RuleFor(x => x.Roles, f => [Ulid.NewUlid(), Ulid.NewUlid()])
-            .RuleFor(x => x.Permissions, f => [Ulid.NewUlid(), Ulid.NewUlid()]);
+            .RuleFor(x => x.Roles, f => [Ulid.New(), Ulid.New()])
+            .RuleFor(x => x.Permissions, f => [Ulid.New(), Ulid.New()]);
 
         return new Faker<UpdateUserCommand>()
-            .RuleFor(x => x.UserId, f => Ulid.NewUlid().ToString())
+            .RuleFor(x => x.UserId, f => Ulid.New().ToString())
             .RuleFor(x => x.UpdateData, _ => updateDataFaker.Generate())
             .Generate();
     }

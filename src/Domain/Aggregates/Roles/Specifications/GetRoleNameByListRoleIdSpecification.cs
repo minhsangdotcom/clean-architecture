@@ -1,3 +1,4 @@
+using ByteAether.Ulid;
 using Specification;
 using Specification.Builders;
 
@@ -7,6 +8,6 @@ public class GetRoleNameByListRoleIdSpecification : Specification<Role, string>
 {
     public GetRoleNameByListRoleIdSpecification(List<Ulid> ids)
     {
-        Query.Where(x => ids.Contains(x.Id)).Select(x => x.Name).AsNoTracking();
+        Query.Where(x => ids.Contains(x.Id)).Select(x => x.Name);
     }
 }

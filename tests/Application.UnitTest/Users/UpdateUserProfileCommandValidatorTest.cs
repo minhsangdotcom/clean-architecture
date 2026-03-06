@@ -1,11 +1,12 @@
 using Application.Common.ErrorCodes;
-using Application.Common.Interfaces.Repositories.EfCore;
+using Application.Common.Interfaces.Repositories;
 using Application.Common.Interfaces.Services.Accessors;
 using Application.Common.Interfaces.Services.Localization;
 using Application.Common.Interfaces.UnitOfWorks;
 using Application.Contracts.ApiWrapper;
 using Application.Features.Users.Commands.Profiles;
 using Bogus;
+using ByteAether.Ulid;
 using Domain.Aggregates.Users;
 using Domain.Aggregates.Users.Enums;
 using FluentValidation;
@@ -21,16 +22,16 @@ public class UpdateUserProfileCommandValidatorTest
     private readonly UpdateUserProfileCommandValidator validator;
     private readonly InlineValidator<UpdateUserProfileCommand> inlineValidator = [];
     private readonly Mock<ITranslator<Messages>> translator = new();
-    private readonly Mock<IEfRepository<User>> userRepo = new();
+    private readonly Mock<ISpecificationReadRepository<User>> userRepo = new();
 
     public UpdateUserProfileCommandValidatorTest()
     {
         Mock<IEfUnitOfWork> unitOfWork = new();
-        unitOfWork.Setup(x => x.Repository<User>()).Returns(userRepo.Object);
+        unitOfWork.Setup(x => x.ReadRepository<User>()).Returns(userRepo.Object);
 
         Mock<IRequestContextProvider> contextProvider = new();
         Mock<ICurrentUser> currentUser = new();
-        currentUser.Setup(x => x.Id).Returns(Ulid.NewUlid());
+        currentUser.Setup(x => x.Id).Returns(Ulid.New());
         validator = new(
             unitOfWork.Object,
             currentUser.Object,

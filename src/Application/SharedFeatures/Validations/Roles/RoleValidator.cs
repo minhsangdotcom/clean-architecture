@@ -4,8 +4,11 @@ using Application.Common.Interfaces.Services.Localization;
 using Application.Common.Interfaces.UnitOfWorks;
 using Application.Common.Validators;
 using Application.SharedFeatures.Requests.Roles;
+using ByteAether.Ulid;
 using Domain.Aggregates.Permissions;
+using Domain.Aggregates.Permissions.Specifications;
 using Domain.Aggregates.Roles;
+using Domain.Aggregates.Roles.Specifications;
 using FluentValidation;
 
 namespace Application.SharedFeatures.Validations.Roles;
@@ -21,7 +24,7 @@ public class RoleValidator(
         ITranslator<Messages> translator
     )
     {
-        _ = Ulid.TryParse(contextProvider.GetId(), out Ulid id);
+        _ = Ulid.TryParse(contextProvider.GetId(), null, out Ulid id);
 
         RuleFor(x => x.Name)
             .NotEmpty()
@@ -65,18 +68,15 @@ public class RoleValidator(
         CancellationToken cancellationToken = default
     ) =>
         !await unitOfWork
-            .Repository<Role>()
-            .AnyAsync(
-                x => x.Name == name && (!excludeId.HasValue || x.Id != excludeId),
-                cancellationToken
-            );
+            .ReadRepository<Role>()
+            .AnyAsync(new GetRoleWithNameSpecification(name, excludeId), cancellationToken);
 
     private async Task<bool> IsAllPermissionExistentAsync(
         List<Ulid> permissionIds,
         CancellationToken cancellationToken = default
     ) =>
         await unitOfWork
-            .Repository<Permission>()
-            .CountAsync(x => permissionIds.Contains(x.Id), cancellationToken)
+            .ReadRepository<Permission>()
+            .CountAsync(new GetPermissionByIdSpecification(permissionIds), cancellationToken)
         == permissionIds.Count;
 }

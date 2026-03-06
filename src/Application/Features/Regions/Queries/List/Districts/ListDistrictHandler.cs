@@ -51,7 +51,7 @@ public class ListDistrictHandler(
             );
         }
         var response = await unitOfWork
-            .ReadonlyRepository<District>()
+            .ReadRepository<District>()
             .PagedListAsync(
                 new ListDistrictSpecification(),
                 query,

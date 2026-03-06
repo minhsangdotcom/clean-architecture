@@ -1,6 +1,7 @@
 using Application.Common.Interfaces.Services.Cache;
 using Application.Common.Interfaces.Services.Identity;
 using Application.Contracts.Permissions;
+using ByteAether.Ulid;
 using Domain.Aggregates.Roles;
 using Domain.Aggregates.Users;
 using Infrastructure.Data;

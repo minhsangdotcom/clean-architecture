@@ -1,6 +1,7 @@
 using System.Reflection;
 using Application.Common.ErrorCodes;
 using Application.Contracts.Dtos.Requests;
+using ByteAether.Ulid;
 using DotNetCoreExtension.Extensions;
 using DotNetCoreExtension.Extensions.Reflections;
 using DotNetCoreExtension.Results;
@@ -118,7 +119,7 @@ public static class QueryParamValidator
             }
 
             // value must be Ulid
-            if ((nullableType == typeof(Ulid)) && !Ulid.TryParse(query.Value, out _))
+            if ((nullableType == typeof(Ulid)) && !Ulid.TryParse(query.Value, null, out _))
             {
                 return new(Error: QueryParamRequestErrorMessages.QueryParamFilterValueUlidInvalid);
             }

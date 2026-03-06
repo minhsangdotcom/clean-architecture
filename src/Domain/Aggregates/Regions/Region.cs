@@ -1,4 +1,4 @@
-using SharedKernel.Entities;
+using Domain.Common;
 
 namespace Domain.Aggregates.Regions;
 
