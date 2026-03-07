@@ -45,7 +45,7 @@
 - [11. Technology](#11-technology)
 - [12. Support](#12-support)
 - [13. Credits](#13-credits)
-- [14. Licence](#14-licence)
+- [14. License](#14-license)
 
 # 2. Introduction
 
