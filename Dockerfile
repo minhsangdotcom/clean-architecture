@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/dotnet/aspnet:10.0.1
+FROM mcr.microsoft.com/dotnet/aspnet:10.0.3
 WORKDIR /app
 EXPOSE 8080
 COPY app/publish .
