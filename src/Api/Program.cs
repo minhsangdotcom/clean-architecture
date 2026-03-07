@@ -159,6 +159,8 @@ try
         "Application health check is running at: {Url}",
         $"{url}{healthCheckPath}"
     );
+
+    // localization configs
     app.UseRequestLocalization(
         new RequestLocalizationOptions
         {
