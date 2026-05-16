@@ -1,7 +1,5 @@
 using Application.Common.Interfaces.Repositories;
-using Application.Common.Interfaces.Services.Cache;
 using Application.Common.Interfaces.UnitOfWorks;
-using Infrastructure.Data.Repositories.EfCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.Logging;
@@ -11,10 +9,9 @@ namespace Infrastructure.Data;
 public class EfUnitOfWork(
     IEfDbContext dbContext,
     ILogger<EfUnitOfWork> logger,
-    IMemoryCacheService cache
+    IRepositoryFactory factory
 ) : IEfUnitOfWork
 {
-    private readonly RepositoryFactory factory = new(dbContext, logger, cache);
     private IDbContextTransaction? currentTransaction = null;
 
     public IRepository<TEntity> Repository<TEntity>()

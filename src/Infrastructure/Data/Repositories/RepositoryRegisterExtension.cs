@@ -1,3 +1,5 @@
+using Application.Common.Interfaces.Repositories;
+using Infrastructure.Data.Repositories.EfCore;
 using Microsoft.Extensions.DependencyInjection;
 using SharedKernel.Repositories;
 
@@ -21,6 +23,8 @@ public static class RepositoryRegisterExtension
                 .AsImplementedInterfaces()
                 .WithScopedLifetime()
         );
+
+        services.AddScoped<IRepositoryFactory, RepositoryFactory>();
 
         return services;
     }

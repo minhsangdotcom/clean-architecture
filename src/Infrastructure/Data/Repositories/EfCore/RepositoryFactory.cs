@@ -6,7 +6,11 @@ using Microsoft.Extensions.Logging;
 
 namespace Infrastructure.Data.Repositories.EfCore;
 
-public class RepositoryFactory(IEfDbContext dbContext, ILogger logger, IMemoryCacheService cache)
+public class RepositoryFactory(
+    IEfDbContext dbContext,
+    ILogger<RepositoryFactory> logger,
+    IMemoryCacheService cache
+) : IRepositoryFactory
 {
     private readonly Dictionary<string, object> repositories = [];
 
