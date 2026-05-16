@@ -33,11 +33,11 @@
       },
       "MailKit": {
         "type": "Direct",
-        "requested": "[4.15.1, )",
-        "resolved": "4.15.1",
-        "contentHash": "4mLbqTbH3ctd0NlukHjVQbU3ZnNDuCtB6ttNZDLPZLWMA2Dr31rh/eCSTqOwDojUX8zfDOVaxstMgJTE9PwZNA==",
+        "requested": "[4.16.0, )",
+        "resolved": "4.16.0",
+        "contentHash": "trJ82DOpAmo8i1jO1vNE+dGn4mPRyeYfy4swRcAGgMJhPoI1Kohf4OFJJf0+YIj4iUxgxPn8W+ht7e7KiYzSjg==",
         "dependencies": {
-          "MimeKit": "4.15.1"
+          "MimeKit": "4.16.0"
         }
       },
       "Microsoft.AspNetCore.Authentication.JwtBearer": {
@@ -70,9 +70,9 @@
       },
       "Scriban": {
         "type": "Direct",
-        "requested": "[6.5.2, )",
-        "resolved": "6.5.2",
-        "contentHash": "JXli/Sh1WVZs/pqnPPRJTlwEsZHPJtndzxiaPnrteXDpAqVqHxh4ifhx4puTaYKVMPJUMOp9bnCpEVBpYlt/eQ=="
+        "requested": "[7.2.0, )",
+        "resolved": "7.2.0",
+        "contentHash": "GiAuu6bCPVWJeMMK8AkJMCNX+wyqt2qgiKjVAPLvRWxzBwpDJjLhJltVP034tsZUHOkBtdfA/Otrny+n3NelBw=="
       },
       "Scrutor": {
         "type": "Direct",
@@ -128,8 +128,8 @@
       },
       "BCrypt.Net-Next": {
         "type": "Transitive",
-        "resolved": "4.0.3",
-        "contentHash": "W+U9WvmZQgi5cX6FS5GDtDoPzUCV4LkBLkywq/kRZhuDwcbavOzcDAr3LXJFqHUi952Yj3LEYoWW0jbEUQChsA=="
+        "resolved": "4.2.0",
+        "contentHash": "gwLD2KfCuwQesP17aVh4h6lpiMPEVt5Lbpndo0ej903hNUUTtyxt3ARdDjmuydBRTAUICc7OVKVbaOvc6SQYXA=="
       },
       "BouncyCastle.Cryptography": {
         "type": "Transitive",
@@ -542,8 +542,8 @@
       },
       "MimeKit": {
         "type": "Transitive",
-        "resolved": "4.15.1",
-        "contentHash": "cxCcQhD0zhboFoG136jJuJtQjNRDJ+BxBm3f2vWn+53bff/CRo+K1mAkWjsW4Wuyy5O22F40MdMG2nRzQu1cJw==",
+        "resolved": "4.16.0",
+        "contentHash": "X0LFxeM4gPRIhODyY/HYS9b+zRZ7y//v59rFzgS6wLxcPuZThnMtNZHtrr0fjLyRRkg3gqJBtvW36XfUzZ7Djw==",
         "dependencies": {
           "BouncyCastle.Cryptography": "2.6.2",
           "System.Security.Cryptography.Pkcs": "10.0.0"
@@ -736,36 +736,36 @@
       },
       "Wangkanai.Detection": {
         "type": "Transitive",
-        "resolved": "8.17.0",
-        "contentHash": "37Vg2RX3V7+YL+/2y3lcfabJLTYyrOos3y5OZIJnjQfrRrzXh4ihpfaxYkjDzvIhUBRU6YnGHSfKihPqIa8qQQ==",
+        "resolved": "8.20.0",
+        "contentHash": "llPuXlZPkhkK++9knG5VQj/TU9Ph6A4nnNIUSuqJcktF/0zvMCrV+vZNPwuYkZkgevDMcDlBjYjm+ZOBcLv3Ww==",
         "dependencies": {
-          "Wangkanai.Hosting": "3.4.0",
-          "Wangkanai.System": "5.4.0"
+          "Wangkanai.Hosting": "3.7.0",
+          "Wangkanai.System": "5.8.0"
         }
       },
       "Wangkanai.Hosting": {
         "type": "Transitive",
-        "resolved": "3.4.0",
-        "contentHash": "XPew5al4lGcAcrXstvJ+j5xUBkLE+eKpmOfAqG8ozTpCi9rqBtHilh4zYJ0yELQOnQAyrPDW+cAFI59bwVUnbQ==",
+        "resolved": "3.7.0",
+        "contentHash": "IcvGT9bz7346eJ33iT1Of1/YsvxvNNGxwKqsdfzagQjqgRLXs35W5LEPaGAvfaq77LpHUUn2BNYbFp3UcHjswQ==",
         "dependencies": {
-          "Wangkanai.System": "5.4.0"
+          "Wangkanai.System": "5.8.0"
         }
       },
       "Wangkanai.System": {
         "type": "Transitive",
-        "resolved": "5.4.0",
-        "contentHash": "9Icv3SGFRiYsjI1IPvqVi+0/GJXkYPVXhEuf7r5y0+c29NBEL8CLvKWXIBAeYiMHbTixJ5JomoUVSPmtjXGdlA=="
+        "resolved": "5.8.0",
+        "contentHash": "2FbVGr41ZJeP0q0Ym+MNs7v8RbZj0u9CQBA5VnaHVx26HwwFtVmhzn1d9q9+0ap476YE3HEie13RB7kHy6ybRA=="
       },
       "application": {
         "type": "Project",
         "dependencies": {
           "Application.Contracts": "[1.0.0, )",
-          "BCrypt.Net-Next": "[4.0.3, )",
+          "BCrypt.Net-Next": "[4.2.0, )",
           "Domain": "[1.0.0, )",
           "Elastic.Clients.Elasticsearch": "[9.2.2, )",
           "FluentValidation.DependencyInjectionExtensions": "[12.0.0, )",
           "Mediator.Abstractions": "[3.0.1, )",
-          "Wangkanai.Detection": "[8.17.0, )"
+          "Wangkanai.Detection": "[8.20.0, )"
         }
       },
       "application.contracts": {

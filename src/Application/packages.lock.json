@@ -4,9 +4,9 @@
     "net10.0": {
       "BCrypt.Net-Next": {
         "type": "Direct",
-        "requested": "[4.0.3, )",
-        "resolved": "4.0.3",
-        "contentHash": "W+U9WvmZQgi5cX6FS5GDtDoPzUCV4LkBLkywq/kRZhuDwcbavOzcDAr3LXJFqHUi952Yj3LEYoWW0jbEUQChsA=="
+        "requested": "[4.2.0, )",
+        "resolved": "4.2.0",
+        "contentHash": "gwLD2KfCuwQesP17aVh4h6lpiMPEVt5Lbpndo0ej903hNUUTtyxt3ARdDjmuydBRTAUICc7OVKVbaOvc6SQYXA=="
       },
       "Elastic.Clients.Elasticsearch": {
         "type": "Direct",
@@ -47,12 +47,12 @@
       },
       "Wangkanai.Detection": {
         "type": "Direct",
-        "requested": "[8.17.0, )",
-        "resolved": "8.17.0",
-        "contentHash": "37Vg2RX3V7+YL+/2y3lcfabJLTYyrOos3y5OZIJnjQfrRrzXh4ihpfaxYkjDzvIhUBRU6YnGHSfKihPqIa8qQQ==",
+        "requested": "[8.20.0, )",
+        "resolved": "8.20.0",
+        "contentHash": "llPuXlZPkhkK++9knG5VQj/TU9Ph6A4nnNIUSuqJcktF/0zvMCrV+vZNPwuYkZkgevDMcDlBjYjm+ZOBcLv3Ww==",
         "dependencies": {
-          "Wangkanai.Hosting": "3.4.0",
-          "Wangkanai.System": "5.4.0"
+          "Wangkanai.Hosting": "3.7.0",
+          "Wangkanai.System": "5.8.0"
         }
       },
       "Ardalis.GuardClauses": {
@@ -192,16 +192,16 @@
       },
       "Wangkanai.Hosting": {
         "type": "Transitive",
-        "resolved": "3.4.0",
-        "contentHash": "XPew5al4lGcAcrXstvJ+j5xUBkLE+eKpmOfAqG8ozTpCi9rqBtHilh4zYJ0yELQOnQAyrPDW+cAFI59bwVUnbQ==",
+        "resolved": "3.7.0",
+        "contentHash": "IcvGT9bz7346eJ33iT1Of1/YsvxvNNGxwKqsdfzagQjqgRLXs35W5LEPaGAvfaq77LpHUUn2BNYbFp3UcHjswQ==",
         "dependencies": {
-          "Wangkanai.System": "5.4.0"
+          "Wangkanai.System": "5.8.0"
         }
       },
       "Wangkanai.System": {
         "type": "Transitive",
-        "resolved": "5.4.0",
-        "contentHash": "9Icv3SGFRiYsjI1IPvqVi+0/GJXkYPVXhEuf7r5y0+c29NBEL8CLvKWXIBAeYiMHbTixJ5JomoUVSPmtjXGdlA=="
+        "resolved": "5.8.0",
+        "contentHash": "2FbVGr41ZJeP0q0Ym+MNs7v8RbZj0u9CQBA5VnaHVx26HwwFtVmhzn1d9q9+0ap476YE3HEie13RB7kHy6ybRA=="
       },
       "application.contracts": {
         "type": "Project",

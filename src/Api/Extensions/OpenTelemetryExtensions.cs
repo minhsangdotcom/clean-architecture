@@ -70,12 +70,30 @@ public static class OpenTelemetryExtensions
                         })
                         .AddEntityFrameworkCoreInstrumentation(opt =>
                         {
-                            if (environmentName != "Production")
+                            // Filter noise
+                            opt.Filter = (providerName, command) =>
                             {
-                                opt.SetDbStatementForText = true;
-                                opt.SetDbStatementForStoredProcedure = true;
-                            }
-                            opt.EnrichWithIDbCommand = (activity, command) => { };
+                                var sql = command.CommandText?.Trim();
+                                if (
+                                    sql?.StartsWith("SELECT 1", StringComparison.OrdinalIgnoreCase)
+                                    == true
+                                )
+                                    return false;
+                                return true;
+                            };
+
+                            // Enrich additional metadata
+                            opt.EnrichWithIDbCommand = (activity, command) =>
+                            {
+                                activity.SetTag("ef.command.type", command.CommandType.ToString());
+                                activity.SetTag("db.params.count", command.Parameters.Count);
+                                activity.SetTag("db.provider", command.Connection?.GetType().Name);
+
+                                if (environmentName == "Production")
+                                {
+                                    activity.SetTag("db.statement", null);
+                                }
+                            };
                         })
                         .AddHttpClientInstrumentation();
 
