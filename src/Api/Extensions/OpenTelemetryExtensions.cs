@@ -78,7 +78,9 @@ public static class OpenTelemetryExtensions
                                     sql?.StartsWith("SELECT 1", StringComparison.OrdinalIgnoreCase)
                                     == true
                                 )
+                                {
                                     return false;
+                                }
                                 return true;
                             };
 

@@ -7,12 +7,12 @@
   <ItemGroup>
     <PackageReference Include="BCrypt.Net-Next" Version="4.2.0" />
     <PackageReference Include="Elastic.Clients.Elasticsearch" Version="9.2.2" />
-    <PackageReference Include="Mediator.Abstractions" Version="3.0.1" />
-    <PackageReference Include="Mediator.SourceGenerator" Version="3.0.1">
+    <PackageReference Include="Mediator.Abstractions" Version="3.1.0-rc.1" />
+    <PackageReference Include="Mediator.SourceGenerator" Version="3.1.0-rc.1">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
-    <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="12.0.0" />
+    <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="12.1.1" />
     <PackageReference Include="Wangkanai.Detection" Version="8.20.0" />
 
     <Using Include="BCrypt.Net.BCrypt" Static="True" />
