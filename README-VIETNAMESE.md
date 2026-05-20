@@ -16,10 +16,14 @@
 [![NuGet Version](https://img.shields.io/nuget/vpre/minhsangdotcom.TheTemplate.ElasticsearchFluentConfig?style=flat&label=ElasticsearchFluentConfig&color=red)](https://www.nuget.org/packages/minhsangdotcom.TheTemplate.ElasticsearchFluentConfig/)
 [![NuGet Version](https://img.shields.io/nuget/vpre/TranMinhSang.AspNetCore.Extensions?style=flat&label=AspNetCore.Extensions&color=red)](https://www.nuget.org/packages/TranMinhSang.AspNetCore.Extensions/)
 
+# React Project
+Mình có thêm một template dạng featured-based structure viết bằng reactjs ở [https://github.com/minhsangdotcom/react](https://github.com/minhsangdotcom/react).
+
 # Bảng nội dung <div id= "bang-noi-dung"/>
 
 - [Ngôn ngữ](#)
 - [Nhãn](#)
+- [React Project](#)
 - [Bảng nội dung](#bang-noi-dung)
 - [Giới thiệu](#gioi-thieu)
 - [Cho mình 1 ⭐ nhé](#cho-minh-sao-nhe)

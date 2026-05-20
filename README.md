@@ -16,11 +16,16 @@
 [![NuGet Version](https://img.shields.io/nuget/vpre/minhsangdotcom.TheTemplate.ElasticsearchFluentConfig?style=flat&label=ElasticsearchFluentConfig&color=red)](https://www.nuget.org/packages/minhsangdotcom.TheTemplate.ElasticsearchFluentConfig/)
 [![NuGet Version](https://img.shields.io/nuget/vpre/TranMinhSang.AspNetCore.Extensions?style=flat&label=AspNetCore.Extensions&color=red)](https://www.nuget.org/packages/TranMinhSang.AspNetCore.Extensions/)
 
+# React Project
+
+The React feature-based project is available at [https://github.com/minhsangdotcom/react](https://github.com/minhsangdotcom/react). Working seamlessly with this backend template.
+
 # Table of Contents
 
 - [1. Language](#1-languages)
-- [2. Badges](#2-badge)
-- [3. Table of Contents](#3-table-of-contents)
+- [1.1. Badges](#2-badge)
+- [1.2. React Project](#3-client-side)
+- [1.3. Table of Contents](#4-table-of-contents)
 - [2. Introduction](#2-introduction)
 - [3. Give a Star! ⭐](#3-give-a-star)
 - [4. What is Clean Architecture?](#4-what-is-clean-architecture)
