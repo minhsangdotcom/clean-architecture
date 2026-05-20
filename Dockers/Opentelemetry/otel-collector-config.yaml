@@ -25,7 +25,7 @@ exporters:
     tls:
       insecure: true
 
-  otlphttp/seq:
+  otlphttp:
     endpoint: http://seq:5341/ingest/otlp
     tls:
       insecure: true
@@ -40,4 +40,4 @@ service:
     logs:
       receivers: [otlp]
       processors: [batch]
-      exporters: [debug, otlphttp/seq]
+      exporters: [debug, otlphttp]
