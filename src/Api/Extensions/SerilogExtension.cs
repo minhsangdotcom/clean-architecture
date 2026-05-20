@@ -1,5 +1,7 @@
+using System.Reflection;
 using Api.Settings;
 using Serilog;
+using Serilog.Sinks.OpenTelemetry;
 
 namespace Api.Extensions;
 
@@ -11,17 +13,30 @@ public static class SerilogExtension
             builder.Configuration
         );
 
-        SerilogSettings serilogSettings =
-            builder.Configuration.GetSection(nameof(SerilogSettings)).Get<SerilogSettings>()
+        OpenTelemetrySettings openTelemetrySettings =
+            builder
+                .Configuration.GetSection(nameof(OpenTelemetrySettings))
+                .Get<OpenTelemetrySettings>()
             ?? new();
 
-        if (serilogSettings.IsDistributeLog)
+        loggerConfiguration.WriteTo.OpenTelemetry(c =>
         {
-            loggerConfiguration.WriteTo.Seq(serilogSettings.SeqUrl!);
-        }
+            c.Endpoint = openTelemetrySettings.Trace.Endpoint;
+            c.Protocol = OtlpProtocol.Grpc;
+            c.IncludedData =
+                IncludedData.TraceIdField
+                | IncludedData.SpanIdField
+                | IncludedData.SourceContextAttribute
+                | IncludedData.MessageTemplateTextAttribute;
+            c.ResourceAttributes = new Dictionary<string, object>
+            {
+                { "service.name", openTelemetrySettings.ServiceName },
+                { "service.version", openTelemetrySettings.ServiceVersion },
+                { "deployment.environment", builder.Environment.EnvironmentName },
+            };
+        });
 
         Log.Logger = loggerConfiguration.CreateLogger();
-
         builder.Host.UseSerilog(Log.Logger);
         builder.Services.AddSingleton(Log.Logger);
     }

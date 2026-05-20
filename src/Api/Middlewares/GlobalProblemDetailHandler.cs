@@ -30,15 +30,13 @@ public class GlobalProblemDetailHandler(
         int code = StatusCodes.Status500InternalServerError;
         httpContext.Response.StatusCode = code;
 
-        ProblemDetails problemDetail =
-            new()
-            {
-                Status = code,
-                Title = "Internal Server Error",
-                Detail = exception.Message,
-                Type =
-                    "https://datatracker.ietf.org/doc/html/rfc9110#name-500-internal-server-error",
-            };
+        ProblemDetails problemDetail = new()
+        {
+            Status = code,
+            Title = "Internal Server Error",
+            Detail = exception.Message,
+            Type = "https://datatracker.ietf.org/doc/html/rfc9110#name-500-internal-server-error",
+        };
 
         return await problemDetailsService.TryWriteAsync(
             new()

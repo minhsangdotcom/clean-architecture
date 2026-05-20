@@ -6,16 +6,20 @@ public class OpenTelemetrySettings
     public string ServiceVersion { get; set; } = "1.0.0";
     public string ActivitySourceName { get; set; } = "TheTemplate.Source";
 
-    public string Endpoint { get; set; } = string.Empty;
+    public TracingConfig Trace { get; set; } = new();
 
-    public OpenTelemetryTracingOption Options { get; set; } = OpenTelemetryTracingOption.None;
+    public LoggingConfig Log { get; set; } = new();
 
     public bool IsEnabled { get; set; }
 }
 
-public enum OpenTelemetryTracingOption
+public class TracingConfig
 {
-    Distribution = 1,
-    Console = 2,
-    None = 3,
+    public string Endpoint { get; set; } = string.Empty;
+}
+
+public class LoggingConfig
+{
+    public string Endpoint { get; set; } = string.Empty;
+    public string Key { get; set; } = string.Empty;
 }

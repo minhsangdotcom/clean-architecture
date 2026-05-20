@@ -233,6 +233,33 @@
           "Microsoft.Extensions.DependencyInjection.Abstractions": "2.1.0"
         }
       },
+      "Google.Protobuf": {
+        "type": "Transitive",
+        "resolved": "3.30.1",
+        "contentHash": "HeWXDQBabQn/sCGicbeLJ0HMunknfC4FdLrOQOsaMJHcpqx3HVIpyyJqTrqJlWnza870twhOb+rBcaTiC/TlNA=="
+      },
+      "Grpc.Core.Api": {
+        "type": "Transitive",
+        "resolved": "2.70.0",
+        "contentHash": "66UotvWcSIq41oiQhLWcQACyKPM4umxXNiht5DQTLZJfNwEswWOcS7Z0xIEHyNIBE7ZpjotH22bEjTkvhPxmVw=="
+      },
+      "Grpc.Net.Client": {
+        "type": "Transitive",
+        "resolved": "2.70.0",
+        "contentHash": "xNv0FFCVJa5S1beUtye82WFCxKThuE1jbN8DO1x1Rj8VSIWXLBUmfSID5a1fGzsU2R/EMfwPoWclJ2RMfQuGXw==",
+        "dependencies": {
+          "Grpc.Net.Common": "2.70.0",
+          "Microsoft.Extensions.Logging.Abstractions": "6.0.0"
+        }
+      },
+      "Grpc.Net.Common": {
+        "type": "Transitive",
+        "resolved": "2.70.0",
+        "contentHash": "rBdEUMyCwa+iB8mqC6JKyPbj3SBHHkReJj/yy/XKJI63GcG6w9DJMMGTVcYHqq4Ci2W4m0HT4jt2pFfFscar8g==",
+        "dependencies": {
+          "Grpc.Core.Api": "2.70.0"
+        }
+      },
       "MailKit": {
         "type": "Transitive",
         "resolved": "4.16.0",
@@ -986,6 +1013,16 @@
           "Serilog": "4.2.0"
         }
       },
+      "Serilog.Sinks.OpenTelemetry": {
+        "type": "Transitive",
+        "resolved": "4.2.0",
+        "contentHash": "PzMCyE5G19tjr5IZEi5qg+4UU5QrxBEoBEMu/hhYybTrGKXqUDiSGWKZNUDBgelaVKqLADlsmlJVyKce5SyPrg==",
+        "dependencies": {
+          "Google.Protobuf": "3.30.1",
+          "Grpc.Net.Client": "2.70.0",
+          "Serilog": "4.2.0"
+        }
+      },
       "Serilog.Sinks.Seq": {
         "type": "Transitive",
         "resolved": "9.0.0",
@@ -1150,6 +1187,7 @@
           "Scalar.AspNetCore": "[2.13.1, )",
           "Serilog.AspNetCore": "[10.0.0, )",
           "Serilog.Enrichers.Environment": "[3.0.1, )",
+          "Serilog.Sinks.OpenTelemetry": "[4.2.0, )",
           "Serilog.Sinks.Seq": "[9.0.0, )"
         }
       },

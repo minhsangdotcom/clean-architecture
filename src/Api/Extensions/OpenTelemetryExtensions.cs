@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using Api.Settings;
 using Application.Contracts.Constants;
+using OpenTelemetry.Exporter;
 using OpenTelemetry.Logs;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
@@ -11,8 +12,7 @@ public static class OpenTelemetryExtensions
 {
     public static IServiceCollection AddOpenTelemetryTracing(
         this IServiceCollection services,
-        IConfiguration configuration,
-        string environmentName
+        IConfiguration configuration
     )
     {
         services.Configure<OpenTelemetrySettings>(
@@ -70,51 +70,28 @@ public static class OpenTelemetryExtensions
                         })
                         .AddEntityFrameworkCoreInstrumentation(opt =>
                         {
-                            // Filter noise
-                            opt.Filter = (providerName, command) =>
-                            {
-                                var sql = command.CommandText?.Trim();
-                                if (
-                                    sql?.StartsWith("SELECT 1", StringComparison.OrdinalIgnoreCase)
-                                    == true
-                                )
-                                {
-                                    return false;
-                                }
-                                return true;
-                            };
-
                             // Enrich additional metadata
                             opt.EnrichWithIDbCommand = (activity, command) =>
                             {
                                 activity.SetTag("ef.command.type", command.CommandType.ToString());
                                 activity.SetTag("db.params.count", command.Parameters.Count);
-                                activity.SetTag("db.provider", command.Connection?.GetType().Name);
-
-                                if (environmentName == "Production")
-                                {
-                                    activity.SetTag("db.statement", null);
-                                }
                             };
                         })
                         .AddHttpClientInstrumentation();
 
-                    switch (openTelemetrySettings.Options)
+                    options.AddOtlpExporter(option =>
                     {
-                        case OpenTelemetryTracingOption.Distribution:
-                            options.AddOtlpExporter(option =>
-                            {
-                                option.Endpoint = new Uri(openTelemetrySettings.Endpoint);
-                            });
-                            break;
-                        case OpenTelemetryTracingOption.Console:
-                            options.AddConsoleExporter();
-                            break;
-                        case OpenTelemetryTracingOption.None:
-                        default:
-                            break;
-                    }
-                });
+                        option.Endpoint = new Uri(openTelemetrySettings.Trace.Endpoint);
+                    });
+                })
+                .WithLogging(logging =>
+                    logging.AddOtlpExporter(option =>
+                    {
+                        option.Endpoint = new Uri(openTelemetrySettings.Log.Endpoint);
+                        option.Protocol = OtlpExportProtocol.HttpProtobuf;
+                        option.Headers = $"X-Seq-ApiKey={openTelemetrySettings.Log.Key}";
+                    })
+                );
         }
 
         return services;

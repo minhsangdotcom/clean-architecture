@@ -25,6 +25,11 @@ exporters:
     tls:
       insecure: true
 
+  otlphttp/seq:
+    endpoint: http://seq:5341/ingest/otlp
+    tls:
+      insecure: true
+
 service:
   extensions: [zpages, pprof, health_check]
   pipelines:
@@ -35,4 +40,4 @@ service:
     logs:
       receivers: [otlp]
       processors: [batch]
-      exporters: [debug]
+      exporters: [debug, otlphttp/seq]

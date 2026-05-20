@@ -140,14 +140,15 @@
           "Serilog": "4.0.0"
         }
       },
-      "Serilog.Sinks.Seq": {
+      "Serilog.Sinks.OpenTelemetry": {
         "type": "Direct",
-        "requested": "[9.0.0, )",
-        "resolved": "9.0.0",
-        "contentHash": "aNU8A0K322q7+voPNmp1/qNPH+9QK8xvM1p72sMmCG0wGlshFzmtDW9QnVSoSYCj0MgQKcMOlgooovtBhRlNHw==",
+        "requested": "[4.2.0, )",
+        "resolved": "4.2.0",
+        "contentHash": "PzMCyE5G19tjr5IZEi5qg+4UU5QrxBEoBEMu/hhYybTrGKXqUDiSGWKZNUDBgelaVKqLADlsmlJVyKce5SyPrg==",
         "dependencies": {
-          "Serilog": "4.2.0",
-          "Serilog.Sinks.File": "6.0.0"
+          "Google.Protobuf": "3.30.1",
+          "Grpc.Net.Client": "2.70.0",
+          "Serilog": "4.2.0"
         }
       },
       "Ardalis.GuardClauses": {
@@ -244,6 +245,32 @@
         "contentHash": "D0VXh4dtjjX2aQizuaa0g6R8X3U1JaVqJPfGCvLwZX9t/O2h7tkpbitbadQMfwcgSPdDbI2vDxuwRMv/Uf9dHA==",
         "dependencies": {
           "FluentValidation": "12.1.1"
+        }
+      },
+      "Google.Protobuf": {
+        "type": "Transitive",
+        "resolved": "3.30.1",
+        "contentHash": "HeWXDQBabQn/sCGicbeLJ0HMunknfC4FdLrOQOsaMJHcpqx3HVIpyyJqTrqJlWnza870twhOb+rBcaTiC/TlNA=="
+      },
+      "Grpc.Core.Api": {
+        "type": "Transitive",
+        "resolved": "2.70.0",
+        "contentHash": "66UotvWcSIq41oiQhLWcQACyKPM4umxXNiht5DQTLZJfNwEswWOcS7Z0xIEHyNIBE7ZpjotH22bEjTkvhPxmVw=="
+      },
+      "Grpc.Net.Client": {
+        "type": "Transitive",
+        "resolved": "2.70.0",
+        "contentHash": "xNv0FFCVJa5S1beUtye82WFCxKThuE1jbN8DO1x1Rj8VSIWXLBUmfSID5a1fGzsU2R/EMfwPoWclJ2RMfQuGXw==",
+        "dependencies": {
+          "Grpc.Net.Common": "2.70.0"
+        }
+      },
+      "Grpc.Net.Common": {
+        "type": "Transitive",
+        "resolved": "2.70.0",
+        "contentHash": "rBdEUMyCwa+iB8mqC6JKyPbj3SBHHkReJj/yy/XKJI63GcG6w9DJMMGTVcYHqq4Ci2W4m0HT4jt2pFfFscar8g==",
+        "dependencies": {
+          "Grpc.Core.Api": "2.70.0"
         }
       },
       "MailKit": {
